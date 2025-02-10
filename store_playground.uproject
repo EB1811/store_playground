@@ -7,7 +7,11 @@
 		{
 			"Name": "store_playground",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"PaperZD",
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [
