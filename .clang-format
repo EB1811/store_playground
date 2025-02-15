@@ -1,9 +1,6 @@
 ---
 BasedOnStyle: Chromium       
 UseTab: Never
-BreakBeforeBraces: Custom
-BraceWrapping:
-    AfterClass: true
 ColumnLimit: 120
 IndentWidth: 2
 SortIncludes: false
@@ -17,3 +14,4 @@ AllowShortFunctionsOnASingleLine: All
 AllowShortBlocksOnASingleLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AlignAfterOpenBracket: Align
+AllowShortCaseLabelsOnASingleLine: true

@@ -17,8 +17,7 @@ struct FInteractionData {
 };
 
 UCLASS()
-class STORE_PLAYGROUND_API APlayerZDCharacter : public APaperZDCharacter
-{
+class STORE_PLAYGROUND_API APlayerZDCharacter : public APaperZDCharacter {
   GENERATED_BODY()
 
 public:
@@ -38,13 +37,25 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* MoveAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
+  class UInputAction* CloseTopOpenMenuAction;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  class UInputAction* CloseAllMenusAction;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  class UInputAction* OpenInventoryAction;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* InteractAction;
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Move(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void CloseTopOpenMenu(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void CloseAllMenus(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void OpenInventory(const FInputActionValue& Value);
 
   //* Inventory
   UPROPERTY(EditAnywhere, Category = "Character | Inventory")
-  class UInventoryComponent* InventoryComponent;
+  class UInventoryComponent* PlayerInventoryComponent;
 
   //* Interaction
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")
@@ -52,4 +63,13 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")
   float InteractionCheckDistance;
   void Interact(const FInputActionValue& Value);
+
+  //* Negotiation
+  UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
+  class UNegotiationSystem* Negotiation;
+
+  UFUNCTION(BlueprintCallable, Category = "Character | Negotiation")
+  void EnterNegotiation(const class UItemBase* Item, const class UCustomerAIComponent* CustomerAI);
+  UFUNCTION(BlueprintCallable, Category = "Character | Negotiation")
+  void ExitNegotiation();
 };

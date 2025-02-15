@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
+#include "store_playground/Negotiation/NegotiationSystem.h"
+#include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -18,7 +21,7 @@ APlayerZDCharacter::APlayerZDCharacter() {
 
   InteractionCheckDistance = 200.0f;
 
-  InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+  PlayerInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -26,6 +29,12 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
   if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
     EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Move);
+    EnhancedInputComponent->BindAction(CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::CloseTopOpenMenu);
+    EnhancedInputComponent->BindAction(CloseAllMenusAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::CloseAllMenus);
+    EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenInventory);
     EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Interact);
   }
 }
@@ -41,6 +50,7 @@ void APlayerZDCharacter::BeginPlay() {
   }
 
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  Negotiation = NewObject<UNegotiationSystem>(this);
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -56,6 +66,14 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
   AddMovementInput(RightDirection, MovementVector.X);
 }
 
+void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }
+
+void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) { HUD->CloseAllMenus(); }
+
+void APlayerZDCharacter::OpenInventory(const FInputActionValue& Value) {
+  HUD->SetAndOpenInventory(PlayerInventoryComponent);
+}
+
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation()};
   FVector TraceEnd{TraceStart + GetViewRotation().Vector() * InteractionCheckDistance};
@@ -69,9 +87,44 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, TraceParams)) {
     if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionCheckDistance) {
       if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>()) {
-        UInventoryComponent* ContainerInventory = Interactable->InteractContainer();
-        HUD->SetAndOpenContainer(ContainerInventory);
+        // TODO: Move to separate, free functions.
+        // ? Separate out player logic from UI logic, with a UI system class?
+        switch (Interactable->InteractionType) {
+          case EInteractionType::Use: {
+            Interactable->InteractUse();
+            break;
+          }
+          case EInteractionType::Npc: {
+            auto [Item, CustomerAI] = Interactable->InteractNpc();
+            if (!Item || !CustomerAI) return;
+
+            EnterNegotiation(Item, CustomerAI);
+            break;
+          }
+          case EInteractionType::Store: {
+            auto [StoreInventory, StoreMoney] = Interactable->InteractStore();
+            if (!StoreInventory) return;
+
+            HUD->SetAndOpenContainer(PlayerInventoryComponent, StoreInventory);
+            break;
+          }
+          case EInteractionType::Container: {
+            UInventoryComponent* ContainerInventory = Interactable->InteractContainer();
+            if (!ContainerInventory) return;
+
+            HUD->SetAndOpenContainer(PlayerInventoryComponent, ContainerInventory);
+            break;
+          }
+        }
       }
     }
   }
 }
+
+// ? Move to HUD?
+void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, const UCustomerAIComponent* CustomerAI) {
+  Negotiation->StartNegotiation(Item, CustomerAI->NegotiationAI, PlayerInventoryComponent, Item->MarketData.BasePrice);
+  HUD->SetAndOpenNegotiation(Negotiation);
+}
+
+void APlayerZDCharacter::ExitNegotiation() {}
