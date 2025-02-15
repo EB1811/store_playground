@@ -3,6 +3,8 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 
 AChest::AChest() {
+  PrimaryActorTick.bCanEverTick = false;
+
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetSimulatePhysics(true);
   SetRootComponent(Mesh);

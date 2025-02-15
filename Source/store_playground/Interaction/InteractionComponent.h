@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <functional>
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "InteractionComponent.generated.h"
@@ -14,17 +13,17 @@ UENUM()
 enum class EInteractionType : uint8 {
   Use UMETA(DisplayName = "Use"),
   Npc UMETA(DisplayName = "Npc"),
-  Pickup UMETA(DisplayName = "Pickup"),
-  Container UMETA(DisplayName = "Container")
+  Store UMETA(DisplayName = "Store"),
+  Container UMETA(DisplayName = "Container"),
+  Stock UMETA(DisplayName = "Stock")
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class STORE_PLAYGROUND_API UInteractionComponent : public UActorComponent
-{
+class STORE_PLAYGROUND_API UInteractionComponent : public UActorComponent {
   GENERATED_BODY()
 
 public:
-  UInteractionComponent() : InteractionType(EInteractionType::Use) {}
+  UInteractionComponent();
 
   virtual void BeginPlay() override;
 
@@ -32,9 +31,11 @@ public:
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
-  void InteractNpc(FUIOnInteract* UIOnInteract = nullptr) const;
-  void InteractPickup(FUIOnInteract* UIOnInteract = nullptr) const;
+  std::tuple<class UItemBase*, class UCustomerAIComponent*> InteractNpc(FUIOnInteract* UIOnInteract = nullptr) const;
+  // TODO: Return market data.
+  std::tuple<class UInventoryComponent*, int16> InteractStore() const;
   class UInventoryComponent* InteractContainer() const;
+  class UInventoryComponent* InteractStock() const;
 };
 
 // ? Should there be different components for different types of interactions?
