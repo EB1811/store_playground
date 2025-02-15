@@ -1,7 +1,12 @@
 
 #include "InventoryComponent.h"
+#include "store_playground/Item/ItemBase.h"
 
-UInventoryComponent::UInventoryComponent() {}
+UInventoryComponent::UInventoryComponent() {
+  PrimaryComponentTick.bCanEverTick = false;
+  InventoryType = EInventoryType::Container;
+  MaxSlots = 20;
+}
 
 void UInventoryComponent::BeginPlay() {
   Super::BeginPlay();
@@ -17,29 +22,30 @@ void UInventoryComponent::BeginPlay() {
       Item->FlavorData = ItemData->FlavorData;
       Item->MetaData = ItemData->MetaData;
       Item->AssetData = ItemData->AssetData;
+      Item->MarketData = ItemData->MarketData;
       AddItem(Item, 1);
     }
   }
 }
 
-void UInventoryComponent::AddItem(UItemBase* Item, int32 Amount) {
-  if (ItemsArray.ContainsByPredicate(
+void UInventoryComponent::AddItem(const UItemBase* Item, int16 Quantity) {
+  if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; })) {
-    Item->Quantity += Amount;
-  } else {
-    Item->Quantity = Amount;
-    ItemsArray.Add(Item->CreateItemCopy());
+    if (InventoryType == EInventoryType::Container) (*ArrayItem)->Quantity += Quantity;
+    return;
   }
 
-  UIOnInventoryUpdated.Broadcast();
+  UE_LOG(LogTemp, Warning, TEXT("AddItem, Quantity: %d"), Quantity);
+
+  UItemBase* ItemCopy = Item->CreateItemCopy();
+  ItemCopy->Quantity = Quantity;
+  ItemsArray.Add(ItemCopy);
 }
 
-void UInventoryComponent::RemoveItem(UItemBase* Item, int32 Amount) {
-  if (ItemsArray.ContainsByPredicate(
+void UInventoryComponent::RemoveItem(const UItemBase* Item, int16 Quantity) {
+  if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; })) {
-    Item->Quantity -= Amount;
-    if (Item->Quantity <= 0) ItemsArray.Remove(Item);
+    (*ArrayItem)->Quantity -= Quantity;
+    if ((*ArrayItem)->Quantity <= 0) ItemsArray.RemoveSingle(*ArrayItem);
   }
-
-  UIOnInventoryUpdated.Broadcast();
 }

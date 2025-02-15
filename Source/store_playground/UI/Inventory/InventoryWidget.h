@@ -13,9 +13,9 @@ class STORE_PLAYGROUND_API UInventoryWidget : public UUserWidget
 
 public:
   virtual void NativeOnInitialized() override;
-  // virtual bool NativeOnDrop(const FGeometry& InGeometry,
-  //                           const FDragDropEvent& InDragDropEvent,
-  //                           UDragDropOperation* InOperation) override;
+  virtual bool NativeOnDrop(const FGeometry& InGeometry,
+                            const FDragDropEvent& InDragDropEvent,
+                            UDragDropOperation* InOperation) override;
 
   UPROPERTY(meta = (BindWidget))
   class UWrapBox* InventoryPanelWrapBox;

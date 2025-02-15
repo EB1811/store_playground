@@ -7,11 +7,14 @@
 #include "store_playground/Item/ItemBase.h"
 #include "InventoryComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FUIOnInventoryUpdated);
+UENUM()
+enum class EInventoryType : uint8 {
+  Container UMETA(DisplayName = "Container"),
+  Store UMETA(DisplayName = "Store"),
+};
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class STORE_PLAYGROUND_API UInventoryComponent : public UActorComponent
-{
+class STORE_PLAYGROUND_API UInventoryComponent : public UActorComponent {
   GENERATED_BODY()
 
 public:
@@ -19,13 +22,19 @@ public:
 
   virtual void BeginPlay() override;
 
-  FUIOnInventoryUpdated UIOnInventoryUpdated;
-
   UPROPERTY(EditAnywhere, Category = "Inventory")
   TArray<TObjectPtr<UItemBase>> ItemsArray;
   UPROPERTY(EditAnywhere, Category = "Inventory")
+  EInventoryType InventoryType;
+  // TODO: Implement max slots.
+  UPROPERTY(EditAnywhere, Category = "Inventory")
+  int16 MaxSlots;
+
+  UPROPERTY(EditAnywhere, Category = "Inventory TESTING | Init State")
   TArray<FDataTableRowHandle> InitItemIds;
 
-  void AddItem(UItemBase* Item, int32 Amount = 1);
-  void RemoveItem(UItemBase* Item, int32 Amount = 1);
+  void AddItem(const UItemBase* Item, int16 Quantity = 1);
+  void RemoveItem(const UItemBase* Item, int16 Quantity = 1);
 };
+
+void TransferItem(UInventoryComponent* From, UInventoryComponent* To, UItemBase* Item, int32 Quantity = 1);

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <stack>
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "SPGHUD.generated.h"
@@ -15,8 +16,7 @@ enum class EHUDState : uint8 {
 };
 
 UCLASS()
-class STORE_PLAYGROUND_API ASpgHUD : public AHUD
-{
+class STORE_PLAYGROUND_API ASpgHUD : public AHUD {
   GENERATED_BODY()
 
 public:
@@ -28,20 +28,38 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> MainMenuWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> ContainerWidgetClass;
+  TSubclassOf<class UUserWidget> PlayerInventoryWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> UNegotiationWidgetClass;
 
   // UPROPERTY()
   // class UMainMenu* MainMenu;
-
-  UPROPERTY()
-  EHUDState HUDState;
-
   // UFUNCTION(BlueprintCallable, Category = "Widgets")
   // void OpenMainMenu();
 
-  UPROPERTY()
-  class UInventoryWidget* ItemContainerWidget;
-  void SetAndOpenContainer(const class UInventoryComponent* InventoryComponent);
+  UPROPERTY() EHUDState HUDState;
+
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TArray<class UUserWidget*> OpenedWidgets;
   UFUNCTION(BlueprintCallable, Category = "Widgets")
-  void CloseContainer();
+  void CloseTopOpenMenu();
+  UFUNCTION(BlueprintCallable, Category = "Widgets")
+  void CloseAllMenus();
+
+  void CloseWidget(class UUserWidget* Widget);
+
+  UPROPERTY()
+  class UPlayerInventoryWidget* PlayerInventoryWidget;
+  void SetAndOpenInventory(const class UInventoryComponent* Inventory);
+
+  UPROPERTY()
+  class UPlayerAndContainerWidget* PlayerAndContainerWidget;
+  void SetAndOpenContainer(const class UInventoryComponent* PlayerInventory,
+                           const class UInventoryComponent* ContainerInventory);
+
+  UPROPERTY()
+  class UNegotiationWidget* NegotiationWidget;
+  void SetAndOpenNegotiation(const class UNegotiationSystem* Negotiation);
 };
