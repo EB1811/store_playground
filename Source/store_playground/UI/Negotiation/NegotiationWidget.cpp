@@ -2,6 +2,8 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
+#include "store_playground/UI/Dialogue/DialogueWidget.h"
+#include "store_playground/UI/Dialogue/DialogueBoxWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
@@ -13,6 +15,7 @@ void UNegotiationWidget::NativeOnInitialized() {
   OfferButton->OnClicked.AddDynamic(this, &UNegotiationWidget::OnOfferButtonClicked);
   AcceptButton->OnClicked.AddDynamic(this, &UNegotiationWidget::OnAcceptButtonClicked);
   RejectButton->OnClicked.AddDynamic(this, &UNegotiationWidget::OnRejectButtonClicked);
+  DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UNegotiationWidget::OnReadDialogueButtonClicked);
 }
 
 void UNegotiationWidget::RefreshNegotiationWhole() {
@@ -23,14 +26,11 @@ void UNegotiationWidget::RefreshNegotiationWhole() {
     ItemQuantity->SetText(FText::FromString(FString::FromInt(NegotiationRef->Quantity)));
   else
     ItemQuantity->SetText(FText::FromString(""));
-  NegotiationStateText->SetText(NegotiationStateToName[NegotiationRef->NegotiationState]);
-  OfferedPrice->SetText(FText::FromString(
-      FString::FromInt((NegotiationRef->OfferedPrice > 0 ? NegotiationRef->OfferedPrice : NegotiationRef->BasePrice))));
 
-  PlayerOfferedPrice->SetValue(NegotiationRef->OfferedPrice > 0 ? NegotiationRef->OfferedPrice
-                                                                : NegotiationRef->BasePrice);
   PlayerOfferedPrice->SetMaxValue(NegotiationRef->BasePrice * 2);
   PlayerOfferedPrice->SetMinValue(NegotiationRef->BasePrice / 2);
+
+  RefreshNegotiationState();
 }
 
 void UNegotiationWidget::RefreshNegotiationState() {
@@ -40,6 +40,42 @@ void UNegotiationWidget::RefreshNegotiationState() {
 
   PlayerOfferedPrice->SetValue(NegotiationRef->OfferedPrice > 0 ? NegotiationRef->OfferedPrice
                                                                 : NegotiationRef->BasePrice);
+
+  switch (NegotiationRef->NegotiationState) {
+    case ENegotiationState::NPCRequest:
+      DialogueBoxWidget->Speaker->SetText(FText::FromString("NPC"));
+      DialogueBoxWidget->DialogueText->SetText(FText::FromString("NPC wants Item."));
+      DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case ENegotiationState::NPCConsider:
+      DialogueBoxWidget->Speaker->SetText(FText::FromString("NPC"));
+      DialogueBoxWidget->DialogueText->SetText(FText::FromString("NPC is considering your offer."));
+      DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case ENegotiationState::PlayerOffer: DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden); break;
+    case ENegotiationState::Accepted:
+      DialogueBoxWidget->Speaker->SetText(FText::FromString("NPC"));
+      DialogueBoxWidget->DialogueText->SetText(FText::FromString("NPC accepted your offer."));
+      DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Close"));
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
+      break;
+    default: break;
+  }
+}
+
+void UNegotiationWidget::OnReadDialogueButtonClicked() {
+  switch (NegotiationRef->NegotiationState) {
+    case ENegotiationState::NPCRequest: NegotiationRef->Consider(Negotiator::Player); break;
+    case ENegotiationState::NPCConsider: NegotiationRef->NPCNegotiationTurn(); break;
+    case ENegotiationState::Accepted: return CloseNegotiationUI();
+    default: break;
+  }
+
+  if (NegotiationRef->NegotiationState == ENegotiationState::Accepted) return CloseNegotiationUI();
+
+  RefreshNegotiationState();
 }
 
 // ? Could return a response with updated data for UI.
@@ -52,12 +88,12 @@ void UNegotiationWidget::OnAcceptButtonClicked() {
   NegotiationRef->AcceptOffer(Negotiator::Player);
   RefreshNegotiationState();
 
-  if (CloseNegotiationUI != nullptr) CloseNegotiationUI();
+  CloseNegotiationUI();
 }
 
 void UNegotiationWidget::OnRejectButtonClicked() {
   NegotiationRef->RejectOffer(Negotiator::Player);
   RefreshNegotiationState();
 
-  if (CloseNegotiationUI != nullptr) CloseNegotiationUI();
+  CloseNegotiationUI();
 }

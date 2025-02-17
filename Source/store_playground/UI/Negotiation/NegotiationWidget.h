@@ -36,12 +36,17 @@ public:
   UPROPERTY(meta = (BindWidget))
   class USlider* PlayerOfferedPrice;
 
+  UPROPERTY(meta = (BindWidget))
+  class UDialogueBoxWidget* DialogueBoxWidget;
+
   UPROPERTY(EditAnywhere)
   class UNegotiationSystem* NegotiationRef;
 
   void RefreshNegotiationWhole();
   void RefreshNegotiationState();
 
+  UFUNCTION()
+  void OnReadDialogueButtonClicked();
   UFUNCTION()
   void OnOfferButtonClicked();
   UFUNCTION()

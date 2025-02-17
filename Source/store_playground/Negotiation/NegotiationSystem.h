@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <array>
 #include <map>
 #include "CoreMinimal.h"
 #include "NegotiationSystem.generated.h"
@@ -14,14 +15,17 @@ enum class Negotiator : uint8 {
 UENUM()
 enum class ENegotiationState : uint8 {
   None UMETA(DisplayName = "NONE"),
-  NPCTurn UMETA(DisplayName = "NPC Turn"),
-  PlayerTurn UMETA(DisplayName = "Player Turn"),
+  NPCRequest UMETA(DisplayName = "NPC Request"),
+  PlayerOffer UMETA(DisplayName = "Player Offer"),
+  NPCConsider UMETA(DisplayName = "NPC Consider"),
   Accepted UMETA(DisplayName = "Accepted"),
   Rejected UMETA(DisplayName = "Rejected")
 };
 UENUM()
 enum class ENegotiationAction : uint8 {
-  Offer UMETA(DisplayName = "Offer"),
+  NPCRequest UMETA(DisplayName = "NPC Request"),
+  Consider UMETA(DisplayName = "Consider"),
+  OfferPrice UMETA(DisplayName = "Offer Price"),
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject")
 };
@@ -56,7 +60,9 @@ public:
                         const class UNegotiationAI* _NegotiationAI,
                         class UInventoryComponent* _PlayerInventory,
                         float BasePrice,
-                        ENegotiationState InitState = ENegotiationState::PlayerTurn);
+                        ENegotiationState InitState = ENegotiationState::NPCRequest);
+  void RequestNegotiation();
+  void Consider(Negotiator CallingNegotiator);
   void OfferPrice(Negotiator CallingNegotiator, float Price);
   void AcceptOffer(Negotiator CallingNegotiator);
   void RejectOffer(Negotiator CallingNegotiator);

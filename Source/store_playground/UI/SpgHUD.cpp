@@ -73,6 +73,7 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
 
 void ASpgHUD::SetAndOpenInventory(const UInventoryComponent* Inventory) {
   check(PlayerInventoryWidget);
+  if (OpenedWidgets.Contains(PlayerInventoryWidget)) return CloseWidget(PlayerInventoryWidget);
 
   PlayerInventoryWidget->InventoryWidget->InventoryRef = const_cast<UInventoryComponent*>(Inventory);
   PlayerInventoryWidget->InventoryWidget->RefreshInventory();
@@ -109,7 +110,7 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue) {
 
   DialogueWidget->DialogueSystemRef = Dialogue;
   DialogueWidget->CloseDialogueUI = [this] { CloseWidget(DialogueWidget); };
-  DialogueWidget->RefreshDialogueWhole();
+  DialogueWidget->InitDialogueUI();
   DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
   const FInputModeGameAndUI InputMode;

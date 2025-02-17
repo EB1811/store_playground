@@ -17,34 +17,48 @@ void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
   PlayerInventory = _PlayerInventory;
 }
 
-// ? Change to just have different actions and use state machine to determine if the action is valid?
-void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
-  if (CallingNegotiator == Negotiator::Player && NegotiationState != ENegotiationState::PlayerTurn) return;
-  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPCTurn) return;
+void UNegotiationSystem::RequestNegotiation() {
+  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NPCRequest);
+  if (NextState == ENegotiationState::None) return;
 
-  OfferedPrice = Price;
+  NegotiationState = NextState;
+}
 
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Offer);
+void UNegotiationSystem::Consider(Negotiator CallingNegotiator) {
+  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Consider);
+  if (NextState == ENegotiationState::None) return;
+
+  NegotiationState = NextState;
 
   // ? Move call to somewhere else?
-  if (NegotiationState != ENegotiationState::NPCTurn) return;
+  if (NegotiationState != ENegotiationState::NPCConsider) return;
   NPCNegotiationTurn();
 }
 
-void UNegotiationSystem::AcceptOffer(Negotiator CallingNegotiator) {
-  if (CallingNegotiator == Negotiator::Player && NegotiationState != ENegotiationState::PlayerTurn) return;
-  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPCTurn) return;
+void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
+  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
+  if (NextState == ENegotiationState::None) return;
 
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
+  NegotiationState = NextState;
+  OfferedPrice = Price;
+}
+
+void UNegotiationSystem::AcceptOffer(Negotiator CallingNegotiator) {
+  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
+  if (NextState == ENegotiationState::None) return;
+
+  NegotiationState = NextState;
 
   // Note: Move to actual object (player, npc) if fine grain functionality needed.
-  if (PlayerInventory) PlayerInventory->AddItem(NegotiatedItem, Quantity);
+  if (NegotiationState != ENegotiationState::Accepted) return;
+  PlayerInventory->AddItem(NegotiatedItem, Quantity);
 }
 
 void UNegotiationSystem::RejectOffer(Negotiator CallingNegotiator) {
-  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPCTurn) return;
+  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
+  if (NextState == ENegotiationState::None) return;
 
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
+  NegotiationState = NextState;
 }
 
 void UNegotiationSystem::NPCNegotiationTurn() {

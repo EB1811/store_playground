@@ -14,20 +14,16 @@ public:
   virtual void NativeOnInitialized() override;
 
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* Speaker;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* DialogueText;
-  UPROPERTY(meta = (BindWidget))
-  class UButton* NextButton;
+  class UDialogueBoxWidget* DialogueBoxWidget;
 
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystemRef;
 
-  void RefreshDialogueWhole();
-  void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent);
+  void InitDialogueUI();
+  void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()
-  void OnNextButtonClicked();
+  void OnNext();
 
   std::function<void()> CloseDialogueUI;
 };

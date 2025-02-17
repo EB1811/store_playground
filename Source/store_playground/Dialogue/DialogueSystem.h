@@ -52,7 +52,7 @@ struct FDialogueData {
 };
 
 struct NextDialogueRes {
-  FString DialogueText;
+  FDialogueData DialogueData;
   EDialogueState State;
 };
 

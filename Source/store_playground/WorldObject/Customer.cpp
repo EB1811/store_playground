@@ -16,5 +16,5 @@ ACustomer::ACustomer() {
 void ACustomer::BeginPlay() {
   Super::BeginPlay();
 
-  InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+  // InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
 }

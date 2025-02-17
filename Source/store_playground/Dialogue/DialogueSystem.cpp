@@ -19,7 +19,7 @@ NextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _Dial
   CurrentDialogueIndex = 0;
   DialogueDataArr = _DialogueDataArr;
 
-  return {DialogueDataArr[CurrentDialogueIndex].DialogueText, DialogueState};
+  return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
 }
 
 NextDialogueRes UDialogueSystem::NextDialogue() {
@@ -30,9 +30,9 @@ NextDialogueRes UDialogueSystem::NextDialogue() {
     case EDialogueState::PlayerTalk:
     case EDialogueState::PlayerChoice: {
       CurrentDialogueIndex++;
-      return {DialogueDataArr[CurrentDialogueIndex].DialogueText, DialogueState};
+      return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
     }
-    case EDialogueState::End: return {"", DialogueState};
-    default: return {"", EDialogueState::None};
+    case EDialogueState::End: return {{}, DialogueState};
+    default: return {{}, EDialogueState::None};
   }
 }

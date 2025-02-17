@@ -1,4 +1,5 @@
 #include "DialogueWidget.h"
+#include "DialogueBoxWidget.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
@@ -7,10 +8,10 @@
 void UDialogueWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
-  NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnNextButtonClicked);
+  DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnNext);
 }
 
-void UDialogueWidget::RefreshDialogueWhole() {
+void UDialogueWidget::InitDialogueUI() {
   check(DialogueSystemRef);
 
   if (DialogueSystemRef->DialogueState == EDialogueState::End) {
@@ -18,17 +19,22 @@ void UDialogueWidget::RefreshDialogueWhole() {
     return;
   }
 
+  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+
   FString SpeakerName = DialogueSystemRef->DialogueState == EDialogueState::PlayerTalk ? "Player" : "NPC";
-  UpdateDialogueText(SpeakerName,
-                     DialogueSystemRef->DialogueDataArr[DialogueSystemRef->CurrentDialogueIndex].DialogueText);
+  UpdateDialogueText(
+      SpeakerName, DialogueSystemRef->DialogueDataArr[DialogueSystemRef->CurrentDialogueIndex].DialogueText,
+      DialogueSystemRef->DialogueDataArr[DialogueSystemRef->CurrentDialogueIndex].Action == EDialogueAction::End);
 }
 
-void UDialogueWidget::UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent) {
-  Speaker->SetText(FText::FromString(SpeakerName));
-  DialogueText->SetText(FText::FromString(NewDialogueContent));
+void UDialogueWidget::UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast) {
+  DialogueBoxWidget->Speaker->SetText(FText::FromString(SpeakerName));
+  DialogueBoxWidget->DialogueText->SetText(FText::FromString(NewDialogueContent));
+
+  if (IsLast) DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Close"));
 }
 
-void UDialogueWidget::OnNextButtonClicked() {
+void UDialogueWidget::OnNext() {
   NextDialogueRes NextDialogue = DialogueSystemRef->NextDialogue();
   if (NextDialogue.State == EDialogueState::End) {
     CloseDialogueUI();
@@ -36,5 +42,6 @@ void UDialogueWidget::OnNextButtonClicked() {
   }
 
   FString SpeakerName = NextDialogue.State == EDialogueState::PlayerTalk ? "Player" : "NPC";
-  UpdateDialogueText(SpeakerName, NextDialogue.DialogueText);
+  UpdateDialogueText(SpeakerName, NextDialogue.DialogueData.DialogueText,
+                     NextDialogue.DialogueData.Action == EDialogueAction::End);
 }
