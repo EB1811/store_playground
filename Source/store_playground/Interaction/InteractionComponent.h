@@ -2,8 +2,10 @@
 
 #pragma once
 
+#include <optional>
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "store_playground/Dialogue/DialogueSystem.h"
 #include "InteractionComponent.generated.h"
 
 // temp: move to player ui controller
@@ -12,7 +14,8 @@ DECLARE_DELEGATE_OneParam(FUIOnInteract, int16);
 UENUM()
 enum class EInteractionType : uint8 {
   Use UMETA(DisplayName = "Use"),
-  Npc UMETA(DisplayName = "Npc"),
+  NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
+  WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
   Store UMETA(DisplayName = "Store"),
   Container UMETA(DisplayName = "Container"),
   Stock UMETA(DisplayName = "Stock")
@@ -31,7 +34,8 @@ public:
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
-  std::tuple<class UItemBase*, class UCustomerAIComponent*> InteractNpc(FUIOnInteract* UIOnInteract = nullptr) const;
+  std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
+  std::tuple<class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
   // TODO: Return market data.
   std::tuple<class UInventoryComponent*, int16> InteractStore() const;
   class UInventoryComponent* InteractContainer() const;

@@ -3,6 +3,7 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/UI/Inventory/InventoryWidget.h"
 #include "store_playground/UI/Inventory/PlayerInventoryWidget.h"
+#include "store_playground/UI/Dialogue/DialogueWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationWidget.h"
 
 ASpgHUD::ASpgHUD() {}
@@ -15,6 +16,7 @@ void ASpgHUD::BeginPlay() {
   check(PlayerAndContainerWidgetClass);
   check(PlayerInventoryWidgetClass);
   check(UNegotiationWidgetClass);
+  check(UDialogueWidgetClass);
 
   PlayerInventoryWidget = CreateWidget<UPlayerInventoryWidget>(GetWorld(), PlayerInventoryWidgetClass);
   PlayerInventoryWidget->AddToViewport(10);
@@ -23,6 +25,10 @@ void ASpgHUD::BeginPlay() {
   PlayerAndContainerWidget = CreateWidget<UPlayerAndContainerWidget>(GetWorld(), PlayerAndContainerWidgetClass);
   PlayerAndContainerWidget->AddToViewport(10);
   PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  DialogueWidget = CreateWidget<UDialogueWidget>(GetWorld(), UDialogueWidgetClass);
+  DialogueWidget->AddToViewport(10);
+  DialogueWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   NegotiationWidget = CreateWidget<UNegotiationWidget>(GetWorld(), UNegotiationWidgetClass);
   NegotiationWidget->AddToViewport(10);
@@ -59,6 +65,7 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   OpenedWidgets.RemoveSingle(Widget);
 
   if (!OpenedWidgets.IsEmpty()) return;
+
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(false);
@@ -95,6 +102,21 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(PlayerAndContainerWidget);
+}
+
+void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue) {
+  check(UDialogueWidgetClass);
+
+  DialogueWidget->DialogueSystemRef = Dialogue;
+  DialogueWidget->CloseDialogueUI = [this] { CloseWidget(DialogueWidget); };
+  DialogueWidget->RefreshDialogueWhole();
+  DialogueWidget->SetVisibility(ESlateVisibility::Visible);
+
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(DialogueWidget);
 }
 
 void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation) {

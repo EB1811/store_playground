@@ -3,6 +3,7 @@
 #include "InteractionComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/AI/CustomerAIComponent.h"
+#include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Item/ItemBase.h"
 
 UInteractionComponent::UInteractionComponent() {
@@ -15,16 +16,23 @@ void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
 
 void UInteractionComponent::InteractUse(FUIOnInteract* UIOnInteract) const {}
 
-std::tuple<UItemBase*, UCustomerAIComponent*> UInteractionComponent::InteractNpc(FUIOnInteract* UIOnInteract) const {
+std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDialogue() const {
+  UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  if (!OwnerDialogue) return std::nullopt;
+
+  return OwnerDialogue->DialogueArr;
+}
+
+std::tuple<class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
   UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
   if (!OwnerInventory) return {nullptr, nullptr};
 
   UCustomerAIComponent* OwnerCustomerAI = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   if (!OwnerCustomerAI) return {nullptr, nullptr};
 
-  if (OwnerInventory->ItemsArray.Num() > 0) return {OwnerInventory->ItemsArray[0], OwnerCustomerAI};
+  if (OwnerInventory->ItemsArray.Num() <= 0) return {nullptr, OwnerCustomerAI};
 
-  return {nullptr, nullptr};
+  return {OwnerInventory->ItemsArray[0], OwnerCustomerAI};
 }
 
 std::tuple<class UInventoryComponent*, int16> UInteractionComponent::InteractStore() const {

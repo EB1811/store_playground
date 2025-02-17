@@ -6,6 +6,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
+#include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -50,7 +51,8 @@ void APlayerZDCharacter::BeginPlay() {
   }
 
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-  Negotiation = NewObject<UNegotiationSystem>(this);
+  DialogueSystem = NewObject<UDialogueSystem>(this);
+  NegotiationSystem = NewObject<UNegotiationSystem>(this);
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -94,8 +96,12 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             Interactable->InteractUse();
             break;
           }
-          case EInteractionType::Npc: {
-            auto [Item, CustomerAI] = Interactable->InteractNpc();
+          case EInteractionType::NPCDialogue: {
+            if (auto DialogueData = Interactable->InteractNPCDialogue()) EnterDialogue(DialogueData.value());
+            break;
+          }
+          case EInteractionType::WaitingCustomer: {
+            auto [Item, CustomerAI] = Interactable->InteractWaitingCustomer();
             if (!Item || !CustomerAI) return;
 
             EnterNegotiation(Item, CustomerAI);
@@ -121,10 +127,14 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   }
 }
 
-// ? Move to HUD?
-void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, const UCustomerAIComponent* CustomerAI) {
-  Negotiation->StartNegotiation(Item, CustomerAI->NegotiationAI, PlayerInventoryComponent, Item->MarketData.BasePrice);
-  HUD->SetAndOpenNegotiation(Negotiation);
+void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr) {
+  DialogueSystem->StartDialogue(DialogueDataArr);
+  HUD->SetAndOpenDialogue(DialogueSystem);
 }
 
-void APlayerZDCharacter::ExitNegotiation() {}
+// ? Move to HUD?
+void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, const UCustomerAIComponent* CustomerAI) {
+  NegotiationSystem->StartNegotiation(Item, CustomerAI->NegotiationAI, PlayerInventoryComponent,
+                                      Item->MarketData.BasePrice);
+  HUD->SetAndOpenNegotiation(NegotiationSystem);
+}

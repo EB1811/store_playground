@@ -8,30 +8,30 @@
 
 UENUM()
 enum class Negotiator : uint8 {
-  PLAYER,
+  Player,
   NPC,
 };
 UENUM()
 enum class ENegotiationState : uint8 {
-  NONE UMETA(DisplayName = "NONE"),
-  NPC_TURN UMETA(DisplayName = "NPC Turn"),
-  PLAYER_TURN UMETA(DisplayName = "Player Turn"),
-  ACCEPTED UMETA(DisplayName = "Accepted"),
-  REJECTED UMETA(DisplayName = "Rejected")
+  None UMETA(DisplayName = "NONE"),
+  NPCTurn UMETA(DisplayName = "NPC Turn"),
+  PlayerTurn UMETA(DisplayName = "Player Turn"),
+  Accepted UMETA(DisplayName = "Accepted"),
+  Rejected UMETA(DisplayName = "Rejected")
 };
 UENUM()
 enum class ENegotiationAction : uint8 {
-  OFFER UMETA(DisplayName = "Offer"),
-  ACCEPT UMETA(DisplayName = "Accept"),
-  REJECT UMETA(DisplayName = "Reject")
+  Offer UMETA(DisplayName = "Offer"),
+  Accept UMETA(DisplayName = "Accept"),
+  Reject UMETA(DisplayName = "Reject")
 };
 
-UCLASS()
+UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API UNegotiationSystem : public UObject {
   GENERATED_BODY()
 
 public:
-  UNegotiationSystem() : NegotiationState(ENegotiationState::NONE), BasePrice(0), OfferedPrice(0) {}
+  UNegotiationSystem() : NegotiationState(ENegotiationState::None), BasePrice(0), OfferedPrice(0) {}
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   ENegotiationState NegotiationState;
@@ -56,7 +56,7 @@ public:
                         const class UNegotiationAI* _NegotiationAI,
                         class UInventoryComponent* _PlayerInventory,
                         float BasePrice,
-                        ENegotiationState InitState = ENegotiationState::PLAYER_TURN);
+                        ENegotiationState InitState = ENegotiationState::PlayerTurn);
   void OfferPrice(Negotiator CallingNegotiator, float Price);
   void AcceptOffer(Negotiator CallingNegotiator);
   void RejectOffer(Negotiator CallingNegotiator);

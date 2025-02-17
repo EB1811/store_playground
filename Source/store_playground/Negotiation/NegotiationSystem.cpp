@@ -19,32 +19,32 @@ void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
 
 // ? Change to just have different actions and use state machine to determine if the action is valid?
 void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
-  if (CallingNegotiator == Negotiator::PLAYER && NegotiationState != ENegotiationState::PLAYER_TURN) return;
-  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPC_TURN) return;
+  if (CallingNegotiator == Negotiator::Player && NegotiationState != ENegotiationState::PlayerTurn) return;
+  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPCTurn) return;
 
   OfferedPrice = Price;
 
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OFFER);
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Offer);
 
   // ? Move call to somewhere else?
-  if (NegotiationState != ENegotiationState::NPC_TURN) return;
+  if (NegotiationState != ENegotiationState::NPCTurn) return;
   NPCNegotiationTurn();
 }
 
 void UNegotiationSystem::AcceptOffer(Negotiator CallingNegotiator) {
-  if (CallingNegotiator == Negotiator::PLAYER && NegotiationState != ENegotiationState::PLAYER_TURN) return;
-  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPC_TURN) return;
+  if (CallingNegotiator == Negotiator::Player && NegotiationState != ENegotiationState::PlayerTurn) return;
+  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPCTurn) return;
 
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::ACCEPT);
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
 
   // Note: Move to actual object (player, npc) if fine grain functionality needed.
   if (PlayerInventory) PlayerInventory->AddItem(NegotiatedItem, Quantity);
 }
 
 void UNegotiationSystem::RejectOffer(Negotiator CallingNegotiator) {
-  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPC_TURN) return;
+  if (CallingNegotiator == Negotiator::NPC && NegotiationState != ENegotiationState::NPCTurn) return;
 
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::REJECT);
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
 }
 
 void UNegotiationSystem::NPCNegotiationTurn() {

@@ -42,20 +42,21 @@ void UNegotiationWidget::RefreshNegotiationState() {
                                                                 : NegotiationRef->BasePrice);
 }
 
+// ? Could return a response with updated data for UI.
 void UNegotiationWidget::OnOfferButtonClicked() {
-  NegotiationRef->OfferPrice(Negotiator::PLAYER, PlayerOfferedPrice->GetValue());
+  NegotiationRef->OfferPrice(Negotiator::Player, PlayerOfferedPrice->GetValue());
   RefreshNegotiationState();
 }
 
 void UNegotiationWidget::OnAcceptButtonClicked() {
-  NegotiationRef->AcceptOffer(Negotiator::PLAYER);
+  NegotiationRef->AcceptOffer(Negotiator::Player);
   RefreshNegotiationState();
 
   if (CloseNegotiationUI != nullptr) CloseNegotiationUI();
 }
 
 void UNegotiationWidget::OnRejectButtonClicked() {
-  NegotiationRef->RejectOffer(Negotiator::PLAYER);
+  NegotiationRef->RejectOffer(Negotiator::Player);
   RefreshNegotiationState();
 
   if (CloseNegotiationUI != nullptr) CloseNegotiationUI();

@@ -32,6 +32,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> UDialogueWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UNegotiationWidgetClass;
 
   // UPROPERTY()
@@ -58,6 +60,10 @@ public:
   class UPlayerAndContainerWidget* PlayerAndContainerWidget;
   void SetAndOpenContainer(const class UInventoryComponent* PlayerInventory,
                            const class UInventoryComponent* ContainerInventory);
+
+  UPROPERTY()
+  class UDialogueWidget* DialogueWidget;
+  void SetAndOpenDialogue(class UDialogueSystem* Dialogue);
 
   UPROPERTY()
   class UNegotiationWidget* NegotiationWidget;

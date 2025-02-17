@@ -64,12 +64,14 @@ public:
   float InteractionCheckDistance;
   void Interact(const FInputActionValue& Value);
 
+  //* Dialogue
+  UPROPERTY(EditAnywhere, Category = "Character | Dialogue")
+  class UDialogueSystem* DialogueSystem;
+  void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr);
+  void ExitDialogue();
+
   //* Negotiation
   UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
-  class UNegotiationSystem* Negotiation;
-
-  UFUNCTION(BlueprintCallable, Category = "Character | Negotiation")
+  class UNegotiationSystem* NegotiationSystem;
   void EnterNegotiation(const class UItemBase* Item, const class UCustomerAIComponent* CustomerAI);
-  UFUNCTION(BlueprintCallable, Category = "Character | Negotiation")
-  void ExitNegotiation();
 };
