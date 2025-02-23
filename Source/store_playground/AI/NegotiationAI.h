@@ -4,6 +4,7 @@
 
 #include <map>
 #include "CoreMinimal.h"
+#include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "NegotiationAI.generated.h"
 
 UENUM()
@@ -13,9 +14,14 @@ enum class ENegotiatorAttitude : uint8 {
   HOSTILE,
 };
 
-struct OfferResponse {
-  bool Accepted;
+USTRUCT()
+struct FOfferResponse {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
   float CounterOffer;
+  UPROPERTY(EditAnywhere)
+  bool Accepted;
 };
 
 UCLASS()
@@ -27,7 +33,14 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   ENegotiatorAttitude Attitude;
 
-  OfferResponse ConsiderOffer(float BasePrice, float OfferedPrice) const;
+  // Temp: Use pointer instead of copy.
+  UPROPERTY(EditAnywhere, Category = "Dialogue")
+  TMap<ENegotiationDialogueType, struct FDialogueData> DialogueMap;
+
+  UPROPERTY(EditAnywhere, Category = "Dialogue")
+  TArray<struct FDialogueData> RequestDialogueArray;
+
+  FOfferResponse ConsiderOffer(float BasePrice, float LastOfferedPrice, float PlayerOfferedPrices) const;
 };
 
 // Temp: Make into function using random.

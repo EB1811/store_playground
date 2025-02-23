@@ -11,13 +11,11 @@ void UDialogueComponent::BeginPlay() {
 }
 
 void UDialogueComponent::LoadDialogueData() {
-  DialogueArr.Empty();
+  DialogueArray.Empty();
 
-  for (FDataTableRowHandle DialogueRowHandle : DialogueDataTableRows) {
-    if (FDialogueDataTable* DialogueData =
-            DialogueRowHandle.GetRow<FDialogueDataTable>(DialogueRowHandle.RowName.ToString())) {
-      FDialogueData Data = {DialogueData->DialogueText, DialogueData->DialogueSpeaker, DialogueData->Action};
-      DialogueArr.Add(Data);
-    }
-  }
+  TArray<FDialogueDataTable*> DialogueRows;
+  TableDialogues.GetRows<FDialogueDataTable>(DialogueRows, TEXT("Dialogues"));
+  for (FDialogueDataTable* Row : DialogueRows)
+    DialogueArray.Add({Row->DialogueChainID, Row->DialogueType, Row->DialogueText, Row->Action, Row->DialogueSpeaker,
+                       Row->ChoicesAmount});
 }

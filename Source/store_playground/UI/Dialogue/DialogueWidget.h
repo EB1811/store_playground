@@ -15,15 +15,22 @@ public:
 
   UPROPERTY(meta = (BindWidget))
   class UDialogueBoxWidget* DialogueBoxWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UWrapBox* ChoicesPanelWrapBox;
+
+  UPROPERTY(EditAnywhere)
+  TSubclassOf<class UDialogueChoiceWidget> DialogueChoiceWidgetClass;
 
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystemRef;
 
-  void InitDialogueUI();
+  void InitDialogueUI(class UDialogueSystem* DialogueSystem);
   void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()
   void OnNext();
+  UFUNCTION()
+  void OnChoiceSelect(int32 ChoiceIndex);
 
   std::function<void()> CloseDialogueUI;
 };
