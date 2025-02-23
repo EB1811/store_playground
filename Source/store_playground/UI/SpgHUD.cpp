@@ -108,9 +108,8 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
 void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue) {
   check(UDialogueWidgetClass);
 
-  DialogueWidget->DialogueSystemRef = Dialogue;
   DialogueWidget->CloseDialogueUI = [this] { CloseWidget(DialogueWidget); };
-  DialogueWidget->InitDialogueUI();
+  DialogueWidget->InitDialogueUI(Dialogue);
   DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
   const FInputModeGameAndUI InputMode;
@@ -123,9 +122,12 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue) {
 void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation) {
   check(UNegotiationWidgetClass);
 
-  NegotiationWidget->NegotiationRef = const_cast<UNegotiationSystem*>(Negotiation);
+  NegotiationWidget->NegotiationSystemRef = const_cast<UNegotiationSystem*>(Negotiation);
   NegotiationWidget->CloseNegotiationUI = [this] { CloseWidget(NegotiationWidget); };
-  NegotiationWidget->RefreshNegotiationWhole();
+  NegotiationWidget->RefreshInventoryUI = [this] {
+    if (PlayerInventoryWidget->IsVisible()) PlayerInventoryWidget->InventoryWidget->RefreshInventory();
+  };
+  NegotiationWidget->InitNegotiationUI();
   NegotiationWidget->SetVisibility(ESlateVisibility::Visible);
 
   const FInputModeGameAndUI InputMode;

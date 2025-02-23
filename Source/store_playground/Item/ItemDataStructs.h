@@ -30,11 +30,11 @@ struct FItemStats {
 
   //
   UPROPERTY(EditAnywhere)
-  int16 Attack;
+  int32 Attack;
   UPROPERTY(EditAnywhere)
-  int16 Defense;
+  int32 Defense;
   UPROPERTY(EditAnywhere)
-  int16 Durability;
+  int32 Durability;
   UPROPERTY(EditAnywhere)
   float Weight;
 };
@@ -67,7 +67,7 @@ struct FItemMetaData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  int16 MaxStackSize;
+  int32 MaxStackSize;
   UPROPERTY(EditAnywhere)
   bool Unique;
   UPROPERTY(EditAnywhere)
@@ -94,9 +94,9 @@ struct FItemMarketData {
   UPROPERTY(EditAnywhere)
   float CurrentPrice;
   UPROPERTY(EditAnywhere)
-  int16 SupplyUnits;
+  int32 SupplyUnits;
   UPROPERTY(EditAnywhere)
-  int16 DemandUnits;
+  int32 DemandUnits;
 };
 
 USTRUCT()
@@ -107,7 +107,7 @@ struct FItemData : public FTableRowBase {
   FName ItemID;
 
   // UPROPERTY(EditAnywhere, Category = "Item Data")
-  // int16 Quantity;
+  // int32 Quantity;
 
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FItemFlavorData FlavorData;

@@ -28,13 +28,13 @@ public:
   EInventoryType InventoryType;
   // TODO: Implement max slots.
   UPROPERTY(EditAnywhere, Category = "Inventory")
-  int16 MaxSlots;
+  int32 MaxSlots;
 
   UPROPERTY(EditAnywhere, Category = "Inventory TESTING | Init State")
   TArray<FDataTableRowHandle> InitItemIds;
 
-  void AddItem(const UItemBase* Item, int16 Quantity = 1);
-  void RemoveItem(const UItemBase* Item, int16 Quantity = 1);
+  void AddItem(const UItemBase* Item, int32 Quantity = 1);
+  void RemoveItem(const UItemBase* Item, int32 Quantity = 1);
 };
 
 void TransferItem(UInventoryComponent* From, UInventoryComponent* To, UItemBase* Item, int32 Quantity = 1);

@@ -2,72 +2,65 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/AI/NegotiationAI.h"
+#include "store_playground/Dialogue/DialogueSystem.h"
 
 void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
                                           const UNegotiationAI* _NegotiationAI,
+                                          UDialogueSystem* _DialogueSystem,
                                           UInventoryComponent* _PlayerInventory,
                                           float Price,
                                           ENegotiationState InitState) {
-  NegotiationState = InitState;
-  BasePrice = Price;
-
   NegotiatedItem = Item;
   Quantity = Item->Quantity;
   NegotiationAI = _NegotiationAI;
   PlayerInventory = _PlayerInventory;
+  DialogueSystem = _DialogueSystem;
+  BasePrice = Price;
+  OfferedPrice = BasePrice;
+  NegotiationState = InitState;
 }
 
-void UNegotiationSystem::RequestNegotiation() {
-  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NPCRequest);
-  if (NextState == ENegotiationState::None) return;
+FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NPCRequest);
 
-  NegotiationState = NextState;
+  return DialogueSystem->StartDialogue(NegotiationAI->RequestDialogueArray);
 }
 
-void UNegotiationSystem::Consider(Negotiator CallingNegotiator) {
-  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Consider);
-  if (NextState == ENegotiationState::None) return;
+void UNegotiationSystem::PlayerReadRequest() {
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerReadRequest);
+}
 
-  NegotiationState = NextState;
+FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
+  if (OfferResponse.Accepted)
+    AcceptOffer(Negotiator::NPC);
+  else
+    OfferPrice(Negotiator::NPC, OfferResponse.CounterOffer);
 
-  // ? Move call to somewhere else?
-  if (NegotiationState != ENegotiationState::NPCConsider) return;
-  NPCNegotiationTurn();
+  return DialogueSystem->StartDialogue(NegotiationAI->RequestDialogueArray);
 }
 
 void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
-  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
-  if (NextState == ENegotiationState::None) return;
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
-  NegotiationState = NextState;
+  if (NegotiationState == ENegotiationState::NPCConsider)
+    OfferResponse = NegotiationAI->ConsiderOffer(BasePrice, OfferedPrice, Price);
+
   OfferedPrice = Price;
 }
 
 void UNegotiationSystem::AcceptOffer(Negotiator CallingNegotiator) {
-  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
-  if (NextState == ENegotiationState::None) return;
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
 
-  NegotiationState = NextState;
-
-  // Note: Move to actual object (player, npc) if fine grain functionality needed.
-  if (NegotiationState != ENegotiationState::Accepted) return;
-  PlayerInventory->AddItem(NegotiatedItem, Quantity);
+  if (NegotiationState == ENegotiationState::Accepted) NegotiationSuccess();
 }
 
 void UNegotiationSystem::RejectOffer(Negotiator CallingNegotiator) {
-  ENegotiationState NextState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
-  if (NextState == ENegotiationState::None) return;
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
 
-  NegotiationState = NextState;
+  if (NegotiationState == ENegotiationState::Rejected) NegotiationFailure();
 }
 
-void UNegotiationSystem::NPCNegotiationTurn() {
-  OfferResponse Response = NegotiationAI->ConsiderOffer(BasePrice, OfferedPrice);
+// Note: Move to actual object (player, npc) if fine grain functionality needed.
+void UNegotiationSystem::NegotiationSuccess() { PlayerInventory->AddItem(NegotiatedItem, Quantity); }
 
-  if (Response.Accepted) {
-    AcceptOffer(Negotiator::NPC);
-    return;
-  }
-
-  OfferPrice(Negotiator::NPC, Response.CounterOffer);
-}
+void UNegotiationSystem::NegotiationFailure() {}

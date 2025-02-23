@@ -5,11 +5,11 @@
 #include <optional>
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "store_playground/Dialogue/DialogueSystem.h"
+#include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "InteractionComponent.generated.h"
 
 // temp: move to player ui controller
-DECLARE_DELEGATE_OneParam(FUIOnInteract, int16);
+DECLARE_DELEGATE_OneParam(FUIOnInteract, int32);
 
 UENUM()
 enum class EInteractionType : uint8 {
@@ -37,7 +37,7 @@ public:
   std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
   std::tuple<class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
   // TODO: Return market data.
-  std::tuple<class UInventoryComponent*, int16> InteractStore() const;
+  std::tuple<class UInventoryComponent*, int32> InteractStore() const;
   class UInventoryComponent* InteractContainer() const;
   class UInventoryComponent* InteractStock() const;
 };

@@ -132,9 +132,8 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
   HUD->SetAndOpenDialogue(DialogueSystem);
 }
 
-// ? Move to HUD?
 void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, const UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI->NegotiationAI, PlayerInventoryComponent,
+  NegotiationSystem->StartNegotiation(Item, CustomerAI->NegotiationAI, DialogueSystem, PlayerInventoryComponent,
                                       Item->MarketData.BasePrice);
   HUD->SetAndOpenNegotiation(NegotiationSystem);
 }

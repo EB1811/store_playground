@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include <optional>
 #include <array>
 #include <map>
 #include "CoreMinimal.h"
+#include "store_playground/AI/NegotiationAI.h"
 #include "NegotiationSystem.generated.h"
 
 UENUM()
@@ -16,7 +18,7 @@ UENUM()
 enum class ENegotiationState : uint8 {
   None UMETA(DisplayName = "NONE"),
   NPCRequest UMETA(DisplayName = "NPC Request"),
-  PlayerOffer UMETA(DisplayName = "Player Offer"),
+  PlayerConsider UMETA(DisplayName = "Player Consider"),
   NPCConsider UMETA(DisplayName = "NPC Consider"),
   Accepted UMETA(DisplayName = "Accepted"),
   Rejected UMETA(DisplayName = "Rejected")
@@ -24,7 +26,7 @@ enum class ENegotiationState : uint8 {
 UENUM()
 enum class ENegotiationAction : uint8 {
   NPCRequest UMETA(DisplayName = "NPC Request"),
-  Consider UMETA(DisplayName = "Consider"),
+  PlayerReadRequest UMETA(DisplayName = "Player Read Request"),
   OfferPrice UMETA(DisplayName = "Offer Price"),
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject")
@@ -47,10 +49,14 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   const class UItemBase* NegotiatedItem;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  int16 Quantity;
+  int32 Quantity;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
+  FOfferResponse OfferResponse;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
   const class UNegotiationAI* NegotiationAI;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UDialogueSystem* DialogueSystem;
 
   // Temp: Just inventory for now.
   UPROPERTY(EditAnywhere, Category = "Negotiation")
@@ -58,16 +64,20 @@ public:
 
   void StartNegotiation(const class UItemBase* NegotiatedItem,
                         const class UNegotiationAI* _NegotiationAI,
+                        UDialogueSystem* _DialogueSystem,
                         class UInventoryComponent* _PlayerInventory,
                         float BasePrice,
-                        ENegotiationState InitState = ENegotiationState::NPCRequest);
-  void RequestNegotiation();
-  void Consider(Negotiator CallingNegotiator);
+                        ENegotiationState InitState = ENegotiationState::None);
+
+  struct FNextDialogueRes NPCRequestNegotiation();
+  void PlayerReadRequest();
+  struct FNextDialogueRes NPCNegotiationTurn();
   void OfferPrice(Negotiator CallingNegotiator, float Price);
   void AcceptOffer(Negotiator CallingNegotiator);
   void RejectOffer(Negotiator CallingNegotiator);
 
-  void NPCNegotiationTurn();
+  void NegotiationSuccess();
+  void NegotiationFailure();
 };
 
 extern std::map<ENegotiationState, FText> NegotiationStateToName;

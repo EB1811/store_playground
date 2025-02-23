@@ -14,35 +14,16 @@ public:
   virtual void NativeOnInitialized() override;
 
   UPROPERTY(meta = (BindWidget))
-  class UButton* OfferButton;
-  UPROPERTY(meta = (BindWidget))
-  class UButton* AcceptButton;
-  UPROPERTY(meta = (BindWidget))
-  class UButton* RejectButton;
+  class UNegotiationElementWidget* NegotiationElementWidget;
 
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* ItemName;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* ItemQuantity;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* BasePrice;
-  UPROPERTY(meta = (BindWidget))
-  class UImage* ItemIcon;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* NegotiationStateText;
-
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* OfferedPrice;
-  UPROPERTY(meta = (BindWidget))
-  class USlider* PlayerOfferedPrice;
-
-  UPROPERTY(meta = (BindWidget))
-  class UDialogueBoxWidget* DialogueBoxWidget;
+  class UDialogueWidget* DialogueWidget;
+  void SetAndOpenDialogue(class UDialogueSystem* Dialogue);
 
   UPROPERTY(EditAnywhere)
-  class UNegotiationSystem* NegotiationRef;
+  class UNegotiationSystem* NegotiationSystemRef;
 
-  void RefreshNegotiationWhole();
+  void InitNegotiationUI();
   void RefreshNegotiationState();
 
   UFUNCTION()
@@ -55,4 +36,5 @@ public:
   void OnRejectButtonClicked();
 
   std::function<void()> CloseNegotiationUI;
+  std::function<void()> RefreshInventoryUI;
 };

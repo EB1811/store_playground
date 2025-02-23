@@ -28,7 +28,7 @@ void UInventoryComponent::BeginPlay() {
   }
 }
 
-void UInventoryComponent::AddItem(const UItemBase* Item, int16 Quantity) {
+void UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) {
   if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; })) {
     if (InventoryType == EInventoryType::Container) (*ArrayItem)->Quantity += Quantity;
@@ -42,7 +42,7 @@ void UInventoryComponent::AddItem(const UItemBase* Item, int16 Quantity) {
   ItemsArray.Add(ItemCopy);
 }
 
-void UInventoryComponent::RemoveItem(const UItemBase* Item, int16 Quantity) {
+void UInventoryComponent::RemoveItem(const UItemBase* Item, int32 Quantity) {
   if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; })) {
     (*ArrayItem)->Quantity -= Quantity;

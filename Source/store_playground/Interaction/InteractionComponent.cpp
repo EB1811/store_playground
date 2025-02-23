@@ -20,7 +20,7 @@ std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDi
   UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
   if (!OwnerDialogue) return std::nullopt;
 
-  return OwnerDialogue->DialogueArr;
+  return OwnerDialogue->DialogueArray;
 }
 
 std::tuple<class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
@@ -35,11 +35,11 @@ std::tuple<class UItemBase*, class UCustomerAIComponent*> UInteractionComponent:
   return {OwnerInventory->ItemsArray[0], OwnerCustomerAI};
 }
 
-std::tuple<class UInventoryComponent*, int16> UInteractionComponent::InteractStore() const {
+std::tuple<class UInventoryComponent*, int32> UInteractionComponent::InteractStore() const {
   UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
   if (!OwnerInventory) return {nullptr, 0};
 
-  int16 StoreMoney = 1000;
+  int32 StoreMoney = 1000;
   return {OwnerInventory, StoreMoney};
 }
 

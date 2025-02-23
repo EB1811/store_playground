@@ -6,8 +6,7 @@
 #include "ItemDataStructs.h"
 #include "ItemBase.generated.h"
 
-UCLASS() class STORE_PLAYGROUND_API UItemBase : public UObject
-{
+UCLASS() class STORE_PLAYGROUND_API UItemBase : public UObject {
   GENERATED_BODY()
 
 public:
@@ -22,7 +21,7 @@ public:
   FGuid UniqueItemID;
 
   UPROPERTY(EditAnywhere, Category = "Item Data", meta = (UIMin = 1))
-  int16 Quantity;
+  int32 Quantity;
 
   UPROPERTY(EditAnywhere, Category = "Item Data | Flavor")
   FItemFlavorData FlavorData;
