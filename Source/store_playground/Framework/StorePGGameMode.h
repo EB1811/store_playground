@@ -10,10 +10,14 @@
  *
  */
 UCLASS()
-class STORE_PLAYGROUND_API AStorePGGameMode : public AGameModeBase
-{
+class STORE_PLAYGROUND_API AStorePGGameMode : public AGameModeBase {
   GENERATED_BODY()
 
 public:
   AStorePGGameMode();
+
+  virtual void BeginPlay() override;
+
+  UPROPERTY(EditAnywhere, Category = "GameMode")
+  TSubclassOf<class ACustomerAIManager> CustomerAIManagerClass;
 };

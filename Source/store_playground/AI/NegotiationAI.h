@@ -30,15 +30,14 @@ class STORE_PLAYGROUND_API UNegotiationAI : public UObject {
 public:
   UNegotiationAI() : Attitude(ENegotiatorAttitude::NEUTRAL) {}
 
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   ENegotiatorAttitude Attitude;
 
-  // Temp: Use pointer instead of copy.
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  TMap<ENegotiationDialogueType, struct FDialogueData> DialogueMap;
-
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   TArray<struct FDialogueData> RequestDialogueArray;
+
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  class UItemBase* WantedItem;
 
   FOfferResponse ConsiderOffer(float BasePrice, float LastOfferedPrice, float PlayerOfferedPrices) const;
 };
