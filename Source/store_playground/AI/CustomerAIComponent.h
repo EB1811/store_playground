@@ -2,12 +2,18 @@
 
 #pragma once
 
-#include <map>
-#include <vector>
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "CustomerAIComponent.generated.h"
+
+UENUM()
+enum class ECustomerState : uint8 {
+  None UMETA(DisplayName = "NONE"),
+  Browsing UMETA(DisplayName = "Browsing"),
+  ItemWanted UMETA(DisplayName = "Item Wanted"),
+  Negotiating UMETA(DisplayName = "Negotiating"),
+  Leaving UMETA(DisplayName = "Leaving"),
+};
 
 UENUM()
 enum class ECustomerType : uint8 {
@@ -29,28 +35,10 @@ public:
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerType CustomerType;
 
-  // Temp:  Index of dialogues. Storing here for now. Move to manager.
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle FriendlyDialoguesTable;
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle NeutralDialoguesTable;
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle HostileDialoguesTable;
-
-  // UPROPERTY(EditAnywhere, Category = "Dialogue")
-  // TMap<ENegotiationDialogueType, TArray<struct FDialogueData>> FriendlyDialoguesMap;
-  // UPROPERTY(EditAnywhere, Category = "Dialogue")
-  // TMap<ENegotiationDialogueType, TArray<struct FDialogueData>> NeutralDialoguesMap;
-  // UPROPERTY(EditAnywhere, Category = "Dialogue")
-  // TMap<ENegotiationDialogueType, TArray<struct FDialogueData>> HostileDialoguesMap;
-
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   class UNegotiationAI* NegotiationAI;
 
-  void InitializeDialogueData();
+  // Temp: No actions for now, directly change state.
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  ECustomerState CustomerState;
 };
-
-// Temp: Probably convert to list variables on object when dialogue types are all finalized.
-extern std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> FriendlyDialoguesMap;
-extern std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> NeutralDialoguesMap;
-extern std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> HostileDialoguesMap;
