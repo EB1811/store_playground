@@ -47,29 +47,37 @@ void UDialogueWidget::OnNext() {
 
   check(NextDialogue.DialogueData);
 
-  if (NextDialogue.State == EDialogueState::PlayerChoice) {
-    DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
-    ChoicesPanelWrapBox->ClearChildren();
+  switch (NextDialogue.State) {
+    case EDialogueState::PlayerChoice: {
+      // TODO: Put this in a function.
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
+      ChoicesPanelWrapBox->ClearChildren();
 
-    TArray<FDialogueData> DialogueDataArr = DialogueSystemRef->GetChoiceDialogues();
-    for (int32 i = 0; FDialogueData DialogueData : DialogueDataArr) {
-      UDialogueChoiceWidget* DialogueChoiceWidget =
-          CreateWidget<UDialogueChoiceWidget>(this, DialogueChoiceWidgetClass);
+      TArray<FDialogueData> DialogueDataArr = DialogueSystemRef->GetChoiceDialogues();
+      for (int32 i = 0; FDialogueData DialogueData : DialogueDataArr) {
+        UDialogueChoiceWidget* DialogueChoiceWidget =
+            CreateWidget<UDialogueChoiceWidget>(this, DialogueChoiceWidgetClass);
 
-      DialogueChoiceWidget->ChoiceIndex = i;
-      DialogueChoiceWidget->ChoiceText->SetText(FText::FromString(DialogueData.DialogueText));
-      DialogueChoiceWidget->OnChoiceSelected = [this, i]() { OnChoiceSelect(i); };
+        DialogueChoiceWidget->ChoiceIndex = i;
+        DialogueChoiceWidget->ChoiceText->SetText(FText::FromString(DialogueData.DialogueText));
+        DialogueChoiceWidget->OnChoiceSelected = [this, i]() { OnChoiceSelect(i); };
 
-      ChoicesPanelWrapBox->AddChildToWrapBox(DialogueChoiceWidget);
-      i++;
+        ChoicesPanelWrapBox->AddChildToWrapBox(DialogueChoiceWidget);
+        i++;
+      }
+
+      return;
     }
+    case EDialogueState::NPCTalk:
+    case EDialogueState::PlayerTalk: {
+      FString SpeakerName = NextDialogue.State == EDialogueState::PlayerTalk ? "Player" : "NPC";
+      UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
+                         NextDialogue.DialogueData->Action == EDialogueAction::End);
 
-    return;
+      return;
+    }
+    default: check(false); return;
   }
-
-  FString SpeakerName = NextDialogue.State == EDialogueState::PlayerTalk ? "Player" : "NPC";
-  UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
-                     NextDialogue.DialogueData->Action == EDialogueAction::End);
 }
 
 void UDialogueWidget::OnChoiceSelect(int32 ChoiceIndex) {

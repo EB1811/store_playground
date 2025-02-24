@@ -3,6 +3,7 @@
 #include "InteractionComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/AI/CustomerAIComponent.h"
+#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Item/ItemBase.h"
 
@@ -24,15 +25,11 @@ std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDi
 }
 
 std::tuple<class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
-  UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
-  if (!OwnerInventory) return {nullptr, nullptr};
-
   UCustomerAIComponent* OwnerCustomerAI = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   if (!OwnerCustomerAI) return {nullptr, nullptr};
 
-  if (OwnerInventory->ItemsArray.Num() <= 0) return {nullptr, OwnerCustomerAI};
-
-  return {OwnerInventory->ItemsArray[0], OwnerCustomerAI};
+  check(OwnerCustomerAI->NegotiationAI->WantedItem);
+  return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI};
 }
 
 std::tuple<class UInventoryComponent*, int32> UInteractionComponent::InteractStore() const {

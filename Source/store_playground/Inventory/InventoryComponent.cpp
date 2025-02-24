@@ -35,8 +35,6 @@ void UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) {
     return;
   }
 
-  UE_LOG(LogTemp, Warning, TEXT("AddItem, Quantity: %d"), Quantity);
-
   UItemBase* ItemCopy = Item->CreateItemCopy();
   ItemCopy->Quantity = Quantity;
   ItemsArray.Add(ItemCopy);
