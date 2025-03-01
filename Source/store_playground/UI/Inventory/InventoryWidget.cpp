@@ -4,6 +4,7 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/UI/Inventory/ItemDragDropOp.h"
 #include "Components/WrapBox.h"
+#include "Components/TextBlock.h"
 
 void UInventoryWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
 
@@ -22,7 +23,10 @@ bool UInventoryWidget::NativeOnDrop(const FGeometry& InGeometry,
 
   if (SourceInventoryRef == InventoryRef) return false;
 
-  TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
+  if (OnDropItemFunc)
+    OnDropItemFunc(DroppedItem, 1);
+  else
+    TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
   RefreshInventory();
   // ? Or remove when initiating the transfer?
   SourceInventoryWidgetRef->RefreshInventory();

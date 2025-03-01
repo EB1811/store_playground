@@ -17,13 +17,10 @@ void UDialogueWidget::NativeOnInitialized() {
 }
 
 void UDialogueWidget::InitDialogueUI(UDialogueSystem* DialogueSystem) {
-  check(DialogueSystem);
+  check(DialogueSystem && CloseDialogueUI);
   DialogueSystemRef = DialogueSystem;
 
-  if (DialogueSystemRef->DialogueState == EDialogueState::End) {
-    if (CloseDialogueUI != nullptr) CloseDialogueUI();
-    return;
-  }
+  if (DialogueSystemRef->DialogueState == EDialogueState::End) return CloseDialogueUI();
 
   DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
 

@@ -2,13 +2,13 @@
 
 #pragma once
 
+#include <functional>
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "InventoryWidget.generated.h"
 
 UCLASS()
-class STORE_PLAYGROUND_API UInventoryWidget : public UUserWidget
-{
+class STORE_PLAYGROUND_API UInventoryWidget : public UUserWidget {
   GENERATED_BODY()
 
 public:
@@ -18,6 +18,8 @@ public:
                             UDragDropOperation* InOperation) override;
 
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* InventoryTitleText;
+  UPROPERTY(meta = (BindWidget))
   class UWrapBox* InventoryPanelWrapBox;
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UInventoryItemSlotWidget> ItemSlotClass;
@@ -25,6 +27,7 @@ public:
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* InventoryRef;
 
-  // void SetInventoryRef(class UInventoryComponent* InventoryComponent);
   void RefreshInventory();
+
+  std::function<void(class UItemBase*, int32)> OnDropItemFunc;
 };

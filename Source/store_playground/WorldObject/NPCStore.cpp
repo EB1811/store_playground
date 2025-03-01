@@ -1,16 +1,19 @@
-#include "Customer.h"
-#include "store_playground/AI/CustomerAIComponent.h"
+#include "NPCStore.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/Inventory/InventoryComponent.h"
 
-ACustomer::ACustomer() {
+ANPCStore::ANPCStore() {
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetSimulatePhysics(true);
   SetRootComponent(Mesh);
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));
-  CustomerAIComponent = CreateDefaultSubobject<UCustomerAIComponent>(TEXT("CustomerAIComponent"));
+  InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
-void ACustomer::BeginPlay() { Super::BeginPlay(); }
+void ANPCStore::BeginPlay() {
+  Super::BeginPlay();
+  InteractionComponent->InteractionType = EInteractionType::Store;
+}

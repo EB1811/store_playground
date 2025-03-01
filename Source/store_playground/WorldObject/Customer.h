@@ -18,11 +18,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Customer")
   UStaticMeshComponent* Mesh;
 
-  // UPROPERTY(EditAnywhere, Category = "Customer")
-  // class UDialogueComponent* DialogueComponent;
-
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UInteractionComponent* InteractionComponent;
+
+  UPROPERTY(EditAnywhere, Category = "Customer")
+  class UDialogueComponent* DialogueComponent;
 
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UCustomerAIComponent* CustomerAIComponent;
