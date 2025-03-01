@@ -16,10 +16,5 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle TableDialogues;
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
   TArray<struct FDialogueData> DialogueArray;
-
-  UFUNCTION(BlueprintCallable, Category = "Dialogue")
-  void LoadDialogueData();
 };

@@ -1,16 +1,10 @@
 #include "NegotiationAI.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 
-std::map<ENegotiatorAttitude, float> AttitudeToPercentAcceptance = {
-    {ENegotiatorAttitude::FRIENDLY, 1.15},
-    {ENegotiatorAttitude::NEUTRAL, 1.1},
-    {ENegotiatorAttitude::HOSTILE, 1.05},
-};
-
 FOfferResponse UNegotiationAI::ConsiderOffer(float BasePrice, float LastOfferedPrice, float PlayerOfferedPrice) const {
   float OfferedPercent = PlayerOfferedPrice / BasePrice;
-  if (OfferedPercent <= AttitudeToPercentAcceptance[Attitude]) return {0, true};
+  if (OfferedPercent <= AcceptancePercentage) return {0, true, AcceptArray};
 
-  float adjustedPercent = AttitudeToPercentAcceptance[Attitude] - FMath::FRandRange(0.01f, 0.1f);
-  return {LastOfferedPrice * adjustedPercent, false};
+  float adjustedPercent = AcceptancePercentage - FMath::FRandRange(0.01f, 0.1f);
+  return {LastOfferedPrice * adjustedPercent, false, OfferedPercent > 1.4f ? ConsiderTooHighArray : ConsiderCloseArray};
 }

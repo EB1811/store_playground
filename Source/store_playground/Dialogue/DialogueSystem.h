@@ -10,9 +10,9 @@
 #include "DialogueSystem.generated.h"
 
 EDialogueState GetNextDialogueState(EDialogueState CurrentState, EDialogueAction Action);
-std::vector<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr,
-                                         int32 StartIndex,
-                                         int32 ChoicesAmount);
+TArray<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr,
+                                    int32 StartIndex,
+                                    int32 ChoicesAmount);
 
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API UDialogueSystem : public UObject {
@@ -34,4 +34,5 @@ public:
   FNextDialogueRes NextDialogue();
   TArray<FDialogueData> GetChoiceDialogues();
   FNextDialogueRes DialogueChoice(int32 ChoiceIndex);
+  void ResetDialogue();
 };

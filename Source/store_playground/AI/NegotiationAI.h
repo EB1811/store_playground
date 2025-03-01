@@ -7,13 +7,6 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "NegotiationAI.generated.h"
 
-UENUM()
-enum class ENegotiatorAttitude : uint8 {
-  FRIENDLY,
-  NEUTRAL,
-  HOSTILE,
-};
-
 USTRUCT()
 struct FOfferResponse {
   GENERATED_BODY()
@@ -22,25 +15,31 @@ struct FOfferResponse {
   float CounterOffer;
   UPROPERTY(EditAnywhere)
   bool Accepted;
+  TArray<struct FDialogueData> ResponseDialogue;
 };
 
 UCLASS()
 class STORE_PLAYGROUND_API UNegotiationAI : public UObject {
   GENERATED_BODY()
 public:
-  UNegotiationAI() : Attitude(ENegotiatorAttitude::NEUTRAL) {}
-
-  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  ENegotiatorAttitude Attitude;
+  UNegotiationAI() {}
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   TArray<struct FDialogueData> RequestDialogueArray;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  TArray<struct FDialogueData> ConsiderTooHighArray;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  TArray<struct FDialogueData> ConsiderCloseArray;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  TArray<struct FDialogueData> AcceptArray;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  TArray<struct FDialogueData> RejectArray;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  class UItemBase* WantedItem;
+  const class UItemBase* WantedItem;
+
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  float AcceptancePercentage;
 
   FOfferResponse ConsiderOffer(float BasePrice, float LastOfferedPrice, float PlayerOfferedPrices) const;
 };
-
-// Temp: Make into function using random.
-extern std::map<ENegotiatorAttitude, float> AttitudeToPercentAcceptance;

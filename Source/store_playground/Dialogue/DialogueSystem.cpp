@@ -13,11 +13,11 @@ EDialogueState GetNextDialogueState(EDialogueState CurrentState, EDialogueAction
 }
 // ? Maybe better to just create a tree structure for dialogues.
 // Note: Preorder traversal, only looking for direct children.
-std::vector<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr,
-                                         int32 StartIndex,
-                                         int32 ChoicesAmount) {
-  std::vector<int32> ChoiceDialogueIndexes;
-  ChoiceDialogueIndexes.reserve(ChoicesAmount);
+TArray<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr,
+                                    int32 StartIndex,
+                                    int32 ChoicesAmount) {
+  TArray<int32> ChoiceDialogueIndexes;
+  ChoiceDialogueIndexes.Reserve(ChoicesAmount);
 
   int32 FoundChoices = 0;
   int32 IgnoreNext = 0;
@@ -28,8 +28,8 @@ std::vector<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDa
         continue;
       }
 
-      ChoiceDialogueIndexes.push_back(i);
-      if (ChoiceDialogueIndexes.size() == ChoicesAmount) break;
+      ChoiceDialogueIndexes.Add(i);
+      if (ChoiceDialogueIndexes.Num() == ChoicesAmount) break;
     }
     if (DialogueDataArr[i].Action == EDialogueAction::AskPlayer) IgnoreNext = DialogueDataArr[i].ChoicesAmount;
   }
@@ -74,10 +74,10 @@ FNextDialogueRes UDialogueSystem::NextDialogue() {
 TArray<FDialogueData> UDialogueSystem::GetChoiceDialogues() {
   if (DialogueState != EDialogueState::PlayerChoice) return {};
 
-  std::vector<int32> ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
-                                                                DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
+  TArray<int32> ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
+                                                           DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
   TArray<FDialogueData> ChoiceDialogueArr = {};
-  ChoiceDialogueArr.Reserve(ChildChoiceIndexes.size());
+  ChoiceDialogueArr.Reserve(ChildChoiceIndexes.Num());
   for (int32 ChoiceIndex : ChildChoiceIndexes) ChoiceDialogueArr.Add(DialogueDataArr[ChoiceIndex]);
 
   return ChoiceDialogueArr;
@@ -86,8 +86,8 @@ TArray<FDialogueData> UDialogueSystem::GetChoiceDialogues() {
 FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
   if (DialogueState != EDialogueState::PlayerChoice) return {};
 
-  std::vector<int32> ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
-                                                                DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
+  TArray<int32> ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
+                                                           DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
   int32 ChoiceDialogueIndex = ChildChoiceIndexes[ChoiceIndex];
 
   DialogueState = GetNextDialogueState(DialogueState, DialogueDataArr[ChoiceDialogueIndex].Action);
@@ -95,4 +95,10 @@ FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
 
   CurrentDialogueIndex = ChoiceDialogueIndex + 1;
   return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+}
+
+void UDialogueSystem::ResetDialogue() {
+  DialogueState = EDialogueState::None;
+  DialogueDataArr.Empty();
+  CurrentDialogueIndex = 0;
 }
