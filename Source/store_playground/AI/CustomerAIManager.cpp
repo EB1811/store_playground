@@ -1,5 +1,7 @@
 
 #include "CustomerAIManager.h"
+#include <vector>
+#include "Containers/Array.h"
 #include "CustomerAIComponent.h"
 #include "NegotiationAI.h"
 #include "Engine/World.h"
@@ -8,151 +10,218 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
-
-std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> FriendlyDialoguesMap = {};
-std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> NeutralDialoguesMap = {};
-std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> HostileDialoguesMap = {};
-
-std::unordered_map<ENegotiationDialogueType, std::vector<int32>> GetRandomNegDialogues() {
-  std::unordered_map<ENegotiationDialogueType, std::vector<int32>> DialogueIndexMap = {};
-
-  DialogueIndexMap[ENegotiationDialogueType::Request] = {};
-  {
-    auto& RequestDialogues = FriendlyDialoguesMap[ENegotiationDialogueType::Request];
-    int32 MapSize = RequestDialogues.size();
-    int32 RandomIndex = FMath::RandRange(0, MapSize - 1);
-    for (int32 i = RandomIndex - 1; i >= 0; i--) {
-      if (RequestDialogues[i].DialogueChainID != RequestDialogues[RandomIndex].DialogueChainID) break;
-      RandomIndex = i;
-    }
-
-    for (int32 i = RandomIndex; i < MapSize; i++) {
-      if (RequestDialogues[i].DialogueChainID != RequestDialogues[RandomIndex].DialogueChainID) break;
-      DialogueIndexMap[ENegotiationDialogueType::Request].push_back(i);
-    }
-  }
-
-  return DialogueIndexMap;
-}
+#include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/Framework/GlobalDataManager.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
 
-  CustomerSpawnInterval = 5.0f;
-  MaxCustomers = 1;
-  PickItemChance = 50.0f;
-  PickItemFrequency = 5.0f;
+  ManagerParams.bSpawnCustomers = true;
+  ManagerParams.CustomerSpawnInterval = 5.0f;
+  ManagerParams.MaxCustomers = 1;
+
+  ManagerParams.UniqueNpcBaseSpawnChance = 10.0f;
+  ManagerParams.UNpcMaxSpawnPerDay = 1;
+
+  ManagerParams.PickItemChance = 50.0f;
+  ManagerParams.PickItemFrequency = 5.0f;
+  ManagerParams.MaxCustomersPickingAtOnce = 2;
+
+  LastSpawnTime = 0.0f;
   LastPickItemCheckTime = 0.0f;
 }
 
-void ACustomerAIManager::BeginPlay() {
-  Super::BeginPlay();
-
-  InitializeDialogueData();
-  SpawnCustomers();
-}
+void ACustomerAIManager::BeginPlay() { Super::BeginPlay(); }
 
 void ACustomerAIManager::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
 
-  if (GetWorld()->TimeSince(LastPickItemCheckTime) > PickItemFrequency) PerformCustomerAILoop();
+  if (ManagerParams.bSpawnCustomers && GetWorld()->TimeSince(LastSpawnTime) > ManagerParams.CustomerSpawnInterval)
+    SpawnCustomers();
+  if (GetWorld()->TimeSince(LastPickItemCheckTime) > ManagerParams.PickItemFrequency) PerformCustomerAILoop();
 }
 
-// TODO: Monitor performance.
-void ACustomerAIManager::PerformCustomerAILoop() {
-  check(PlayerStock);
-  UE_LOG(LogTemp, Warning, TEXT("PerformCustomerAILoop"));
-
-  LastPickItemCheckTime = GetWorld()->GetTimeSeconds();
-
-  for (ACustomer* Customer : AllCustomers) {
-    switch (Customer->CustomerAIComponent->CustomerState) {
-      case (ECustomerState::Browsing): {
-        if (FMath::FRand() * 100 < PickItemChance) CustomerPickItem(Customer);
-        break;
-      }
-      default: break;
-    }
-  }
+void ACustomerAIManager::StartCustomerAI() {
+  ManagerParams.bSpawnCustomers = true;
+  SetActorTickEnabled(true);
 }
 
-// TODO: Add check for already picked items.
-void ACustomerAIManager::CustomerPickItem(class ACustomer* Customer) {
-  if (PlayerStock->ItemsArray.Num() <= 0) return;
+void ACustomerAIManager::EndCustomerAI() {
+  ManagerParams.bSpawnCustomers = false;
+  SetActorTickEnabled(false);
 
-  Customer->CustomerAIComponent->CustomerState = ECustomerState::ItemWanted;
+  CustomersPickingIds.Empty();
 
-  UItemBase* Item = PlayerStock->ItemsArray[FMath::RandRange(0, PlayerStock->ItemsArray.Num() - 1)];
-  Customer->CustomerAIComponent->NegotiationAI->WantedItem = Item;
-  Customer->InteractionComponent->InteractionType = EInteractionType::WaitingCustomer;
-
-  auto DialogueIndexMap = GetRandomNegDialogues();
-  for (int32 RandomDialogue : DialogueIndexMap[ENegotiationDialogueType::Request])
-    Customer->CustomerAIComponent->NegotiationAI->RequestDialogueArray.Add(
-        FriendlyDialoguesMap[ENegotiationDialogueType::Request][RandomDialogue]);
+  TArray<ACustomer*> CustomersToRemove;
+  for (ACustomer* Customer : AllCustomers) CustomersToRemove.Add(Customer);
+  AllCustomers.Empty();
+  for (ACustomer* Customer : CustomersToRemove) Customer->Destroy();
 }
 
 void ACustomerAIManager::SpawnCustomers() {
   check(CustomerClass);
+  if (AllCustomers.Num() >= ManagerParams.MaxCustomers) return;
+
+  LastSpawnTime = GetWorld()->GetTimeSeconds();
 
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  for (int32 i = 0; i < MaxCustomers; i++) {
+  // TODO: Spawn conditions.
+  if (ManagerParams.UniqueNpcBaseSpawnChance > FMath::FRand() * 100) {
+    FUniqueNpcData UniqueNpcData = GlobalDataManager->GetRandomUniqueNpcData();
+    UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
+    ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
+        CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
+        GetActorRotation(), SpawnParams);
+
+    UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+
+    // TODO: Dialogue tracking.
+    FName RandomDialogueChainID =
+        UniqueNpcData.DialogueChainIDs[FMath::RandRange(0, UniqueNpcData.DialogueChainIDs.Num() - 1)];
+    UniqueCustomer->DialogueComponent->DialogueArray =
+        GlobalDataManager->UniqueNpcDialoguesMap[RandomDialogueChainID].Dialogues;
+
+    UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
+    UniqueCustomer->CustomerAIComponent->Attitude = ECustomerAttitude::Neutral;
+    UniqueCustomer->CustomerAIComponent->WantedBaseItemIDs = UniqueNpcData.WantedBaseItemIDs;
+
+    UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage =
+        FMath::FRandRange(UniqueNpcData.AcceptancePercentageRange[0], UniqueNpcData.AcceptancePercentageRange[1]) /
+        100.0f;
+
+    // ? Maybe have different arrays for different customer types?
+    AllCustomers.Add(UniqueCustomer);
+  }
+
+  if (AllCustomers.Num() >= ManagerParams.MaxCustomers) return;
+
+  int32 CustomersToSpawn = FMath::RandRange(1, ManagerParams.MaxCustomers - AllCustomers.Num());
+  UE_LOG(LogTemp, Warning, TEXT("Spawning %d customers."), CustomersToSpawn);
+  for (int32 i = 0; i < CustomersToSpawn; i++) {
     ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
-        CustomerClass, GetActorLocation() + (GetActorForwardVector() + 50.0f), GetActorRotation(), SpawnParams);
+        CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
+        GetActorRotation(), SpawnParams);
 
     Customer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+
+    // TODO: Add leaving dialogue.
+    Customer->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomCustomerDialogue();
+
     Customer->CustomerAIComponent->CustomerType = ECustomerType::Peasant;
+    Customer->CustomerAIComponent->Attitude = ECustomerAttitude::Friendly;
 
     // ? Maybe have two arrays for customers ai and customer interaction components?
     AllCustomers.Add(Customer);
   }
 }
 
-void ACustomerAIManager::InitializeDialogueData() {
-  FriendlyDialoguesMap.clear();
-  FriendlyDialoguesMap[ENegotiationDialogueType::Request] = {};
-  FriendlyDialoguesMap[ENegotiationDialogueType::ConsiderTooHigh] = {};
-  FriendlyDialoguesMap[ENegotiationDialogueType::ConsiderClose] = {};
-  FriendlyDialoguesMap[ENegotiationDialogueType::Accept] = {};
-  FriendlyDialoguesMap[ENegotiationDialogueType::Reject] = {};
-  TArray<FNegotiationDialoguesDataTable*> FriendlyRows;
-  FriendlyDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(FriendlyRows, TEXT("Friendly Dialogues"));
-  for (FNegotiationDialoguesDataTable* Row : FriendlyRows)
-    FriendlyDialoguesMap[Row->NegotiationType].push_back({Row->DialogueChainID, Row->DialogueType, Row->DialogueText,
-                                                          Row->Action, Row->DialogueSpeaker, Row->ChoicesAmount});
+// TODO: Monitor performance.
+void ACustomerAIManager::PerformCustomerAILoop() {
+  check(StoreStock);
 
-  NeutralDialoguesMap.clear();
-  NeutralDialoguesMap[ENegotiationDialogueType::Request] = {};
-  NeutralDialoguesMap[ENegotiationDialogueType::ConsiderTooHigh] = {};
-  NeutralDialoguesMap[ENegotiationDialogueType::ConsiderClose] = {};
-  NeutralDialoguesMap[ENegotiationDialogueType::Accept] = {};
-  NeutralDialoguesMap[ENegotiationDialogueType::Reject] = {};
-  TArray<FNegotiationDialoguesDataTable*> NeutralRows;
-  NeutralDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(NeutralRows, TEXT("Neutral Dialogues"));
-  for (FNegotiationDialoguesDataTable* Row : NeutralRows)
-    NeutralDialoguesMap[Row->NegotiationType].push_back({Row->DialogueChainID, Row->DialogueType, Row->DialogueText,
-                                                         Row->Action, Row->DialogueSpeaker, Row->ChoicesAmount});
+  LastPickItemCheckTime = GetWorld()->GetTimeSeconds();
 
-  HostileDialoguesMap.clear();
-  HostileDialoguesMap[ENegotiationDialogueType::Request] = {};
-  HostileDialoguesMap[ENegotiationDialogueType::ConsiderTooHigh] = {};
-  HostileDialoguesMap[ENegotiationDialogueType::ConsiderClose] = {};
-  HostileDialoguesMap[ENegotiationDialogueType::Accept] = {};
-  HostileDialoguesMap[ENegotiationDialogueType::Reject] = {};
-  TArray<FNegotiationDialoguesDataTable*> HostileRows;
-  HostileDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(HostileRows, TEXT("Hostile Dialogues"));
-  for (FNegotiationDialoguesDataTable* Row : HostileRows)
-    HostileDialoguesMap[Row->NegotiationType].push_back({Row->DialogueChainID, Row->DialogueType, Row->DialogueText,
-                                                         Row->Action, Row->DialogueSpeaker, Row->ChoicesAmount});
+  // ? Call function somewhere to remove the picked item on successful negotiation?
+  CustomersPickingIds = CustomersPickingIds.FilterByPredicate([this](FGuid ItemID) {
+    return StoreStock->ItemsArray.ContainsByPredicate(
+        [ItemID](UItemBase* Item) { return Item->UniqueItemID == ItemID; });
+  });
 
-  UE_LOG(LogTemp, Warning, TEXT("Neutral Dialogues: %d"),
-         NeutralDialoguesMap[ENegotiationDialogueType::Request].size());
-  UE_LOG(LogTemp, Warning, TEXT("Friendly Dialogues: %d"),
-         FriendlyDialoguesMap[ENegotiationDialogueType::Request].size());
-  UE_LOG(LogTemp, Warning, TEXT("Hostile Dialogues: %d"),
-         HostileDialoguesMap[ENegotiationDialogueType::Request].size());
+  std::vector<ACustomer*> CustomersToRemove;
+
+  for (ACustomer* Customer : AllCustomers) {
+    switch (Customer->CustomerAIComponent->CustomerState) {
+      case (ECustomerState::Browsing): {
+        if (CustomersPickingIds.Num() >= ManagerParams.MaxCustomersPickingAtOnce) break;
+
+        if (FMath::FRand() * 100 < ManagerParams.PickItemChance) {
+          if (Customer->CustomerAIComponent->CustomerType == ECustomerType::Unique)
+            UniqueNpcPickItem(Customer->CustomerAIComponent, Customer->InteractionComponent);
+          else
+            CustomerPickItem(Customer->CustomerAIComponent, Customer->InteractionComponent);
+        }
+        break;
+      }
+      case (ECustomerState::ItemWanted): {
+        // ? Maybe have a timer for how long the customer waits for the item.
+        break;
+      }
+      case (ECustomerState::Negotiating): {
+        break;
+      }
+      case (ECustomerState::Leaving): {
+        CustomersToRemove.push_back(Customer);
+        break;
+      }
+      default: break;
+    }
+  }
+
+  for (ACustomer* Customer : CustomersToRemove) {
+    AllCustomers.RemoveSingle(Customer);
+
+    Customer->Destroy();
+  }
+}
+
+void ACustomerAIManager::CustomerPickItem(class UCustomerAIComponent* CustomerAI,
+                                          class UInteractionComponent* Interaction) {
+  if (StoreStock->ItemsArray.Num() <= 0 || CustomersPickingIds.Num() >= StoreStock->ItemsArray.Num()) return;
+
+  // TODO: Picked items will depend on customer type.
+  TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
+      [this](UItemBase* Item) { return !CustomersPickingIds.Contains(Item->UniqueItemID); });
+
+  int32 RandomIndex = FMath::RandRange(0, NonPickedItems.Num() - 1);
+  const UItemBase* Item = NonPickedItems[RandomIndex];
+  // ? Use item id instead of item pointer?
+  CustomerAI->NegotiationAI->WantedItem = Item;
+  CustomersPickingIds.Add(Item->UniqueItemID);
+
+  // TODO: Move state management to customer ai component.
+  CustomerAI->CustomerState = ECustomerState::ItemWanted;
+  Interaction->InteractionType = EInteractionType::WaitingCustomer;
+
+  CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(1.05f, 1.15f);
+
+  auto RandomNegDialogueMap = GlobalDataManager->GetRandomNegDialogueMap();
+  CustomerAI->NegotiationAI->RequestDialogueArray = RandomNegDialogueMap[ENegotiationDialogueType::Request].Dialogues;
+  CustomerAI->NegotiationAI->ConsiderTooHighArray =
+      RandomNegDialogueMap[ENegotiationDialogueType::ConsiderTooHigh].Dialogues;
+  CustomerAI->NegotiationAI->ConsiderCloseArray =
+      RandomNegDialogueMap[ENegotiationDialogueType::ConsiderClose].Dialogues;
+  CustomerAI->NegotiationAI->AcceptArray = RandomNegDialogueMap[ENegotiationDialogueType::Accept].Dialogues;
+  CustomerAI->NegotiationAI->RejectArray = RandomNegDialogueMap[ENegotiationDialogueType::Reject].Dialogues;
+}
+
+void ACustomerAIManager::UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI,
+                                           class UInteractionComponent* Interaction) {
+  if (StoreStock->ItemsArray.Num() <= 0 || CustomersPickingIds.Num() >= StoreStock->ItemsArray.Num()) return;
+
+  TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
+      [this](UItemBase* Item) { return !CustomersPickingIds.Contains(Item->UniqueItemID); });
+  TArray<UItemBase*> WantedItems = NonPickedItems.FilterByPredicate(
+      [this, CustomerAI](UItemBase* Item) { return CustomerAI->WantedBaseItemIDs.Contains(Item->ItemID); });
+  if (WantedItems.Num() <= 0) return;
+
+  int32 RandomIndex = FMath::RandRange(0, WantedItems.Num() - 1);
+  const UItemBase* Item = WantedItems[RandomIndex];
+  CustomerAI->NegotiationAI->WantedItem = Item;
+  CustomersPickingIds.Add(Item->UniqueItemID);
+
+  CustomerAI->CustomerState = ECustomerState::ItemWanted;
+  Interaction->InteractionType = EInteractionType::WaitingUniqueCustomer;
+
+  auto RandomNegDialogueMap = GlobalDataManager->GetRandomNegDialogueMap();
+  CustomerAI->NegotiationAI->RequestDialogueArray = RandomNegDialogueMap[ENegotiationDialogueType::Request].Dialogues;
+  CustomerAI->NegotiationAI->ConsiderTooHighArray =
+      RandomNegDialogueMap[ENegotiationDialogueType::ConsiderTooHigh].Dialogues;
+  CustomerAI->NegotiationAI->ConsiderCloseArray =
+      RandomNegDialogueMap[ENegotiationDialogueType::ConsiderClose].Dialogues;
+  CustomerAI->NegotiationAI->AcceptArray = RandomNegDialogueMap[ENegotiationDialogueType::Accept].Dialogues;
+  CustomerAI->NegotiationAI->RejectArray = RandomNegDialogueMap[ENegotiationDialogueType::Reject].Dialogues;
 }

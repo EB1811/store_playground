@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "CustomerAIComponent.generated.h"
 
 UENUM()
@@ -17,6 +18,7 @@ enum class ECustomerState : uint8 {
 
 UENUM()
 enum class ECustomerType : uint8 {
+  Unique,
   Farmer,
   Merchant,
   Noble,
@@ -34,6 +36,11 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerType CustomerType;
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  ECustomerAttitude Attitude;
+
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  TArray<FName> WantedBaseItemIDs;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   class UNegotiationAI* NegotiationAI;
@@ -41,4 +48,7 @@ public:
   // Temp: No actions for now, directly change state.
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerState CustomerState;
+
+  void StartNegotiation();
+  void PostNegotiation();
 };

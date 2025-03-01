@@ -5,6 +5,7 @@
 #include <optional>
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "Misc/EnumRange.h"
 #include "DialogueDataStructs.generated.h"
 
 UENUM()
@@ -57,7 +58,7 @@ struct FDialogueData {
   EDialogueSpeaker DialogueSpeaker;
 
   UPROPERTY(EditAnywhere)
-  int32 ChoicesAmount;  // Note: Choices dialogues + response dialogues.
+  int32 ChoicesAmount;
 };
 
 USTRUCT()
@@ -106,6 +107,7 @@ enum class ENegotiationDialogueType : uint8 {
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject"),
 };
+ENUM_RANGE_BY_COUNT(ENegotiationDialogueType, 5);
 
 USTRUCT()
 struct FNegotiationDialoguesDataTable : public FTableRowBase {

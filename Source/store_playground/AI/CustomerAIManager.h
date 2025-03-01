@@ -7,10 +7,29 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "CustomerAIManager.generated.h"
 
-extern std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> FriendlyDialoguesMap;
-extern std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> NeutralDialoguesMap;
-extern std::unordered_map<ENegotiationDialogueType, std::vector<struct FDialogueData>> HostileDialoguesMap;
-std::unordered_map<ENegotiationDialogueType, std::vector<int32>> GetRandomNegDialogues();
+USTRUCT()
+struct FManagerParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  bool bSpawnCustomers;
+  UPROPERTY(EditAnywhere)
+  float CustomerSpawnInterval;
+  UPROPERTY(EditAnywhere)
+  int32 MaxCustomers;
+
+  UPROPERTY(EditAnywhere)
+  float UniqueNpcBaseSpawnChance;
+  UPROPERTY(EditAnywhere)
+  int32 UNpcMaxSpawnPerDay;
+
+  UPROPERTY(EditAnywhere)
+  float PickItemChance;
+  UPROPERTY(EditAnywhere)
+  float PickItemFrequency;
+  UPROPERTY(EditAnywhere)
+  int32 MaxCustomersPickingAtOnce;
+};
 
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ACustomerAIManager : public AInfo {
@@ -24,32 +43,24 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Customer Blueprint")
   TSubclassOf<class ACustomer> CustomerClass;
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle FriendlyDialoguesTable;
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle NeutralDialoguesTable;
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
-  struct FDataTableCategoryHandle HostileDialoguesTable;
 
-  // TODO: Put in params struct.
-  UPROPERTY(EditAnywhere, Category = "AI Params")
-  float CustomerSpawnInterval;
-  // * Upper limit overwriting dynamic limit.
-  UPROPERTY(EditAnywhere, Category = "AI Params")
-  int32 MaxCustomers;
-  // * Chance for a customer to pick an item. Higher value means more customers wanting to buy at any one time.
-  UPROPERTY(EditAnywhere, Category = "AI Params")
-  float PickItemChance;
-  UPROPERTY(EditAnywhere, Category = "AI Params")
-  float PickItemFrequency;
-  UPROPERTY(EditAnywhere, Category = "AI Params")
+  class AGlobalDataManager* GlobalDataManager;
+
+  UPROPERTY(EditAnywhere, Category = "Manager Params")
+  struct FManagerParams ManagerParams;
+
+  UPROPERTY(EditAnywhere, Category = "Spawn Customers")
+  float LastSpawnTime;
+
+  UPROPERTY(EditAnywhere, Category = "Pick Item")
   float LastPickItemCheckTime;
-
-  UPROPERTY(EditAnywhere, Category = "AI Timer")
+  UPROPERTY(EditAnywhere, Category = "Pick Item")
   FTimerHandle PickItemTimer;
+  UPROPERTY(EditAnywhere, Category = "Pick Item")
+  TArray<FGuid> CustomersPickingIds;
 
   UPROPERTY(EditAnywhere, Category = "Player Stock")
-  const class UInventoryComponent* PlayerStock;
+  const class UInventoryComponent* StoreStock;
 
   UPROPERTY(EditAnywhere, Category = "Customers Array")
   TArray<class ACustomer*> AllCustomers;
@@ -58,13 +69,13 @@ public:
   // TArray<class UCustomerAIComponent*> BrowsingCustomers;
   // UPROPERTY(EditAnywhere, Category = "Customers Array")
   // TArray<class UCustomerAIComponent*> ItemPickedCustomers;
+
+  void StartCustomerAI();
+  void EndCustomerAI();
+
+  void SpawnCustomers();
   void PerformCustomerAILoop();
 
-  void CustomerPickItem(class ACustomer* Customer);
-
-  // ? Put in a separate class?
-  // * Customer spawning logic.
-  void SpawnCustomers();
-  // * Initializes the dialogue data from data tables.
-  void InitializeDialogueData();
+  void CustomerPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 };
