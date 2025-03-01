@@ -40,6 +40,11 @@ public:
   UNegotiationSystem() : NegotiationState(ENegotiationState::None), BasePrice(0), OfferedPrice(0) {}
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UDialogueSystem* DialogueSystem;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class AStore* Store;
+
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
   ENegotiationState NegotiationState;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   float BasePrice;
@@ -50,22 +55,17 @@ public:
   const class UItemBase* NegotiatedItem;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   int32 Quantity;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UInventoryComponent* FromInventory;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UCustomerAIComponent* CustomerAI;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  FOfferResponse OfferResponse;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  const class UNegotiationAI* NegotiationAI;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class UDialogueSystem* DialogueSystem;
-
-  // Temp: Just inventory for now.
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class UInventoryComponent* PlayerInventory;
+  FOfferResponse CustomerOfferResponse;
 
   void StartNegotiation(const class UItemBase* NegotiatedItem,
-                        const class UNegotiationAI* _NegotiationAI,
-                        UDialogueSystem* _DialogueSystem,
-                        class UInventoryComponent* _PlayerInventory,
+                        class UCustomerAIComponent* _CustomerAI,
+                        class UInventoryComponent* _FromInventory,
                         float BasePrice,
                         ENegotiationState InitState = ENegotiationState::None);
 

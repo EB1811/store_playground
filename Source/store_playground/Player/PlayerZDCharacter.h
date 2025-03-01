@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
 #include "PlayerZDCharacter.generated.h"
@@ -41,7 +42,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* CloseAllMenusAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* OpenInventoryAction;
+  class UInputAction* OpenInventoryViewAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* InteractAction;
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -51,7 +52,7 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void CloseAllMenus(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void OpenInventory(const FInputActionValue& Value);
+  void OpenInventoryView(const FInputActionValue& Value);
 
   //* Inventory
   UPROPERTY(EditAnywhere, Category = "Character | Inventory")
@@ -67,11 +68,20 @@ public:
   //* Dialogue
   UPROPERTY(EditAnywhere, Category = "Character | Dialogue")
   class UDialogueSystem* DialogueSystem;
-  void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr);
+  void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
+                     std::function<void()> OnDialogueEndFunc = nullptr);
   void ExitDialogue();
 
   //* Negotiation
   UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
   class UNegotiationSystem* NegotiationSystem;
-  void EnterNegotiation(const class UItemBase* Item, const class UCustomerAIComponent* CustomerAI);
+  void EnterNegotiation(const class UItemBase* Item, class UCustomerAIComponent* CustomerAI);
+
+  //* Store
+  UPROPERTY(EditAnywhere, Category = "Character | Store")
+  class AStore* Store;
+
+  //* Game Store Phase Manager - to control the global game state.
+  UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
+  class AStorePhaseManager* StorePhaseManager;
 };

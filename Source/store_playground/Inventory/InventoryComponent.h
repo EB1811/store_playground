@@ -37,4 +37,5 @@ public:
   void RemoveItem(const UItemBase* Item, int32 Quantity = 1);
 };
 
+// TODO: Add param for container/store distinction.
 void TransferItem(UInventoryComponent* From, UInventoryComponent* To, UItemBase* Item, int32 Quantity = 1);

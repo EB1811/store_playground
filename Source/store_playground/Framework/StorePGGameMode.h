@@ -18,6 +18,14 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "GameMode")
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AGlobalDataManager> GlobalDataManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AStorePhaseManager> StorePhaseManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ACustomerAIManager> CustomerAIManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AMarket> MarketClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AStore> StoreClass;
 };

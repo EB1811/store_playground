@@ -24,7 +24,7 @@ std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDi
   return OwnerDialogue->DialogueArray;
 }
 
-std::tuple<class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
+std::tuple<const class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
   UCustomerAIComponent* OwnerCustomerAI = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   if (!OwnerCustomerAI) return {nullptr, nullptr};
 
@@ -32,12 +32,27 @@ std::tuple<class UItemBase*, class UCustomerAIComponent*> UInteractionComponent:
   return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI};
 }
 
-std::tuple<class UInventoryComponent*, int32> UInteractionComponent::InteractStore() const {
-  UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
-  if (!OwnerInventory) return {nullptr, 0};
+std::tuple<const class UItemBase*, UCustomerAIComponent*, UDialogueComponent*>
+UInteractionComponent::InteractWaitingUniqueCustomer() const {
+  UCustomerAIComponent* OwnerCustomerAI = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
+  if (!OwnerCustomerAI) return {nullptr, nullptr, nullptr};
 
-  int32 StoreMoney = 1000;
-  return {OwnerInventory, StoreMoney};
+  check(OwnerCustomerAI->NegotiationAI->WantedItem);
+
+  UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  if (!OwnerDialogue) return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI, nullptr};
+
+  return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI, OwnerDialogue};
+}
+
+std::tuple<UInventoryComponent*, UDialogueComponent*> UInteractionComponent::InteractStore() const {
+  UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
+  if (!OwnerInventory) return {nullptr, nullptr};
+
+  UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  if (!OwnerDialogue) return {OwnerInventory, nullptr};
+
+  return {OwnerInventory, OwnerDialogue};
 }
 
 UInventoryComponent* UInteractionComponent::InteractContainer() const {

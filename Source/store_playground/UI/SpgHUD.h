@@ -28,9 +28,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> MainMenuWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> PlayerInventoryWidgetClass;
+  TSubclassOf<class UUserWidget> InventoryViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UNpcStoreWidget> NpcStoreWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -53,8 +55,8 @@ public:
   void CloseWidget(class UUserWidget* Widget);
 
   UPROPERTY()
-  class UPlayerInventoryWidget* PlayerInventoryWidget;
-  void SetAndOpenInventory(const class UInventoryComponent* Inventory);
+  class UInventoryViewWidget* InventoryViewWidget;
+  void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory, class AStore* Store);
 
   UPROPERTY()
   class UPlayerAndContainerWidget* PlayerAndContainerWidget;
@@ -62,8 +64,14 @@ public:
                            const class UInventoryComponent* ContainerInventory);
 
   UPROPERTY()
+  class UNpcStoreWidget* NpcStoreWidget;
+  void SetAndOpenNPCStore(class UInventoryComponent* NPCStoreInventory,
+                          class UInventoryComponent* PlayerInventory,
+                          class AStore* PlayerStore);
+
+  UPROPERTY()
   class UDialogueWidget* DialogueWidget;
-  void SetAndOpenDialogue(class UDialogueSystem* Dialogue);
+  void SetAndOpenDialogue(class UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc = nullptr);
 
   UPROPERTY()
   class UNegotiationWidget* NegotiationWidget;

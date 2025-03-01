@@ -13,12 +13,17 @@ DECLARE_DELEGATE_OneParam(FUIOnInteract, int32);
 
 UENUM()
 enum class EInteractionType : uint8 {
+  None UMETA(DisplayName = "None"),
+  // ? Or just have it on the hud?
+  StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
+  Stock UMETA(DisplayName = "Stock"),
   Use UMETA(DisplayName = "Use"),
+  // ? Combine and use customer state?
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
+  WaitingUniqueCustomer UMETA(DisplayName = "Waiting Unique Customer"),
   Store UMETA(DisplayName = "Store"),
   Container UMETA(DisplayName = "Container"),
-  Stock UMETA(DisplayName = "Stock")
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -34,12 +39,15 @@ public:
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
-  std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
-  std::tuple<class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
-  // TODO: Return market data.
-  std::tuple<class UInventoryComponent*, int32> InteractStore() const;
-  class UInventoryComponent* InteractContainer() const;
   class UInventoryComponent* InteractStock() const;
+
+  std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
+  std::tuple<const class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
+  std::tuple<const class UItemBase*, class UCustomerAIComponent*, class UDialogueComponent*>
+  InteractWaitingUniqueCustomer() const;
+
+  std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractStore() const;
+  class UInventoryComponent* InteractContainer() const;
 };
 
 // ? Should there be different components for different types of interactions?

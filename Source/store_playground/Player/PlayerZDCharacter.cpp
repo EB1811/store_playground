@@ -4,9 +4,12 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
+#include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
+#include "store_playground/Store/Store.h"
+#include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -34,8 +37,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                        &APlayerZDCharacter::CloseTopOpenMenu);
     EnhancedInputComponent->BindAction(CloseAllMenusAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::CloseAllMenus);
-    EnhancedInputComponent->BindAction(OpenInventoryAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::OpenInventory);
+    EnhancedInputComponent->BindAction(OpenInventoryViewAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenInventoryView);
     EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Interact);
   }
 }
@@ -51,8 +54,6 @@ void APlayerZDCharacter::BeginPlay() {
   }
 
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-  DialogueSystem = NewObject<UDialogueSystem>(this);
-  NegotiationSystem = NewObject<UNegotiationSystem>(this);
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -72,12 +73,12 @@ void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD-
 
 void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) { HUD->CloseAllMenus(); }
 
-void APlayerZDCharacter::OpenInventory(const FInputActionValue& Value) {
-  HUD->SetAndOpenInventory(PlayerInventoryComponent);
+void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
+  HUD->SetAndOpenInventoryView(PlayerInventoryComponent, Store);
 }
 
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
-  FVector TraceStart{GetPawnViewLocation()};
+  FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
   FVector TraceEnd{TraceStart + GetViewRotation().Vector() * InteractionCheckDistance};
 
   DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.1f, 0, 5.0f);
@@ -92,31 +93,50 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
         // TODO: Move to separate, free functions.
         // ? Separate out player logic from UI logic, with a UI system class?
         switch (Interactable->InteractionType) {
+          case EInteractionType::None: {
+            break;
+          }
+          case EInteractionType::StoreNextPhase: {
+            StorePhaseManager->NextPhase();
+            break;
+          }
           case EInteractionType::Use: {
             Interactable->InteractUse();
             break;
           }
           case EInteractionType::NPCDialogue: {
-            if (auto DialogueData = Interactable->InteractNPCDialogue()) EnterDialogue(DialogueData.value());
+            auto DialogueData = Interactable->InteractNPCDialogue();
+            check(DialogueData);
+
+            EnterDialogue(DialogueData.value());
             break;
           }
           case EInteractionType::WaitingCustomer: {
             auto [Item, CustomerAI] = Interactable->InteractWaitingCustomer();
-            if (!Item || !CustomerAI) return;
+            check(Item && CustomerAI);
 
             EnterNegotiation(Item, CustomerAI);
             break;
           }
-          case EInteractionType::Store: {
-            auto [StoreInventory, StoreMoney] = Interactable->InteractStore();
-            if (!StoreInventory) return;
+          case EInteractionType::WaitingUniqueCustomer: {
+            auto [Item, CustomerAI, Dialogue] = Interactable->InteractWaitingUniqueCustomer();
+            check(Item && CustomerAI && Dialogue);
 
-            HUD->SetAndOpenContainer(PlayerInventoryComponent, StoreInventory);
+            EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() { EnterNegotiation(Item, CustomerAI); });
+            break;
+          }
+          case EInteractionType::Store: {
+            auto [StoreInventory, Dialogue] = Interactable->InteractStore();
+            check(StoreInventory && Dialogue);
+
+            EnterDialogue(Dialogue->DialogueArray, [this, StoreInventory]() {
+              HUD->SetAndOpenNPCStore(StoreInventory, PlayerInventoryComponent, Store);
+            });
             break;
           }
           case EInteractionType::Container: {
             UInventoryComponent* ContainerInventory = Interactable->InteractContainer();
-            if (!ContainerInventory) return;
+            check(ContainerInventory);
 
             HUD->SetAndOpenContainer(PlayerInventoryComponent, ContainerInventory);
             break;
@@ -127,13 +147,13 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   }
 }
 
-void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr) {
+void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,
+                                       std::function<void()> OnDialogueEndFunc) {
   DialogueSystem->StartDialogue(DialogueDataArr);
-  HUD->SetAndOpenDialogue(DialogueSystem);
+  HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueEndFunc);
 }
 
-void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, const UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI->NegotiationAI, DialogueSystem, PlayerInventoryComponent,
-                                      Item->MarketData.BasePrice);
+void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, UCustomerAIComponent* CustomerAI) {
+  NegotiationSystem->StartNegotiation(Item, CustomerAI, Store->StoreStock, Item->MarketData.BasePrice);
   HUD->SetAndOpenNegotiation(NegotiationSystem);
 }

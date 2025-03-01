@@ -2,28 +2,31 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/AI/NegotiationAI.h"
+#include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
+#include "store_playground/Store/Store.h"
 
 void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
-                                          const UNegotiationAI* _NegotiationAI,
-                                          UDialogueSystem* _DialogueSystem,
-                                          UInventoryComponent* _PlayerInventory,
+                                          UCustomerAIComponent* _CustomerAI,
+                                          UInventoryComponent* _FromInventory,
                                           float Price,
                                           ENegotiationState InitState) {
   NegotiatedItem = Item;
   Quantity = Item->Quantity;
-  NegotiationAI = _NegotiationAI;
-  PlayerInventory = _PlayerInventory;
-  DialogueSystem = _DialogueSystem;
+  CustomerAI = _CustomerAI;
+  FromInventory = _FromInventory;
   BasePrice = Price;
   OfferedPrice = BasePrice;
   NegotiationState = InitState;
+
+  CustomerAI->StartNegotiation();
+  DialogueSystem->ResetDialogue();
 }
 
 FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NPCRequest);
 
-  return DialogueSystem->StartDialogue(NegotiationAI->RequestDialogueArray);
+  return DialogueSystem->StartDialogue(CustomerAI->NegotiationAI->RequestDialogueArray);
 }
 
 void UNegotiationSystem::PlayerReadRequest() {
@@ -31,19 +34,19 @@ void UNegotiationSystem::PlayerReadRequest() {
 }
 
 FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
-  if (OfferResponse.Accepted)
+  if (CustomerOfferResponse.Accepted)
     AcceptOffer(Negotiator::NPC);
   else
-    OfferPrice(Negotiator::NPC, OfferResponse.CounterOffer);
+    OfferPrice(Negotiator::NPC, CustomerOfferResponse.CounterOffer);
 
-  return DialogueSystem->StartDialogue(NegotiationAI->RequestDialogueArray);
+  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
 }
 
 void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
   if (NegotiationState == ENegotiationState::NPCConsider)
-    OfferResponse = NegotiationAI->ConsiderOffer(BasePrice, OfferedPrice, Price);
+    CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderOffer(BasePrice, OfferedPrice, Price);
 
   OfferedPrice = Price;
 }
@@ -61,6 +64,22 @@ void UNegotiationSystem::RejectOffer(Negotiator CallingNegotiator) {
 }
 
 // Note: Move to actual object (player, npc) if fine grain functionality needed.
-void UNegotiationSystem::NegotiationSuccess() { PlayerInventory->AddItem(NegotiatedItem, Quantity); }
+void UNegotiationSystem::NegotiationSuccess() {
+  FromInventory->RemoveItem(NegotiatedItem, Quantity);
+  Store->Money += OfferedPrice * Quantity;
+  UE_LOG(LogTemp, Warning, TEXT("Money: %f"), Store->Money);
 
-void UNegotiationSystem::NegotiationFailure() {}
+  CustomerAI->PostNegotiation();
+
+  NegotiatedItem = nullptr;
+  CustomerAI = nullptr;
+  FromInventory = nullptr;
+}
+
+void UNegotiationSystem::NegotiationFailure() {
+  CustomerAI->PostNegotiation();
+
+  NegotiatedItem = nullptr;
+  CustomerAI = nullptr;
+  FromInventory = nullptr;
+}
