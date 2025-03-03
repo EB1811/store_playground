@@ -2,6 +2,7 @@
 
 #include "InteractionComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
@@ -15,56 +16,62 @@ UInteractionComponent::UInteractionComponent() {
 
 void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
 
+// TODO: Change to use asserts as there really shouldn't be situations where the component is missing.
+
 void UInteractionComponent::InteractUse(FUIOnInteract* UIOnInteract) const {}
 
-std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDialogue() const {
-  UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
-  if (!OwnerDialogue) return std::nullopt;
+std::tuple<UStockDisplayComponent*, UInventoryComponent*> UInteractionComponent::InteractStockDisplay() const {
+  UStockDisplayComponent* OwnerStockDisplayC = GetOwner()->FindComponentByClass<UStockDisplayComponent>();
+  UInventoryComponent* OwnerInventoryC = GetOwner()->FindComponentByClass<UInventoryComponent>();
 
-  return OwnerDialogue->DialogueArray;
+  check(OwnerStockDisplayC);
+  check(OwnerInventoryC);
+
+  return {OwnerStockDisplayC, OwnerInventoryC};
+}
+
+std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDialogue() const {
+  UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
+
+  check(OwnerDialogueC);
+
+  return OwnerDialogueC->DialogueArray;
 }
 
 std::tuple<const class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
-  UCustomerAIComponent* OwnerCustomerAI = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
-  if (!OwnerCustomerAI) return {nullptr, nullptr};
+  UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
+  check(OwnerCustomerAIC);
+  check(OwnerCustomerAIC->NegotiationAI->RelevantItem);
 
-  check(OwnerCustomerAI->NegotiationAI->WantedItem);
-  return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI};
+  return {OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerCustomerAIC};
 }
 
 std::tuple<const class UItemBase*, UCustomerAIComponent*, UDialogueComponent*>
 UInteractionComponent::InteractWaitingUniqueCustomer() const {
-  UCustomerAIComponent* OwnerCustomerAI = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
-  if (!OwnerCustomerAI) return {nullptr, nullptr, nullptr};
+  UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
+  UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
 
-  check(OwnerCustomerAI->NegotiationAI->WantedItem);
+  check(OwnerCustomerAIC);
+  check(OwnerCustomerAIC->NegotiationAI->RelevantItem);
+  check(OwnerDialogueC);
 
-  UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
-  if (!OwnerDialogue) return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI, nullptr};
-
-  return {OwnerCustomerAI->NegotiationAI->WantedItem, OwnerCustomerAI, OwnerDialogue};
+  return {OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerCustomerAIC, OwnerDialogueC};
 }
 
-std::tuple<UInventoryComponent*, UDialogueComponent*> UInteractionComponent::InteractStore() const {
-  UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
-  if (!OwnerInventory) return {nullptr, nullptr};
+std::tuple<UInventoryComponent*, UDialogueComponent*> UInteractionComponent::InteractNpcStore() const {
+  UInventoryComponent* OwnerInventoryC = GetOwner()->FindComponentByClass<UInventoryComponent>();
+  UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
 
-  UDialogueComponent* OwnerDialogue = GetOwner()->FindComponentByClass<UDialogueComponent>();
-  if (!OwnerDialogue) return {OwnerInventory, nullptr};
+  check(OwnerInventoryC);
+  check(OwnerDialogueC);
 
-  return {OwnerInventory, OwnerDialogue};
+  return {OwnerInventoryC, OwnerDialogueC};
 }
 
 UInventoryComponent* UInteractionComponent::InteractContainer() const {
-  UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
-  if (!OwnerInventory) return nullptr;
+  UInventoryComponent* OwnerInventoryC = GetOwner()->FindComponentByClass<UInventoryComponent>();
 
-  return OwnerInventory;
-}
+  check(OwnerInventoryC);
 
-UInventoryComponent* UInteractionComponent::InteractStock() const {
-  UInventoryComponent* OwnerInventory = GetOwner()->FindComponentByClass<UInventoryComponent>();
-  if (!OwnerInventory) return nullptr;
-
-  return OwnerInventory;
+  return OwnerInventoryC;
 }

@@ -24,11 +24,12 @@ bool UInventoryWidget::NativeOnDrop(const FGeometry& InGeometry,
   if (SourceInventoryRef == InventoryRef) return false;
 
   if (OnDropItemFunc)
+    // TODO: Add source inventory parameter.
     OnDropItemFunc(DroppedItem, 1);
-  else
-    TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
+  // else
+  //   TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
+
   RefreshInventory();
-  // ? Or remove when initiating the transfer?
   SourceInventoryWidgetRef->RefreshInventory();
 
   return true;

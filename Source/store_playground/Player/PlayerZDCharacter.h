@@ -65,6 +65,9 @@ public:
   float InteractionCheckDistance;
   void Interact(const FInputActionValue& Value);
 
+  // * Stock Display
+  void EnterStockDisplay(class UStockDisplayComponent* StockDisplayC, class UInventoryComponent* DisplayInventoryC);
+
   //* Dialogue
   UPROPERTY(EditAnywhere, Category = "Character | Dialogue")
   class UDialogueSystem* DialogueSystem;
@@ -76,6 +79,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
   class UNegotiationSystem* NegotiationSystem;
   void EnterNegotiation(const class UItemBase* Item, class UCustomerAIComponent* CustomerAI);
+
+  // * Npc Store
+  void EnterNpcStore(class UInventoryComponent* StoreInventoryC);
 
   //* Store
   UPROPERTY(EditAnywhere, Category = "Character | Store")

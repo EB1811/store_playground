@@ -14,15 +14,14 @@ DECLARE_DELEGATE_OneParam(FUIOnInteract, int32);
 UENUM()
 enum class EInteractionType : uint8 {
   None UMETA(DisplayName = "None"),
-  // ? Or just have it on the hud?
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
-  Stock UMETA(DisplayName = "Stock"),
+  StockDisplay UMETA(DisplayName = "StockDisplay"),
   Use UMETA(DisplayName = "Use"),
   // ? Combine and use customer state?
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
   WaitingUniqueCustomer UMETA(DisplayName = "Waiting Unique Customer"),
-  Store UMETA(DisplayName = "Store"),
+  NpcStore UMETA(DisplayName = "NPC Store"),
   Container UMETA(DisplayName = "Container"),
 };
 
@@ -39,14 +38,14 @@ public:
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
-  class UInventoryComponent* InteractStock() const;
+  std::tuple<class UStockDisplayComponent*, class UInventoryComponent*> InteractStockDisplay() const;
 
   std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
   std::tuple<const class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
   std::tuple<const class UItemBase*, class UCustomerAIComponent*, class UDialogueComponent*>
   InteractWaitingUniqueCustomer() const;
 
-  std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractStore() const;
+  std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
   class UInventoryComponent* InteractContainer() const;
 };
 

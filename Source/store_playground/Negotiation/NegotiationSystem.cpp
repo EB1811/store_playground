@@ -7,11 +7,13 @@
 #include "store_playground/Store/Store.h"
 
 void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
+                                          bool bNpcBuying,
                                           UCustomerAIComponent* _CustomerAI,
                                           UInventoryComponent* _FromInventory,
                                           float Price,
                                           ENegotiationState InitState) {
   NegotiatedItem = Item;
+  Type = bNpcBuying ? NegotiationType::PlayerSell : NegotiationType::PlayerBuy;
   Quantity = Item->Quantity;
   CustomerAI = _CustomerAI;
   FromInventory = _FromInventory;
@@ -46,7 +48,8 @@ void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
   if (NegotiationState == ENegotiationState::NPCConsider)
-    CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderOffer(BasePrice, OfferedPrice, Price);
+    CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderOffer(Type == NegotiationType::PlayerSell ? true : false,
+                                                                     BasePrice, OfferedPrice, Price);
 
   OfferedPrice = Price;
 }
@@ -65,8 +68,13 @@ void UNegotiationSystem::RejectOffer(Negotiator CallingNegotiator) {
 
 // Note: Move to actual object (player, npc) if fine grain functionality needed.
 void UNegotiationSystem::NegotiationSuccess() {
-  FromInventory->RemoveItem(NegotiatedItem, Quantity);
-  Store->Money += OfferedPrice * Quantity;
+  if (Type == NegotiationType::PlayerSell) {
+    FromInventory->RemoveItem(NegotiatedItem, Quantity);
+    Store->Money += OfferedPrice * Quantity;
+  } else {
+    FromInventory->AddItem(NegotiatedItem, Quantity);
+    Store->Money -= OfferedPrice * Quantity;
+  }
   UE_LOG(LogTemp, Warning, TEXT("Money: %f"), Store->Money);
 
   CustomerAI->PostNegotiation();

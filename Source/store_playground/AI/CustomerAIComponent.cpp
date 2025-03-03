@@ -26,6 +26,6 @@ void UCustomerAIComponent::PostNegotiation() {
   check(OwnerInteraction);
   OwnerInteraction->InteractionType = EInteractionType::None;
 
-  NegotiationAI->WantedItem = nullptr;
+  NegotiationAI->RelevantItem = nullptr;
   NegotiationAI = nullptr;
 }

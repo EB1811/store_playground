@@ -1,19 +1,16 @@
-#include "NPCStore.h"
+#include "StockDisplay.h"
 #include "store_playground/Interaction/InteractionComponent.h"
-#include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 
-ANPCStore::ANPCStore() {
+AStockDisplay::AStockDisplay() {
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetSimulatePhysics(true);
   SetRootComponent(Mesh);
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
-  DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));
   InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+  StockDisplayComponent = CreateDefaultSubobject<UStockDisplayComponent>(TEXT("StockDisplayComponent"));
 }
 
-void ANPCStore::BeginPlay() {
-  Super::BeginPlay();
-  InteractionComponent->InteractionType = EInteractionType::NpcStore;
-}
+void AStockDisplay::BeginPlay() { Super::BeginPlay(); }

@@ -30,9 +30,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> InventoryViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> StockDisplayWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UNpcStoreWidget> NpcStoreWidgetClass;
+  TSubclassOf<class UUserWidget> NpcStoreWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -59,6 +61,14 @@ public:
   void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory, class AStore* Store);
 
   UPROPERTY()
+  class UStockDisplayWidget* StockDisplayWidget;
+  void SetAndOpenStockDisplay(class UStockDisplayComponent* StockDisplay,
+                              class UInventoryComponent* DisplayInventory,
+                              class UInventoryComponent* PlayerInventory,
+                              std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToDisplayFunc,
+                              std::function<void(class UItemBase*, class UInventoryComponent*)> DisplayToPlayerFunc);
+
+  UPROPERTY()
   class UPlayerAndContainerWidget* PlayerAndContainerWidget;
   void SetAndOpenContainer(const class UInventoryComponent* PlayerInventory,
                            const class UInventoryComponent* ContainerInventory);
@@ -67,7 +77,8 @@ public:
   class UNpcStoreWidget* NpcStoreWidget;
   void SetAndOpenNPCStore(class UInventoryComponent* NPCStoreInventory,
                           class UInventoryComponent* PlayerInventory,
-                          class AStore* PlayerStore);
+                          std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
+                          std::function<void(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc);
 
   UPROPERTY()
   class UDialogueWidget* DialogueWidget;

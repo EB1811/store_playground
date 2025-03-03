@@ -176,10 +176,12 @@ void ACustomerAIManager::CustomerPickItem(class UCustomerAIComponent* CustomerAI
   TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
       [this](UItemBase* Item) { return !CustomersPickingIds.Contains(Item->UniqueItemID); });
 
+  CustomerAI->NegotiationAI->bNpcBuying = true;
   int32 RandomIndex = FMath::RandRange(0, NonPickedItems.Num() - 1);
   const UItemBase* Item = NonPickedItems[RandomIndex];
   // ? Use item id instead of item pointer?
-  CustomerAI->NegotiationAI->WantedItem = Item;
+  CustomerAI->NegotiationAI->RelevantItem = Item;
+
   CustomersPickingIds.Add(Item->UniqueItemID);
 
   // TODO: Move state management to customer ai component.
@@ -204,13 +206,15 @@ void ACustomerAIManager::UniqueNpcPickItem(class UCustomerAIComponent* CustomerA
 
   TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
       [this](UItemBase* Item) { return !CustomersPickingIds.Contains(Item->UniqueItemID); });
-  TArray<UItemBase*> WantedItems = NonPickedItems.FilterByPredicate(
+  TArray<UItemBase*> RelevantItems = NonPickedItems.FilterByPredicate(
       [this, CustomerAI](UItemBase* Item) { return CustomerAI->WantedBaseItemIDs.Contains(Item->ItemID); });
-  if (WantedItems.Num() <= 0) return;
+  if (RelevantItems.Num() <= 0) return;
 
-  int32 RandomIndex = FMath::RandRange(0, WantedItems.Num() - 1);
-  const UItemBase* Item = WantedItems[RandomIndex];
-  CustomerAI->NegotiationAI->WantedItem = Item;
+  CustomerAI->NegotiationAI->bNpcBuying = true;
+  int32 RandomIndex = FMath::RandRange(0, RelevantItems.Num() - 1);
+  const UItemBase* Item = RelevantItems[RandomIndex];
+  CustomerAI->NegotiationAI->RelevantItem = Item;
+
   CustomersPickingIds.Add(Item->UniqueItemID);
 
   CustomerAI->CustomerState = ECustomerState::ItemWanted;

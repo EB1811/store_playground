@@ -15,6 +15,11 @@ enum class Negotiator : uint8 {
   NPC,
 };
 UENUM()
+enum class NegotiationType : uint8 {
+  PlayerBuy UMETA(DisplayName = "Player Buy"),
+  PlayerSell UMETA(DisplayName = "Player Sell"),
+};
+UENUM()
 enum class ENegotiationState : uint8 {
   None UMETA(DisplayName = "NONE"),
   NPCRequest UMETA(DisplayName = "NPC Request"),
@@ -56,6 +61,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   int32 Quantity;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
+  NegotiationType Type;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UInventoryComponent* FromInventory;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UCustomerAIComponent* CustomerAI;
@@ -64,6 +71,7 @@ public:
   FOfferResponse CustomerOfferResponse;
 
   void StartNegotiation(const class UItemBase* NegotiatedItem,
+                        bool bNpcBuying,
                         class UCustomerAIComponent* _CustomerAI,
                         class UInventoryComponent* _FromInventory,
                         float BasePrice,

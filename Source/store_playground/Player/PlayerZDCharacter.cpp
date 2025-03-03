@@ -5,10 +5,12 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/Market/Market.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Engine/LocalPlayer.h"
@@ -104,6 +106,12 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             Interactable->InteractUse();
             break;
           }
+          case EInteractionType::StockDisplay: {
+            auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
+
+            EnterStockDisplay(DisplayC, DisplayInventoryC);
+            break;
+          }
           case EInteractionType::NPCDialogue: {
             auto DialogueData = Interactable->InteractNPCDialogue();
             check(DialogueData);
@@ -125,13 +133,11 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() { EnterNegotiation(Item, CustomerAI); });
             break;
           }
-          case EInteractionType::Store: {
-            auto [StoreInventory, Dialogue] = Interactable->InteractStore();
+          case EInteractionType::NpcStore: {
+            auto [StoreInventory, Dialogue] = Interactable->InteractNpcStore();
             check(StoreInventory && Dialogue);
 
-            EnterDialogue(Dialogue->DialogueArray, [this, StoreInventory]() {
-              HUD->SetAndOpenNPCStore(StoreInventory, PlayerInventoryComponent, Store);
-            });
+            EnterDialogue(Dialogue->DialogueArray, [this, StoreInventory]() { EnterNpcStore(StoreInventory); });
             break;
           }
           case EInteractionType::Container: {
@@ -147,6 +153,26 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   }
 }
 
+void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC,
+                                           UInventoryComponent* DisplayInventoryC) {
+  auto PlayerToDisplayFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
+                                                                      UInventoryComponent* SourceInventory) {
+    check(SourceInventory == PlayerInventoryComponent);
+    TransferItem(SourceInventory, DisplayInventoryC, DroppedItem);
+    // ? Have a function in the store to refetch all stock?
+    Store->StoreStock->AddItem(DroppedItem, 1);
+  };
+  auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
+                                                                      UInventoryComponent* SourceInventory) {
+    check(SourceInventory == DisplayInventoryC);
+    TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem);
+    Store->StoreStock->RemoveItem(DroppedItem, 1);
+  };
+
+  HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent, PlayerToDisplayFunc,
+                              DisplayToPlayerFunc);
+}
+
 void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,
                                        std::function<void()> OnDialogueEndFunc) {
   DialogueSystem->StartDialogue(DialogueDataArr);
@@ -154,6 +180,20 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
 }
 
 void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI, Store->StoreStock, Item->MarketData.BasePrice);
+  NegotiationSystem->StartNegotiation(Item, CustomerAI->NegotiationAI->bNpcBuying, CustomerAI, Store->StoreStock,
+                                      Item->MarketData.BasePrice);
   HUD->SetAndOpenNegotiation(NegotiationSystem);
+}
+
+void APlayerZDCharacter::EnterNpcStore(UInventoryComponent* StoreInventoryC) {
+  auto StoreToPlayerFunc = [this, StoreInventoryC](UItemBase* DroppedItem, UInventoryComponent* SourceInventory) {
+    check(SourceInventory == StoreInventoryC);
+    BuyItem(SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
+  };
+  auto PlayerToStoreFunc = [this, StoreInventoryC](UItemBase* DroppedItem, UInventoryComponent* SourceInventory) {
+    check(SourceInventory == PlayerInventoryComponent);
+    SellItem(StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
+  };
+
+  HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
 }

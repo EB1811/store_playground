@@ -36,10 +36,15 @@ public:
   TArray<struct FDialogueData> RejectArray;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  const class UItemBase* WantedItem;
+  bool bNpcBuying;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  const class UItemBase* RelevantItem;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float AcceptancePercentage;
 
-  FOfferResponse ConsiderOffer(float BasePrice, float LastOfferedPrice, float PlayerOfferedPrices) const;
+  FOfferResponse ConsiderOffer(bool bNpcBuying,
+                               float BasePrice,
+                               float LastOfferedPrice,
+                               float PlayerOfferedPrices) const;
 };

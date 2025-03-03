@@ -1,12 +1,15 @@
 #include "SpgHUD.h"
 #include "store_playground/UI/Inventory/PlayerAndContainerWidget.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Store/StockDisplayComponent.h"
+#include "store_playground/Item/ItemBase.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/UI/Inventory/InventoryWidget.h"
 #include "store_playground/UI/Inventory/InventoryViewWidget.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationWidget.h"
 #include "store_playground/UI/NPCStore/NpcStoreWidget.h"
+#include "store_playground/UI/Store/StockDisplayWidget.h"
 #include "store_playground/Store/Store.h"
 #include "Components/TextBlock.h"
 
@@ -22,10 +25,15 @@ void ASpgHUD::BeginPlay() {
   check(NpcStoreWidgetClass);
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
+  check(StockDisplayWidgetClass);
 
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
   InventoryViewWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  StockDisplayWidget = CreateWidget<UStockDisplayWidget>(GetWorld(), StockDisplayWidgetClass);
+  StockDisplayWidget->AddToViewport(10);
+  StockDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   PlayerAndContainerWidget = CreateWidget<UPlayerAndContainerWidget>(GetWorld(), PlayerAndContainerWidgetClass);
   PlayerAndContainerWidget->AddToViewport(10);
@@ -81,6 +89,7 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   GetOwningPlayerController()->SetShowMouseCursor(false);
 }
 
+// TODO: Update.
 void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, AStore* Store) {
   check(InventoryViewWidget);
   if (OpenedWidgets.Contains(InventoryViewWidget)) return CloseWidget(InventoryViewWidget);
@@ -100,6 +109,41 @@ void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, ASto
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(InventoryViewWidget);
+}
+
+void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
+                                     UInventoryComponent* DisplayInventory,
+                                     UInventoryComponent* PlayerInventory,
+                                     std::function<void(UItemBase*, UInventoryComponent*)> PlayerToDisplayFunc,
+                                     std::function<void(UItemBase*, UInventoryComponent*)> DisplayToPlayerFunc) {
+  check(StockDisplayWidget);
+
+  // StockDisplayWidget->StockDisplayRef = StockDisplay;
+  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
+  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryTitleText->SetText(
+      FText::FromString("Player"));
+  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->InventoryRef = DisplayInventory;
+  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->InventoryTitleText->SetText(
+      FText::FromString("Display"));
+
+  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
+  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
+
+  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->OnDropItemFunc =
+      [DisplayToPlayerFunc, DisplayInventory](UItemBase* Item, int32 Quantity) {
+        DisplayToPlayerFunc(Item, DisplayInventory);
+      };
+  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->OnDropItemFunc =
+      [PlayerToDisplayFunc, PlayerInventory](UItemBase* Item, int32 Quantity) {
+        PlayerToDisplayFunc(Item, PlayerInventory);
+      };
+
+  StockDisplayWidget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(StockDisplayWidget);
 }
 
 void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
@@ -126,7 +170,8 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
 // TODO: Check for refresh of open widgets.
 void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
                                  UInventoryComponent* PlayerInventory,
-                                 AStore* PlayerStore) {
+                                 std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
+                                 std::function<void(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc) {
   check(NpcStoreWidget);
 
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
@@ -139,14 +184,17 @@ void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
   NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
 
+  // ? Define in player class?
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->OnDropItemFunc =
-      [this, NPCStoreInventory, PlayerInventory, PlayerStore](UItemBase* Item, int32 Quantity) {
-        BuyItem(NPCStoreInventory, PlayerInventory, PlayerStore, Item, Quantity);
+      [this, StoreToPlayerFunc, NPCStoreInventory](UItemBase* Item, int32 Quantity) {
+        StoreToPlayerFunc(Item, NPCStoreInventory);
+
         if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
       };
   NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->OnDropItemFunc =
-      [this, PlayerInventory, NPCStoreInventory, PlayerStore](UItemBase* Item, int32 Quantity) {
-        SellItem(NPCStoreInventory, PlayerInventory, PlayerStore, Item, Quantity);
+      [this, PlayerToStoreFunc, PlayerInventory](UItemBase* Item, int32 Quantity) {
+        PlayerToStoreFunc(Item, PlayerInventory);
+
         if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
       };
 
