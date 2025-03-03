@@ -26,6 +26,4 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   class UInventoryComponent* InventoryComponent;
-
-  // TODO: Implement store stats, add money, etc.
 };

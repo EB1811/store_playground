@@ -6,6 +6,7 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
+#include "store_playground/UI/Negotiation/StockCheckWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
@@ -21,6 +22,8 @@ void UNegotiationWidget::NativeOnInitialized() {
 }
 
 void UNegotiationWidget::InitNegotiationUI() {
+  check(PlayerInventoryRef && NegotiationSystemRef);
+
   NegotiationElementWidget->ItemName->SetText(NegotiationSystemRef->NegotiatedItem->FlavorData.TextData.Name);
   NegotiationElementWidget->BasePrice->SetText(FText::FromString(FString::FromInt(NegotiationSystemRef->BasePrice)));
   NegotiationElementWidget->ItemIcon->SetBrushFromTexture(NegotiationSystemRef->NegotiatedItem->AssetData.Icon);
@@ -35,6 +38,8 @@ void UNegotiationWidget::InitNegotiationUI() {
 
   DialogueWidget->CloseDialogueUI = [this] { OnReadDialogueButtonClicked(); };
 
+  StockCheckWidget->ShowItemFunc = [this](UItemBase* Item) { ShowItem(Item); };
+
   RefreshNegotiationState();
 }
 
@@ -47,7 +52,6 @@ void UNegotiationWidget::RefreshNegotiationState() {
   NegotiationElementWidget->PlayerOfferedPrice->SetValue(
       NegotiationSystemRef->OfferedPrice > 0 ? NegotiationSystemRef->OfferedPrice : NegotiationSystemRef->BasePrice);
 
-  UE_LOG(LogTemp, Warning, TEXT("RefreshNegotiationState: %d"), NegotiationSystemRef->NegotiationState);
   switch (NegotiationSystemRef->NegotiationState) {
     case ENegotiationState::None: {
       auto Dialogue = NegotiationSystemRef->NPCRequestNegotiation();
@@ -55,15 +59,26 @@ void UNegotiationWidget::RefreshNegotiationState() {
       DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
+      StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationElementWidget->SetVisibility(ESlateVisibility::Hidden);
       break;
     }
-    case ENegotiationState::NPCConsider: {
+    case ENegotiationState::PlayerStockCheck: {
+      StockCheckWidget->InitStockCheckUI(PlayerInventoryRef, NegotiationSystemRef->NegotiatedItem);
+
+      // TODO: Put this in a function.
+      StockCheckWidget->SetVisibility(ESlateVisibility::Visible);
+      DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
+      NegotiationElementWidget->SetVisibility(ESlateVisibility::Hidden);
+      break;
+    }
+    case ENegotiationState::NpcStockCheckConsider: {
       auto Dialogue = NegotiationSystemRef->NPCNegotiationTurn();
 
       DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
+      StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationElementWidget->SetVisibility(ESlateVisibility::Hidden);
 
       break;
@@ -71,6 +86,18 @@ void UNegotiationWidget::RefreshNegotiationState() {
     case ENegotiationState::PlayerConsider: {
       DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationElementWidget->SetVisibility(ESlateVisibility::Visible);
+      break;
+    }
+
+    case ENegotiationState::NpcConsider: {
+      auto Dialogue = NegotiationSystemRef->NPCNegotiationTurn();
+
+      DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
+      DialogueWidget->SetVisibility(ESlateVisibility::Visible);
+
+      StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);
+      NegotiationElementWidget->SetVisibility(ESlateVisibility::Hidden);
+
       break;
     }
     case ENegotiationState::Accepted:
@@ -85,26 +112,31 @@ void UNegotiationWidget::RefreshNegotiationState() {
 
 void UNegotiationWidget::OnReadDialogueButtonClicked() {
   switch (NegotiationSystemRef->NegotiationState) {
-    case ENegotiationState::NPCRequest: NegotiationSystemRef->PlayerReadRequest(); break;
+    case ENegotiationState::NpcRequest:
+    case ENegotiationState::NpcStockCheckRequest: NegotiationSystemRef->PlayerReadRequest(); break;
     default: break;
   }
 
   RefreshNegotiationState();
 }
 
-// ? Could return a response with updated data for UI.
+void UNegotiationWidget::ShowItem(UItemBase* Item) {
+  NegotiationSystemRef->PlayerShowItem(Item);
+  RefreshNegotiationState();
+}
+
 void UNegotiationWidget::OnOfferButtonClicked() {
-  NegotiationSystemRef->OfferPrice(Negotiator::Player, NegotiationElementWidget->PlayerOfferedPrice->GetValue());
+  NegotiationSystemRef->OfferPrice(NegotiationElementWidget->PlayerOfferedPrice->GetValue());
   RefreshNegotiationState();
 }
 
 void UNegotiationWidget::OnAcceptButtonClicked() {
-  NegotiationSystemRef->AcceptOffer(Negotiator::Player);
+  NegotiationSystemRef->AcceptOffer();
   RefreshNegotiationState();
 }
 
 void UNegotiationWidget::OnRejectButtonClicked() {
-  NegotiationSystemRef->RejectOffer(Negotiator::Player);
+  NegotiationSystemRef->RejectOffer();
   RefreshNegotiationState();
 
   CloseNegotiationUI();

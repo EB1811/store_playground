@@ -19,19 +19,29 @@ enum class NegotiationType : uint8 {
   PlayerBuy UMETA(DisplayName = "Player Buy"),
   PlayerSell UMETA(DisplayName = "Player Sell"),
 };
+// ? Create a stock check system?
 UENUM()
 enum class ENegotiationState : uint8 {
   None UMETA(DisplayName = "NONE"),
-  NPCRequest UMETA(DisplayName = "NPC Request"),
+  // * Npc requests item.
+  NpcRequest UMETA(DisplayName = "NPC Request"),
+  // * Alternatively, stock check.
+  NpcStockCheckRequest UMETA(DisplayName = "NPC Request Stock Check"),
+  PlayerStockCheck UMETA(DisplayName = "Player Stock Check"),
+  NpcStockCheckConsider UMETA(DisplayName = "NPC Stock Check Consider"),
+
+  // * Negotiation back and forth.
   PlayerConsider UMETA(DisplayName = "Player Consider"),
-  NPCConsider UMETA(DisplayName = "NPC Consider"),
+  NpcConsider UMETA(DisplayName = "NPC Consider"),
   Accepted UMETA(DisplayName = "Accepted"),
-  Rejected UMETA(DisplayName = "Rejected")
+  Rejected UMETA(DisplayName = "Rejected"),
 };
 UENUM()
 enum class ENegotiationAction : uint8 {
-  NPCRequest UMETA(DisplayName = "NPC Request"),
+  NpcRequest UMETA(DisplayName = "NPC Request"),
   PlayerReadRequest UMETA(DisplayName = "Player Read Request"),
+  NpcStockCheckRequest UMETA(DisplayName = "NPC Stock Check Request"),
+  PlayerShowItem UMETA(DisplayName = "Player Stock Check Show Item"),
   OfferPrice UMETA(DisplayName = "Offer Price"),
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject")
@@ -43,6 +53,9 @@ class STORE_PLAYGROUND_API UNegotiationSystem : public UObject {
 
 public:
   UNegotiationSystem() : NegotiationState(ENegotiationState::None), BasePrice(0), OfferedPrice(0) {}
+
+  // UPROPERTY(EditAnywhere, Category = "Negotiation")
+  // TMap<FName, struct FDialoguesArray> UniqueNpcDialoguesMap;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UDialogueSystem* DialogueSystem;
@@ -71,7 +84,6 @@ public:
   FOfferResponse CustomerOfferResponse;
 
   void StartNegotiation(const class UItemBase* NegotiatedItem,
-                        bool bNpcBuying,
                         class UCustomerAIComponent* _CustomerAI,
                         class UInventoryComponent* _FromInventory,
                         float BasePrice,
@@ -79,14 +91,21 @@ public:
 
   struct FNextDialogueRes NPCRequestNegotiation();
   void PlayerReadRequest();
+  void PlayerShowItem(class UItemBase* Item);
   struct FNextDialogueRes NPCNegotiationTurn();
-  void OfferPrice(Negotiator CallingNegotiator, float Price);
-  void AcceptOffer(Negotiator CallingNegotiator);
-  void RejectOffer(Negotiator CallingNegotiator);
+  void OfferPrice(float Price);
+  void AcceptOffer();
+  void RejectOffer();
 
   void NegotiationSuccess();
   void NegotiationFailure();
 };
 
-extern std::map<ENegotiationState, FText> NegotiationStateToName;
+extern TMap<ENegotiationState, FText> NegotiationStateToName;
+struct NStateAction {
+  ENegotiationState initial;
+  ENegotiationAction action;
+  ENegotiationState next;
+};
+extern TArray<NStateAction> NStateTransitions;
 ENegotiationState GetNextNegotiationState(ENegotiationState State, ENegotiationAction Action);

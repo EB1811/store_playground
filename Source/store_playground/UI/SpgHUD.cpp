@@ -184,7 +184,6 @@ void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
   NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
 
-  // ? Define in player class?
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->OnDropItemFunc =
       [this, StoreToPlayerFunc, NPCStoreInventory](UItemBase* Item, int32 Quantity) {
         StoreToPlayerFunc(Item, NPCStoreInventory);
@@ -224,10 +223,11 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue, std::function<void()
   OpenedWidgets.Add(DialogueWidget);
 }
 
-void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation) {
+void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInventoryComponent* PlayerInventoryC) {
   check(UNegotiationWidgetClass);
 
   NegotiationWidget->NegotiationSystemRef = const_cast<UNegotiationSystem*>(Negotiation);
+  NegotiationWidget->PlayerInventoryRef = PlayerInventoryC;
   NegotiationWidget->CloseNegotiationUI = [this] { CloseWidget(NegotiationWidget); };
   NegotiationWidget->RefreshInventoryUI = [this] {
     if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();

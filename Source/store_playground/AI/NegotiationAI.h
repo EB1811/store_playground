@@ -7,6 +7,13 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "NegotiationAI.generated.h"
 
+UENUM()
+enum class ECustomerRequestType : uint8 {
+  BuyStockItem UMETA(DisplayName = "Buy Stock Item"),
+  SellItem UMETA(DisplayName = "Sell Item"),
+  StockCheck UMETA(DisplayName = "Stock Check"),
+};
+
 USTRUCT()
 struct FOfferResponse {
   GENERATED_BODY()
@@ -24,6 +31,7 @@ class STORE_PLAYGROUND_API UNegotiationAI : public UObject {
 public:
   UNegotiationAI() {}
 
+  // TODO: Change to map.
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   TArray<struct FDialogueData> RequestDialogueArray;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
@@ -36,7 +44,7 @@ public:
   TArray<struct FDialogueData> RejectArray;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  bool bNpcBuying;
+  ECustomerRequestType RequestType;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   const class UItemBase* RelevantItem;
 
@@ -47,4 +55,5 @@ public:
                                float BasePrice,
                                float LastOfferedPrice,
                                float PlayerOfferedPrices) const;
+  FOfferResponse ConsiderStockCheck(class UItemBase* Item) const;
 };

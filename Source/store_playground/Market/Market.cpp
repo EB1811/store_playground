@@ -99,7 +99,7 @@ TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) {
   return NewItems;
 }
 
-// TODO: Implement.
+// TODO: Implement random values.
 UItemBase* AMarket::CreateRandomItem(UItemBase* FromBaseItem) {
   // TODO: Add weights to the random item generation.
   auto BaseItemCopy = FromBaseItem->CreateItemCopy();

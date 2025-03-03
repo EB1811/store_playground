@@ -23,11 +23,12 @@ bool UInventoryWidget::NativeOnDrop(const FGeometry& InGeometry,
 
   if (SourceInventoryRef == InventoryRef) return false;
 
+  // TODO: Add success/failure return struct.
   if (OnDropItemFunc)
     // TODO: Add source inventory parameter.
     OnDropItemFunc(DroppedItem, 1);
-  // else
-  //   TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
+  else
+    TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
 
   RefreshInventory();
   SourceInventoryWidgetRef->RefreshInventory();
@@ -45,6 +46,7 @@ void UInventoryWidget::RefreshInventory() {
     UInventoryItemSlotWidget* InventoryItemSlot = CreateWidget<UInventoryItemSlotWidget>(this, ItemSlotClass);
     InventoryItemSlot->ItemRef = Item;
     InventoryItemSlot->InventoryWidgetRef = this;
+    InventoryItemSlot->OnSelectItemFunc = [this](UItemBase* Item) { SelectedItem = Item; };
 
     InventoryPanelWrapBox->AddChildToWrapBox(InventoryItemSlot);
   }

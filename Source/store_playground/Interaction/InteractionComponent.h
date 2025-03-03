@@ -17,7 +17,6 @@ enum class EInteractionType : uint8 {
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
   StockDisplay UMETA(DisplayName = "StockDisplay"),
   Use UMETA(DisplayName = "Use"),
-  // ? Combine and use customer state?
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
   WaitingUniqueCustomer UMETA(DisplayName = "Waiting Unique Customer"),
@@ -48,5 +47,3 @@ public:
   std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
   class UInventoryComponent* InteractContainer() const;
 };
-
-// ? Should there be different components for different types of interactions?

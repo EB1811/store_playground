@@ -62,13 +62,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Player Stock")
   const class UInventoryComponent* StoreStock;
 
+  // ? Have separate arrays for each state?
   UPROPERTY(EditAnywhere, Category = "Customers Array")
   TArray<class ACustomer*> AllCustomers;
-  // ? Have separate arrays for each state?
-  // UPROPERTY(EditAnywhere, Category = "Customers Array")
-  // TArray<class UCustomerAIComponent*> BrowsingCustomers;
-  // UPROPERTY(EditAnywhere, Category = "Customers Array")
-  // TArray<class UCustomerAIComponent*> ItemPickedCustomers;
 
   void StartCustomerAI();
   void EndCustomerAI();
@@ -78,4 +74,5 @@ public:
 
   void CustomerPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
   void UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void CustomerStockCheck(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 };

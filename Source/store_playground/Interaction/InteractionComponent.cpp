@@ -16,8 +16,6 @@ UInteractionComponent::UInteractionComponent() {
 
 void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
 
-// TODO: Change to use asserts as there really shouldn't be situations where the component is missing.
-
 void UInteractionComponent::InteractUse(FUIOnInteract* UIOnInteract) const {}
 
 std::tuple<UStockDisplayComponent*, UInventoryComponent*> UInteractionComponent::InteractStockDisplay() const {

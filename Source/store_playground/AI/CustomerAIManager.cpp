@@ -142,7 +142,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
           if (Customer->CustomerAIComponent->CustomerType == ECustomerType::Unique)
             UniqueNpcPickItem(Customer->CustomerAIComponent, Customer->InteractionComponent);
           else
-            CustomerPickItem(Customer->CustomerAIComponent, Customer->InteractionComponent);
+            CustomerStockCheck(Customer->CustomerAIComponent, Customer->InteractionComponent);
+          // CustomerPickItem(Customer->CustomerAIComponent, Customer->InteractionComponent);
         }
         break;
       }
@@ -168,18 +169,16 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   }
 }
 
-void ACustomerAIManager::CustomerPickItem(class UCustomerAIComponent* CustomerAI,
-                                          class UInteractionComponent* Interaction) {
+void ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   if (StoreStock->ItemsArray.Num() <= 0 || CustomersPickingIds.Num() >= StoreStock->ItemsArray.Num()) return;
 
   // TODO: Picked items will depend on customer type.
   TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
       [this](UItemBase* Item) { return !CustomersPickingIds.Contains(Item->UniqueItemID); });
 
-  CustomerAI->NegotiationAI->bNpcBuying = true;
   int32 RandomIndex = FMath::RandRange(0, NonPickedItems.Num() - 1);
   const UItemBase* Item = NonPickedItems[RandomIndex];
-  // ? Use item id instead of item pointer?
+  CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
   CustomerAI->NegotiationAI->RelevantItem = Item;
 
   CustomersPickingIds.Add(Item->UniqueItemID);
@@ -200,8 +199,7 @@ void ACustomerAIManager::CustomerPickItem(class UCustomerAIComponent* CustomerAI
   CustomerAI->NegotiationAI->RejectArray = RandomNegDialogueMap[ENegotiationDialogueType::Reject].Dialogues;
 }
 
-void ACustomerAIManager::UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI,
-                                           class UInteractionComponent* Interaction) {
+void ACustomerAIManager::UniqueNpcPickItem(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   if (StoreStock->ItemsArray.Num() <= 0 || CustomersPickingIds.Num() >= StoreStock->ItemsArray.Num()) return;
 
   TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
@@ -210,15 +208,42 @@ void ACustomerAIManager::UniqueNpcPickItem(class UCustomerAIComponent* CustomerA
       [this, CustomerAI](UItemBase* Item) { return CustomerAI->WantedBaseItemIDs.Contains(Item->ItemID); });
   if (RelevantItems.Num() <= 0) return;
 
-  CustomerAI->NegotiationAI->bNpcBuying = true;
   int32 RandomIndex = FMath::RandRange(0, RelevantItems.Num() - 1);
   const UItemBase* Item = RelevantItems[RandomIndex];
+  CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
   CustomerAI->NegotiationAI->RelevantItem = Item;
 
   CustomersPickingIds.Add(Item->UniqueItemID);
 
   CustomerAI->CustomerState = ECustomerState::ItemWanted;
   Interaction->InteractionType = EInteractionType::WaitingUniqueCustomer;
+
+  auto RandomNegDialogueMap = GlobalDataManager->GetRandomNegDialogueMap();
+  CustomerAI->NegotiationAI->RequestDialogueArray = RandomNegDialogueMap[ENegotiationDialogueType::Request].Dialogues;
+  CustomerAI->NegotiationAI->ConsiderTooHighArray =
+      RandomNegDialogueMap[ENegotiationDialogueType::ConsiderTooHigh].Dialogues;
+  CustomerAI->NegotiationAI->ConsiderCloseArray =
+      RandomNegDialogueMap[ENegotiationDialogueType::ConsiderClose].Dialogues;
+  CustomerAI->NegotiationAI->AcceptArray = RandomNegDialogueMap[ENegotiationDialogueType::Accept].Dialogues;
+  CustomerAI->NegotiationAI->RejectArray = RandomNegDialogueMap[ENegotiationDialogueType::Reject].Dialogues;
+}
+
+void ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
+  if (StoreStock->ItemsArray.Num() <= 0 || CustomersPickingIds.Num() >= StoreStock->ItemsArray.Num()) return;
+
+  // Temp
+  TArray<UItemBase*> NonPickedItems = StoreStock->ItemsArray.FilterByPredicate(
+      [this](UItemBase* Item) { return !CustomersPickingIds.Contains(Item->UniqueItemID); });
+
+  int32 RandomIndex = FMath::RandRange(0, NonPickedItems.Num() - 1);
+  const UItemBase* Item = NonPickedItems[RandomIndex];
+  CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::StockCheck;
+  CustomerAI->NegotiationAI->RelevantItem = Item;
+
+  CustomersPickingIds.Add(Item->UniqueItemID);
+
+  CustomerAI->CustomerState = ECustomerState::ItemWanted;
+  Interaction->InteractionType = EInteractionType::WaitingCustomer;
 
   auto RandomNegDialogueMap = GlobalDataManager->GetRandomNegDialogueMap();
   CustomerAI->NegotiationAI->RequestDialogueArray = RandomNegDialogueMap[ENegotiationDialogueType::Request].Dialogues;

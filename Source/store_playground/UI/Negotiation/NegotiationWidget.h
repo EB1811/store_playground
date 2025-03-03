@@ -15,19 +15,24 @@ public:
 
   UPROPERTY(meta = (BindWidget))
   class UNegotiationElementWidget* NegotiationElementWidget;
-
   UPROPERTY(meta = (BindWidget))
   class UDialogueWidget* DialogueWidget;
-  void SetAndOpenDialogue(class UDialogueSystem* Dialogue);
+  UPROPERTY(meta = (BindWidget))
+  class UStockCheckWidget* StockCheckWidget;
 
   UPROPERTY(EditAnywhere)
   class UNegotiationSystem* NegotiationSystemRef;
+
+  UPROPERTY(EditAnywhere)
+  class UInventoryComponent* PlayerInventoryRef;
 
   void InitNegotiationUI();
   void RefreshNegotiationState();
 
   UFUNCTION()
   void OnReadDialogueButtonClicked();
+  UFUNCTION()
+  void ShowItem(class UItemBase* Item);
   UFUNCTION()
   void OnOfferButtonClicked();
   UFUNCTION()

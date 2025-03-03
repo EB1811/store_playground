@@ -30,7 +30,7 @@ void UDialogueWidget::InitDialogueUI(UDialogueSystem* DialogueSystem) {
       DialogueSystemRef->DialogueDataArr[DialogueSystemRef->CurrentDialogueIndex].Action == EDialogueAction::End);
 }
 
-// TODO: Change this to refresh all data.
+// ? Change this to refresh all data?
 void UDialogueWidget::UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast) {
   DialogueBoxWidget->Speaker->SetText(FText::FromString(SpeakerName));
   DialogueBoxWidget->DialogueText->SetText(FText::FromString(NewDialogueContent));
@@ -46,7 +46,6 @@ void UDialogueWidget::OnNext() {
 
   switch (NextDialogue.State) {
     case EDialogueState::PlayerChoice: {
-      // TODO: Put this in a function.
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
       ChoicesPanelWrapBox->ClearChildren();
 

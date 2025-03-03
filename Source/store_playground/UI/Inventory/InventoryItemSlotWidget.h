@@ -30,10 +30,18 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* ItemQuantity;
 
+  // Button wraping the widget to handle mouse clicks.
+  UPROPERTY(meta = (BindWidget))
+  class UButton* SelectItemButton;
+
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
   class UItemBase* ItemRef;
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
   class UInventoryWidget* InventoryWidgetRef;
+
+  UFUNCTION()
+  void OnSelectItemButtonClicked();
+  std::function<void(class UItemBase*)> OnSelectItemFunc;
 
   // TODO: Implement drag and drop visuals
   // UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Slot")

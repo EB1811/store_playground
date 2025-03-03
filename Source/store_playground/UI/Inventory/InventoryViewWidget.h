@@ -24,7 +24,5 @@ public:
   UPROPERTY(EditAnywhere)
   class AStore* Store;
 
-  // ? Maybe have tabs for different inventories.
-
   void RefreshInventoryViewUI();
 };

@@ -4,8 +4,13 @@
 #include "store_playground/UI/Inventory/ItemDragDropOp.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
-void UInventoryItemSlotWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
+void UInventoryItemSlotWidget::NativeOnInitialized() {
+  Super::NativeOnInitialized();
+
+  SelectItemButton->OnClicked.AddDynamic(this, &UInventoryItemSlotWidget::OnSelectItemButtonClicked);
+}
 
 void UInventoryItemSlotWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -55,4 +60,11 @@ bool UInventoryItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry,
                                             const FDragDropEvent& InDragDropEvent,
                                             UDragDropOperation* InOperation) {
   return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
+void UInventoryItemSlotWidget::OnSelectItemButtonClicked() {
+  if (!OnSelectItemFunc) return;
+
+  SelectItemButton->SetBackgroundColor(FLinearColor(0.0f, 1.0f, 0.0f, 0.5f));
+  OnSelectItemFunc(ItemRef);
 }

@@ -7,13 +7,13 @@
 #include "store_playground/Store/Store.h"
 
 void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
-                                          bool bNpcBuying,
                                           UCustomerAIComponent* _CustomerAI,
                                           UInventoryComponent* _FromInventory,
                                           float Price,
                                           ENegotiationState InitState) {
   NegotiatedItem = Item;
-  Type = bNpcBuying ? NegotiationType::PlayerSell : NegotiationType::PlayerBuy;
+  Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
+                                                                                   : NegotiationType::PlayerSell;
   Quantity = Item->Quantity;
   CustomerAI = _CustomerAI;
   FromInventory = _FromInventory;
@@ -25,8 +25,12 @@ void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
   DialogueSystem->ResetDialogue();
 }
 
+// ? Turn FNextDialogueRes into using the dialogue system directly in the ui?
 FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NPCRequest);
+  if (CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::StockCheck)
+    NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcStockCheckRequest);
+  else
+    NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
 
   return DialogueSystem->StartDialogue(CustomerAI->NegotiationAI->RequestDialogueArray);
 }
@@ -35,32 +39,52 @@ void UNegotiationSystem::PlayerReadRequest() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerReadRequest);
 }
 
-FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
-  if (CustomerOfferResponse.Accepted)
-    AcceptOffer(Negotiator::NPC);
-  else
-    OfferPrice(Negotiator::NPC, CustomerOfferResponse.CounterOffer);
+void UNegotiationSystem::PlayerShowItem(UItemBase* Item) {
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
-  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
+  CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item);
+  NegotiatedItem = Item;
 }
 
-void UNegotiationSystem::OfferPrice(Negotiator CallingNegotiator, float Price) {
+FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
+  switch (NegotiationState) {
+    case ENegotiationState::NpcStockCheckConsider: {
+      if (CustomerOfferResponse.Accepted)
+        NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
+      else
+        NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
+
+      return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
+    }
+    case ENegotiationState::NpcConsider: {
+      if (CustomerOfferResponse.Accepted)
+        AcceptOffer();
+      else
+        OfferPrice(CustomerOfferResponse.CounterOffer);
+
+      return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
+    }
+    default: checkf(false, TEXT("Invalid State %d"), (int)NegotiationState); return {};
+  }
+}
+
+void UNegotiationSystem::OfferPrice(float Price) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
-  if (NegotiationState == ENegotiationState::NPCConsider)
+  if (NegotiationState == ENegotiationState::NpcConsider)
     CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderOffer(Type == NegotiationType::PlayerSell ? true : false,
                                                                      BasePrice, OfferedPrice, Price);
 
   OfferedPrice = Price;
 }
 
-void UNegotiationSystem::AcceptOffer(Negotiator CallingNegotiator) {
+void UNegotiationSystem::AcceptOffer() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
 
   if (NegotiationState == ENegotiationState::Accepted) NegotiationSuccess();
 }
 
-void UNegotiationSystem::RejectOffer(Negotiator CallingNegotiator) {
+void UNegotiationSystem::RejectOffer() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
 
   if (NegotiationState == ENegotiationState::Rejected) NegotiationFailure();

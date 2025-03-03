@@ -92,8 +92,6 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, TraceParams)) {
     if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionCheckDistance) {
       if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>()) {
-        // TODO: Move to separate, free functions.
-        // ? Separate out player logic from UI logic, with a UI system class?
         switch (Interactable->InteractionType) {
           case EInteractionType::None: {
             break;
@@ -107,43 +105,36 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             break;
           }
           case EInteractionType::StockDisplay: {
-            auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
+            if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
 
+            auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
             EnterStockDisplay(DisplayC, DisplayInventoryC);
             break;
           }
           case EInteractionType::NPCDialogue: {
             auto DialogueData = Interactable->InteractNPCDialogue();
-            check(DialogueData);
-
             EnterDialogue(DialogueData.value());
             break;
           }
           case EInteractionType::WaitingCustomer: {
             auto [Item, CustomerAI] = Interactable->InteractWaitingCustomer();
-            check(Item && CustomerAI);
-
             EnterNegotiation(Item, CustomerAI);
             break;
           }
           case EInteractionType::WaitingUniqueCustomer: {
             auto [Item, CustomerAI, Dialogue] = Interactable->InteractWaitingUniqueCustomer();
-            check(Item && CustomerAI && Dialogue);
-
             EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() { EnterNegotiation(Item, CustomerAI); });
             break;
           }
           case EInteractionType::NpcStore: {
-            auto [StoreInventory, Dialogue] = Interactable->InteractNpcStore();
-            check(StoreInventory && Dialogue);
+            if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
 
+            auto [StoreInventory, Dialogue] = Interactable->InteractNpcStore();
             EnterDialogue(Dialogue->DialogueArray, [this, StoreInventory]() { EnterNpcStore(StoreInventory); });
             break;
           }
           case EInteractionType::Container: {
             UInventoryComponent* ContainerInventory = Interactable->InteractContainer();
-            check(ContainerInventory);
-
             HUD->SetAndOpenContainer(PlayerInventoryComponent, ContainerInventory);
             break;
           }
@@ -180,9 +171,8 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
 }
 
 void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI->NegotiationAI->bNpcBuying, CustomerAI, Store->StoreStock,
-                                      Item->MarketData.BasePrice);
-  HUD->SetAndOpenNegotiation(NegotiationSystem);
+  NegotiationSystem->StartNegotiation(Item, CustomerAI, Store->StoreStock, Item->MarketData.BasePrice);
+  HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterNpcStore(UInventoryComponent* StoreInventoryC) {

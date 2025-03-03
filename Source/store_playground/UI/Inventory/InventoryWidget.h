@@ -27,6 +27,9 @@ public:
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* InventoryRef;
 
+  UPROPERTY(EditAnywhere)
+  class UItemBase* SelectedItem;
+
   void RefreshInventory();
 
   std::function<void(class UItemBase*, int32)> OnDropItemFunc;

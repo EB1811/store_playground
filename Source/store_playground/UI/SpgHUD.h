@@ -86,5 +86,5 @@ public:
 
   UPROPERTY()
   class UNegotiationWidget* NegotiationWidget;
-  void SetAndOpenNegotiation(const class UNegotiationSystem* Negotiation);
+  void SetAndOpenNegotiation(const class UNegotiationSystem* Negotiation, class UInventoryComponent* PlayerInventoryC);
 };

@@ -15,8 +15,6 @@ public:
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FName ItemID;
   // * Each item will have dynamic flavor data, resulting in different unique item IDs from the same base item ID.
-  // ? Is this the best way to handle this?
-  // ? Is ItemID needed?
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FGuid UniqueItemID;
 
