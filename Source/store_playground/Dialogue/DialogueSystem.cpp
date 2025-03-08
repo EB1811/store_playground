@@ -74,8 +74,8 @@ FNextDialogueRes UDialogueSystem::NextDialogue() {
 TArray<FDialogueData> UDialogueSystem::GetChoiceDialogues() {
   if (DialogueState != EDialogueState::PlayerChoice) return {};
 
-  TArray<int32> ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
-                                                           DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
+  const TArray<int32>& ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
+                                                                  DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
   TArray<FDialogueData> ChoiceDialogueArr = {};
   ChoiceDialogueArr.Reserve(ChildChoiceIndexes.Num());
   for (int32 ChoiceIndex : ChildChoiceIndexes) ChoiceDialogueArr.Add(DialogueDataArr[ChoiceIndex]);
@@ -86,8 +86,8 @@ TArray<FDialogueData> UDialogueSystem::GetChoiceDialogues() {
 FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
   if (DialogueState != EDialogueState::PlayerChoice) return {};
 
-  TArray<int32> ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
-                                                           DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
+  const TArray<int32>& ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
+                                                                  DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
   int32 ChoiceDialogueIndex = ChildChoiceIndexes[ChoiceIndex];
 
   DialogueState = GetNextDialogueState(DialogueState, DialogueDataArr[ChoiceDialogueIndex].Action);

@@ -70,15 +70,19 @@ public:
   float OfferedPrice;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  const class UItemBase* NegotiatedItem;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
   int32 Quantity;
+
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  NegotiationType Type;
+  TArray<const class UItemBase*> NegotiatedItems;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UInventoryComponent* FromInventory;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
+  NegotiationType Type;
+
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UCustomerAIComponent* CustomerAI;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UInventoryComponent* PlayerInventory;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   FOfferResponse CustomerOfferResponse;
@@ -91,7 +95,7 @@ public:
 
   struct FNextDialogueRes NPCRequestNegotiation();
   void PlayerReadRequest();
-  void PlayerShowItem(class UItemBase* Item);
+  void PlayerShowItem(class UItemBase* Item, class UInventoryComponent* _FromInventory);
   struct FNextDialogueRes NPCNegotiationTurn();
   void OfferPrice(float Price);
   void AcceptOffer();

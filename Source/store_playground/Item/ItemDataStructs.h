@@ -10,9 +10,43 @@ UENUM()
 enum class EItemType : uint8 {
   Weapon UMETA(DisplayName = "Weapon"),
   Armor UMETA(DisplayName = "Armor"),
+  Jewellery UMETA(DisplayName = "Jewellery"),
+  Clothing UMETA(DisplayName = "Clothing"),
   Consumable UMETA(DisplayName = "Consumable"),
-  Spell UMETA(DisplayName = "Spell"),
-  Relic UMETA(DisplayName = "Relic"),
+  Valuables UMETA(DisplayName = "Valuables"),
+  Objects UMETA(DisplayName = "Objects"),
+  Financial UMETA(DisplayName = "Financial"),
+};
+UENUM()
+enum class EItemWealthType : uint8 {
+  Essential UMETA(DisplayName = "Essential"),
+  Mid UMETA(DisplayName = "Mid"),
+  Luxury UMETA(DisplayName = "Luxury"),
+};
+ENUM_RANGE_BY_COUNT(EItemWealthType, 3);
+
+UENUM()
+enum class EItemEconType : uint8 {
+  Consumer UMETA(DisplayName = "Consumer"),
+  Adventurer UMETA(DisplayName = "Adventurer"),
+  Magic UMETA(DisplayName = "Magic"),
+  Finance UMETA(DisplayName = "Finance"),
+};
+ENUM_RANGE_BY_COUNT(EItemEconType, 4);
+
+USTRUCT()
+struct FItemEconData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FGuid ItemID;
+
+  UPROPERTY(EditAnywhere)
+  EItemType Type;
+  UPROPERTY(EditAnywhere)
+  EItemWealthType WealthType;
+  UPROPERTY(EditAnywhere)
+  EItemEconType EconType;
 };
 
 UENUM()
@@ -56,20 +90,12 @@ struct FItemFlavorData {
   EItemType Type;
   UPROPERTY(EditAnywhere)
   EItemQuality Quality;
-  UPROPERTY(EditAnywhere)
-  FItemStats StatsData;
-  UPROPERTY(EditAnywhere)
-  FItemTextData TextData;
 };
 
 USTRUCT()
 struct FItemMetaData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
-  int32 MaxStackSize;
-  UPROPERTY(EditAnywhere)
-  bool Unique;
   UPROPERTY(EditAnywhere)
   bool Stackable;
 };
@@ -99,6 +125,7 @@ struct FItemMarketData {
   int32 DemandUnits;
 };
 
+// Outdated, use FItemDataRow instead.
 USTRUCT()
 struct FItemData : public FTableRowBase {
   GENERATED_BODY()
@@ -117,4 +144,34 @@ struct FItemData : public FTableRowBase {
   FItemAssetData AssetData;
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FItemMarketData MarketData;
+};
+
+USTRUCT()
+struct FItemDataRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName ItemID;
+
+  UPROPERTY(EditAnywhere)
+  FItemTextData TextData;
+
+  UPROPERTY(EditAnywhere)
+  EItemType ItemType;
+  UPROPERTY(EditAnywhere)
+  EItemWealthType ItemWealthType;
+  UPROPERTY(EditAnywhere)
+  EItemEconType ItemEconType;
+  UPROPERTY(EditAnywhere)
+  float BasePrice;
+  UPROPERTY(EditAnywhere)
+  float PriceJumpPercent;  // * Reverse price stickiness, 1.0 = current price changes to perfect price in one cycle.
+
+  UPROPERTY(EditAnywhere)
+  FItemAssetData AssetData;
+  UPROPERTY(EditAnywhere)
+  FItemFlavorData FlavorData;
+
+  UPROPERTY(EditAnywhere)
+  FItemMetaData MetaData;
 };

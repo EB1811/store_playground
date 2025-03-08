@@ -13,5 +13,4 @@ void UInventoryViewWidget::RefreshInventoryViewUI() {
       FText::FromString(FString::SanitizeFloat((FMath::RoundToInt32(Store->Money * 100) / 100.00))));
 
   PlayerInventoryWidget->RefreshInventory();
-  StoreInventoryWidget->RefreshInventory();
 }

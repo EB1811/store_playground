@@ -28,7 +28,8 @@ public:
   class UInventoryComponent* InventoryRef;
 
   UPROPERTY(EditAnywhere)
-  class UItemBase* SelectedItem;
+  class UInventoryItemSlotWidget* SelectedItemSlotWidget;
+  UPROPERTY(EditAnywhere) class UItemBase* SelectedItem;
 
   void RefreshInventory();
 

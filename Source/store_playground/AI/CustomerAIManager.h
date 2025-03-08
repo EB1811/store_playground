@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Store/Store.h"
 #include "CustomerAIManager.generated.h"
 
 USTRUCT()
@@ -60,7 +61,7 @@ public:
   TArray<FGuid> CustomersPickingIds;
 
   UPROPERTY(EditAnywhere, Category = "Player Stock")
-  const class UInventoryComponent* StoreStock;
+  class AStore* Store;
 
   // ? Have separate arrays for each state?
   UPROPERTY(EditAnywhere, Category = "Customers Array")

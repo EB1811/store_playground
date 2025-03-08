@@ -13,45 +13,42 @@ AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
 void AMarket::BeginPlay() {
   Super::BeginPlay();
 
-  check(NpcStoreDialoguesTable && AllItemsTable && NPCStoreClass);
+  // check(NpcStoreDialoguesTable && AllItemsTable && NPCStoreClass);
 
-  TArray<FDialogueDataTable*> NpcStoreDialoguesRows;
-  NpcStoreDialoguesTable->GetAllRows<FDialogueDataTable>("", NpcStoreDialoguesRows);
-  for (auto* Row : NpcStoreDialoguesRows)
-    NpcStoreDialogues.Add({
-        Row->DialogueChainID,
-        Row->DialogueType,
-        Row->DialogueText,
-        Row->Action,
-        Row->DialogueSpeaker,
-        Row->ChoicesAmount,
-    });
+  // TArray<FDialogueDataTable*> NpcStoreDialoguesRows;
+  // NpcStoreDialoguesTable->GetAllRows<FDialogueDataTable>("", NpcStoreDialoguesRows);
+  // for (auto* Row : NpcStoreDialoguesRows)
+  //   NpcStoreDialogues.Add({
+  //       Row->DialogueChainID,
+  //       Row->DialogueType,
+  //       Row->DialogueText,
+  //       Row->Action,
+  //       Row->DialogueSpeaker,
+  //       Row->ChoicesAmount,
+  //   });
 
-  TArray<FItemData*> ItemRows;
-  AllItemsTable->GetAllRows<FItemData>("", ItemRows);
-  for (auto Row : ItemRows) {
-    UItemBase* Item = NewObject<UItemBase>(this);
+  // TArray<FItemData*> ItemRows;
+  // AllItemsTable->GetAllRows<FItemData>("", ItemRows);
+  // for (auto Row : ItemRows) {
+  //   UItemBase* Item = NewObject<UItemBase>(this);
 
-    Item->ItemID = Row->ItemID;
-    Item->Quantity = 1;
-    Item->UniqueItemID = FGuid::NewGuid();
-    Item->FlavorData = Row->FlavorData;
-    Item->MetaData = Row->MetaData;
-    Item->AssetData = Row->AssetData;
-    Item->MarketData = Row->MarketData;
+  //   Item->ItemID = Row->ItemID;
+  //   Item->Quantity = 1;
+  //   Item->UniqueItemID = FGuid::NewGuid();
+  //   Item->FlavorData = Row->FlavorData;
+  //   Item->MetaData = Row->MetaData;
+  //   Item->AssetData = Row->AssetData;
+  //   Item->MarketData = Row->MarketData;
 
-    AllItems.Add(Item);
-    MarketPrices.Add(Item->ItemID, Item->MarketData.BasePrice);
-  }
+  //   AllItems.Add(Item);
+  //   MarketPrices.Add(Item->ItemID, Item->MarketData.BasePrice);
+  // }
 
-  check(NpcStoreDialogues.Num() > 0);
-  check(AllItems.Num() > 0);
+  // check(NpcStoreDialogues.Num() > 0);
+  // check(AllItems.Num() > 0);
 
-  NpcStoreDialoguesTable = nullptr;
-  AllItemsTable = nullptr;
-
-  // TODO: Move to game mode.
-  InitializeNPCStores();
+  // NpcStoreDialoguesTable = nullptr;
+  // AllItemsTable = nullptr;
 }
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }

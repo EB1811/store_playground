@@ -5,7 +5,7 @@
 UInventoryComponent::UInventoryComponent() {
   PrimaryComponentTick.bCanEverTick = false;
   InventoryType = EInventoryType::Container;
-  MaxSlots = 20;
+  MaxSlots = 30;
 }
 
 void UInventoryComponent::BeginPlay() {

@@ -15,8 +15,8 @@ void BuyItem(UInventoryComponent* NPCStoreInventory,
 
   if (PLayerStore->Money < Item->MarketData.CurrentPrice * Quantity) return;
 
-  TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity);
-  PLayerStore->Money -= Item->MarketData.CurrentPrice * Quantity;
+  if (TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess)
+    PLayerStore->Money -= Item->MarketData.CurrentPrice * Quantity;
 }
 
 void SellItem(UInventoryComponent* NPCStoreInventory,
@@ -29,6 +29,6 @@ void SellItem(UInventoryComponent* NPCStoreInventory,
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
     return;
 
-  TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity);
-  PlayerStore->Money += Item->MarketData.CurrentPrice * Quantity;
+  if (TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess)
+    PlayerStore->Money += Item->MarketData.CurrentPrice * Quantity;
 }

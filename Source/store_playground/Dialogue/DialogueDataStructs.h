@@ -106,8 +106,11 @@ enum class ENegotiationDialogueType : uint8 {
   ConsiderClose UMETA(DisplayName = "Consider Close"),
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject"),
+  StockCheckRequest UMETA(DisplayName = "Stock Check Request"),
+  StockCheckAccept UMETA(DisplayName = "Stock Check Accept"),
+  StockCheckReject UMETA(DisplayName = "Stock Check Reject"),
 };
-ENUM_RANGE_BY_COUNT(ENegotiationDialogueType, 5);
+ENUM_RANGE_BY_COUNT(ENegotiationDialogueType, 8);
 
 USTRUCT()
 struct FNegotiationDialoguesDataTable : public FTableRowBase {
@@ -137,4 +140,13 @@ struct FNegotiationDialoguesDataTable : public FTableRowBase {
   int32 ChoicesAmount;  // Note: To know number of children in a preorder tree traversal.
   UPROPERTY(EditAnywhere)
   int32 ChoiceIndex;  // Note: This is really just for nicer understanding in the data table.
+};
+
+// * This enables using a list in a map.
+USTRUCT()
+struct FDialoguesArray {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  TArray<struct FDialogueData> Dialogues;
 };

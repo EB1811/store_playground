@@ -18,8 +18,6 @@ public:
   class UTextBlock* StoreMoneyText;
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class UInventoryWidget* PlayerInventoryWidget;
-  UPROPERTY(EditAnywhere, meta = (BindWidget))
-  class UInventoryWidget* StoreInventoryWidget;
 
   UPROPERTY(EditAnywhere)
   class AStore* Store;

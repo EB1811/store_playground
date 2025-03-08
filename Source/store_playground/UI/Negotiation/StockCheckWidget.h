@@ -26,5 +26,5 @@ public:
   UFUNCTION()
   void OnShowItemButtonClicked();
 
-  std::function<void(class UItemBase*)> ShowItemFunc;
+  std::function<void(class UItemBase*, class UInventoryComponent* FromInventory)> ShowItemFunc;
 };

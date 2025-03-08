@@ -12,15 +12,6 @@
 // * Data comes from the data tables.
 // * Actor due to the need to initialize the data and possible tick to update it / check for changes.
 
-// * This enables using a list in a map.
-USTRUCT()
-struct FDialoguesArray {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  TArray<struct FDialogueData> Dialogues;
-};
-
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AGlobalDataManager : public AInfo {
   GENERATED_BODY()
@@ -48,15 +39,15 @@ public:
   TArray<struct FUniqueNpcData> UniqueNpcArray;
 
   UPROPERTY(EditAnywhere, Category = "Dialogue")
-  TMap<FName, struct FDialoguesArray> UniqueNpcDialoguesMap;
+  TMap<FName, FDialoguesArray> UniqueNpcDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   TArray<struct FDialogueData> CustomerDialogues;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
-  TMap<ENegotiationDialogueType, struct FDialoguesArray> FriendlyDialoguesMap;
+  TMap<ENegotiationDialogueType, FDialoguesArray> FriendlyDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
-  TMap<ENegotiationDialogueType, struct FDialoguesArray> NeutralDialoguesMap;
+  TMap<ENegotiationDialogueType, FDialoguesArray> NeutralDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
-  TMap<ENegotiationDialogueType, struct FDialoguesArray> HostileDialoguesMap;
+  TMap<ENegotiationDialogueType, FDialoguesArray> HostileDialoguesMap;
 
   void InitializeNPCData();
   void InitializeDialogueData();
@@ -64,5 +55,6 @@ public:
   struct FUniqueNpcData GetRandomUniqueNpcData() const;
 
   TArray<struct FDialogueData> GetRandomCustomerDialogue() const;
-  TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap() const;
+  TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
+      ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 };

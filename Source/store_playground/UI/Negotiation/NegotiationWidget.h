@@ -32,7 +32,7 @@ public:
   UFUNCTION()
   void OnReadDialogueButtonClicked();
   UFUNCTION()
-  void ShowItem(class UItemBase* Item);
+  void ShowItem(class UItemBase* Item, class UInventoryComponent* FromInventory);
   UFUNCTION()
   void OnOfferButtonClicked();
   UFUNCTION()

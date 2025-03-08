@@ -1,9 +1,14 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 
-void TransferItem(UInventoryComponent* From, UInventoryComponent* To, UItemBase* Item, int32 Quantity) {
+FInventoryTransferRes TransferItem(UInventoryComponent* From,
+                                   UInventoryComponent* To,
+                                   UItemBase* Item,
+                                   int32 Quantity) {
   if (!From->ItemsArray.ContainsByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
-    return;
+    return FInventoryTransferRes{false};
+
+  if (To->ItemsArray.Num() >= To->MaxSlots) return FInventoryTransferRes{false};
 
   switch (From->InventoryType) {
     case EInventoryType::Container:
@@ -12,4 +17,6 @@ void TransferItem(UInventoryComponent* From, UInventoryComponent* To, UItemBase*
       break;
     case EInventoryType::Store: To->AddItem(Item, Quantity); break;
   }
+
+  return FInventoryTransferRes{true};
 }

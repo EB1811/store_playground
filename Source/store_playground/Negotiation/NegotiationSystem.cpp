@@ -5,16 +5,18 @@
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/Dialogue/DialogueDataStructs.h"
 
 void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
                                           UCustomerAIComponent* _CustomerAI,
                                           UInventoryComponent* _FromInventory,
                                           float Price,
                                           ENegotiationState InitState) {
-  NegotiatedItem = Item;
+  NegotiatedItems.Empty();
+  NegotiatedItems.Add(Item);
   Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
                                                                                    : NegotiationType::PlayerSell;
-  Quantity = Item->Quantity;
+  Quantity = 1;
   CustomerAI = _CustomerAI;
   FromInventory = _FromInventory;
   BasePrice = Price;
@@ -27,23 +29,30 @@ void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
 
 // ? Turn FNextDialogueRes into using the dialogue system directly in the ui?
 FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
-  if (CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::StockCheck)
+  if (CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::StockCheck) {
     NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcStockCheckRequest);
-  else
-    NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
+    return DialogueSystem->StartDialogue(
+        CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues);
+  }
 
-  return DialogueSystem->StartDialogue(CustomerAI->NegotiationAI->RequestDialogueArray);
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
+  return DialogueSystem->StartDialogue(
+      CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::Request].Dialogues);
 }
 
 void UNegotiationSystem::PlayerReadRequest() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerReadRequest);
 }
 
-void UNegotiationSystem::PlayerShowItem(UItemBase* Item) {
+void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _FromInventory) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
+  check(Item && _FromInventory);
+
   CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item);
-  NegotiatedItem = Item;
+  NegotiatedItems.Empty();
+  NegotiatedItems.Add(Item);
+  FromInventory = _FromInventory;
 }
 
 FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
@@ -93,17 +102,22 @@ void UNegotiationSystem::RejectOffer() {
 // Note: Move to actual object (player, npc) if fine grain functionality needed.
 void UNegotiationSystem::NegotiationSuccess() {
   if (Type == NegotiationType::PlayerSell) {
-    FromInventory->RemoveItem(NegotiatedItem, Quantity);
-    Store->Money += OfferedPrice * Quantity;
+    check(FromInventory);
+
+    for (const UItemBase* NegotiatedItem : NegotiatedItems) FromInventory->RemoveItem(NegotiatedItem);
+    Store->Money += OfferedPrice;
+    Store->StoreStockItems.RemoveAll(
+        [this](const FStockItem& StockItem) { return NegotiatedItems.Contains(StockItem.Item); });
   } else {
-    FromInventory->AddItem(NegotiatedItem, Quantity);
-    Store->Money -= OfferedPrice * Quantity;
+    check(PlayerInventory);
+
+    for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->AddItem(NegotiatedItem);
+    Store->Money -= OfferedPrice;
   }
-  UE_LOG(LogTemp, Warning, TEXT("Money: %f"), Store->Money);
 
   CustomerAI->PostNegotiation();
 
-  NegotiatedItem = nullptr;
+  NegotiatedItems.Empty();
   CustomerAI = nullptr;
   FromInventory = nullptr;
 }
@@ -111,7 +125,7 @@ void UNegotiationSystem::NegotiationSuccess() {
 void UNegotiationSystem::NegotiationFailure() {
   CustomerAI->PostNegotiation();
 
-  NegotiatedItem = nullptr;
+  NegotiatedItems.Empty();
   CustomerAI = nullptr;
   FromInventory = nullptr;
 }

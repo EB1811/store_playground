@@ -43,14 +43,17 @@ TArray<struct FDialogueData> AGlobalDataManager::GetRandomCustomerDialogue() con
   return RandomDialogue;
 }
 
-TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNegDialogueMap() const {
-  TMap<ENegotiationDialogueType, FDialoguesArray> RandomDialogueIndexMap;
+TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNegDialogueMap(
+    ECustomerAttitude Attitude) const {
+  auto& DialoguesMap = Attitude == ECustomerAttitude::Friendly  ? FriendlyDialoguesMap
+                       : Attitude == ECustomerAttitude::Neutral ? NeutralDialoguesMap
+                                                                : HostileDialoguesMap;
 
+  TMap<ENegotiationDialogueType, FDialoguesArray> RandomDialogueIndexMap;
   for (auto Type : TEnumRange<ENegotiationDialogueType>()) {
     RandomDialogueIndexMap.Add(Type, {});
 
-    // TODO: Pass attitude.
-    auto& Dialogues = FriendlyDialoguesMap[Type].Dialogues;
+    auto& Dialogues = DialoguesMap[Type].Dialogues;
     int32 MapSize = Dialogues.Num();
     int32 RandomIndex = FMath::RandRange(0, MapSize - 1);
     for (int32 i = RandomIndex - 1; i >= 0; i--) {
@@ -63,7 +66,6 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNeg
       RandomDialogueIndexMap[Type].Dialogues.Add(Dialogues[i]);
     }
   }
-
   return RandomDialogueIndexMap;
 }
 
@@ -116,11 +118,7 @@ void AGlobalDataManager::InitializeDialogueData() {
     });
 
   FriendlyDialoguesMap.Empty();
-  FriendlyDialoguesMap.Add(ENegotiationDialogueType::Request, {});
-  FriendlyDialoguesMap.Add(ENegotiationDialogueType::ConsiderTooHigh, {});
-  FriendlyDialoguesMap.Add(ENegotiationDialogueType::ConsiderClose, {});
-  FriendlyDialoguesMap.Add(ENegotiationDialogueType::Accept, {});
-  FriendlyDialoguesMap.Add(ENegotiationDialogueType::Reject, {});
+  for (auto Type : TEnumRange<ENegotiationDialogueType>()) FriendlyDialoguesMap.Add(Type, {});
   TArray<FNegotiationDialoguesDataTable*> FriendlyRows;
   FriendlyNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(FriendlyRows, TEXT("Friendly Dialogues"));
   for (FNegotiationDialoguesDataTable* Row : FriendlyRows)
@@ -129,11 +127,7 @@ void AGlobalDataManager::InitializeDialogueData() {
                                                               Row->ChoicesAmount});
 
   NeutralDialoguesMap.Empty();
-  NeutralDialoguesMap.Add(ENegotiationDialogueType::Request, {});
-  NeutralDialoguesMap.Add(ENegotiationDialogueType::ConsiderTooHigh, {});
-  NeutralDialoguesMap.Add(ENegotiationDialogueType::ConsiderClose, {});
-  NeutralDialoguesMap.Add(ENegotiationDialogueType::Accept, {});
-  NeutralDialoguesMap.Add(ENegotiationDialogueType::Reject, {});
+  for (auto Type : TEnumRange<ENegotiationDialogueType>()) NeutralDialoguesMap.Add(Type, {});
   TArray<FNegotiationDialoguesDataTable*> NeutralRows;
   NeutralNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(NeutralRows, TEXT("Neutral Dialogues"));
   for (FNegotiationDialoguesDataTable* Row : NeutralRows)
@@ -141,11 +135,7 @@ void AGlobalDataManager::InitializeDialogueData() {
                                                              Row->Action, Row->DialogueSpeaker, Row->ChoicesAmount});
 
   HostileDialoguesMap.Empty();
-  HostileDialoguesMap.Add(ENegotiationDialogueType::Request, {});
-  HostileDialoguesMap.Add(ENegotiationDialogueType::ConsiderTooHigh, {});
-  HostileDialoguesMap.Add(ENegotiationDialogueType::ConsiderClose, {});
-  HostileDialoguesMap.Add(ENegotiationDialogueType::Accept, {});
-  HostileDialoguesMap.Add(ENegotiationDialogueType::Reject, {});
+  for (auto Type : TEnumRange<ENegotiationDialogueType>()) HostileDialoguesMap.Add(Type, {});
   TArray<FNegotiationDialoguesDataTable*> HostileRows;
   HostileNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(HostileRows, TEXT("Hostile Dialogues"));
   for (FNegotiationDialoguesDataTable* Row : HostileRows)

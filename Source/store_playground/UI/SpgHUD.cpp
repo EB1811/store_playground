@@ -96,8 +96,6 @@ void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, ASto
 
   InventoryViewWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
   InventoryViewWidget->PlayerInventoryWidget->InventoryTitleText->SetText(FText::FromString("Player"));
-  InventoryViewWidget->StoreInventoryWidget->InventoryRef = Store->StoreStock;
-  InventoryViewWidget->StoreInventoryWidget->InventoryTitleText->SetText(FText::FromString("Store"));
 
   InventoryViewWidget->Store = Store;
 

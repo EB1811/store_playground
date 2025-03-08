@@ -7,6 +7,16 @@
 #include "Store.generated.h"
 
 USTRUCT()
+struct FStockItem {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  class UInventoryComponent* BelongingStockInventoryC;
+  UPROPERTY(EditAnywhere)
+  class UItemBase* Item;
+};
+
+USTRUCT()
 struct FStoreStats {
   GENERATED_BODY()
 
@@ -27,14 +37,17 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Store Data")
   float Money;
-
   UPROPERTY(EditAnywhere, Category = "Store Data")
   FStoreStats StoreStats;
 
   UPROPERTY(EditAnywhere, Category = "Store Stock")
-  class UInventoryComponent* StoreStock;
+  TArray<FStockItem> StoreStockItems;
 
   // ? Put state in game manager?
   // UPROPERTY(EditAnywhere, Category = "Store")
   // state
+
+  UPROPERTY(EditAnywhere, Category = "TESTING")
+  class TSubclassOf<class AActor> StockDisplayClass;
+  void InitStockDisplays();
 };

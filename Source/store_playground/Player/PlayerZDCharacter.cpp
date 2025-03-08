@@ -149,15 +149,16 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
   auto PlayerToDisplayFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
     check(SourceInventory == PlayerInventoryComponent);
-    TransferItem(SourceInventory, DisplayInventoryC, DroppedItem);
     // ? Have a function in the store to refetch all stock?
-    Store->StoreStock->AddItem(DroppedItem, 1);
+    if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess)
+      Store->StoreStockItems.Add({DisplayInventoryC, DroppedItem});
   };
   auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
     check(SourceInventory == DisplayInventoryC);
-    TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem);
-    Store->StoreStock->RemoveItem(DroppedItem, 1);
+    if (TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem).bSuccess)
+      Store->StoreStockItems.RemoveAll(
+          [DroppedItem](const FStockItem& StockItem) { return StockItem.Item == DroppedItem; });
   };
 
   HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent, PlayerToDisplayFunc,
@@ -171,7 +172,8 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
 }
 
 void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI, Store->StoreStock, Item->MarketData.BasePrice);
+  NegotiationSystem->StartNegotiation(Item, CustomerAI, CustomerAI->NegotiationAI->StockDisplayInventory,
+                                      Item->MarketData.BasePrice);
   HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
 }
 

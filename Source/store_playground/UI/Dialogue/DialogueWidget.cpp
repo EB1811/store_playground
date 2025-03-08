@@ -49,7 +49,7 @@ void UDialogueWidget::OnNext() {
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
       ChoicesPanelWrapBox->ClearChildren();
 
-      TArray<FDialogueData> DialogueDataArr = DialogueSystemRef->GetChoiceDialogues();
+      const TArray<FDialogueData>& DialogueDataArr = DialogueSystemRef->GetChoiceDialogues();
       for (int32 i = 0; FDialogueData DialogueData : DialogueDataArr) {
         UDialogueChoiceWidget* DialogueChoiceWidget =
             CreateWidget<UDialogueChoiceWidget>(this, DialogueChoiceWidgetClass);

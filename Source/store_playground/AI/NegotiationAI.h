@@ -31,22 +31,14 @@ class STORE_PLAYGROUND_API UNegotiationAI : public UObject {
 public:
   UNegotiationAI() {}
 
-  // TODO: Change to map.
-  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  TArray<struct FDialogueData> RequestDialogueArray;
-  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  TArray<struct FDialogueData> ConsiderTooHighArray;
-  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  TArray<struct FDialogueData> ConsiderCloseArray;
-  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  TArray<struct FDialogueData> AcceptArray;
-  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  TArray<struct FDialogueData> RejectArray;
+  TMap<ENegotiationDialogueType, FDialoguesArray> DialoguesMap;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   ECustomerRequestType RequestType;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   const class UItemBase* RelevantItem;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  class UInventoryComponent* StockDisplayInventory;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float AcceptancePercentage;

@@ -18,7 +18,7 @@ void UInventoryItemSlotWidget::NativeConstruct() {
   if (!ItemRef) return;
 
   ItemIcon->SetBrushFromTexture(ItemRef->AssetData.Icon);
-  ItemName->SetText(ItemRef->FlavorData.TextData.Name);
+  // ItemName->SetText(ItemRef->FlavorData.TextData.Name);
   if (ItemRef->Quantity > 1) ItemQuantity->SetText(FText::FromString(FString::FromInt(ItemRef->Quantity)));
 }
 
@@ -65,6 +65,5 @@ bool UInventoryItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry,
 void UInventoryItemSlotWidget::OnSelectItemButtonClicked() {
   if (!OnSelectItemFunc) return;
 
-  SelectItemButton->SetBackgroundColor(FLinearColor(0.0f, 1.0f, 0.0f, 0.5f));
   OnSelectItemFunc(ItemRef);
 }

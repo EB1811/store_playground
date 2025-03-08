@@ -39,12 +39,14 @@ void AStorePGGameMode::BeginPlay() {
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
 
   CustomerAIManager->GlobalDataManager = GlobalDataManager;
-  CustomerAIManager->StoreStock = Store->StoreStock;
+  CustomerAIManager->Store = Store;
 
   NegotiationSystem->DialogueSystem = DialogueSystem;
   NegotiationSystem->Store = Store;
 
   StorePhaseManager->Start();
+  // Market->InitializeNPCStores();
+  Store->InitStockDisplays();
 
   UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
 }

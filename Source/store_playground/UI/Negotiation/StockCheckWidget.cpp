@@ -17,10 +17,11 @@ void UStockCheckWidget::InitStockCheckUI(UInventoryComponent* PlayerInventory, c
   PlayerInventoryWidget->InventoryRef = PlayerInventory;
   PlayerInventoryWidget->RefreshInventory();
 
-  BaseItemName->SetText(BaseItem->FlavorData.TextData.Name);
+  // BaseItemName->SetText(BaseItem->FlavorData.TextData.Name);
 }
 
 void UStockCheckWidget::OnShowItemButtonClicked() {
   check(ShowItemFunc);
-  if (PlayerInventoryWidget->SelectedItem) ShowItemFunc(PlayerInventoryWidget->SelectedItem);
+  if (PlayerInventoryWidget->SelectedItem)
+    ShowItemFunc(PlayerInventoryWidget->SelectedItem, PlayerInventoryWidget->InventoryRef);
 }

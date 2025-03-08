@@ -5,6 +5,7 @@
 #include "store_playground/UI/Inventory/ItemDragDropOp.h"
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
 
 void UInventoryWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
 
@@ -46,7 +47,15 @@ void UInventoryWidget::RefreshInventory() {
     UInventoryItemSlotWidget* InventoryItemSlot = CreateWidget<UInventoryItemSlotWidget>(this, ItemSlotClass);
     InventoryItemSlot->ItemRef = Item;
     InventoryItemSlot->InventoryWidgetRef = this;
-    InventoryItemSlot->OnSelectItemFunc = [this](UItemBase* Item) { SelectedItem = Item; };
+    // TODO: Select mode + single select mode.
+    InventoryItemSlot->OnSelectItemFunc = [this, InventoryItemSlot](UItemBase* Item) {
+      if (SelectedItemSlotWidget)
+        SelectedItemSlotWidget->SelectItemButton->SetBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f));
+
+      SelectedItem = Item;
+      SelectedItemSlotWidget = InventoryItemSlot;
+      SelectedItemSlotWidget->SelectItemButton->SetBackgroundColor(FLinearColor(0.0f, 1.0f, 0.0f, 0.5f));
+    };
 
     InventoryPanelWrapBox->AddChildToWrapBox(InventoryItemSlot);
   }

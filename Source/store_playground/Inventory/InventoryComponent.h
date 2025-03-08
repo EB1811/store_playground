@@ -37,5 +37,14 @@ public:
   void RemoveItem(const UItemBase* Item, int32 Quantity = 1);
 };
 
+USTRUCT()
+struct FInventoryTransferRes {
+  GENERATED_BODY()
+
+  bool bSuccess;
+};
 // TODO: Add param for container/store distinction.
-void TransferItem(UInventoryComponent* From, UInventoryComponent* To, UItemBase* Item, int32 Quantity = 1);
+FInventoryTransferRes TransferItem(UInventoryComponent* From,
+                                   UInventoryComponent* To,
+                                   UItemBase* Item,
+                                   int32 Quantity = 1);
