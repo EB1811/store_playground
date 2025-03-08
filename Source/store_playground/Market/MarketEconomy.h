@@ -12,6 +12,8 @@ struct FEconomyParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  float NeedsfulfilledPercent;  // Artificially set for 60% of the needs fulfilled at the start of the game.
+  UPROPERTY(EditAnywhere)
   float SingleUnitPriceMulti;
 };
 
@@ -39,6 +41,8 @@ public:
   int32 TotalPopulation;
   UPROPERTY(EditAnywhere, Category = "Economy")
   float TotalWealth;
+  UPROPERTY(EditAnywhere, Category = "Economy")
+  float TotaBought;
 
   UPROPERTY(EditAnywhere, Category = "Economy")
   TArray<FCustomerPop> AllCustomerPops;  // ? Needed?

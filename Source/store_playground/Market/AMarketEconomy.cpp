@@ -13,9 +13,11 @@ AMarketEconomy::AMarketEconomy() {
   PrimaryActorTick.bCanEverTick = true;
   PrimaryActorTick.TickInterval = 1;
 
+  EconomyParams.NeedsfulfilledPercent = 0.6f;
   EconomyParams.SingleUnitPriceMulti = 0.1;
   TotalPopulation = 0;
   TotalWealth = 0;
+  TotaBought = 0;
 }
 
 void AMarketEconomy::BeginPlay() {
@@ -39,6 +41,7 @@ void AMarketEconomy::PerformEconomyTick() {
                      TotalWealth * (((PopGen.MSharePercent / 100) + (PopGen.Population / TotalPopulation)) * 0.5));
 
   // Calculate the amount of total goods bought, and the needs fulfilled for each pop.
+  TotaBought = 0;
   TMap<EItemWealthType, float> TotalBoughtMap;
   for (auto WealthType : TEnumRange<EItemWealthType>()) TotalBoughtMap.Add(WealthType, 0);
   // ? Record bought items for each pop?
@@ -133,6 +136,7 @@ void AMarketEconomy::PerformEconomyTick() {
 
     // Update total bought map.
     for (auto WealthType : TEnumRange<EItemWealthType>()) {
+      TotaBought += PopBoughtMap[WealthType];
       TotalBoughtMap[WealthType] += PopBoughtMap[WealthType];
       if (BucketFulfilledAmountMap[WealthType] >= 1) NeedsFulfilledPops.Add(PopSpend.PopID);
       if (BucketNotCloseAmountMap[WealthType] >= 1) NeedsNotClosePops.Add(PopSpend.PopID);
@@ -265,13 +269,12 @@ void AMarketEconomy::InitializeEconomyData() {
     AveragePriceMap[WealthType] /= ItemCountMap[WealthType];
   }
 
-  float NeedsfulfilledPercent = 0.5;  // Artificially set for 60% of the needs fulfilled at the start of the game.
   float BaseTotalMoney = 0;
   float ActualTotalMoney = 0;
   for (auto& Pop : AllCustomerPops) {
     BaseTotalMoney += Pop.EconData.MGen;
     for (auto WealthType : TEnumRange<EItemWealthType>())
-      ActualTotalMoney += (AverageNeedsMap[WealthType] * NeedsfulfilledPercent) *
+      ActualTotalMoney += (AverageNeedsMap[WealthType] * EconomyParams.NeedsfulfilledPercent) *
                           (AveragePriceMap[WealthType] * EconomyParams.SingleUnitPriceMulti);
   }
   float MGenMulti = (ActualTotalMoney / BaseTotalMoney);
@@ -281,8 +284,8 @@ void AMarketEconomy::InitializeEconomyData() {
 
   // * Calc BoughtToPriceMulti.
   for (auto& Item : EconItems)
-    Item.BoughtToPriceMulti = (Item.CurrentPrice / (AverageNeedsMap[Item.ItemWealthType] * NeedsfulfilledPercent)) *
-                              EconomyParams.SingleUnitPriceMulti;
+    Item.BoughtToPriceMulti =
+        (Item.CurrentPrice / (AverageNeedsMap[Item.ItemWealthType])) * EconomyParams.SingleUnitPriceMulti;
 
   // * Setting WealthTypePricesMap.
   for (auto WealthType : TEnumRange<EItemWealthType>()) WealthTypePricesMap.Add(WealthType, 0);
