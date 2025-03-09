@@ -75,7 +75,7 @@ void AMarketEconomy::PerformEconomyTick() {
 
       // ItemSpendPercent pass.
       for (auto WealthType : TEnumRange<EItemWealthType>()) {
-        float Need = PopSpend.ItemNeeds[WealthType] * (PopSpend.Population / Buckets);
+        float Need = PopSpend.ItemNeeds[WealthType] * PopSpend.Population / Buckets;
         float Spending = Money * (PopSpend.ItemSpendPercent[WealthType] / 100);
         float Price = WealthTypePricesMap[WealthType];
 
@@ -94,8 +94,9 @@ void AMarketEconomy::PerformEconomyTick() {
       // Remaining money sequential pass.
       for (auto WealthType : TEnumRange<EItemWealthType>()) {
         if (NeedsFulfilledMap[WealthType]) continue;
+        if (BucketRemainingMoney <= 0) break;
 
-        int32 Need = PopSpend.ItemNeeds[WealthType] * (PopSpend.Population / Buckets);
+        float Need = PopSpend.ItemNeeds[WealthType] * PopSpend.Population / Buckets;
         float Spending = BucketRemainingMoney;
         float Price = WealthTypePricesMap[WealthType];
 
@@ -105,7 +106,7 @@ void AMarketEconomy::PerformEconomyTick() {
           BucketBoughtMap[WealthType] = Need;
           NeedsFulfilledMap[WealthType] = true;
           float Excess = BuyAmount - Need;
-          BucketRemainingMoney = Excess * Price;
+          BucketRemainingMoney += Excess * Price;
           continue;
         }
         BucketBoughtMap[WealthType] = BuyAmount;
@@ -116,28 +117,28 @@ void AMarketEconomy::PerformEconomyTick() {
       }
 
       for (auto WealthType : TEnumRange<EItemWealthType>()) {
+        float buc = (PopSpend.ItemNeeds[WealthType] * PopSpend.Population / Buckets);
         PopBoughtMap[WealthType] += BucketBoughtMap[WealthType];
         if (NeedsFulfilledMap[WealthType]) BucketFulfilledAmountMap[WealthType] += 1;
       }
       RemainingMoney += BucketRemainingMoney;
     }
 
-    // Evenly buy items.
+    // If all needs fulfilled, buy luxury items.
     if (RemainingMoney > 0) {
-      float RemainingSpending = RemainingMoney / PopBoughtMap.Num();  // Proxy for EItemWealthType num.
-      for (auto WealthType : TEnumRange<EItemWealthType>()) {
-        float Spending = RemainingSpending;
-        float Price = WealthTypePricesMap[WealthType];
+      float Spending = RemainingMoney;
+      float Price = WealthTypePricesMap[EItemWealthType::Luxury];
 
-        float BuyAmount = Spending / Price;
-        PopBoughtMap[WealthType] += BuyAmount;
-      }
+      float BuyAmount = Spending / Price;
+      PopBoughtMap[EItemWealthType::Luxury] += BuyAmount;
     }
 
     // Update total bought map.
     for (auto WealthType : TEnumRange<EItemWealthType>()) {
       TotaBought += PopBoughtMap[WealthType];
       TotalBoughtMap[WealthType] += PopBoughtMap[WealthType];
+      PopSpend.ItemNeedsFulfilled.Add(
+          WealthType, PopBoughtMap[WealthType] / (PopSpend.ItemNeeds[WealthType] * PopSpend.Population));
       if (BucketFulfilledAmountMap[WealthType] >= 1) NeedsFulfilledPops.Add(PopSpend.PopID);
       if (BucketNotCloseAmountMap[WealthType] >= 1) NeedsNotClosePops.Add(PopSpend.PopID);
     }
@@ -145,10 +146,9 @@ void AMarketEconomy::PerformEconomyTick() {
 
   // Calculate perfect prices based on amount of bought items + small random variation.
   for (auto& Item : EconItems)
-    if (TotalBoughtMap[Item.ItemWealthType] > 0) {
+    if (TotalBoughtMap[Item.ItemWealthType] > 0)
       Item.PerfectPrice =
           TotalBoughtMap[Item.ItemWealthType] * FMath::RandRange(0.95f, 1.05f) * Item.BoughtToPriceMulti;
-    }
 
   // Additional price adjustments.
   // TODO: Implement.
@@ -172,14 +172,12 @@ void AMarketEconomy::PerformEconomyTick() {
     if (WealthTypePricesSumMap[WealthType] > 0 && ItemsCountMap[WealthType] > 0)
       WealthTypePricesMap[WealthType] = WealthTypePricesSumMap[WealthType] / ItemsCountMap[WealthType];
 
-  UE_LOG(LogTemp, Warning, TEXT("NeedsFulfilledPops %d"), NeedsFulfilledPops.Num());
-  UE_LOG(LogTemp, Warning, TEXT("NeedsNotClosePops %d"), NeedsNotClosePops.Num());
-
   // Consider pop changes.
   // TODO: Implement.
 }
 
 void AMarketEconomy::InitializeEconomyData() {
+  int32 TotalMShare = 0;
   TMap<EPopType, TMap<EPopWealthType, FBasePopTypeEconomyData>> PopEconGenDataMap;
   TArray<FBasePopTypeToEconomyRow*> BasePopTypeToEconomyRows;
   BasePopTypeToEconomyTable->GetAllRows<FBasePopTypeToEconomyRow>("", BasePopTypeToEconomyRows);
@@ -192,9 +190,24 @@ void AMarketEconomy::InitializeEconomyData() {
                                                              Row->ItemSpendPercent,
                                                              Row->ItemNeeds,
                                                          });
+    TotalMShare += Row->MSharePercent;
   }
-
   check(PopEconGenDataMap[EPopType::Common].Contains(EPopWealthType::Middle));
+
+  UE_LOG(LogTemp, Warning, TEXT("Total MShare: %d"), TotalMShare);
+  UE_LOG(LogTemp, Warning, TEXT("Total MShare: %f"), 100. / (float)TotalMShare);
+
+  // * Equalize all percentages.
+  for (auto& PopType : PopEconGenDataMap) {
+    for (auto& PopEconGen : PopType.Value) {
+      if (TotalMShare != 100) PopEconGen.Value.MSharePercent *= 100. / (float)TotalMShare;
+
+      int32 TotalItemSpend = 0;
+      for (auto& ItemSpend : PopEconGen.Value.ItemSpendPercent) TotalItemSpend += ItemSpend.Value;
+      if (TotalItemSpend != 100)
+        for (auto& ItemSpend : PopEconGen.Value.ItemSpendPercent) ItemSpend.Value *= 100. / (float)TotalItemSpend;
+    }
+  }
 
   AllCustomerPops.Empty();
   TArray<FCustomerPopDataRow*> CustomerPopDataTableRows;
@@ -253,8 +266,10 @@ void AMarketEconomy::InitializeEconomyData() {
     AveragePriceMap.Add(WealthType, 0);
     ItemCountMap.Add(WealthType, 0);
   }
-  for (auto& Pop : PopMoneySpendDataArray)
-    for (auto WealthType : TEnumRange<EItemWealthType>()) AverageNeedsMap[WealthType] += Pop.ItemNeeds[WealthType];
+  for (auto& Pop : AllCustomerPops)
+    for (auto WealthType : TEnumRange<EItemWealthType>())
+      AverageNeedsMap[WealthType] += Pop.EconData.ItemNeeds[WealthType] * Pop.EconData.Population *
+                                     Pop.EconData.MSharePercent / 100 * Pop.EconData.ItemSpendPercent[WealthType] / 100;
   for (auto& Item : EconItems) {
     AveragePriceMap[Item.ItemWealthType] += Item.CurrentPrice;
     ItemCountMap[Item.ItemWealthType] += 1;

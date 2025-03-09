@@ -145,6 +145,8 @@ struct FPopMoneySpendData {
   TMap<EItemWealthType, float> ItemSpendPercent;
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, int32> ItemNeeds;
+  UPROPERTY(EditAnywhere)
+  TMap<EItemWealthType, float> ItemNeedsFulfilled;
 };
 
 USTRUCT()

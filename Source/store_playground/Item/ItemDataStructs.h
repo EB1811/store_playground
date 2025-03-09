@@ -97,7 +97,9 @@ struct FItemMetaData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  bool Stackable;
+  bool bStackable;
+  UPROPERTY(EditAnywhere)
+  bool bUnique;
 };
 
 USTRUCT()
