@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Item/ItemDataStructs.h"
 #include "CustomerAIComponent.generated.h"
 
 UENUM()
@@ -17,13 +18,7 @@ enum class ECustomerState : uint8 {
 };
 
 UENUM()
-enum class ECustomerType : uint8 {
-  Unique,
-  Farmer,
-  Merchant,
-  Noble,
-  Peasant,
-};
+enum class ECustomerType : uint8 { Unique, Generic };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class STORE_PLAYGROUND_API UCustomerAIComponent : public UActorComponent {
@@ -36,6 +31,11 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerType CustomerType;
+
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  TArray<EItemEconType> ItemEconTypes;
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  float MoneyToSpend;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerAttitude Attitude;
 

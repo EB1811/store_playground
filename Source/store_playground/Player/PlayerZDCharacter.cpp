@@ -172,19 +172,18 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
 }
 
 void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI, CustomerAI->NegotiationAI->StockDisplayInventory,
-                                      Item->MarketData.BasePrice);
+  NegotiationSystem->StartNegotiation(Item, CustomerAI, CustomerAI->NegotiationAI->StockDisplayInventory);
   HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterNpcStore(UInventoryComponent* StoreInventoryC) {
   auto StoreToPlayerFunc = [this, StoreInventoryC](UItemBase* DroppedItem, UInventoryComponent* SourceInventory) {
     check(SourceInventory == StoreInventoryC);
-    BuyItem(SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
+    BuyItem(MarketEconomy, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
   };
   auto PlayerToStoreFunc = [this, StoreInventoryC](UItemBase* DroppedItem, UInventoryComponent* SourceInventory) {
     check(SourceInventory == PlayerInventoryComponent);
-    SellItem(StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
+    SellItem(MarketEconomy, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
   };
 
   HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);

@@ -52,10 +52,10 @@ class STORE_PLAYGROUND_API UNegotiationSystem : public UObject {
   GENERATED_BODY()
 
 public:
-  UNegotiationSystem() : NegotiationState(ENegotiationState::None), BasePrice(0), OfferedPrice(0) {}
+  UNegotiationSystem() : BoughtAtPrice(0), MarketPrice(0), NegotiationState(ENegotiationState::None), OfferedPrice(0) {}
 
-  // UPROPERTY(EditAnywhere, Category = "Negotiation")
-  // TMap<FName, struct FDialoguesArray> UniqueNpcDialoguesMap;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  const class AMarketEconomy* MarketEconomy;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UDialogueSystem* DialogueSystem;
@@ -63,14 +63,14 @@ public:
   class AStore* Store;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  ENegotiationState NegotiationState;
+  float BoughtAtPrice;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  float BasePrice;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  float OfferedPrice;
+  float MarketPrice;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  int32 Quantity;
+  ENegotiationState NegotiationState;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  float OfferedPrice;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   TArray<const class UItemBase*> NegotiatedItems;
@@ -90,7 +90,6 @@ public:
   void StartNegotiation(const class UItemBase* NegotiatedItem,
                         class UCustomerAIComponent* _CustomerAI,
                         class UInventoryComponent* _FromInventory,
-                        float BasePrice,
                         ENegotiationState InitState = ENegotiationState::None);
 
   struct FNextDialogueRes NPCRequestNegotiation();

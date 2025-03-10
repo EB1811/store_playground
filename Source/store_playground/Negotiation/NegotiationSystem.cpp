@@ -6,22 +6,27 @@
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Market/MarketEconomy.h"
 
 void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
                                           UCustomerAIComponent* _CustomerAI,
                                           UInventoryComponent* _FromInventory,
-                                          float Price,
                                           ENegotiationState InitState) {
   NegotiatedItems.Empty();
   NegotiatedItems.Add(Item);
   Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
                                                                                    : NegotiationType::PlayerSell;
-  Quantity = 1;
   CustomerAI = _CustomerAI;
   FromInventory = _FromInventory;
-  BasePrice = Price;
-  OfferedPrice = BasePrice;
   NegotiationState = InitState;
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
+
+  BoughtAtPrice = Item->PriceData.BoughtAt;
+  MarketPrice = EconItem->CurrentPrice;
+  OfferedPrice = MarketPrice;
 
   CustomerAI->StartNegotiation();
   DialogueSystem->ResetDialogue();
@@ -82,7 +87,7 @@ void UNegotiationSystem::OfferPrice(float Price) {
 
   if (NegotiationState == ENegotiationState::NpcConsider)
     CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderOffer(Type == NegotiationType::PlayerSell ? true : false,
-                                                                     BasePrice, OfferedPrice, Price);
+                                                                     MarketPrice, OfferedPrice, Price);
 
   OfferedPrice = Price;
 }

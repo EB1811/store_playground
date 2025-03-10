@@ -45,7 +45,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Customer Blueprint")
   TSubclassOf<class ACustomer> CustomerClass;
 
-  class AGlobalDataManager* GlobalDataManager;
+  const class AGlobalDataManager* GlobalDataManager;
+  const class AMarketEconomy* MarketEconomy;
 
   UPROPERTY(EditAnywhere, Category = "Manager Params")
   struct FManagerParams ManagerParams;
@@ -61,7 +62,7 @@ public:
   TArray<FGuid> CustomersPickingIds;
 
   UPROPERTY(EditAnywhere, Category = "Player Stock")
-  class AStore* Store;
+  const class AStore* Store;
 
   // ? Have separate arrays for each state?
   UPROPERTY(EditAnywhere, Category = "Customers Array")

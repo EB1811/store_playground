@@ -4,11 +4,11 @@ FInventoryTransferRes TransferItem(UInventoryComponent* From,
                                    UInventoryComponent* To,
                                    UItemBase* Item,
                                    int32 Quantity) {
-  if (!From->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
+  if (!From->ItemsArray.ContainsByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
     return FInventoryTransferRes{false};
 
-  if (To->ItemsArray.Num() >= To->MaxSlots) return FInventoryTransferRes{false};
+  if (!To->ItemsArray.ContainsByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+    if (To->ItemsArray.Num() >= To->MaxSlots) return FInventoryTransferRes{false};
 
   switch (From->InventoryType) {
     case EInventoryType::Container:

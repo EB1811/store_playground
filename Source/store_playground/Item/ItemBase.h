@@ -6,6 +6,14 @@
 #include "ItemDataStructs.h"
 #include "ItemBase.generated.h"
 
+USTRUCT()
+struct FItemPriceData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  float BoughtAt;
+};
+
 UCLASS() class STORE_PLAYGROUND_API UItemBase : public UObject {
   GENERATED_BODY()
 
@@ -14,22 +22,30 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FName ItemID;
-  // * Each item will have dynamic flavor data, resulting in different unique item IDs from the same base item ID.
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FGuid UniqueItemID;
 
   UPROPERTY(EditAnywhere, Category = "Item Data", meta = (UIMin = 1))
   int32 Quantity;
 
-  UPROPERTY(EditAnywhere, Category = "Item Data | Flavor")
-  FItemFlavorData FlavorData;
+  UPROPERTY(EditAnywhere)
+  EItemType ItemType;
+
+  UPROPERTY(EditAnywhere)
+  EItemWealthType ItemWealthType;
+  UPROPERTY(EditAnywhere)
+  EItemEconType ItemEconType;
+
   UPROPERTY(EditAnywhere, Category = "Item Data")
-  FItemMetaData MetaData;
+  FItemTextData TextData;
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FItemAssetData AssetData;
 
-  UPROPERTY(EditAnywhere, Category = "Item Data | Market")
-  FItemMarketData MarketData;
+  UPROPERTY(EditAnywhere, Category = "Item Data")
+  FItemFlavorData FlavorData;
+
+  UPROPERTY(EditAnywhere, Category = "Item Data")
+  FItemPriceData PriceData;
 
   // UPROPERTY()
   // class UInventoryComponent* OwningInventory;

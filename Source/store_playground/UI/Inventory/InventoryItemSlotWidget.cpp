@@ -18,7 +18,7 @@ void UInventoryItemSlotWidget::NativeConstruct() {
   if (!ItemRef) return;
 
   ItemIcon->SetBrushFromTexture(ItemRef->AssetData.Icon);
-  // ItemName->SetText(ItemRef->FlavorData.TextData.Name);
+  ItemName->SetText(ItemRef->TextData.Name);
   if (ItemRef->Quantity > 1) ItemQuantity->SetText(FText::FromString(FString::FromInt(ItemRef->Quantity)));
 }
 

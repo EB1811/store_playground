@@ -90,4 +90,8 @@ public:
   //* Game Store Phase Manager - to control the global game state.
   UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
   class AStorePhaseManager* StorePhaseManager;
+
+  //* MarketEconomy
+  UPROPERTY(EditAnywhere, Category = "Character | MarketEconomy")
+  class AMarketEconomy* MarketEconomy;
 };

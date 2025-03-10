@@ -16,28 +16,33 @@ enum class EPopType : uint8 {
   Criminal UMETA(DisplayName = "Criminal"),
   Financial UMETA(DisplayName = "Financial"),
 };
+ENUM_RANGE_BY_COUNT(EPopType, 6);
 UENUM()
 enum class EPopWealthType : uint8 {
   Poorer UMETA(DisplayName = "Poorer"),
   Middle UMETA(DisplayName = "Middle"),
   Upper UMETA(DisplayName = "Upper"),
 };
+ENUM_RANGE_BY_COUNT(EPopWealthType, 3);
 
 USTRUCT()
 struct FCustomerPopDataRow : public FTableRowBase {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  FName PopID;
+
+  UPROPERTY(EditAnywhere)
   FText PopName;
 
+  UPROPERTY(EditAnywhere)
+  int32 InitPopulation;
   UPROPERTY(EditAnywhere)
   EPopType PopType;
   UPROPERTY(EditAnywhere)
   EPopWealthType WealthType;
   UPROPERTY(EditAnywhere)
   TArray<EItemEconType> ItemEconTypes;
-  UPROPERTY(EditAnywhere)
-  int32 InitPopulation;
 };
 
 // * Alternative to micro managing each pop's economy.
@@ -78,7 +83,7 @@ struct FPopEconData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FGuid PopID;
+  FName PopID;
 
   UPROPERTY(EditAnywhere)
   int32 Population;
@@ -98,7 +103,7 @@ struct FCustomerPop {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FGuid PopID;
+  FName PopID;
   UPROPERTY(EditAnywhere)
   FText PopName;
 
@@ -118,7 +123,7 @@ struct FPopEconGenData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FGuid PopID;
+  FName PopID;
 
   UPROPERTY(EditAnywhere)
   int32 Population;
@@ -134,7 +139,7 @@ struct FPopMoneySpendData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FGuid PopID;
+  FName PopID;
 
   UPROPERTY(EditAnywhere)
   float Money;

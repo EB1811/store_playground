@@ -6,7 +6,7 @@
 UCustomerAIComponent::UCustomerAIComponent() {
   PrimaryComponentTick.bCanEverTick = false;
 
-  CustomerType = ECustomerType::Peasant;
+  CustomerType = ECustomerType::Generic;
 }
 
 void UCustomerAIComponent::BeginPlay() {

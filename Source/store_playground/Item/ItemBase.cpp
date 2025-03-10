@@ -9,12 +9,15 @@ UItemBase::UItemBase() {}
 UItemBase* UItemBase::CreateItemCopy() const {
   UItemBase* ItemCopy = NewObject<UItemBase>(UItemBase::StaticClass());
   ItemCopy->ItemID = ItemID;
-  ItemCopy->UniqueItemID = UniqueItemID;
+  ItemCopy->UniqueItemID = FGuid::NewGuid();
   ItemCopy->Quantity = Quantity;
-  ItemCopy->FlavorData = FlavorData;
-  ItemCopy->MetaData = MetaData;
+  ItemCopy->ItemType = ItemType;
+  ItemCopy->ItemWealthType = ItemWealthType;
+  ItemCopy->ItemEconType = ItemEconType;
+  ItemCopy->TextData = TextData;
   ItemCopy->AssetData = AssetData;
-  ItemCopy->MarketData = MarketData;
+  ItemCopy->FlavorData = FlavorData;
+  ItemCopy->PriceData = PriceData;
 
   return ItemCopy;
 }

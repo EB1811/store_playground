@@ -12,25 +12,27 @@ void UInventoryComponent::BeginPlay() {
   Super::BeginPlay();
 
   for (FDataTableRowHandle ItemRowHandle : InitItemIds) {
-    if (FItemData* ItemData = ItemRowHandle.GetRow<FItemData>(ItemRowHandle.RowName.ToString())) {
+    if (FItemDataRow* Row = ItemRowHandle.GetRow<FItemDataRow>(ItemRowHandle.RowName.ToString())) {
       UItemBase* Item = NewObject<UItemBase>(this);
 
-      Item->ItemID = ItemData->ItemID;
-      // Item->Quantity = std::clamp(Quantity, 1, ItemData->MetaData.MaxStackSize);
-      Item->Quantity = 1;
+      Item->ItemID = Row->ItemID;
       Item->UniqueItemID = FGuid::NewGuid();
-      Item->FlavorData = ItemData->FlavorData;
-      Item->MetaData = ItemData->MetaData;
-      Item->AssetData = ItemData->AssetData;
-      Item->MarketData = ItemData->MarketData;
+      Item->Quantity = 1;
+      Item->ItemType = Row->ItemType;
+      Item->ItemWealthType = Row->ItemWealthType;
+      Item->ItemEconType = Row->ItemEconType;
+      Item->TextData = Row->TextData;
+      Item->AssetData = Row->AssetData;
+      Item->FlavorData = Row->FlavorData;
+      Item->PriceData.BoughtAt = Row->BasePrice;
       AddItem(Item, 1);
     }
   }
 }
 
 void UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) {
-  if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; })) {
+  if (TObjectPtr<UItemBase>* ArrayItem =
+          ItemsArray.FindByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; })) {
     if (InventoryType == EInventoryType::Container) (*ArrayItem)->Quantity += Quantity;
     return;
   }
@@ -41,8 +43,8 @@ void UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) {
 }
 
 void UInventoryComponent::RemoveItem(const UItemBase* Item, int32 Quantity) {
-  if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; })) {
+  if (TObjectPtr<UItemBase>* ArrayItem =
+          ItemsArray.FindByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; })) {
     (*ArrayItem)->Quantity -= Quantity;
     if ((*ArrayItem)->Quantity <= 0) ItemsArray.RemoveSingle(*ArrayItem);
   }

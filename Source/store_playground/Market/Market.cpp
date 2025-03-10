@@ -13,42 +13,44 @@ AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
 void AMarket::BeginPlay() {
   Super::BeginPlay();
 
-  // check(NpcStoreDialoguesTable && AllItemsTable && NPCStoreClass);
+  check(NpcStoreDialoguesTable && AllItemsTable && NPCStoreClass);
 
-  // TArray<FDialogueDataTable*> NpcStoreDialoguesRows;
-  // NpcStoreDialoguesTable->GetAllRows<FDialogueDataTable>("", NpcStoreDialoguesRows);
-  // for (auto* Row : NpcStoreDialoguesRows)
-  //   NpcStoreDialogues.Add({
-  //       Row->DialogueChainID,
-  //       Row->DialogueType,
-  //       Row->DialogueText,
-  //       Row->Action,
-  //       Row->DialogueSpeaker,
-  //       Row->ChoicesAmount,
-  //   });
+  TArray<FDialogueDataTable*> NpcStoreDialoguesRows;
+  NpcStoreDialoguesTable->GetAllRows<FDialogueDataTable>("", NpcStoreDialoguesRows);
+  for (auto* Row : NpcStoreDialoguesRows)
+    NpcStoreDialogues.Add({
+        Row->DialogueChainID,
+        Row->DialogueType,
+        Row->DialogueText,
+        Row->Action,
+        Row->DialogueSpeaker,
+        Row->ChoicesAmount,
+    });
 
-  // TArray<FItemData*> ItemRows;
-  // AllItemsTable->GetAllRows<FItemData>("", ItemRows);
-  // for (auto Row : ItemRows) {
-  //   UItemBase* Item = NewObject<UItemBase>(this);
+  TArray<FItemDataRow*> ItemRows;
+  AllItemsTable->GetAllRows<FItemDataRow>("", ItemRows);
+  for (auto Row : ItemRows) {
+    UItemBase* Item = NewObject<UItemBase>(this);
 
-  //   Item->ItemID = Row->ItemID;
-  //   Item->Quantity = 1;
-  //   Item->UniqueItemID = FGuid::NewGuid();
-  //   Item->FlavorData = Row->FlavorData;
-  //   Item->MetaData = Row->MetaData;
-  //   Item->AssetData = Row->AssetData;
-  //   Item->MarketData = Row->MarketData;
+    Item->ItemID = Row->ItemID;
+    Item->UniqueItemID = FGuid::NewGuid();
+    Item->Quantity = 1;
+    Item->ItemType = Row->ItemType;
+    Item->ItemWealthType = Row->ItemWealthType;
+    Item->ItemEconType = Row->ItemEconType;
+    Item->TextData = Row->TextData;
+    Item->AssetData = Row->AssetData;
+    Item->FlavorData = Row->FlavorData;
+    Item->PriceData.BoughtAt = Row->BasePrice;
 
-  //   AllItems.Add(Item);
-  //   MarketPrices.Add(Item->ItemID, Item->MarketData.BasePrice);
-  // }
+    AllItems.Add(Item);
+  }
 
-  // check(NpcStoreDialogues.Num() > 0);
-  // check(AllItems.Num() > 0);
+  check(NpcStoreDialogues.Num() > 0);
+  check(AllItems.Num() > 0);
 
-  // NpcStoreDialoguesTable = nullptr;
-  // AllItemsTable = nullptr;
+  NpcStoreDialoguesTable = nullptr;
+  AllItemsTable = nullptr;
 }
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -86,23 +88,13 @@ TArray<int32> AMarket::GetRandomDialogueIndexes() {
   return RandomDialogueIndexes;
 }
 
+// TODO: Get items based on factors.
 TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) {
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
     int32 RandomIndex = FMath::RandRange(0, AllItems.Num() - 1);
-    NewItems.Add(CreateRandomItem(AllItems[RandomIndex]));
+    NewItems.Add(AllItems[RandomIndex]->CreateItemCopy());
   }
 
   return NewItems;
-}
-
-// TODO: Implement random values.
-UItemBase* AMarket::CreateRandomItem(UItemBase* FromBaseItem) {
-  // TODO: Add weights to the random item generation.
-  auto BaseItemCopy = FromBaseItem->CreateItemCopy();
-  BaseItemCopy->FlavorData.Quality = EItemQuality(FMath::RandRange(0, 3));
-
-  BaseItemCopy->MarketData.CurrentPrice = MarketPrices[BaseItemCopy->ItemID];
-
-  return BaseItemCopy;
 }

@@ -35,7 +35,7 @@ void AMarketEconomy::PerformEconomyTick() {
   // Calculate total wealth.
   TotalWealth = 0;
   for (FPopEconGenData& PopGen : PopEconGenDataArray) TotalWealth += PopGen.MGen * PopGen.Population;
-  TMap<FGuid, float> PopWealthMap;
+  TMap<FName, float> PopWealthMap;
   for (FPopEconGenData& PopGen : PopEconGenDataArray)  // %share = diff(pop ratio, base %)
     PopWealthMap.Add(PopGen.PopID,
                      TotalWealth * (((PopGen.MSharePercent / 100) + (PopGen.Population / TotalPopulation)) * 0.5));
@@ -45,8 +45,8 @@ void AMarketEconomy::PerformEconomyTick() {
   TMap<EItemWealthType, float> TotalBoughtMap;
   for (auto WealthType : TEnumRange<EItemWealthType>()) TotalBoughtMap.Add(WealthType, 0);
   // ? Record bought items for each pop?
-  TArray<FGuid> NeedsFulfilledPops;
-  TArray<FGuid> NeedsNotClosePops;
+  TArray<FName> NeedsFulfilledPops;
+  TArray<FName> NeedsNotClosePops;
 
   for (FPopMoneySpendData& PopSpend : PopMoneySpendDataArray) {
     PopSpend.Money = PopWealthMap[PopSpend.PopID];
@@ -192,12 +192,23 @@ void AMarketEconomy::InitializeEconomyData() {
                                                          });
     TotalMShare += Row->MSharePercent;
   }
-  check(PopEconGenDataMap[EPopType::Common].Contains(EPopWealthType::Middle));
+
+  // Check that all wealth types are present for each pop type.
+  // for (auto PopType : TEnumRange<EPopType>()) {
+  //   if (!PopEconGenDataMap.Contains(PopType))
+  //     checkf(false, TEXT("PopType %s not found in PopEconGenDataMap"),
+  //            *UEnum::GetDisplayValueAsText(PopType).ToString());
+  //   for (auto WealthType : TEnumRange<EPopWealthType>())
+  //     if (!PopEconGenDataMap[PopType].Contains(WealthType))
+  //       checkf(false, TEXT("WealthType %s not found in PopEconGenDataMap for PopType %s"),
+  //              *UEnum::GetDisplayValueAsText(WealthType).ToString(),
+  //              *UEnum::GetDisplayValueAsText(PopType).ToString());
+  // }
 
   UE_LOG(LogTemp, Warning, TEXT("Total MShare: %d"), TotalMShare);
   UE_LOG(LogTemp, Warning, TEXT("Total MShare: %f"), 100. / (float)TotalMShare);
 
-  // * Equalize all percentages.
+  // Equalize all percentages.
   for (auto& PopType : PopEconGenDataMap) {
     for (auto& PopEconGen : PopType.Value) {
       if (TotalMShare != 100) PopEconGen.Value.MSharePercent *= 100. / (float)TotalMShare;
@@ -213,9 +224,11 @@ void AMarketEconomy::InitializeEconomyData() {
   TArray<FCustomerPopDataRow*> CustomerPopDataTableRows;
   CustomerPopDataTable->GetAllRows<FCustomerPopDataRow>("", CustomerPopDataTableRows);
   for (auto* Row : CustomerPopDataTableRows) {
-    FGuid PopID = FGuid::NewGuid();
+    check(PopEconGenDataMap.Contains(Row->PopType));
+    check(PopEconGenDataMap[Row->PopType].Contains(Row->WealthType));
+
     FPopEconData PopEconData = {
-        PopID,
+        Row->PopID,
         Row->InitPopulation,
         PopEconGenDataMap[Row->PopType][Row->WealthType].MGen,
         PopEconGenDataMap[Row->PopType][Row->WealthType].MSharePercent,
@@ -223,21 +236,22 @@ void AMarketEconomy::InitializeEconomyData() {
         PopEconGenDataMap[Row->PopType][Row->WealthType].ItemNeeds,
     };
 
-    AllCustomerPops.Add({PopID,
+    AllCustomerPops.Add({Row->PopID,
                          Row->PopName,
                          Row->PopType,
                          Row->WealthType,
                          Row->ItemEconTypes,
                          {
-                             PopID,
+                             Row->PopID,
                              Row->InitPopulation,
                              PopEconData.MGen,
                              PopEconData.MSharePercent,
                              PopEconData.ItemSpendPercent,
                              PopEconData.ItemNeeds,
                          }});
-    PopEconGenDataArray.Add({PopID, PopEconData.Population, PopEconData.MGen, PopEconData.MSharePercent});
-    PopMoneySpendDataArray.Add({PopID, 0, PopEconData.Population, PopEconData.ItemSpendPercent, PopEconData.ItemNeeds});
+    PopEconGenDataArray.Add({Row->PopID, PopEconData.Population, PopEconData.MGen, PopEconData.MSharePercent});
+    PopMoneySpendDataArray.Add(
+        {Row->PopID, 0, PopEconData.Population, PopEconData.ItemSpendPercent, PopEconData.ItemNeeds});
 
     TotalPopulation += PopEconData.Population;
   }
@@ -297,12 +311,12 @@ void AMarketEconomy::InitializeEconomyData() {
   for (auto& Pop : AllCustomerPops) Pop.EconData.MGen *= MGenMulti;
   for (auto& Pop : PopEconGenDataArray) Pop.MGen *= MGenMulti;
 
-  // * Calc BoughtToPriceMulti.
+  // Calc BoughtToPriceMulti.
   for (auto& Item : EconItems)
     Item.BoughtToPriceMulti =
         (Item.CurrentPrice / (AverageNeedsMap[Item.ItemWealthType])) * EconomyParams.SingleUnitPriceMulti;
 
-  // * Setting WealthTypePricesMap.
+  // Setting WealthTypePricesMap.
   for (auto WealthType : TEnumRange<EItemWealthType>()) WealthTypePricesMap.Add(WealthType, 0);
   for (auto WealthType : TEnumRange<EItemWealthType>())
     WealthTypePricesMap[WealthType] = (AveragePriceMap[WealthType] * EconomyParams.SingleUnitPriceMulti);

@@ -13,6 +13,7 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/Market/MarketEconomy.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
@@ -60,7 +61,7 @@ void ACustomerAIManager::EndCustomerAI() {
 }
 
 void ACustomerAIManager::SpawnCustomers() {
-  check(CustomerClass);
+  check(CustomerClass && GlobalDataManager && MarketEconomy && Store);
   if (AllCustomers.Num() >= ManagerParams.MaxCustomers) return;
 
   LastSpawnTime = GetWorld()->GetTimeSeconds();
@@ -71,7 +72,7 @@ void ACustomerAIManager::SpawnCustomers() {
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
   // TODO: Spawn conditions.
-  if (ManagerParams.UniqueNpcBaseSpawnChance > FMath::FRand() * 100) {
+  if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) {
     FUniqueNpcData UniqueNpcData = GlobalDataManager->GetRandomUniqueNpcData();
     UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
     ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
@@ -107,20 +108,31 @@ void ACustomerAIManager::SpawnCustomers() {
         CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
         GetActorRotation(), SpawnParams);
 
+    // TODO: Spawn probabilities with weights.
+    const FGenericCustomerData RandomCustomerData =
+        GlobalDataManager
+            ->GenericCustomersArray[FMath::RandRange(0, GlobalDataManager->GenericCustomersArray.Num() - 1)];
+    const FCustomerPop* CustomerPopData = MarketEconomy->AllCustomerPops.FindByPredicate(
+        [RandomCustomerData](const FCustomerPop& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
+    const FPopMoneySpendData* PopMoneySpendData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
+        [RandomCustomerData](const FPopMoneySpendData& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
+    check(CustomerPopData && PopMoneySpendData);
+
     Customer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
 
     // TODO: Add leaving dialogue.
     Customer->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomCustomerDialogue();
 
-    Customer->CustomerAIComponent->CustomerType = ECustomerType::Peasant;
-    Customer->CustomerAIComponent->Attitude = ECustomerAttitude::Friendly;
+    Customer->CustomerAIComponent->CustomerType = ECustomerType::Generic;
+    Customer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
+    Customer->CustomerAIComponent->MoneyToSpend = PopMoneySpendData->Money / PopMoneySpendData->Population;
+    Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
 
     // ? Maybe have two arrays for customers ai and customer interaction components?
     AllCustomers.Add(Customer);
   }
 }
 
-// TODO: Monitor performance.
 void ACustomerAIManager::PerformCustomerAILoop() {
   check(Store);
 
@@ -174,12 +186,15 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 void ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   if (Store->StoreStockItems.Num() <= 0 || CustomersPickingIds.Num() >= Store->StoreStockItems.Num()) return;
 
-  // TODO: Picked items will depend on customer type.
   TArray<FStockItem> NonPickedItems = Store->StoreStockItems.FilterByPredicate(
       [this](const FStockItem& StockItem) { return !CustomersPickingIds.Contains(StockItem.Item->UniqueItemID); });
+  TArray<FStockItem> RelevantItems = NonPickedItems.FilterByPredicate([this, CustomerAI](const FStockItem& StockItem) {
+    return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
+           CustomerAI->MoneyToSpend >= StockItem.Item->PriceData.BoughtAt;
+  });
 
-  int32 RandomIndex = FMath::RandRange(0, NonPickedItems.Num() - 1);
-  const FStockItem& StockItem = NonPickedItems[RandomIndex];
+  int32 RandomIndex = FMath::RandRange(0, RelevantItems.Num() - 1);
+  const FStockItem& StockItem = RelevantItems[RandomIndex];
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
   CustomerAI->NegotiationAI->RelevantItem = StockItem.Item;
   CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;

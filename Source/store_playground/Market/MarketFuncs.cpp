@@ -2,33 +2,43 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/Market/MarketEconomy.h"
 
-void BuyItem(UInventoryComponent* NPCStoreInventory,
+void BuyItem(AMarketEconomy* MarketEconomy,
+             UInventoryComponent* NPCStoreInventory,
              UInventoryComponent* PlayerInventory,
              AStore* PLayerStore,
              UItemBase* Item,
              int32 Quantity) {
   check(NPCStoreInventory && PlayerInventory && PLayerStore && Item);
   if (!NPCStoreInventory->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
+          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
     return;
 
-  if (PLayerStore->Money < Item->MarketData.CurrentPrice * Quantity) return;
+  // TODO: Add prices
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
+  if (PLayerStore->Money < EconItem->CurrentPrice * Quantity) return;
 
   if (TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess)
-    PLayerStore->Money -= Item->MarketData.CurrentPrice * Quantity;
+    PLayerStore->Money -= EconItem->CurrentPrice * Quantity;
 }
 
-void SellItem(UInventoryComponent* NPCStoreInventory,
+void SellItem(AMarketEconomy* MarketEconomy,
+              UInventoryComponent* NPCStoreInventory,
               UInventoryComponent* PlayerInventory,
               AStore* PlayerStore,
               UItemBase* Item,
               int32 Quantity) {
   check(NPCStoreInventory && PlayerInventory && PlayerStore && Item);
   if (!PlayerInventory->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
+          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
     return;
 
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
   if (TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess)
-    PlayerStore->Money += Item->MarketData.CurrentPrice * Quantity;
+    PlayerStore->Money += EconItem->CurrentPrice * Quantity;
 }

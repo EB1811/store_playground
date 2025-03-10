@@ -6,6 +6,7 @@
 #include "GameFramework/Info.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
+#include "store_playground/AI/CustomerDataStructs.h"
 #include "GlobalDataManager.generated.h"
 
 // * Global data store to hold data used by random generation systems.
@@ -23,6 +24,8 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> GenericCustomersDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UniqueNpcDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UniqueNpcDialoguesTable;
@@ -35,6 +38,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Data")
   struct FDataTableCategoryHandle HostileNegDialoguesTable;
 
+  UPROPERTY(EditAnywhere, Category = "NPC")
+  TArray<struct FGenericCustomerData> GenericCustomersArray;
   UPROPERTY(EditAnywhere, Category = "NPC")
   TArray<struct FUniqueNpcData> UniqueNpcArray;
 

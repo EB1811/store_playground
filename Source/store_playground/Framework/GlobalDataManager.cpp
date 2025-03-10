@@ -9,7 +9,7 @@ AGlobalDataManager::AGlobalDataManager() { PrimaryActorTick.bCanEverTick = false
 void AGlobalDataManager::BeginPlay() {
   Super::BeginPlay();
 
-  check(UniqueNpcDataTable && UniqueNpcDialoguesTable && CustomerDialoguesTable &&
+  check(GenericCustomersDataTable && UniqueNpcDataTable && UniqueNpcDialoguesTable && CustomerDialoguesTable &&
         FriendlyNegDialoguesTable.DataTable && NeutralNegDialoguesTable.DataTable &&
         HostileNegDialoguesTable.DataTable);
 
@@ -70,6 +70,18 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNeg
 }
 
 void AGlobalDataManager::InitializeNPCData() {
+  GenericCustomersArray.Empty();
+  TArray<FCustomerDataRow*> GenericCustomersRows;
+  GenericCustomersDataTable->GetAllRows<FCustomerDataRow>("", GenericCustomersRows);
+  for (auto* Row : GenericCustomersRows)
+    GenericCustomersArray.Add({
+        Row->CustomerID,
+        Row->LinkedPopID,
+        Row->CustomerName,
+        Row->InitAttitude,
+        Row->AssetData,
+    });
+
   UniqueNpcArray.Empty();
   TArray<FUniqueNpcDataTable*> UniqueNpcRows;
   UniqueNpcDataTable->GetAllRows<FUniqueNpcDataTable>("", UniqueNpcRows);
@@ -83,8 +95,10 @@ void AGlobalDataManager::InitializeNPCData() {
         Row->AssetData,
     });
 
-  UE_LOG(LogTemp, Warning, TEXT("UniqueNpc Data: %d"), UniqueNpcArray.Num());
+  check(GenericCustomersArray.Num() > 0);
+  check(UniqueNpcArray.Num() > 0);
 
+  GenericCustomersDataTable = nullptr;
   UniqueNpcDataTable = nullptr;
 }
 

@@ -20,10 +20,12 @@ public:
 
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* ItemName;
+
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* ItemQuantity;
+  class UTextBlock* BoughtAtPrice;
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* BasePrice;
+  class UTextBlock* MarketPrice;
+
   UPROPERTY(meta = (BindWidget))
   class UImage* ItemIcon;
   UPROPERTY(meta = (BindWidget))

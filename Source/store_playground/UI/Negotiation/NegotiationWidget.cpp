@@ -27,17 +27,15 @@ void UNegotiationWidget::InitNegotiationUI() {
   check(NegotiationSystemRef->NegotiatedItems.Num() > 0);
 
   auto FirstItem = NegotiationSystemRef->NegotiatedItems[0];
-  // NegotiationElementWidget->ItemName->SetText(FirstItem->FlavorData.TextData.Name);
-  NegotiationElementWidget->BasePrice->SetText(FText::FromString(FString::FromInt(NegotiationSystemRef->BasePrice)));
+  NegotiationElementWidget->ItemName->SetText(FirstItem->TextData.Name);
+  NegotiationElementWidget->BoughtAtPrice->SetText(
+      FText::FromString(FString::FromInt(NegotiationSystemRef->BoughtAtPrice)));
+  NegotiationElementWidget->MarketPrice->SetText(
+      FText::FromString(FString::FromInt(NegotiationSystemRef->MarketPrice)));
   NegotiationElementWidget->ItemIcon->SetBrushFromTexture(FirstItem->AssetData.Icon);
-  if (NegotiationSystemRef->Quantity > 1)
-    NegotiationElementWidget->ItemQuantity->SetText(
-        FText::FromString(FString::FromInt(NegotiationSystemRef->Quantity)));
-  else
-    NegotiationElementWidget->ItemQuantity->SetText(FText::FromString(""));
 
-  NegotiationElementWidget->PlayerOfferedPrice->SetMaxValue(NegotiationSystemRef->BasePrice * 2);
-  NegotiationElementWidget->PlayerOfferedPrice->SetMinValue(NegotiationSystemRef->BasePrice / 2);
+  NegotiationElementWidget->PlayerOfferedPrice->SetMaxValue(NegotiationSystemRef->BoughtAtPrice * 2);
+  NegotiationElementWidget->PlayerOfferedPrice->SetMinValue(NegotiationSystemRef->BoughtAtPrice / 2);
 
   DialogueWidget->CloseDialogueUI = [this] { OnReadDialogueButtonClicked(); };
 
@@ -49,13 +47,12 @@ void UNegotiationWidget::InitNegotiationUI() {
 }
 
 void UNegotiationWidget::RefreshNegotiationState() {
-  NegotiationElementWidget->OfferedPrice->SetText(FText::FromString(FString::FromInt(
-      NegotiationSystemRef->OfferedPrice > 0 ? NegotiationSystemRef->OfferedPrice : NegotiationSystemRef->BasePrice)));
+  NegotiationElementWidget->OfferedPrice->SetText(
+      FText::FromString(FString::FromInt(NegotiationSystemRef->OfferedPrice)));
   NegotiationElementWidget->NegotiationStateText->SetText(
       NegotiationStateToName[NegotiationSystemRef->NegotiationState]);
 
-  NegotiationElementWidget->PlayerOfferedPrice->SetValue(
-      NegotiationSystemRef->OfferedPrice > 0 ? NegotiationSystemRef->OfferedPrice : NegotiationSystemRef->BasePrice);
+  NegotiationElementWidget->PlayerOfferedPrice->SetValue(NegotiationSystemRef->OfferedPrice);
 
   switch (NegotiationSystemRef->NegotiationState) {
     case ENegotiationState::None: {

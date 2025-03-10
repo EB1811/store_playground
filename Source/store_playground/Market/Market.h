@@ -44,15 +44,16 @@ public:
 
   TArray<int32> GetRandomDialogueIndexes();
   TArray<class UItemBase*> GetNewRandomItems(int32 Amount);
-  class UItemBase* CreateRandomItem(class UItemBase* FromBaseItem);
 };
 
-void BuyItem(class UInventoryComponent* NPCStoreInventory,
+void BuyItem(class AMarketEconomy* MarketEconomy,
+             class UInventoryComponent* NPCStoreInventory,
              class UInventoryComponent* PlayerInventory,
              class AStore* PLayerStore,
              class UItemBase* Item,
              int32 Quantity = 1);
-void SellItem(class UInventoryComponent* NPCStoreInventory,
+void SellItem(class AMarketEconomy* MarketEconomy,
+              class UInventoryComponent* NPCStoreInventory,
               class UInventoryComponent* PlayerInventory,
               class AStore* PlayerStore,
               class UItemBase* Item,
