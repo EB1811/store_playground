@@ -88,8 +88,8 @@ TArray<int32> AMarket::GetRandomDialogueIndexes() {
   return RandomDialogueIndexes;
 }
 
-// TODO: Get items based on factors.
-TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) {
+// ? Get items based on factors?
+TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
     int32 RandomIndex = FMath::RandRange(0, AllItems.Num() - 1);

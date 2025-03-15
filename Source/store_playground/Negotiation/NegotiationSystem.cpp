@@ -1,4 +1,5 @@
 #include "NegotiationSystem.h"
+#include "Misc/AssertionMacros.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/AI/NegotiationAI.h"
@@ -8,25 +9,85 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Market/MarketEconomy.h"
 
-void UNegotiationSystem::StartNegotiation(const UItemBase* Item,
-                                          UCustomerAIComponent* _CustomerAI,
+UNegotiationSystem::UNegotiationSystem() {
+  NStateTransitions = {
+      FNStateAction{ENegotiationState::None, ENegotiationAction::OfferPrice, ENegotiationState::PlayerConsider},
+      FNStateAction{ENegotiationState::None, ENegotiationAction::NpcRequest, ENegotiationState::NpcRequest},
+      FNStateAction{ENegotiationState::None, ENegotiationAction::NpcStockCheckRequest,
+                    ENegotiationState::NpcStockCheckRequest},
+
+      FNStateAction{ENegotiationState::NpcRequest, ENegotiationAction::PlayerReadRequest,
+                    ENegotiationState::PlayerConsider},
+
+      // * Alternatively, stock check.
+      FNStateAction{ENegotiationState::NpcStockCheckRequest, ENegotiationAction::PlayerReadRequest,
+                    ENegotiationState::PlayerStockCheck},
+      FNStateAction{ENegotiationState::PlayerStockCheck, ENegotiationAction::PlayerShowItem,
+                    ENegotiationState::NpcStockCheckConsider},
+      FNStateAction{ENegotiationState::NpcStockCheckConsider, ENegotiationAction::Accept,
+                    ENegotiationState::PlayerConsider},
+      FNStateAction{ENegotiationState::NpcStockCheckConsider, ENegotiationAction::Reject, ENegotiationState::Rejected},
+
+      // * Negotiation back and forth.
+      FNStateAction{ENegotiationState::PlayerConsider, ENegotiationAction::OfferPrice, ENegotiationState::NpcConsider},
+      FNStateAction{ENegotiationState::PlayerConsider, ENegotiationAction::Accept, ENegotiationState::Accepted},
+      FNStateAction{ENegotiationState::PlayerConsider, ENegotiationAction::Reject, ENegotiationState::Rejected},
+      FNStateAction{ENegotiationState::NpcConsider, ENegotiationAction::OfferPrice, ENegotiationState::PlayerConsider},
+      FNStateAction{ENegotiationState::NpcConsider, ENegotiationAction::Accept, ENegotiationState::Accepted},
+      FNStateAction{ENegotiationState::NpcConsider, ENegotiationAction::Reject, ENegotiationState::Rejected},
+  };
+  BoughtAtPrice = 0;
+  MarketPrice = 0;
+  NegotiationState = ENegotiationState::None;
+  OfferedPrice = 0;
+  CustomerOfferResponse = {false, 0, {}};
+  Type = NegotiationType::PlayerBuy;
+}
+ENegotiationState UNegotiationSystem::GetNextNegotiationState(ENegotiationState FNStateAction,
+                                                              ENegotiationAction Action) {
+  for (const struct FNStateAction& Transition : NStateTransitions)
+    if (Transition.initial == FNStateAction && Transition.action == Action) return Transition.next;
+
+  checkf(false, TEXT("Invalid Action %d for FNStateAction %d"), (int)Action, (int)FNStateAction);
+
+  return ENegotiationState::None;
+}
+
+void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
+                                          const UItemBase* Item,
                                           UInventoryComponent* _FromInventory,
                                           ENegotiationState InitState) {
   NegotiatedItems.Empty();
-  NegotiatedItems.Add(Item);
   Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
                                                                                    : NegotiationType::PlayerSell;
   CustomerAI = _CustomerAI;
-  FromInventory = _FromInventory;
   NegotiationState = InitState;
 
-  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
-  check(EconItem);
+  BoughtAtPrice = 0;
+  MarketPrice = 0;
+  OfferedPrice = 0;
+  CustomerOfferResponse = {false, 0, {}};
 
-  BoughtAtPrice = Item->PriceData.BoughtAt;
-  MarketPrice = EconItem->CurrentPrice;
-  OfferedPrice = MarketPrice;
+  switch (CustomerAI->NegotiationAI->RequestType) {
+    case ECustomerRequestType::StockCheck: WantedItemType = CustomerAI->NegotiationAI->WantedItemType; break;
+    case ECustomerRequestType::BuyStockItem:
+    case ECustomerRequestType::SellItem: {
+      NegotiatedItems.Add(Item);
+      FromInventory = _FromInventory;
+
+      for (const UItemBase* NegotiatedItem : NegotiatedItems) {
+        const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+            [NegotiatedItem](const FEconItem& EconItem) { return EconItem.ItemID == NegotiatedItem->ItemID; });
+        check(EconItem);
+
+        BoughtAtPrice += Item->PriceData.BoughtAt;
+        MarketPrice += EconItem->CurrentPrice;
+        OfferedPrice += MarketPrice;
+      }
+      break;
+    }
+    default: checkNoEntry(); break;
+  }
 
   CustomerAI->StartNegotiation();
   DialogueSystem->ResetDialogue();
@@ -41,8 +102,11 @@ FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
   }
 
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
-  return DialogueSystem->StartDialogue(
-      CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::Request].Dialogues);
+  return Type == NegotiationType::PlayerSell
+             ? DialogueSystem->StartDialogue(
+                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::BuyItemRequest].Dialogues)
+             : DialogueSystem->StartDialogue(
+                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::SellItemRequest].Dialogues);
 }
 
 void UNegotiationSystem::PlayerReadRequest() {
@@ -55,31 +119,32 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
   check(Item && _FromInventory);
 
   CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item);
+  if (!CustomerOfferResponse.Accepted) return;
+
   NegotiatedItems.Empty();
   NegotiatedItems.Add(Item);
   FromInventory = _FromInventory;
+
+  for (const UItemBase* NegotiatedItem : NegotiatedItems) {
+    const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+        [NegotiatedItem](const FEconItem& EconItem) { return EconItem.ItemID == NegotiatedItem->ItemID; });
+    check(EconItem);
+
+    BoughtAtPrice += Item->PriceData.BoughtAt;
+    MarketPrice += EconItem->CurrentPrice;
+    OfferedPrice += MarketPrice;
+  }
 }
 
 FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
-  switch (NegotiationState) {
-    case ENegotiationState::NpcStockCheckConsider: {
-      if (CustomerOfferResponse.Accepted)
-        NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Accept);
-      else
-        NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::Reject);
+  if (CustomerOfferResponse.Accepted)
+    AcceptOffer();
+  else if (CustomerOfferResponse.CounterOffer > 0)
+    OfferPrice(CustomerOfferResponse.CounterOffer);
+  else
+    RejectOffer();
 
-      return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
-    }
-    case ENegotiationState::NpcConsider: {
-      if (CustomerOfferResponse.Accepted)
-        AcceptOffer();
-      else
-        OfferPrice(CustomerOfferResponse.CounterOffer);
-
-      return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
-    }
-    default: checkf(false, TEXT("Invalid State %d"), (int)NegotiationState); return {};
-  }
+  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
 }
 
 void UNegotiationSystem::OfferPrice(float Price) {

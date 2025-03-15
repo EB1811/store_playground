@@ -10,7 +10,8 @@
 UENUM()
 enum class EInventoryType : uint8 {
   Container UMETA(DisplayName = "Container"),
-  Store UMETA(DisplayName = "Store"),
+  Store UMETA(DisplayName = "Store"),                // Items are not removed.
+  StockDisplay UMETA(DisplayName = "StockDisplay"),  // Only single items.
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -26,7 +27,6 @@ public:
   TArray<TObjectPtr<UItemBase>> ItemsArray;
   UPROPERTY(EditAnywhere, Category = "Inventory")
   EInventoryType InventoryType;
-  // TODO: Implement max slots.
   UPROPERTY(EditAnywhere, Category = "Inventory")
   int32 MaxSlots;
 
@@ -43,7 +43,7 @@ struct FInventoryTransferRes {
 
   bool bSuccess;
 };
-// TODO: Add param for container/store distinction.
+
 FInventoryTransferRes TransferItem(UInventoryComponent* From,
                                    UInventoryComponent* To,
                                    UItemBase* Item,

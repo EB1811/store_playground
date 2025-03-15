@@ -39,7 +39,6 @@ std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDi
 std::tuple<const class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   check(OwnerCustomerAIC);
-  check(OwnerCustomerAIC->NegotiationAI->RelevantItem);
 
   return {OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerCustomerAIC};
 }

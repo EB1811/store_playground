@@ -15,7 +15,6 @@ void BuyItem(AMarketEconomy* MarketEconomy,
           [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
     return;
 
-  // TODO: Add prices
   const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
       [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
   check(EconItem);

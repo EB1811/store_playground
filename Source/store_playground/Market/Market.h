@@ -43,7 +43,7 @@ public:
   void InitializeNPCStores();
 
   TArray<int32> GetRandomDialogueIndexes();
-  TArray<class UItemBase*> GetNewRandomItems(int32 Amount);
+  TArray<class UItemBase*> GetNewRandomItems(int32 Amount) const;
 };
 
 void BuyItem(class AMarketEconomy* MarketEconomy,
