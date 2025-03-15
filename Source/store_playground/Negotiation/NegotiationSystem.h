@@ -3,8 +3,6 @@
 #pragma once
 
 #include <optional>
-#include <array>
-#include <map>
 #include "CoreMinimal.h"
 #include "store_playground/AI/NegotiationAI.h"
 #include "NegotiationSystem.generated.h"
@@ -46,13 +44,25 @@ enum class ENegotiationAction : uint8 {
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject")
 };
+USTRUCT()
+struct FNStateAction {
+  GENERATED_BODY()
+
+  ENegotiationState initial;
+  ENegotiationAction action;
+  ENegotiationState next;
+};
 
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API UNegotiationSystem : public UObject {
   GENERATED_BODY()
 
 public:
-  UNegotiationSystem() : BoughtAtPrice(0), MarketPrice(0), NegotiationState(ENegotiationState::None), OfferedPrice(0) {}
+  UNegotiationSystem();
+
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  TArray<FNStateAction> NStateTransitions;
+  ENegotiationState GetNextNegotiationState(ENegotiationState State, ENegotiationAction Action);
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   const class AMarketEconomy* MarketEconomy;
@@ -61,6 +71,8 @@ public:
   class UDialogueSystem* DialogueSystem;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class AStore* Store;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UInventoryComponent* PlayerInventory;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   float BoughtAtPrice;
@@ -78,18 +90,18 @@ public:
   class UInventoryComponent* FromInventory;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   NegotiationType Type;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  FWantedItemType WantedItemType;  // ? Move stock check to another system?
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UCustomerAIComponent* CustomerAI;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class UInventoryComponent* PlayerInventory;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   FOfferResponse CustomerOfferResponse;
 
-  void StartNegotiation(const class UItemBase* NegotiatedItem,
-                        class UCustomerAIComponent* _CustomerAI,
-                        class UInventoryComponent* _FromInventory,
+  void StartNegotiation(class UCustomerAIComponent* _CustomerAI,
+                        const class UItemBase* NegotiatedItem = nullptr,
+                        class UInventoryComponent* _FromInventory = nullptr,
                         ENegotiationState InitState = ENegotiationState::None);
 
   struct FNextDialogueRes NPCRequestNegotiation();
@@ -103,12 +115,3 @@ public:
   void NegotiationSuccess();
   void NegotiationFailure();
 };
-
-extern TMap<ENegotiationState, FText> NegotiationStateToName;
-struct NStateAction {
-  ENegotiationState initial;
-  ENegotiationAction action;
-  ENegotiationState next;
-};
-extern TArray<NStateAction> NStateTransitions;
-ENegotiationState GetNextNegotiationState(ENegotiationState State, ENegotiationAction Action);

@@ -5,6 +5,7 @@
 #include <map>
 #include "CoreMinimal.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/AI/CustomerDataStructs.h"
 #include "NegotiationAI.generated.h"
 
 UENUM()
@@ -19,9 +20,9 @@ struct FOfferResponse {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  float CounterOffer;
-  UPROPERTY(EditAnywhere)
   bool Accepted;
+  UPROPERTY(EditAnywhere)
+  float CounterOffer;
   TArray<struct FDialogueData> ResponseDialogue;
 };
 
@@ -35,16 +36,22 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   ECustomerRequestType RequestType;
+
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   const class UItemBase* RelevantItem;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   class UInventoryComponent* StockDisplayInventory;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  FWantedItemType WantedItemType;
+
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float AcceptancePercentage;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  float MaxHagglingCount;
 
   FOfferResponse ConsiderOffer(bool bNpcBuying,
-                               float BasePrice,
+                               float MarketPrice,
                                float LastOfferedPrice,
                                float PlayerOfferedPrices) const;
   FOfferResponse ConsiderStockCheck(class UItemBase* Item) const;

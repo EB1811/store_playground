@@ -27,6 +27,7 @@ public:
   class UInventoryComponent* PlayerInventoryRef;
 
   void InitNegotiationUI();
+  void StartNegotiation();
   void RefreshNegotiationState();
 
   UFUNCTION()

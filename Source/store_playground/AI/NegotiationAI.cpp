@@ -3,25 +3,42 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 
 FOfferResponse UNegotiationAI::ConsiderOffer(bool NpcBuying,
-                                             float BasePrice,
+                                             float MarketPrice,
                                              float LastOfferedPrice,
                                              float PlayerOfferedPrice) const {
-  float OfferedPercent = PlayerOfferedPrice / BasePrice;
-  if (NpcBuying && OfferedPercent <= AcceptancePercentage)
-    return {0, true, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues};
-  if (!NpcBuying && OfferedPercent >= AcceptancePercentage)
-    return {0, true, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues};
+  float OfferedPercent = PlayerOfferedPrice / MarketPrice;
+  if (NpcBuying && OfferedPercent <= 1.0 + AcceptancePercentage + 0.01f)
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues};
+  if (!NpcBuying && OfferedPercent >= 1.0 - AcceptancePercentage - 0.01f)
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues};
 
-  float adjustedPercent = AcceptancePercentage - FMath::FRandRange(0.01f, 0.1f);
+  // Leave negotiation if the difference is too high.
+  float AcceptanceDiff =
+      NpcBuying ? OfferedPercent - 1.0 + AcceptancePercentage : 1.0 - AcceptancePercentage - OfferedPercent;
+  if (AcceptanceDiff > 0.33f)
+    return {false, 0,
+            NpcBuying ? DialoguesMap[ENegotiationDialogueType::BuyItemTooHigh].Dialogues
+                      : DialoguesMap[ENegotiationDialogueType::SellItemTooLow].Dialogues};
 
-  return {LastOfferedPrice * adjustedPercent, false,
-          OfferedPercent > 1.4f ? DialoguesMap[ENegotiationDialogueType::ConsiderTooHigh].Dialogues
-                                : DialoguesMap[ENegotiationDialogueType::ConsiderClose].Dialogues};
+  float adjustedPercent =
+      NpcBuying
+          ? FMath::Min((LastOfferedPrice / MarketPrice) + FMath::FRandRange(0.01f, 0.1f), 1.0 + AcceptancePercentage)
+          : FMath::Max((LastOfferedPrice / MarketPrice) - FMath::FRandRange(0.01f, 0.1f), 1.0 - AcceptancePercentage);
+  UE_LOG(LogTemp, Warning,
+         TEXT("ConsiderOffer: NpcBuying: %d, MarketPrice: %f, PlayerOfferedPrice: %f, OfferedPercent: %f, "
+              "AcceptancePercentage: %f, LastOfferedPrice: %f, AdjustedPercent: %f"),
+         NpcBuying, MarketPrice, PlayerOfferedPrice, OfferedPercent, AcceptancePercentage, LastOfferedPrice,
+         adjustedPercent);
+  return {false, MarketPrice * adjustedPercent,
+          AcceptanceDiff > 0.2 ? (NpcBuying ? DialoguesMap[ENegotiationDialogueType::BuyItemTooHigh].Dialogues
+                                            : DialoguesMap[ENegotiationDialogueType::SellItemTooLow].Dialogues)
+                               : (NpcBuying ? DialoguesMap[ENegotiationDialogueType::BuyItemClose].Dialogues
+                                            : DialoguesMap[ENegotiationDialogueType::SellItemClose].Dialogues)};
 }
 
 FOfferResponse UNegotiationAI::ConsiderStockCheck(UItemBase* Item) const {
-  if (Item->ItemID == RelevantItem->ItemID)
-    return {0, true, DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues};
+  if (Item->ItemType == WantedItemType.ItemType && Item->ItemEconType == WantedItemType.ItemEconType)
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues};
 
-  return {0, false, DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues};
+  return {false, 0, DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues};
 }

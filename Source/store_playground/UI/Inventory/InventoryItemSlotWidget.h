@@ -43,7 +43,6 @@ public:
   void OnSelectItemButtonClicked();
   std::function<void(class UItemBase*)> OnSelectItemFunc;
 
-  // TODO: Implement drag and drop visuals
   // UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Slot")
   // TSubclassOf<class UDragItemVisual> DragVisualClass;
 };

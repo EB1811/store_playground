@@ -118,12 +118,12 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
           }
           case EInteractionType::WaitingCustomer: {
             auto [Item, CustomerAI] = Interactable->InteractWaitingCustomer();
-            EnterNegotiation(Item, CustomerAI);
+            EnterNegotiation(CustomerAI, Item);
             break;
           }
           case EInteractionType::WaitingUniqueCustomer: {
             auto [Item, CustomerAI, Dialogue] = Interactable->InteractWaitingUniqueCustomer();
-            EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() { EnterNegotiation(Item, CustomerAI); });
+            EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() { EnterNegotiation(CustomerAI, Item); });
             break;
           }
           case EInteractionType::NpcStore: {
@@ -151,7 +151,8 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
     check(SourceInventory == PlayerInventoryComponent);
     // ? Have a function in the store to refetch all stock?
     if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess)
-      Store->StoreStockItems.Add({DisplayInventoryC, DroppedItem});
+      Store->StoreStockItems.Add(
+          {DisplayInventoryC, DroppedItem});  // TODO: Check if the two item instances cause problems.
   };
   auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
@@ -171,8 +172,8 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
   HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueEndFunc);
 }
 
-void APlayerZDCharacter::EnterNegotiation(const UItemBase* Item, UCustomerAIComponent* CustomerAI) {
-  NegotiationSystem->StartNegotiation(Item, CustomerAI, CustomerAI->NegotiationAI->StockDisplayInventory);
+void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI, const UItemBase* Item) {
+  NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAI->StockDisplayInventory);
   HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
 }
 

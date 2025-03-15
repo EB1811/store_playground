@@ -78,7 +78,7 @@ public:
   //* Negotiation
   UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
   class UNegotiationSystem* NegotiationSystem;
-  void EnterNegotiation(const class UItemBase* Item, class UCustomerAIComponent* CustomerAI);
+  void EnterNegotiation(class UCustomerAIComponent* CustomerAI, const class UItemBase* Item = nullptr);
 
   // * Npc Store
   void EnterNpcStore(class UInventoryComponent* StoreInventoryC);

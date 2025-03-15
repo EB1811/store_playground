@@ -4,6 +4,7 @@
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/AI/CustomerDataStructs.h"
 #include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
 #include "store_playground/UI/Negotiation/StockCheckWidget.h"
@@ -24,6 +25,17 @@ void UNegotiationWidget::NativeOnInitialized() {
 
 void UNegotiationWidget::InitNegotiationUI() {
   check(PlayerInventoryRef && NegotiationSystemRef);
+
+  DialogueWidget->CloseDialogueUI = [this] { OnReadDialogueButtonClicked(); };
+  StockCheckWidget->ShowItemFunc = [this](UItemBase* Item, UInventoryComponent* FromInventory) {
+    ShowItem(Item, FromInventory);
+  };
+
+  RefreshNegotiationState();
+}
+
+void UNegotiationWidget::StartNegotiation() {
+  check(PlayerInventoryRef && NegotiationSystemRef);
   check(NegotiationSystemRef->NegotiatedItems.Num() > 0);
 
   auto FirstItem = NegotiationSystemRef->NegotiatedItems[0];
@@ -36,21 +48,13 @@ void UNegotiationWidget::InitNegotiationUI() {
 
   NegotiationElementWidget->PlayerOfferedPrice->SetMaxValue(NegotiationSystemRef->BoughtAtPrice * 2);
   NegotiationElementWidget->PlayerOfferedPrice->SetMinValue(NegotiationSystemRef->BoughtAtPrice / 2);
-
-  DialogueWidget->CloseDialogueUI = [this] { OnReadDialogueButtonClicked(); };
-
-  StockCheckWidget->ShowItemFunc = [this](UItemBase* Item, UInventoryComponent* FromInventory) {
-    ShowItem(Item, FromInventory);
-  };
-
-  RefreshNegotiationState();
 }
 
 void UNegotiationWidget::RefreshNegotiationState() {
   NegotiationElementWidget->OfferedPrice->SetText(
       FText::FromString(FString::FromInt(NegotiationSystemRef->OfferedPrice)));
   NegotiationElementWidget->NegotiationStateText->SetText(
-      NegotiationStateToName[NegotiationSystemRef->NegotiationState]);
+      UEnum::GetDisplayValueAsText(NegotiationSystemRef->NegotiationState));
 
   NegotiationElementWidget->PlayerOfferedPrice->SetValue(NegotiationSystemRef->OfferedPrice);
 
@@ -66,10 +70,8 @@ void UNegotiationWidget::RefreshNegotiationState() {
       break;
     }
     case ENegotiationState::PlayerStockCheck: {
-      StockCheckWidget->InitStockCheckUI(PlayerInventoryRef, NegotiationSystemRef->NegotiatedItems[0]);
-
-      // TODO: Put this in a function.
       StockCheckWidget->SetVisibility(ESlateVisibility::Visible);
+
       DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationElementWidget->SetVisibility(ESlateVisibility::Hidden);
       break;
@@ -86,8 +88,10 @@ void UNegotiationWidget::RefreshNegotiationState() {
       break;
     }
     case ENegotiationState::PlayerConsider: {
-      DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationElementWidget->SetVisibility(ESlateVisibility::Visible);
+
+      DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
+      StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);
       break;
     }
 
@@ -114,8 +118,20 @@ void UNegotiationWidget::RefreshNegotiationState() {
 
 void UNegotiationWidget::OnReadDialogueButtonClicked() {
   switch (NegotiationSystemRef->NegotiationState) {
-    case ENegotiationState::NpcRequest:
-    case ENegotiationState::NpcStockCheckRequest: NegotiationSystemRef->PlayerReadRequest(); break;
+    case ENegotiationState::NpcRequest: {
+      NegotiationSystemRef->PlayerReadRequest();
+      StartNegotiation();
+      break;
+    }
+    case ENegotiationState::NpcStockCheckRequest: {
+      NegotiationSystemRef->PlayerReadRequest();
+      StockCheckWidget->InitStockCheckUI(PlayerInventoryRef, NegotiationSystemRef->WantedItemType.WantedItemTypeName);
+      break;
+    }
+    case ENegotiationState::PlayerConsider: {
+      StartNegotiation();
+      break;
+    }
     default: break;
   }
 

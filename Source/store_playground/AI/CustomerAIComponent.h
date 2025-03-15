@@ -12,7 +12,7 @@ UENUM()
 enum class ECustomerState : uint8 {
   None UMETA(DisplayName = "NONE"),
   Browsing UMETA(DisplayName = "Browsing"),
-  ItemWanted UMETA(DisplayName = "Item Wanted"),
+  Requesting UMETA(DisplayName = "Requesting"),
   Negotiating UMETA(DisplayName = "Negotiating"),
   Leaving UMETA(DisplayName = "Leaving"),
 };

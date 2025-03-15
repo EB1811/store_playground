@@ -13,7 +13,7 @@ struct FStockItem {
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* BelongingStockInventoryC;
   UPROPERTY(EditAnywhere)
-  class UItemBase* Item;
+  class UItemBase* Item;  // ? Change to item id?
 };
 
 USTRUCT()

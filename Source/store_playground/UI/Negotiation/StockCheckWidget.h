@@ -16,12 +16,12 @@ public:
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class UInventoryWidget* PlayerInventoryWidget;
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* BaseItemName;
+  class UTextBlock* WantedItemTypeName;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* ShowItemButton;
 
-  void InitStockCheckUI(class UInventoryComponent* PlayerInventory, const class UItemBase* BaseItem);
+  void InitStockCheckUI(class UInventoryComponent* PlayerInventory, const FText ItemTypeName);
 
   UFUNCTION()
   void OnShowItemButtonClicked();

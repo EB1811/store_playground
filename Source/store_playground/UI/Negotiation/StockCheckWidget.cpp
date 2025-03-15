@@ -13,11 +13,11 @@ void UStockCheckWidget::NativeOnInitialized() {
   ShowItemButton->OnClicked.AddDynamic(this, &UStockCheckWidget::OnShowItemButtonClicked);
 }
 
-void UStockCheckWidget::InitStockCheckUI(UInventoryComponent* PlayerInventory, const UItemBase* BaseItem) {
+void UStockCheckWidget::InitStockCheckUI(UInventoryComponent* PlayerInventory, const FText ItemTypeName) {
   PlayerInventoryWidget->InventoryRef = PlayerInventory;
   PlayerInventoryWidget->RefreshInventory();
 
-  BaseItemName->SetText(BaseItem->TextData.Name);
+  WantedItemTypeName->SetText(ItemTypeName);
 }
 
 void UStockCheckWidget::OnShowItemButtonClicked() {
