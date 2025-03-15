@@ -4,6 +4,7 @@
 #include <vector>
 #include "Containers/Array.h"
 #include "CustomerAIComponent.h"
+#include "Misc/AssertionMacros.h"
 #include "NegotiationAI.h"
 #include "Engine/World.h"
 #include "Engine/DataTable.h"
@@ -84,6 +85,74 @@ void ACustomerAIManager::EndCustomerAI() {
   for (ACustomer* Customer : CustomersToRemove) Customer->Destroy();
 }
 
+void ACustomerAIManager::SpawnUniqueNpc() {
+  // Temp: Need info about player.
+  FFilterGameData GameData = {Store->Money, QuestsCompleted};
+  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs(GameData);
+  if (EligibleNpcs.Num() <= 0) return;
+
+  FActorSpawnParameters SpawnParams;
+  SpawnParams.Owner = this;
+  SpawnParams.bNoFail = true;
+  SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+  // TODO: Add recently spawned penalty.
+  FUniqueNpcData UniqueNpcData =
+      GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
+
+  UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
+  ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
+      CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
+      GetActorRotation(), SpawnParams);
+
+  // Generic.
+  UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
+  UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+  UniqueCustomer->DialogueComponent->DialogueArray =
+      GlobalDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
+
+  // Quest override.
+  TArray<struct FQuestChainData> EligibleQuestChains =
+      GlobalDataManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs, GameData, QuestsInProgressMap);
+  if (EligibleQuestChains.Num() > 0) {
+    // Most likely quest chain.
+    FQuestChainData RandomQuestChainData = GetWeightedRandomItem<FQuestChainData>(
+        EligibleQuestChains, [](const auto& Chain) { return Chain.StartChance; });
+    if (FMath::FRand() * 100 < RandomQuestChainData.StartChance) {
+      UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::PerformingQuest;
+      UniqueCustomer->CustomerAIComponent->CustomerAction = RandomQuestChainData.CustomerActionToPerform;
+      UniqueCustomer->CustomerAIComponent->ActionRelevantIDs = RandomQuestChainData.ActionRelevantIDs;
+
+      UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
+      UniqueCustomer->DialogueComponent->DialogueArray = GlobalDataManager->GetQuestDialogue(RandomQuestChainData);
+
+      // TODO: Handle case where ids are not present in the store.
+      auto& IDs = RandomQuestChainData.ActionRelevantIDs;
+      if (RandomQuestChainData.CustomerActionToPerform == ECustomerAction::PickItem)
+        CustomerPickItem(UniqueCustomer->CustomerAIComponent,
+                         [&IDs](const auto& StockItem) { return IDs.Contains(StockItem.Item->ItemID); });
+      else if (RandomQuestChainData.CustomerActionToPerform == ECustomerAction::StockCheck)
+        CustomerStockCheck(UniqueCustomer->CustomerAIComponent,
+                           [&IDs](const auto& ItemType) { return IDs.Contains(ItemType.WantedItemTypeID); });
+      else if (RandomQuestChainData.CustomerActionToPerform == ECustomerAction::SellItem)
+        CustomerSellItem(UniqueCustomer->CustomerAIComponent, Market->GetItemByID(IDs[0]));
+
+      QuestsInProgressMap.Add(RandomQuestChainData.QuestID, RandomQuestChainData.QuestChainID);
+    }
+  }
+
+  UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage =
+      FMath::FRandRange(UniqueNpcData.NegotiationData.AcceptancePercentageRange[0],
+                        UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
+      100.0f;
+  UniqueCustomer->CustomerAIComponent->Attitude = UniqueNpcData.NegotiationData.Attitude;
+
+  // TODO: Add pop type link.
+
+  AllCustomers.Add(UniqueCustomer);
+}
+
 void ACustomerAIManager::SpawnCustomers() {
   check(CustomerClass && GlobalDataManager && MarketEconomy && Store);
   if (AllCustomers.Num() >= ManagerParams.MaxCustomers) return;
@@ -95,54 +164,9 @@ void ACustomerAIManager::SpawnCustomers() {
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) {
-    // Temp: Need info about player.
-    FFilterGameData GameData = {Store->Money, QuestsCompleted};
-    TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs(GameData);
-    if (EligibleNpcs.Num() <= 0) return;
+  if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) SpawnUniqueNpc();
 
-    FUniqueNpcData UniqueNpcData =
-        GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
-
-    UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
-    ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
-        CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
-        GetActorRotation(), SpawnParams);
-
-    TArray<struct FQuestChainData> EligibleQuestChains =
-        GlobalDataManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs, GameData, QuestsInProgressMap);
-    if (EligibleQuestChains.Num() > 0) {
-      // Most likely quest chain.
-      FQuestChainData RandomQuestChainData = GetWeightedRandomItem<FQuestChainData>(
-          EligibleQuestChains, [](const auto& Chain) { return Chain.StartChance; });
-      if (FMath::FRand() * 100 < RandomQuestChainData.StartChance) {
-        // Temp: Just dialogue for now.
-        UniqueCustomer->DialogueComponent->DialogueArray =
-            GlobalDataManager->GetRandomNpcDialogue({RandomQuestChainData.DialogueChainID});
-
-        QuestsInProgressMap.Add(RandomQuestChainData.QuestID, RandomQuestChainData.QuestChainID);
-      }
-    }
-
-    if (UniqueCustomer->DialogueComponent->DialogueArray.Num() <= 0)
-      UniqueCustomer->DialogueComponent->DialogueArray =
-          GlobalDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
-
-    UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
-
-    UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
-    UniqueCustomer->CustomerAIComponent->Attitude = ECustomerAttitude::Neutral;
-    UniqueCustomer->CustomerAIComponent->WantedBaseItemIDs = UniqueNpcData.WantedBaseItemIDs;
-
-    UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage =
-        FMath::FRandRange(UniqueNpcData.NegotiationData.AcceptancePercentageRange[0],
-                          UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
-        100.0f;
-
-    AllCustomers.Add(UniqueCustomer);
-  }
-
-  int32 CustomersToSpawn = FMath::RandRange(1, ManagerParams.MaxCustomers - AllCustomers.Num());
+  int32 CustomersToSpawn = FMath::RandRange(0, ManagerParams.MaxCustomers - AllCustomers.Num());
   UE_LOG(LogTemp, Warning, TEXT("Spawning %d customers."), CustomersToSpawn);
   for (int32 i = 0; i < CustomersToSpawn; i++) {
     ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
@@ -159,14 +183,15 @@ void ACustomerAIManager::SpawnCustomers() {
         [RandomCustomerData](const FPopMoneySpendData& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
     check(CustomerPopData && PopMoneySpendData);
 
-    Customer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
-
-    Customer->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomCustomerDialogue();
-
+    Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
     Customer->CustomerAIComponent->CustomerType = ECustomerType::Generic;
     Customer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
     Customer->CustomerAIComponent->MoneyToSpend = PopMoneySpendData->Money / PopMoneySpendData->Population;
     Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
+
+    Customer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+
+    Customer->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomCustomerDialogue();
 
     // ? Maybe have two arrays for customers ai and customer interaction components?
     AllCustomers.Add(Customer);
@@ -206,16 +231,20 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         CustomersToRemove.Add(Customer);
         break;
       }
-      default: break;
+      case (ECustomerState::PerformingQuest): {
+        // ? Check if quest is completed.
+        break;
+      }
+      default: checkNoEntry();
     }
   }
 
   for (ACustomer* Customer : CustomersToRemove) {
-    AllCustomers.RemoveSingle(Customer);
+    AllCustomers.RemoveSingleSwap(Customer);
     // ? Store struct of picked ids and associated customer?
     if (Customer->CustomerAIComponent->NegotiationAI) {
       if (Customer->CustomerAIComponent->NegotiationAI->RelevantItem)
-        CustomersPickingIds.RemoveSingle(Customer->CustomerAIComponent->NegotiationAI->RelevantItem->UniqueItemID);
+        CustomersPickingIds.RemoveSingleSwap(Customer->CustomerAIComponent->NegotiationAI->RelevantItem->UniqueItemID);
 
       Customer->CustomerAIComponent->NegotiationAI->RelevantItem = nullptr;
       Customer->CustomerAIComponent->NegotiationAI = nullptr;
@@ -227,8 +256,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   check(CustomerAI && Interaction);
 
-  // TODO: Specify unique npc action to take.
-  if (CustomerAI->CustomerType == ECustomerType::Unique) return UniqueNpcPickItem(CustomerAI, Interaction);
+  // TODO: RandomAction wighted by if relevant items in stock/inv.
 
   TMap<ECustomerAction, float> ActionWeights = ManagerParams.ActionWeights;
   if (Store->StoreStockItems.Num() < 5.0f)
@@ -238,17 +266,22 @@ void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI,
         return Action.Value;
       }).Key;
 
-  switch (RandomAction) {
+  ECustomerAction Action =
+      CustomerAI->CustomerAction != ECustomerAction::None ? CustomerAI->CustomerAction : RandomAction;
+  switch (Action) {
     case (ECustomerAction::PickItem): {
-      CustomerPickItem(CustomerAI, Interaction);
+      CustomerPickItem(CustomerAI);
+      MakeCustomerNegotiable(CustomerAI, Interaction);
       break;
     }
     case (ECustomerAction::StockCheck): {
-      CustomerStockCheck(CustomerAI, Interaction);
+      CustomerStockCheck(CustomerAI);
+      MakeCustomerNegotiable(CustomerAI, Interaction);
       break;
     }
     case (ECustomerAction::SellItem): {
-      CustomerSellItem(CustomerAI, Interaction);
+      CustomerSellItem(CustomerAI);
+      MakeCustomerNegotiable(CustomerAI, Interaction);
       break;
     }
     case (ECustomerAction::Leave): {
@@ -260,15 +293,18 @@ void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI,
 }
 
 // ? Use item ids to pick items?
-void ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
+void ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
+                                          std::function<bool(const FStockItem& StockItem)> FilterFunc) {
   if (Store->StoreStockItems.Num() <= 0 || CustomersPickingIds.Num() >= Store->StoreStockItems.Num()) return;
 
   TArray<FStockItem> NonPickedItems = Store->StoreStockItems.FilterByPredicate(
       [this](const FStockItem& StockItem) { return !CustomersPickingIds.Contains(StockItem.Item->UniqueItemID); });
-  TArray<FStockItem> RelevantItems = NonPickedItems.FilterByPredicate([this, CustomerAI](const FStockItem& StockItem) {
-    return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
-           CustomerAI->MoneyToSpend >= StockItem.Item->PriceData.BoughtAt;
-  });
+  auto RelevantItems = FilterFunc ? NonPickedItems.FilterByPredicate(FilterFunc)
+                                  : NonPickedItems.FilterByPredicate([CustomerAI](const FStockItem& StockItem) {
+                                      return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
+                                             CustomerAI->MoneyToSpend >= StockItem.Item->PriceData.BoughtAt;
+                                    });
+  if (RelevantItems.Num() <= 0) return;
 
   const FStockItem& StockItem = RelevantItems[FMath::RandRange(0, RelevantItems.Num() - 1)];
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
@@ -276,40 +312,41 @@ void ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI, UInt
   CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;
 
   CustomersPickingIds.Add(StockItem.Item->UniqueItemID);
-
-  MakeCustomerNegotiable(CustomerAI, Interaction);
 }
 
-void ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
-  // Note: Agnostic about if player has item type or not.
-
-  TArray<FWantedItemType> ValidItemTypes =
-      GlobalDataManager->WantedItemTypesArray.FilterByPredicate([CustomerAI](const FWantedItemType& ItemType) {
-        return CustomerAI->ItemEconTypes.Contains(ItemType.ItemEconType);
-      });
+// Note: Agnostic about if player has item type or not.
+void ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
+                                            std::function<bool(const FWantedItemType& ItemType)> FilterFunc) {
+  auto ValidItemTypes =
+      FilterFunc
+          ? GlobalDataManager->WantedItemTypesArray.FilterByPredicate(FilterFunc)
+          : GlobalDataManager->WantedItemTypesArray.FilterByPredicate([CustomerAI](const FWantedItemType& ItemType) {
+              return CustomerAI->ItemEconTypes.Contains(ItemType.ItemEconType);
+            });
   if (ValidItemTypes.Num() <= 0) return;
 
   const FWantedItemType& WantedItemType = ValidItemTypes[FMath::RandRange(0, ValidItemTypes.Num() - 1)];
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::StockCheck;
   CustomerAI->NegotiationAI->WantedItemType = WantedItemType;
-
-  MakeCustomerNegotiable(CustomerAI, Interaction);
 }
 
-void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
+// ? Use item id?
+void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UItemBase* HasItem) {
   // Temp: Random item.
-  UItemBase* Item = Market->GetNewRandomItems(1)[0];
+  UItemBase* Item = HasItem ? HasItem : Market->GetNewRandomItems(1)[0];
   check(Item);
 
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::SellItem;
   CustomerAI->NegotiationAI->RelevantItem = Item;
-
-  MakeCustomerNegotiable(CustomerAI, Interaction);
 }
 
 void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   CustomerAI->CustomerState = ECustomerState::Requesting;
   Interaction->InteractionType = EInteractionType::WaitingCustomer;
+
+  CustomerAI->NegotiationAI->DialoguesMap = GlobalDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
+
+  if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 
   float AcceptanceMin = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 0.05f
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.00f
@@ -318,33 +355,4 @@ void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.10f
                                                                              : 0.15f;
   CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
-  CustomerAI->NegotiationAI->DialoguesMap = GlobalDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
-}
-
-void ACustomerAIManager::UniqueNpcPickItem(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
-  if (Store->StoreStockItems.Num() <= 0 || CustomersPickingIds.Num() >= Store->StoreStockItems.Num()) return;
-
-  TArray<FStockItem> NonPickedItems = Store->StoreStockItems.FilterByPredicate(
-      [this](const FStockItem& StockItem) { return !CustomersPickingIds.Contains(StockItem.Item->UniqueItemID); });
-  TArray<FStockItem> RelevantItems = NonPickedItems.FilterByPredicate([CustomerAI](const FStockItem& StockItem) {
-    if (CustomerAI->WantedBaseItemIDs.Num() > 0)
-      return CustomerAI->WantedBaseItemIDs.Contains(StockItem.Item->ItemID);
-    else
-      return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
-             CustomerAI->MoneyToSpend >= StockItem.Item->PriceData.BoughtAt;
-  });
-  if (RelevantItems.Num() <= 0) return;
-
-  int32 RandomIndex = FMath::RandRange(0, RelevantItems.Num() - 1);
-  const FStockItem& StockItem = RelevantItems[RandomIndex];
-  CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
-  CustomerAI->NegotiationAI->RelevantItem = StockItem.Item;
-  CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;
-
-  CustomersPickingIds.Add(StockItem.Item->UniqueItemID);
-
-  CustomerAI->CustomerState = ECustomerState::Requesting;
-  Interaction->InteractionType = EInteractionType::WaitingUniqueCustomer;
-
-  CustomerAI->NegotiationAI->DialoguesMap = GlobalDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
 }

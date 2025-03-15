@@ -2,19 +2,14 @@
 
 #pragma once
 
+#include <functional>
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/AI/CustomerDataStructs.h"
 #include "store_playground/Store/Store.h"
+#include "AIStructs.h"
 #include "CustomerAIManager.generated.h"
-
-UENUM()
-enum class ECustomerAction : uint8 {
-  PickItem,
-  StockCheck,
-  SellItem,
-  Leave,
-};
 
 USTRUCT()
 struct FManagerParams {
@@ -90,15 +85,17 @@ public:
   void StartCustomerAI();
   void EndCustomerAI();
 
+  void SpawnUniqueNpc();
   void SpawnCustomers();
   void PerformCustomerAILoop();
 
   void CustomerPerformAction(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 
-  void CustomerPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
-  void CustomerStockCheck(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
-  void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
-  void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void CustomerPickItem(class UCustomerAIComponent* CustomerAI,
+                        std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr);
+  void CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
+                          std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr);
+  void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr);
 
-  void UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 };

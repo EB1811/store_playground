@@ -19,7 +19,7 @@ enum class EInteractionType : uint8 {
   Use UMETA(DisplayName = "Use"),
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
-  WaitingUniqueCustomer UMETA(DisplayName = "Waiting Unique Customer"),
+  UniqueNPCQuest UMETA(DisplayName = "Unique Npc Quest"),
   NpcStore UMETA(DisplayName = "NPC Store"),
   Container UMETA(DisplayName = "Container"),
 };
@@ -41,8 +41,8 @@ public:
 
   std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
   std::tuple<const class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
-  std::tuple<const class UItemBase*, class UCustomerAIComponent*, class UDialogueComponent*>
-  InteractWaitingUniqueCustomer() const;
+  std::tuple<const class UItemBase*, class UCustomerAIComponent*, class UDialogueComponent*> InteractUniqueNPCQuest()
+      const;
 
   std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
   class UInventoryComponent* InteractContainer() const;

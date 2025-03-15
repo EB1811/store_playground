@@ -98,3 +98,7 @@ TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
 
   return NewItems;
 }
+
+UItemBase* AMarket::GetItemByID(const FName& ItemID) const {
+  return *(AllItems.FindByPredicate([ItemID](const UItemBase* Item) { return Item->ItemID == ItemID; }));
+}

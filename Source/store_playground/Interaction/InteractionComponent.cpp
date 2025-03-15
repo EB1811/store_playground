@@ -44,12 +44,11 @@ std::tuple<const class UItemBase*, class UCustomerAIComponent*> UInteractionComp
 }
 
 std::tuple<const class UItemBase*, UCustomerAIComponent*, UDialogueComponent*>
-UInteractionComponent::InteractWaitingUniqueCustomer() const {
+UInteractionComponent::InteractUniqueNPCQuest() const {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
 
   check(OwnerCustomerAIC);
-  check(OwnerCustomerAIC->NegotiationAI->RelevantItem);
   check(OwnerDialogueC);
 
   return {OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerCustomerAIC, OwnerDialogueC};

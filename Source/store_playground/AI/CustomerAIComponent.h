@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Item/ItemDataStructs.h"
+#include "store_playground/AI/AIStructs.h"
 #include "CustomerAIComponent.generated.h"
 
 UENUM()
@@ -15,6 +16,7 @@ enum class ECustomerState : uint8 {
   Requesting UMETA(DisplayName = "Requesting"),
   Negotiating UMETA(DisplayName = "Negotiating"),
   Leaving UMETA(DisplayName = "Leaving"),
+  PerformingQuest UMETA(DisplayName = "Performing Quest"),
 };
 
 UENUM()
@@ -40,7 +42,9 @@ public:
   ECustomerAttitude Attitude;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
-  TArray<FName> WantedBaseItemIDs;
+  ECustomerAction CustomerAction;
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   class UNegotiationAI* NegotiationAI;

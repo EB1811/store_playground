@@ -15,6 +15,7 @@ void UCustomerAIComponent::BeginPlay() {
   NegotiationAI = NewObject<UNegotiationAI>(this);
   Attitude = ECustomerAttitude::Neutral;
   CustomerState = ECustomerState::Browsing;
+  CustomerAction = ECustomerAction::None;
 }
 
 void UCustomerAIComponent::StartNegotiation() { CustomerState = ECustomerState::Negotiating; }

@@ -22,8 +22,11 @@ UNegotiationSystem::UNegotiationSystem() {
       // * Alternatively, stock check.
       FNStateAction{ENegotiationState::NpcStockCheckRequest, ENegotiationAction::PlayerReadRequest,
                     ENegotiationState::PlayerStockCheck},
+
       FNStateAction{ENegotiationState::PlayerStockCheck, ENegotiationAction::PlayerShowItem,
                     ENegotiationState::NpcStockCheckConsider},
+      FNStateAction{ENegotiationState::PlayerStockCheck, ENegotiationAction::Reject, ENegotiationState::Rejected},
+
       FNStateAction{ENegotiationState::NpcStockCheckConsider, ENegotiationAction::Accept,
                     ENegotiationState::PlayerConsider},
       FNStateAction{ENegotiationState::NpcStockCheckConsider, ENegotiationAction::Reject, ENegotiationState::Rejected},
@@ -32,6 +35,7 @@ UNegotiationSystem::UNegotiationSystem() {
       FNStateAction{ENegotiationState::PlayerConsider, ENegotiationAction::OfferPrice, ENegotiationState::NpcConsider},
       FNStateAction{ENegotiationState::PlayerConsider, ENegotiationAction::Accept, ENegotiationState::Accepted},
       FNStateAction{ENegotiationState::PlayerConsider, ENegotiationAction::Reject, ENegotiationState::Rejected},
+
       FNStateAction{ENegotiationState::NpcConsider, ENegotiationAction::OfferPrice, ENegotiationState::PlayerConsider},
       FNStateAction{ENegotiationState::NpcConsider, ENegotiationAction::Accept, ENegotiationState::Accepted},
       FNStateAction{ENegotiationState::NpcConsider, ENegotiationAction::Reject, ENegotiationState::Rejected},

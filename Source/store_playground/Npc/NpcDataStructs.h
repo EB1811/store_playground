@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/AI/AIStructs.h"
 #include "NpcDataStructs.generated.h"
 
 // * Quests.
@@ -78,6 +79,10 @@ struct FQuestChainData {
 
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
+  UPROPERTY(EditAnywhere)
+  ECustomerAction CustomerActionToPerform;
+  UPROPERTY(EditAnywhere)
+  TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
 
   UPROPERTY(EditAnywhere)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.
@@ -88,7 +93,7 @@ struct FQuestChainData {
   bool bIsRepeatable;
 
   UPROPERTY(EditAnywhere)
-  EQuestAction Action;
+  EQuestAction QuestAction;
   UPROPERTY(EditAnywhere)
   int32 BranchesAmount;
   UPROPERTY(EditAnywhere)
@@ -108,6 +113,10 @@ struct FQuestChainDataRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
+  UPROPERTY(EditAnywhere)
+  ECustomerAction CustomerAction;
+  UPROPERTY(EditAnywhere)
+  TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
 
   UPROPERTY(EditAnywhere)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.
@@ -118,7 +127,7 @@ struct FQuestChainDataRow : public FTableRowBase {
   bool bIsRepeatable;
 
   UPROPERTY(EditAnywhere)
-  EQuestAction Action;
+  EQuestAction QuestAction;
   UPROPERTY(EditAnywhere)
   int32 BranchesAmount;
   UPROPERTY(EditAnywhere)
@@ -171,8 +180,6 @@ struct FUniqueNpcData {
   TArray<FName> QuestIDs;
   UPROPERTY(EditAnywhere)
   TArray<FName> DialogueChainIDs;  // * Dialogue used outside of a quest.
-  UPROPERTY(EditAnywhere)
-  TArray<FName> WantedBaseItemIDs;
 
   UPROPERTY(EditAnywhere)
   FNpcNegotiationData NegotiationData;
@@ -203,8 +210,6 @@ struct FUniqueNpcDataRow : public FTableRowBase {
   TArray<FName> QuestIDs;
   UPROPERTY(EditAnywhere)
   TArray<FName> DialogueChainIDs;  // * Dialogue used outside of a quest.
-  UPROPERTY(EditAnywhere)
-  TArray<FName> WantedBaseItemIDs;
 
   UPROPERTY(EditAnywhere)
   FNpcNegotiationData NegotiationData;

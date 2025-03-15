@@ -121,9 +121,23 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             EnterNegotiation(CustomerAI, Item);
             break;
           }
-          case EInteractionType::WaitingUniqueCustomer: {
-            auto [Item, CustomerAI, Dialogue] = Interactable->InteractWaitingUniqueCustomer();
-            EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() { EnterNegotiation(CustomerAI, Item); });
+          case EInteractionType::UniqueNPCQuest: {
+            auto [Item, CustomerAI, Dialogue] = Interactable->InteractUniqueNPCQuest();
+
+            switch (CustomerAI->CustomerAction) {
+              case ECustomerAction::PickItem:
+              case ECustomerAction::StockCheck:
+              case ECustomerAction::SellItem:
+                check(CustomerAI->NegotiationAI->RelevantItem);
+                EnterDialogue(Dialogue->DialogueArray,
+                              [this, Item, CustomerAI]() { EnterNegotiation(CustomerAI, Item); });
+                break;
+              case ECustomerAction::None:
+              case ECustomerAction::Leave:
+                EnterDialogue(Dialogue->DialogueArray,
+                              [CustomerAI]() { CustomerAI->CustomerState = ECustomerState::Leaving; });
+                break;
+            }
             break;
           }
           case EInteractionType::NpcStore: {

@@ -11,8 +11,8 @@ void AGlobalDataManager::BeginPlay() {
   Super::BeginPlay();
 
   check(GenericCustomersDataTable && WantedItemTypesDataTable && UniqueNpcDataTable && UniqueNpcDialoguesTable &&
-        CustomerDialoguesTable && FriendlyNegDialoguesTable.DataTable && NeutralNegDialoguesTable.DataTable &&
-        HostileNegDialoguesTable.DataTable && FQuestChainDataDataTable);
+        QuestDialoguesTable && CustomerDialoguesTable && FriendlyNegDialoguesTable.DataTable &&
+        NeutralNegDialoguesTable.DataTable && HostileNegDialoguesTable.DataTable && FQuestChainDataDataTable);
 
   InitializeCustomerData();
   InitializeNPCData();
@@ -127,6 +127,10 @@ TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
   return FilteredQuestChains;
 }
 
+TArray<struct FDialogueData> AGlobalDataManager::GetQuestDialogue(const FQuestChainData& QuestChain) const {
+  return QuestDialoguesMap[QuestChain.DialogueChainID].Dialogues;
+}
+
 TArray<struct FDialogueData> AGlobalDataManager::GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const {
   FName RandomDialogueChainID = DialogueChainIDs[FMath::RandRange(0, DialogueChainIDs.Num() - 1)];
 
@@ -218,6 +222,20 @@ void AGlobalDataManager::InitializeDialogueData() {
         Row->ChoicesAmount,
     });
   }
+  QuestDialoguesMap.Empty();
+  TArray<FDialogueDataTable*> QuestDialoguesRows;
+  QuestDialoguesTable->GetAllRows<FDialogueDataTable>("", QuestDialoguesRows);
+  for (auto* Row : QuestDialoguesRows) {
+    QuestDialoguesMap.FindOrAdd(Row->DialogueChainID, {});
+    QuestDialoguesMap[Row->DialogueChainID].Dialogues.Add({
+        Row->DialogueChainID,
+        Row->DialogueType,
+        Row->DialogueText,
+        Row->Action,
+        Row->DialogueSpeaker,
+        Row->ChoicesAmount,
+    });
+  }
 
   CustomerDialogues.Empty();
   TArray<FDialogueDataTable*> CustomerDialoguesRows;
@@ -281,10 +299,12 @@ void AGlobalDataManager::InitializeQuestChainsData() {
         Row->QuestChainID,
         Row->QuestChainType,
         Row->DialogueChainID,
+        Row->CustomerAction,
+        Row->ActionRelevantIDs,
         Row->StartRequirementsFilter,
         Row->StartChance,
         Row->bIsRepeatable,
-        Row->Action,
+        Row->QuestAction,
         Row->BranchesAmount,
         Row->BranchRequiredChoiceIDs,
     });
@@ -308,7 +328,6 @@ void AGlobalDataManager::InitializeNPCData() {
         Row->SpawnChanceWeight,
         Row->QuestIDs,
         Row->DialogueChainIDs,
-        Row->WantedBaseItemIDs,
         Row->NegotiationData,
         Row->AssetData,
     });

@@ -53,6 +53,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UniqueNpcDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> QuestDialoguesTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> CustomerDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   struct FDataTableCategoryHandle FriendlyNegDialoguesTable;
@@ -72,6 +74,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Store")
   TMap<FName, FDialoguesArray> UniqueNpcDialoguesMap;
+  UPROPERTY(EditAnywhere, Category = "Store")
+  TMap<FName, FDialoguesArray> QuestDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<struct FDialogueData> CustomerDialogues;
   UPROPERTY(EditAnywhere, Category = "Store")
@@ -95,8 +99,9 @@ public:
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
                                                         FFilterGameData GameData,
                                                         TMap<FName, FName> QuestsInProgressMap) const;
-  TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
+  TArray<struct FDialogueData> GetQuestDialogue(const FQuestChainData& QuestChain) const;
 
+  TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
   TArray<struct FDialogueData> GetRandomCustomerDialogue() const;
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
