@@ -39,7 +39,6 @@ enum class EDialogueType : uint8 {
   Choice UMETA(DisplayName = "Choice"),
 };
 
-// TODO: Change to class. (for pointers)
 USTRUCT()
 struct FDialogueData {
   GENERATED_BODY()
@@ -101,16 +100,22 @@ enum class ECustomerAttitude : uint8 {
 
 UENUM()
 enum class ENegotiationDialogueType : uint8 {
-  Request UMETA(DisplayName = "Request"),
-  ConsiderTooHigh UMETA(DisplayName = "Consider Too High"),
-  ConsiderClose UMETA(DisplayName = "Consider Close"),
+  BuyItemRequest UMETA(DisplayName = "Buy Item Request"),
+  BuyItemTooHigh UMETA(DisplayName = "Buy Item Too High"),
+  BuyItemClose UMETA(DisplayName = "Buy Item Close"),
+
+  SellItemRequest UMETA(DisplayName = "Sell Item Request"),
+  SellItemTooLow UMETA(DisplayName = "Sell Item Too Low"),
+  SellItemClose UMETA(DisplayName = "Sell Item Close"),
+
   Accept UMETA(DisplayName = "Accept"),
   Reject UMETA(DisplayName = "Reject"),
+
   StockCheckRequest UMETA(DisplayName = "Stock Check Request"),
   StockCheckAccept UMETA(DisplayName = "Stock Check Accept"),
   StockCheckReject UMETA(DisplayName = "Stock Check Reject"),
 };
-ENUM_RANGE_BY_COUNT(ENegotiationDialogueType, 8);
+ENUM_RANGE_BY_COUNT(ENegotiationDialogueType, 11);
 
 USTRUCT()
 struct FNegotiationDialoguesDataTable : public FTableRowBase {

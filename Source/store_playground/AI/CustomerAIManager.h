@@ -8,6 +8,14 @@
 #include "store_playground/Store/Store.h"
 #include "CustomerAIManager.generated.h"
 
+UENUM()
+enum class ECustomerAction : uint8 {
+  PickItem,
+  StockCheck,
+  SellItem,
+  Leave,
+};
+
 USTRUCT()
 struct FManagerParams {
   GENERATED_BODY()
@@ -25,11 +33,14 @@ struct FManagerParams {
   int32 UNpcMaxSpawnPerDay;
 
   UPROPERTY(EditAnywhere)
-  float PickItemChance;
-  UPROPERTY(EditAnywhere)
   float PickItemFrequency;
   UPROPERTY(EditAnywhere)
   int32 MaxCustomersPickingAtOnce;
+
+  UPROPERTY(EditAnywhere)
+  float PerformActionChance;
+  UPROPERTY(EditAnywhere)
+  TMap<ECustomerAction, float> ActionWeights;
 };
 
 UCLASS(Blueprintable)
@@ -42,30 +53,38 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  UPROPERTY(EditAnywhere, Category = "Customer Blueprint")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Classes")
   TSubclassOf<class ACustomer> CustomerClass;
 
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
   const class AGlobalDataManager* GlobalDataManager;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
+  const class AMarket* Market;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
   const class AMarketEconomy* MarketEconomy;
-
-  UPROPERTY(EditAnywhere, Category = "Manager Params")
-  struct FManagerParams ManagerParams;
-
-  UPROPERTY(EditAnywhere, Category = "Spawn Customers")
-  float LastSpawnTime;
-
-  UPROPERTY(EditAnywhere, Category = "Pick Item")
-  float LastPickItemCheckTime;
-  UPROPERTY(EditAnywhere, Category = "Pick Item")
-  FTimerHandle PickItemTimer;
-  UPROPERTY(EditAnywhere, Category = "Pick Item")
-  TArray<FGuid> CustomersPickingIds;
-
-  UPROPERTY(EditAnywhere, Category = "Player Stock")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
   const class AStore* Store;
 
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Params")
+  struct FManagerParams ManagerParams;
+
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Tracking")
+  TArray<FName> QuestsCompleted;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Tracking")
+  TMap<FName, FName> QuestsInProgressMap;  // * Previous QuestChainID completed.
+
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
+  float LastSpawnTime;
+
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
+  float LastPickItemCheckTime;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
+  FTimerHandle PickItemTimer;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
+  TArray<FGuid> CustomersPickingIds;
+
   // ? Have separate arrays for each state?
-  UPROPERTY(EditAnywhere, Category = "Customers Array")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Customers Array")
   TArray<class ACustomer*> AllCustomers;
 
   void StartCustomerAI();
@@ -74,7 +93,12 @@ public:
   void SpawnCustomers();
   void PerformCustomerAILoop();
 
+  void CustomerPerformAction(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+
   void CustomerPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
-  void UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
   void CustomerStockCheck(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+
+  void UniqueNpcPickItem(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 };

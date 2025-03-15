@@ -60,3 +60,35 @@ struct FCustomerDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FCustomerAssetData AssetData;
 };
+
+// Dynamic subtypes for stock check requests.
+USTRUCT()
+struct FWantedItemType {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName WantedItemTypeID;
+
+  UPROPERTY(EditAnywhere)
+  FText WantedItemTypeName;
+
+  UPROPERTY(EditAnywhere)
+  EItemType ItemType;
+  UPROPERTY(EditAnywhere)
+  EItemEconType ItemEconType;
+};
+USTRUCT()
+struct FWantedItemTypeRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName WantedItemTypeID;
+
+  UPROPERTY(EditAnywhere)
+  FText WantedItemTypeName;
+
+  UPROPERTY(EditAnywhere)
+  EItemType ItemType;
+  UPROPERTY(EditAnywhere)
+  EItemEconType ItemEconType;
+};
