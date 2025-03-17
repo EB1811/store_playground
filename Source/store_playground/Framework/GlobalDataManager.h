@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <any>
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
@@ -17,24 +18,13 @@ UENUM()
 enum class EReqFilterOperand : uint8 {
   Time UMETA(DisplayName = "Time"),  // ? Review if needed.
   Money UMETA(DisplayName = "Money"),
-  Inventory UMETA(DisplayName = "Inventory"),                        // * Using item ids.
-  CompletedQuests UMETA(DisplayName = "Completed Quests"),           // * Using quest ids.
-  MadeDialogueChoices UMETA(DisplayName = "Made Dialogue Choices"),  // * Using dialogue chain ids.
+  Inventory UMETA(DisplayName = "Inventory"),                       // * Using item ids.
+  CompletedQuests UMETA(DisplayName = "CompletedQuests"),           // * Using quest ids.
+  MadeDialogueChoices UMETA(DisplayName = "Made DialogueChoices"),  // * Using dialogue chain ids.
 };
 ENUM_RANGE_BY_COUNT(EReqFilterOperand, 5);
-USTRUCT()
-struct FFilterGameData {
-  GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
-  float PlayerMoney;
-  // UPROPERTY(EditAnywhere)
-  // TArray<FName> InventoryItemIDs;
-  UPROPERTY(EditAnywhere)
-  TArray<FName> CompletedQuestIDs;
-};
-
-bool EvaluateRequirementsFilter(const FName& RequirementsFilter, FFilterGameData GameData);
+bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap);
 
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AGlobalDataManager : public AInfo {
@@ -95,9 +85,10 @@ public:
   void InitializeQuestChainsData();
   void InitializeNPCData();
 
-  TArray<struct FUniqueNpcData> GetEligibleNpcs(FFilterGameData GameData) const;
+  TArray<struct FUniqueNpcData> GetEligibleNpcs(const TMap<EReqFilterOperand, std::any>& GameDataMap) const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
-                                                        FFilterGameData GameData,
+                                                        const TMap<EReqFilterOperand, std::any>& GameDataMap,
+                                                        TArray<FName> CompletedQuestIDs,
                                                         TMap<FName, FName> PrevChainCompletedMap) const;
   TArray<struct FDialogueData> GetQuestDialogue(const FQuestChainData& QuestChain) const;
 

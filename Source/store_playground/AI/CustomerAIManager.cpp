@@ -87,8 +87,8 @@ void ACustomerAIManager::EndCustomerAI() {
 
 void ACustomerAIManager::SpawnUniqueNpc() {
   // Temp: Need info about player.
-  FFilterGameData GameData = {Store->Money, QuestsCompleted};
-  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs(GameData);
+  const TMap<EReqFilterOperand, std::any> GameDataMap = {{EReqFilterOperand::Money, Store->Money}};
+  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs(GameDataMap);
   if (EligibleNpcs.Num() <= 0) return;
 
   FActorSpawnParameters SpawnParams;
@@ -133,8 +133,8 @@ void ACustomerAIManager::SpawnUniqueNpc() {
   TMap<FName, FName> PrevChainCompletedMap = {};
   for (const auto& QuestInProgress : QuestInProgressMap)
     PrevChainCompletedMap.Add(QuestInProgress.Key, QuestInProgress.Value.ChainCompletedIDs.Last());
-  TArray<struct FQuestChainData> EligibleQuestChains =
-      GlobalDataManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs, GameData, PrevChainCompletedMap);
+  TArray<struct FQuestChainData> EligibleQuestChains = GlobalDataManager->GetEligibleQuestChains(
+      UniqueNpcData.QuestIDs, GameDataMap, QuestsCompleted, PrevChainCompletedMap);
   if (EligibleQuestChains.Num() > 0) {
     // Most likely quest chain.
     FQuestChainData RandomQuestChainData = GetWeightedRandomItem<FQuestChainData>(

@@ -1,6 +1,7 @@
 #include "GlobalDataManager.h"
 #include "Containers/Array.h"
 #include "Engine/DataTable.h"
+#include "Misc/CString.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -22,7 +23,6 @@ void AGlobalDataManager::BeginPlay() {
 
 void AGlobalDataManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-// TODO: More complex operators.
 template <typename T>
 bool ApplyOperator(const FString& Operator, const T& Value1, const T& Value2) {
   if (Operator == TEXT("=")) return FMath::IsNearlyEqual(Value1, Value2, KINDA_SMALL_NUMBER);
@@ -34,9 +34,52 @@ bool ApplyOperator(const FString& Operator, const T& Value1, const T& Value2) {
 
   return false;
 }
+template <>
+bool ApplyOperator<FName>(const FString& Operator, const FName& Value1, const FName& Value2) {
+  if (Operator == TEXT("=")) return Value1 == Value2;
+  if (Operator == TEXT("!=")) return Value1 != Value2;
+
+  return false;
+}
+template <>
+bool ApplyOperator<FString>(const FString& Operator, const FString& Value1, const FString& Value2) {
+  if (Operator == TEXT("=")) return Value1.Equals(Value2);
+  if (Operator == TEXT("!=")) return !Value1.Equals(Value2);
+
+  return false;
+}
+template <>
+bool ApplyOperator<const TArray<FName>>(const FString& Operator,
+                                        const TArray<FName>& Value1,
+                                        const TArray<FName>& Value2) {
+  // Array contains all.
+  if (Operator == TEXT("contains")) {
+    for (const FName& Value : Value2)
+      if (!Value1.Contains(Value)) return false;
+    return true;
+  }
+
+  return false;
+}
+
+bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, const FString& ValueString) {
+  if (Operator == TEXT("contains")) {
+    TArray<FString> ValueArray;
+    if (ValueString.Contains("[") && ValueString.Contains(",") && ValueString.Contains("]"))
+      ValueString.LeftChop(1).RightChop(1).ParseIntoArray(ValueArray, TEXT(","), true);
+    if (ValueArray.Num() <= 0) ValueArray.Add(ValueString);
+
+    TArray<FName> ValueNameArray;
+    for (const FString& Value : ValueArray) ValueNameArray.Add(FName(*Value.TrimStartAndEnd()));
+
+    return ApplyOperator<const TArray<FName>>(Operator, Array, ValueNameArray);
+  }
+
+  return ApplyOperator<int32>(Operator, Array.Num(), FCString::Atoi(*ValueString));
+}
 
 // ! Simplified inorder parser works due to no operator precedence.
-bool EvaluateRequirementsFilter(const FName& RequirementsFilter, FFilterGameData GameData) {
+bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap) {
   if (RequirementsFilter == NAME_None) return true;
 
   FString FilterString = RequirementsFilter.ToString();
@@ -51,10 +94,10 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, FFilterGameData
   int32 MaxOperators = 10;
   while ((RemainingString.Contains(TEXT("AND")) || RemainingString.Contains(TEXT("OR"))) && MaxOperators-- > 0) {
     for (const FString& Op : LogicalOperators) {
-      int32 OpIndex = RemainingString.Find(Op, ESearchCase::IgnoreCase, ESearchDir::FromStart, 0);
+      int32 OpIndex = RemainingString.Find(Op, ESearchCase::CaseSensitive, ESearchDir::FromStart, 0);
       if (OpIndex == INDEX_NONE) continue;
 
-      FilterExprs.Add(FilterString.Mid(0, OpIndex).TrimStartAndEnd());
+      FilterExprs.Add(RemainingString.Mid(0, OpIndex).TrimStartAndEnd());
       ExprsOperators.Add(Op);
 
       RemainingString = RemainingString.Mid(OpIndex + Op.Len()).TrimStartAndEnd();
@@ -65,19 +108,22 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, FFilterGameData
 
   for (const FString& FilterExpr : FilterExprs) {
     FString Operand;
+    EReqFilterOperand OperandE = EReqFilterOperand::Time;
     FString Operator;
     FString ValueStr;
 
     for (auto Op : TEnumRange<EReqFilterOperand>()) {
       FString OpStr = UEnum::GetDisplayValueAsText(Op).ToString();
-      if (FilterExpr.StartsWith(OpStr)) {
+      if (FilterExpr.Contains(OpStr)) {
         Operand = OpStr;
+        OperandE = Op;
         break;
       }
     }
     checkf(!Operand.IsEmpty(), TEXT("FilterExpr %s does not contain a valid operand."), *FilterExpr);
 
-    TArray<FString> ValidOperators = {TEXT(">="), TEXT("<="), TEXT("!="), TEXT(">"), TEXT("<"), TEXT("=")};
+    TArray<FString> ValidOperators = {TEXT("contains"), TEXT(">="), TEXT("<="), TEXT("!="),
+                                      TEXT(">"),        TEXT("<"),  TEXT("=")};
     for (const FString& Op : ValidOperators) {
       if (FilterExpr.Contains(Op)) {
         Operator = Op;
@@ -89,10 +135,41 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, FFilterGameData
     int32 OpStart = FilterExpr.Find(Operator, ESearchCase::IgnoreCase, ESearchDir::FromStart);
     int32 OpEnd = OpStart + Operator.Len();
     ValueStr = FilterExpr.Mid(OpEnd).TrimStartAndEnd();
+    TArray<FString> FuncOperators = {TEXT("contains")};
+    if (FuncOperators.Contains(Operator)) {
+      // e.g., contains(array, [i, j])
+      ValueStr.TrimStartAndEndInline();
+      int32 FuncValueIndex = ValueStr.Find(TEXT(","), ESearchCase::IgnoreCase, ESearchDir::FromStart);
+      int32 FuncEndIndex = ValueStr.Find(TEXT(")"), ESearchCase::IgnoreCase, ESearchDir::FromStart);
+      if (FuncValueIndex == INDEX_NONE || FuncEndIndex == INDEX_NONE)
+        checkf(false, TEXT("FilterExpr %s does not contain a valid value."), *FilterExpr);
+
+      ValueStr = ValueStr.RightChop(FuncValueIndex + 1).LeftChop(ValueStr.Len() - FuncEndIndex);
+      ValueStr.TrimStartAndEndInline();
+    }
     checkf(!ValueStr.IsEmpty(), TEXT("FilterExpr %s does not contain a valid value."), *FilterExpr);
 
-    float CompareValue = FCString::Atof(*ValueStr);
-    if (Operand == TEXT("Money")) FilterExprsRes.Add(ApplyOperator(Operator, GameData.PlayerMoney, CompareValue));
+    if (!GameDataMap.Contains(OperandE)) {
+      checkf(false, TEXT("GameDataMap does not contain operand %s."), *Operand);
+      FilterExprsRes.Add(false);
+      continue;
+    }
+
+    bool EvalResult = false;
+    if (GameDataMap[OperandE].type() == typeid(float))
+      EvalResult = ApplyOperator(Operator, std::any_cast<float>(GameDataMap[OperandE]), FCString::Atof(*ValueStr));
+    else if (GameDataMap[OperandE].type() == typeid(int32))
+      EvalResult = ApplyOperator(Operator, std::any_cast<int32>(GameDataMap[OperandE]), FCString::Atoi(*ValueStr));
+    else if (GameDataMap[OperandE].type() == typeid(FName))
+      EvalResult = ApplyOperator(Operator, std::any_cast<FName>(GameDataMap[OperandE]), FName(*ValueStr));
+    else if (GameDataMap[OperandE].type() == typeid(FString))
+      EvalResult = ApplyOperator(Operator, std::any_cast<FString>(GameDataMap[OperandE]), ValueStr);
+    else if (GameDataMap[OperandE].type() == typeid(TArray<FName>))
+      EvalResult = ApplyFuncOperator(Operator, std::any_cast<const TArray<FName>&>(GameDataMap[OperandE]), ValueStr);
+    else
+      checkf(false, TEXT("FilterExpr %s does not contain a valid value."), *FilterExpr);
+
+    FilterExprsRes.Add(EvalResult);
   }
   check(FilterExprsRes.Num() == FilterExprs.Num());
 
@@ -107,18 +184,19 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, FFilterGameData
 }
 
 // Temp: Only money for now.
-TArray<struct FUniqueNpcData> AGlobalDataManager::GetEligibleNpcs(FFilterGameData GameData) const {
+TArray<struct FUniqueNpcData> AGlobalDataManager::GetEligibleNpcs(
+    const TMap<EReqFilterOperand, std::any>& GameDataMap) const {
   return UniqueNpcArray.FilterByPredicate(
-      [&](const FUniqueNpcData& Npc) { return EvaluateRequirementsFilter(Npc.SpawnRequirementsFilter, GameData); });
+      [&](const FUniqueNpcData& Npc) { return EvaluateRequirementsFilter(Npc.SpawnRequirementsFilter, GameDataMap); });
 }
 
 TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
     const TArray<FName>& QuestIDs,
-    FFilterGameData GameData,
+    const TMap<EReqFilterOperand, std::any>& GameDataMap,
+    TArray<FName> CompletedQuestIDs,
     TMap<FName, FName> PrevChainCompletedMap) const {
   auto FilteredQuestChains = QuestChainsArray.FilterByPredicate([&](const FQuestChainData& Chain) {
-    return QuestIDs.Contains(Chain.QuestID) &&
-           (!GameData.CompletedQuestIDs.Contains(Chain.QuestID) || Chain.bIsRepeatable);
+    return QuestIDs.Contains(Chain.QuestID) && (!CompletedQuestIDs.Contains(Chain.QuestID) || Chain.bIsRepeatable);
   });
 
   // Quest in progress tracking.
@@ -140,7 +218,7 @@ TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
 
   // Evaluate last since it is the most expensive.
   return QuestChainToStart.FilterByPredicate([&](const FQuestChainData& Chain) {
-    return EvaluateRequirementsFilter(Chain.StartRequirementsFilter, GameData);
+    return EvaluateRequirementsFilter(Chain.StartRequirementsFilter, GameDataMap);
   });
 }
 
