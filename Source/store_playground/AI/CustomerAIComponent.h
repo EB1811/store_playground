@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Item/ItemDataStructs.h"
+#include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/AI/AIStructs.h"
 #include "CustomerAIComponent.generated.h"
 
@@ -45,6 +46,8 @@ public:
   ECustomerAction CustomerAction;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  FQuestChainData QuestChainData;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   class UNegotiationAI* NegotiationAI;

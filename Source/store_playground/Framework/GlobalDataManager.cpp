@@ -115,16 +115,33 @@ TArray<struct FUniqueNpcData> AGlobalDataManager::GetEligibleNpcs(FFilterGameDat
 TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
     const TArray<FName>& QuestIDs,
     FFilterGameData GameData,
-    TMap<FName, FName> QuestsInProgressMap) const {
-  TArray<FQuestChainData> FilteredQuestChains = QuestChainsArray.FilterByPredicate([&](const FQuestChainData& Chain) {
+    TMap<FName, FName> PrevChainCompletedMap) const {
+  auto FilteredQuestChains = QuestChainsArray.FilterByPredicate([&](const FQuestChainData& Chain) {
     return QuestIDs.Contains(Chain.QuestID) &&
-           (!GameData.CompletedQuestIDs.Contains(Chain.QuestID) || Chain.bIsRepeatable ||
-            (!QuestsInProgressMap.Contains(Chain.QuestID) ||
-             *QuestsInProgressMap.Find(Chain.QuestID) == Chain.QuestChainID)) &&
-           EvaluateRequirementsFilter(Chain.StartRequirementsFilter, GameData);
+           (!GameData.CompletedQuestIDs.Contains(Chain.QuestID) || Chain.bIsRepeatable);
   });
 
-  return FilteredQuestChains;
+  // Quest in progress tracking.
+  TArray<struct FQuestChainData> QuestChainToStart;  // For each quest.
+  for (const FQuestChainData& Chain : FilteredQuestChains)
+    if (!PrevChainCompletedMap.Contains(Chain.QuestID) &&
+        !QuestChainToStart.ContainsByPredicate(
+            [&](const FQuestChainData& ChainToStart) { return ChainToStart.QuestID == Chain.QuestID; }))
+      QuestChainToStart.Add(Chain);
+  for (const auto& QuestInProgress : PrevChainCompletedMap) {
+    FName AtQuestChainID = QuestInProgress.Value;
+    int32 AtQuestChainIndex = FilteredQuestChains.IndexOfByPredicate(
+        [&](const FQuestChainData& Chain) { return Chain.QuestChainID == AtQuestChainID; });
+    check(AtQuestChainIndex != INDEX_NONE);
+
+    if (FilteredQuestChains[AtQuestChainIndex].QuestAction == EQuestAction::End) continue;
+    QuestChainToStart.Add(FilteredQuestChains[AtQuestChainIndex + 1]);
+  }
+
+  // Evaluate last since it is the most expensive.
+  return QuestChainToStart.FilterByPredicate([&](const FQuestChainData& Chain) {
+    return EvaluateRequirementsFilter(Chain.StartRequirementsFilter, GameData);
+  });
 }
 
 TArray<struct FDialogueData> AGlobalDataManager::GetQuestDialogue(const FQuestChainData& QuestChain) const {
@@ -215,6 +232,7 @@ void AGlobalDataManager::InitializeDialogueData() {
     UniqueNpcDialoguesMap.FindOrAdd(Row->DialogueChainID, {});
     UniqueNpcDialoguesMap[Row->DialogueChainID].Dialogues.Add({
         Row->DialogueChainID,
+        Row->DialogueID,
         Row->DialogueType,
         Row->DialogueText,
         Row->Action,
@@ -229,6 +247,7 @@ void AGlobalDataManager::InitializeDialogueData() {
     QuestDialoguesMap.FindOrAdd(Row->DialogueChainID, {});
     QuestDialoguesMap[Row->DialogueChainID].Dialogues.Add({
         Row->DialogueChainID,
+        Row->DialogueID,
         Row->DialogueType,
         Row->DialogueText,
         Row->Action,
@@ -243,6 +262,7 @@ void AGlobalDataManager::InitializeDialogueData() {
   for (auto* Row : CustomerDialoguesRows)
     CustomerDialogues.Add({
         Row->DialogueChainID,
+        Row->DialogueID,
         Row->DialogueType,
         Row->DialogueText,
         Row->Action,
@@ -255,7 +275,7 @@ void AGlobalDataManager::InitializeDialogueData() {
   TArray<FNegotiationDialoguesDataTable*> FriendlyRows;
   FriendlyNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(FriendlyRows, TEXT("Friendly Dialogues"));
   for (FNegotiationDialoguesDataTable* Row : FriendlyRows)
-    FriendlyDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueType,
+    FriendlyDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
                                                               Row->DialogueText, Row->Action, Row->DialogueSpeaker,
                                                               Row->ChoicesAmount});
 
@@ -264,16 +284,18 @@ void AGlobalDataManager::InitializeDialogueData() {
   TArray<FNegotiationDialoguesDataTable*> NeutralRows;
   NeutralNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(NeutralRows, TEXT("Neutral Dialogues"));
   for (FNegotiationDialoguesDataTable* Row : NeutralRows)
-    NeutralDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueType, Row->DialogueText,
-                                                             Row->Action, Row->DialogueSpeaker, Row->ChoicesAmount});
+    NeutralDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
+                                                             Row->DialogueText, Row->Action, Row->DialogueSpeaker,
+                                                             Row->ChoicesAmount});
 
   HostileDialoguesMap.Empty();
   for (auto Type : TEnumRange<ENegotiationDialogueType>()) HostileDialoguesMap.Add(Type, {});
   TArray<FNegotiationDialoguesDataTable*> HostileRows;
   HostileNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(HostileRows, TEXT("Hostile Dialogues"));
   for (FNegotiationDialoguesDataTable* Row : HostileRows)
-    HostileDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueType, Row->DialogueText,
-                                                             Row->Action, Row->DialogueSpeaker, Row->ChoicesAmount});
+    HostileDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
+                                                             Row->DialogueText, Row->Action, Row->DialogueSpeaker,
+                                                             Row->ChoicesAmount});
 
   check(UniqueNpcDialoguesMap.Num() > 0);
   check(CustomerDialogues.Num() > 0);

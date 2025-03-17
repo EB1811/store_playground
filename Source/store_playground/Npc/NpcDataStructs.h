@@ -12,14 +12,13 @@
 UENUM()
 enum class EQuestAction : uint8 {
   Continue UMETA(DisplayName = "Continue"),
-  ChoiceBranch UMETA(DisplayName = "Choice Branch"),    // * Need to have make specific choices.
-  ReqBranch UMETA(DisplayName = "Requirement Branch"),  // * Need to have specific requirements.
   End UMETA(DisplayName = "End"),
 };
 UENUM()
 enum class EQuestChainType : uint8 {
-  DialogueChain UMETA(DisplayName = "Dialogue Chain"),
-  Branch UMETA(DisplayName = "Branch"),
+  DialogueChain UMETA(DisplayName = "Dialogue"),
+  DialogueChoice UMETA(DisplayName = "Dialogue Choice"),  // * Save choices made.
+  Negotiation UMETA(DisplayName = "Negotiation"),         // * Save negotiation outcomes.
 };
 
 // UENUM()

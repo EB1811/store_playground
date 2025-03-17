@@ -26,9 +26,10 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   TArray<FDialogueData> DialogueDataArr;
-
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   int32 CurrentDialogueIndex;
+  UPROPERTY(EditAnywhere, Category = "Dialogue")
+  TArray<FName> ChoiceDialoguesSelectedIDs;
 
   FNextDialogueRes StartDialogue(const TArray<FDialogueData> _DialogueDataArr);
   FNextDialogueRes NextDialogue();

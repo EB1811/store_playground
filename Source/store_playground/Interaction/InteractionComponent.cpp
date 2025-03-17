@@ -36,14 +36,14 @@ std::optional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDi
   return OwnerDialogueC->DialogueArray;
 }
 
-std::tuple<const class UItemBase*, class UCustomerAIComponent*> UInteractionComponent::InteractWaitingCustomer() const {
+std::tuple<class UCustomerAIComponent*, const class UItemBase*> UInteractionComponent::InteractWaitingCustomer() const {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   check(OwnerCustomerAIC);
 
-  return {OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerCustomerAIC};
+  return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAI->RelevantItem};
 }
 
-std::tuple<const class UItemBase*, UCustomerAIComponent*, UDialogueComponent*>
+std::tuple<UCustomerAIComponent*, UDialogueComponent*, const class UItemBase*>
 UInteractionComponent::InteractUniqueNPCQuest() const {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
@@ -51,7 +51,7 @@ UInteractionComponent::InteractUniqueNPCQuest() const {
   check(OwnerCustomerAIC);
   check(OwnerDialogueC);
 
-  return {OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerCustomerAIC, OwnerDialogueC};
+  return {OwnerCustomerAIC, OwnerDialogueC, OwnerCustomerAIC->NegotiationAI->RelevantItem};
 }
 
 std::tuple<UInventoryComponent*, UDialogueComponent*> UInteractionComponent::InteractNpcStore() const {

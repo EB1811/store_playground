@@ -40,8 +40,8 @@ public:
   std::tuple<class UStockDisplayComponent*, class UInventoryComponent*> InteractStockDisplay() const;
 
   std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
-  std::tuple<const class UItemBase*, class UCustomerAIComponent*> InteractWaitingCustomer() const;
-  std::tuple<const class UItemBase*, class UCustomerAIComponent*, class UDialogueComponent*> InteractUniqueNPCQuest()
+  std::tuple<class UCustomerAIComponent*, const class UItemBase*> InteractWaitingCustomer() const;
+  std::tuple<class UCustomerAIComponent*, class UDialogueComponent*, const class UItemBase*> InteractUniqueNPCQuest()
       const;
 
   std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;

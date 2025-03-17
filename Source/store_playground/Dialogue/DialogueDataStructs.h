@@ -46,6 +46,8 @@ struct FDialogueData {
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
   UPROPERTY(EditAnywhere)
+  FName DialogueID;
+  UPROPERTY(EditAnywhere)
   EDialogueType DialogueType;
 
   UPROPERTY(EditAnywhere)
@@ -74,6 +76,8 @@ struct FDialogueDataTable : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
+  UPROPERTY(EditAnywhere)
+  FName DialogueID;
   UPROPERTY(EditAnywhere)
   EDialogueType DialogueType;
 
@@ -130,6 +134,8 @@ struct FNegotiationDialoguesDataTable : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
+  UPROPERTY(EditAnywhere)
+  FName DialogueID;
   UPROPERTY(EditAnywhere)
   EDialogueType DialogueType;
 

@@ -44,7 +44,7 @@ public:
 
   TArray<int32> GetRandomDialogueIndexes();
   TArray<class UItemBase*> GetNewRandomItems(int32 Amount) const;
-  class UItemBase* GetItemByID(const FName& ItemID) const;
+  class UItemBase* GetItemByID(const TArray<FName> ItemIds) const;
 };
 
 void BuyItem(class AMarketEconomy* MarketEconomy,

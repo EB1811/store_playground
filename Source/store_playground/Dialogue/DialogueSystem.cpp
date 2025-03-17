@@ -45,6 +45,7 @@ FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _Dia
                                                           : EDialogueAction::PlayerNext);
   DialogueDataArr = _DialogueDataArr;
   CurrentDialogueIndex = 0;
+  ChoiceDialoguesSelectedIDs.Empty();
 
   UE_LOG(LogTemp, Warning, TEXT("StartDialogue: %d"), CurrentDialogueIndex);
 
@@ -90,6 +91,7 @@ FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
                                                                   DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
   int32 ChoiceDialogueIndex = ChildChoiceIndexes[ChoiceIndex];
 
+  ChoiceDialoguesSelectedIDs.Add(DialogueDataArr[ChoiceDialogueIndex].DialogueID);
   DialogueState = GetNextDialogueState(DialogueState, DialogueDataArr[ChoiceDialogueIndex].Action);
   if (DialogueState == EDialogueState::End) return {{}, DialogueState};
 
@@ -101,4 +103,5 @@ void UDialogueSystem::ResetDialogue() {
   DialogueState = EDialogueState::None;
   DialogueDataArr.Empty();
   CurrentDialogueIndex = 0;
+  ChoiceDialoguesSelectedIDs.Empty();
 }

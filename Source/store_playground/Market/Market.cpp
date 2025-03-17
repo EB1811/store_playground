@@ -20,6 +20,7 @@ void AMarket::BeginPlay() {
   for (auto* Row : NpcStoreDialoguesRows)
     NpcStoreDialogues.Add({
         Row->DialogueChainID,
+        Row->DialogueID,
         Row->DialogueType,
         Row->DialogueText,
         Row->Action,
@@ -99,6 +100,7 @@ TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
   return NewItems;
 }
 
-UItemBase* AMarket::GetItemByID(const FName& ItemID) const {
-  return *(AllItems.FindByPredicate([ItemID](const UItemBase* Item) { return Item->ItemID == ItemID; }));
+UItemBase* AMarket::GetItemByID(const TArray<FName> ItemIds) const {
+  FName RandomId = ItemIds[FMath::RandRange(0, ItemIds.Num() - 1)];
+  return *(AllItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
 }

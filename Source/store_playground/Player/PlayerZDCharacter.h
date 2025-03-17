@@ -24,7 +24,7 @@ class STORE_PLAYGROUND_API APlayerZDCharacter : public APaperZDCharacter {
 public:
   APlayerZDCharacter();
 
-  //* Overrides
+  // * Overrides
   virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
@@ -32,7 +32,7 @@ public:
   UPROPERTY()
   class ASpgHUD* HUD;
 
-  //* Input
+  // * Input
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputMappingContext* InputMappingContext;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
@@ -54,11 +54,11 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenInventoryView(const FInputActionValue& Value);
 
-  //* Inventory
+  // * Inventory
   UPROPERTY(EditAnywhere, Category = "Character | Inventory")
   class UInventoryComponent* PlayerInventoryComponent;
 
-  //* Interaction
+  // * Interaction
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")
   float InteractionCheckFrequency;
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")
@@ -68,30 +68,36 @@ public:
   // * Stock Display
   void EnterStockDisplay(class UStockDisplayComponent* StockDisplayC, class UInventoryComponent* DisplayInventoryC);
 
-  //* Dialogue
+  // * Dialogue
   UPROPERTY(EditAnywhere, Category = "Character | Dialogue")
   class UDialogueSystem* DialogueSystem;
   void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
                      std::function<void()> OnDialogueEndFunc = nullptr);
   void ExitDialogue();
 
-  //* Negotiation
+  // * Negotiation
   UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
   class UNegotiationSystem* NegotiationSystem;
-  void EnterNegotiation(class UCustomerAIComponent* CustomerAI, const class UItemBase* Item = nullptr);
+  void EnterNegotiation(class UCustomerAIComponent* CustomerAI,
+                        const class UItemBase* Item = nullptr,
+                        bool bIsQuestAssociated = false);
 
   // * Npc Store
   void EnterNpcStore(class UInventoryComponent* StoreInventoryC);
 
-  //* Store
+  // * Store
   UPROPERTY(EditAnywhere, Category = "Character | Store")
   class AStore* Store;
 
-  //* Game Store Phase Manager - to control the global game state.
+  // * Game Store Phase Manager - to control the global game state.
   UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
   class AStorePhaseManager* StorePhaseManager;
 
-  //* MarketEconomy
+  // * MarketEconomy
   UPROPERTY(EditAnywhere, Category = "Character | MarketEconomy")
   class AMarketEconomy* MarketEconomy;
+
+  // * CustomerAIManager
+  UPROPERTY(EditAnywhere, Category = "Character | CustomerAIManager")
+  class ACustomerAIManager* CustomerAIManager;
 };

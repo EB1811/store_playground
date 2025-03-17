@@ -7,6 +7,7 @@
 #include "GameFramework/Info.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/AI/CustomerDataStructs.h"
+#include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/Store/Store.h"
 #include "AIStructs.h"
 #include "CustomerAIManager.generated.h"
@@ -38,6 +39,18 @@ struct FManagerParams {
   TMap<ECustomerAction, float> ActionWeights;
 };
 
+USTRUCT()
+struct FQuestInProgressData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  TArray<FName> ChainCompletedIDs;
+  UPROPERTY(EditAnywhere)
+  TArray<FName> ChoicesMade;
+  UPROPERTY(EditAnywhere)
+  TMap<FName, bool> NegotiationOutcomesMap;
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ACustomerAIManager : public AInfo {
   GENERATED_BODY()
@@ -63,10 +76,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Params")
   struct FManagerParams ManagerParams;
 
+  // ? Seperate quests into another system?
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Tracking")
   TArray<FName> QuestsCompleted;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Tracking")
-  TMap<FName, FName> QuestsInProgressMap;  // * Previous QuestChainID completed.
+  TMap<FName, FQuestInProgressData> QuestInProgressMap;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
   float LastSpawnTime;
@@ -91,11 +105,14 @@ public:
 
   void CustomerPerformAction(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 
-  void CustomerPickItem(class UCustomerAIComponent* CustomerAI,
+  bool CustomerPickItem(class UCustomerAIComponent* CustomerAI,
                         std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr);
-  void CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
+  bool CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
                           std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr);
   void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr);
-
   void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+
+  void CompleteQuestChain(const FQuestChainData& QuestChainData,
+                          TArray<FName> MadeChoiceIds = {},
+                          bool bNegotiationSuccess = false);
 };

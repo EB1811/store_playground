@@ -98,7 +98,7 @@ public:
   TArray<struct FUniqueNpcData> GetEligibleNpcs(FFilterGameData GameData) const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
                                                         FFilterGameData GameData,
-                                                        TMap<FName, FName> QuestsInProgressMap) const;
+                                                        TMap<FName, FName> PrevChainCompletedMap) const;
   TArray<struct FDialogueData> GetQuestDialogue(const FQuestChainData& QuestChain) const;
 
   TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;

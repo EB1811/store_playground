@@ -37,6 +37,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
   PlayerCharacter->MarketEconomy = MarketEconomy;
+  PlayerCharacter->CustomerAIManager = CustomerAIManager;
 
   StorePhaseManager->Store = Store;
   StorePhaseManager->Market = Market;
@@ -51,6 +52,7 @@ void AStorePGGameMode::BeginPlay() {
   NegotiationSystem->DialogueSystem = DialogueSystem;
   NegotiationSystem->Store = Store;
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
+  NegotiationSystem->CustomerAIManager = CustomerAIManager;
 
   StorePhaseManager->Start();
   Market->InitializeNPCStores();
