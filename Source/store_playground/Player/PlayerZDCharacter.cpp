@@ -15,6 +15,9 @@
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/WorldObject/Buildable.h"
+#include "store_playground/WorldObject/Level/SpawnPoint.h"
+#include "store_playground/Level/LevelChangeComponent.h"
+#include "store_playground/Level/LevelManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -23,6 +26,7 @@
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Pawn.h"
 #include "Engine/HitResult.h"
+#include "Kismet/GameplayStatics.h"
 
 APlayerZDCharacter::APlayerZDCharacter() {
   // Set this character to call Tick() every frame.
@@ -50,6 +54,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void APlayerZDCharacter::BeginPlay() {
   Super::BeginPlay();
+
+  check(SpawnPointClass);
 
   if (GetWorld()->GetFirstPlayerController()) {
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
@@ -99,6 +105,12 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
           case EInteractionType::None: {
             break;
           }
+          case EInteractionType::LevelChange: {
+            auto LevelChangeC = Interactable->InteractLevelChange();
+
+            EnterNewLevel(LevelChangeC);
+            break;
+          }
           case EInteractionType::StoreNextPhase: {
             StorePhaseManager->NextPhase();
             break;
@@ -135,6 +147,7 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             auto [CustomerAI, Dialogue, Item] = Interactable->InteractUniqueNPCQuest();
             check(CustomerAI->QuestChainData.QuestID != NAME_None);
 
+            // TODO: Put CustomerAction switch in function.
             switch (CustomerAI->CustomerAction) {
               case ECustomerAction::PickItem:
               case ECustomerAction::StockCheck:
@@ -252,4 +265,18 @@ void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventory
   };
 
   HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
+}
+
+void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
+  auto LevelReadyFunc = [this, LevelChangeC]() {
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), SpawnPointClass, FoundActors);
+    ASpawnPoint* SpawnPoint = Cast<ASpawnPoint>(*(FoundActors.FindByPredicate(
+        [LevelChangeC](const AActor* Actor) { return Cast<ASpawnPoint>(Actor)->Level == LevelChangeC->LevelToLoad; })));
+    check(SpawnPoint);
+
+    this->SetActorLocation(SpawnPoint->GetActorLocation());
+  };
+
+  LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
 }

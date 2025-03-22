@@ -95,6 +95,14 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
   class AStorePhaseManager* StorePhaseManager;
 
+  // * Level Manager
+  UPROPERTY(EditAnywhere, Category = "Character | LevelManager")
+  class ALevelManager* LevelManager;
+
+  UPROPERTY(EditAnywhere, Category = "Character | LevelManager")
+  TSubclassOf<class ASpawnPoint> SpawnPointClass;
+  void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
+
   // * Market
   UPROPERTY(EditAnywhere, Category = "Character | Market")
   class AMarket* Market;

@@ -37,7 +37,7 @@ void ALevelStreamerActor::OverlapBegins(UPrimitiveComponent* OverlappedComponent
   TArray<AActor*> FoundActors;
   UGameplayStatics::GetAllActorsOfClass(GetWorld(), LevelManagerClass, FoundActors);
   ALevelManager* LevelManager = Cast<ALevelManager>(FoundActors[0]);
-  LevelManager->LoadLevel(LevelToLoad);
+  LevelManager->BeginLoadLevel(LevelToLoad);
 }
 void ALevelStreamerActor::OverlapEnds(UPrimitiveComponent* OverlappedComponent,
                                       AActor* OtherActor,
@@ -50,5 +50,5 @@ void ALevelStreamerActor::OverlapEnds(UPrimitiveComponent* OverlappedComponent,
   TArray<AActor*> FoundActors;
   UGameplayStatics::GetAllActorsOfClass(GetWorld(), LevelManagerClass, FoundActors);
   ALevelManager* LevelManager = Cast<ALevelManager>(FoundActors[0]);
-  LevelManager->UnloadLevel(LevelToUnload);
+  LevelManager->BeginUnloadLevel(LevelToUnload);
 }

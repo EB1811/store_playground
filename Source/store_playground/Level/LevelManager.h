@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "GameFramework/Info.h"
 #include "LevelManager.generated.h"
 
@@ -8,6 +9,7 @@
 
 UENUM()
 enum class ELevel : uint8 {
+  None UMETA(DisplayName = "None"),
   Store UMETA(DisplayName = "Store"),
   Market UMETA(DisplayName = "Market"),
   //
@@ -33,13 +35,16 @@ public:
   class AMarket* Market;
 
   UPROPERTY(EditAnywhere, Category = "Level Manager")
+  ELevel CurrentLevel;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
   ELevel LoadedLevel;
 
-  UFUNCTION(BlueprintCallable, Category = "Level Manager")
-  void LoadLevel(ELevel Level);
-  UFUNCTION(BlueprintCallable, Category = "Level Manager")
-  void UnloadLevel(ELevel Level);
+  void BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc = nullptr);
+  void BeginUnloadLevel(ELevel Level);
 
-  UFUNCTION(BlueprintCallable, Category = "Level Manager")
-  void InitLevel();
+  UFUNCTION()
+  void OnLevelShown();
+  void InitLevel(ELevel Level);
+
+  std::function<void()> LevelReadyFunc;  // * Callback for the player.
 };

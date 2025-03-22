@@ -14,6 +14,8 @@ DECLARE_DELEGATE_OneParam(FUIOnInteract, int32);
 UENUM()
 enum class EInteractionType : uint8 {
   None UMETA(DisplayName = "None"),
+
+  LevelChange UMETA(DisplayName = "Level Change"),
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
 
   Buildable UMETA(DisplayName = "Buildable"),
@@ -41,6 +43,8 @@ public:
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
+
+  class ULevelChangeComponent* InteractLevelChange() const;
 
   TOptional<class ABuildable*> InteractBuildable() const;
   TTuple<class UStockDisplayComponent*, class UInventoryComponent*> InteractStockDisplay() const;

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <stack>
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "SPGHUD.generated.h"

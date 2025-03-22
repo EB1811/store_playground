@@ -16,34 +16,42 @@ void ALevelManager::BeginPlay() {
 
 void ALevelManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void ALevelManager::LoadLevel(ELevel Level) {
+void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc) {
   UE_LOG(LogTemp, Warning, TEXT("Loading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
 
-  // FLatentActionInfo LatentInfo;
-  // UGameplayStatics::LoadStreamLevel(this, LevelName, true, true, LatentInfo);
-
-  ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[Level]);
-  if (Streaming) {
-    Streaming->OnLevelShown.Clear();
-    Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::InitLevel);
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[Level])) {
     LoadedLevel = Level;
+    LevelReadyFunc = _LevelReadyFunc;
+
+    Streaming->OnLevelShown.Clear();
+    Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
 
     FLatentActionInfo LatentInfo;
     LatentInfo.CallbackTarget = this;
     LatentInfo.UUID = 1;
-    UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, true, LatentInfo);
+    UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, false, LatentInfo);
   }
 }
 
-void ALevelManager::UnloadLevel(ELevel Level) {
+void ALevelManager::BeginUnloadLevel(ELevel Level) {
   UE_LOG(LogTemp, Warning, TEXT("Unloading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
 
   FLatentActionInfo LatentInfo;
-  UGameplayStatics::UnloadStreamLevel(this, LevelNames[Level], LatentInfo, true);
+  UGameplayStatics::UnloadStreamLevel(this, LevelNames[Level], LatentInfo, false);
 }
 
-void ALevelManager::InitLevel() {
-  switch (LoadedLevel) {
+void ALevelManager::OnLevelShown() {
+  InitLevel(LoadedLevel);
+
+  if (LevelReadyFunc) LevelReadyFunc();
+  LevelReadyFunc = nullptr;
+
+  if (CurrentLevel != ELevel::None) BeginUnloadLevel(CurrentLevel);
+  CurrentLevel = LoadedLevel;
+}
+
+void ALevelManager::InitLevel(ELevel Level) {
+  switch (Level) {
     case ELevel::Store:
       check(Store);
       Store->InitStockDisplays();

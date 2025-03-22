@@ -9,6 +9,7 @@
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/WorldObject/Buildable.h"
+#include "store_playground/Level/LevelChangeComponent.h"
 
 UInteractionComponent::UInteractionComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -19,6 +20,13 @@ UInteractionComponent::UInteractionComponent() {
 void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
 
 void UInteractionComponent::InteractUse(FUIOnInteract* UIOnInteract) const {}
+
+ULevelChangeComponent* UInteractionComponent::InteractLevelChange() const {
+  ULevelChangeComponent* OwnerLevelChangeC = GetOwner()->FindComponentByClass<ULevelChangeComponent>();
+  check(OwnerLevelChangeC);
+
+  return OwnerLevelChangeC;
+}
 
 TOptional<class ABuildable*> UInteractionComponent::InteractBuildable() const {
   ABuildable* OwnerBuildable = Cast<ABuildable>(GetOwner());
