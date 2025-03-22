@@ -11,7 +11,7 @@ struct FDisplayStats {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  float PriceIncreasePercentage;
+  float PickRateModifier;
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

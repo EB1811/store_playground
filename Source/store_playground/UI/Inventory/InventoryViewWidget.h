@@ -20,7 +20,7 @@ public:
   class UInventoryWidget* PlayerInventoryWidget;
 
   UPROPERTY(EditAnywhere)
-  class AStore* Store;
+  const class AStore* Store;
 
   void RefreshInventoryViewUI();
 };

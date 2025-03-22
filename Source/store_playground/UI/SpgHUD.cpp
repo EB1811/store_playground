@@ -10,6 +10,7 @@
 #include "store_playground/UI/Negotiation/NegotiationWidget.h"
 #include "store_playground/UI/NPCStore/NpcStoreWidget.h"
 #include "store_playground/UI/Store/StockDisplayWidget.h"
+#include "store_playground/UI/Store/BuildableDisplayWidget.h"
 #include "store_playground/Store/Store.h"
 #include "Components/TextBlock.h"
 
@@ -22,6 +23,7 @@ void ASpgHUD::BeginPlay() {
 
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
+  check(BuildableDisplayWidgetClass);
   check(NpcStoreWidgetClass);
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
@@ -30,6 +32,10 @@ void ASpgHUD::BeginPlay() {
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
   InventoryViewWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  BuildableDisplayWidget = CreateWidget<UBuildableDisplayWidget>(GetWorld(), BuildableDisplayWidgetClass);
+  BuildableDisplayWidget->AddToViewport(10);
+  BuildableDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   StockDisplayWidget = CreateWidget<UStockDisplayWidget>(GetWorld(), StockDisplayWidgetClass);
   StockDisplayWidget->AddToViewport(10);
@@ -89,7 +95,7 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   GetOwningPlayerController()->SetShowMouseCursor(false);
 }
 
-// TODO: Update.
+// todo-low: Update.
 void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, AStore* Store) {
   check(InventoryViewWidget);
   if (OpenedWidgets.Contains(InventoryViewWidget)) return CloseWidget(InventoryViewWidget);
@@ -107,6 +113,24 @@ void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, ASto
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(InventoryViewWidget);
+}
+
+void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable,
+                                         std::function<bool(class ABuildable* Buildable)> BuildStockDisplayFunc,
+                                         std::function<bool(class ABuildable* Buildable)> BuildDecorationFunc) {
+  check(BuildableDisplayWidget);
+
+  BuildableDisplayWidget->SetBuildable(Buildable);
+  BuildableDisplayWidget->BuildStockDisplayFunc = BuildStockDisplayFunc;
+  BuildableDisplayWidget->BuildDecorationFunc = BuildDecorationFunc;
+  BuildableDisplayWidget->CloseWidgetFunc = [this]() { CloseWidget(BuildableDisplayWidget); };
+
+  BuildableDisplayWidget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(BuildableDisplayWidget);
 }
 
 void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
@@ -165,7 +189,7 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
   OpenedWidgets.Add(PlayerAndContainerWidget);
 }
 
-// TODO: Check for refresh of open widgets.
+// todo-low: Check for refresh of open widgets.
 void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
                                  UInventoryComponent* PlayerInventory,
                                  std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,

@@ -3,7 +3,7 @@
 UStockDisplayComponent::UStockDisplayComponent() {
   PrimaryComponentTick.bCanEverTick = false;
 
-  DisplayStats.PriceIncreasePercentage = 0.0f;
+  DisplayStats.PickRateModifier = 1.0f;
 }
 
 void UStockDisplayComponent::BeginPlay() { Super::BeginPlay(); }

@@ -15,7 +15,11 @@ UENUM()
 enum class EInteractionType : uint8 {
   None UMETA(DisplayName = "None"),
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
+
+  Buildable UMETA(DisplayName = "Buildable"),
   StockDisplay UMETA(DisplayName = "StockDisplay"),
+  Decoration UMETA(DisplayName = "Decoration"),
+
   Use UMETA(DisplayName = "Use"),
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
@@ -37,13 +41,15 @@ public:
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
-  std::tuple<class UStockDisplayComponent*, class UInventoryComponent*> InteractStockDisplay() const;
 
-  std::optional<TArray<FDialogueData>> InteractNPCDialogue() const;
-  std::tuple<class UCustomerAIComponent*, const class UItemBase*> InteractWaitingCustomer() const;
-  std::tuple<class UCustomerAIComponent*, class UDialogueComponent*, const class UItemBase*> InteractUniqueNPCQuest()
-      const;
+  TOptional<class ABuildable*> InteractBuildable() const;
+  TTuple<class UStockDisplayComponent*, class UInventoryComponent*> InteractStockDisplay() const;
+  // TTuple<class UInventoryComponent*, class UStockDisplayComponent*> InteractDecoration() const;
 
-  std::tuple<class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
+  TOptional<TArray<FDialogueData>> InteractNPCDialogue() const;
+  TTuple<class UCustomerAIComponent*, const class UItemBase*> InteractWaitingCustomer() const;
+  TTuple<class UCustomerAIComponent*, class UDialogueComponent*, const class UItemBase*> InteractUniqueNPCQuest() const;
+
+  TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
   class UInventoryComponent* InteractContainer() const;
 };

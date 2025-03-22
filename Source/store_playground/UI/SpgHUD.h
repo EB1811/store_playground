@@ -30,6 +30,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> InventoryViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> BuildableDisplayWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> StockDisplayWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
@@ -59,6 +61,12 @@ public:
   UPROPERTY()
   class UInventoryViewWidget* InventoryViewWidget;
   void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory, class AStore* Store);
+
+  UPROPERTY()
+  class UBuildableDisplayWidget* BuildableDisplayWidget;
+  void SetAndOpenBuildableDisplay(class ABuildable* Buildable,
+                                  std::function<bool(class ABuildable* Buildable)> BuildStockDisplayFunc,
+                                  std::function<bool(class ABuildable* Buildable)> BuildDecorationFunc);
 
   UPROPERTY()
   class UStockDisplayWidget* StockDisplayWidget;

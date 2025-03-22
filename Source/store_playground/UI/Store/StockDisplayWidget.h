@@ -17,5 +17,5 @@ public:
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class UPlayerAndContainerWidget* PlayerAndContainerWidget;
 
-  // TODO: Add stock display details.
+  // todo-low: Add stock display details.
 };

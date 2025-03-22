@@ -120,6 +120,7 @@ void UNegotiationSystem::PlayerReadRequest() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerReadRequest);
 }
 
+// TODO: Support multiple items.
 void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _FromInventory) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
@@ -183,7 +184,7 @@ void UNegotiationSystem::NegotiationSuccess() {
 
     for (const UItemBase* NegotiatedItem : NegotiatedItems) FromInventory->RemoveItem(NegotiatedItem);
     Store->Money += OfferedPrice;
-    Store->StoreStockItems.RemoveAll(
+    Store->StoreStockItems.RemoveAllSwap(
         [this](const FStockItem& StockItem) { return NegotiatedItems.Contains(StockItem.Item); });
   } else {
     check(PlayerInventory);
