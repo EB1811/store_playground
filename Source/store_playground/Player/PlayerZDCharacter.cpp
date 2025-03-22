@@ -6,6 +6,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/Market/NpcStoreComponent.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/AI/CustomerAIManager.h"
@@ -13,6 +14,7 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/StorePhaseManager.h"
+#include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -105,6 +107,13 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             Interactable->InteractUse();
             break;
           }
+          case EInteractionType::Buildable: {
+            if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
+
+            auto Buildable = Interactable->InteractBuildable();
+            EnterBuildableDisplay(Buildable.GetValue());
+            break;
+          }
           case EInteractionType::StockDisplay: {
             if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
 
@@ -114,7 +123,7 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
           }
           case EInteractionType::NPCDialogue: {
             auto DialogueData = Interactable->InteractNPCDialogue();
-            EnterDialogue(DialogueData.value());
+            EnterDialogue(DialogueData.GetValue());
             break;
           }
           case EInteractionType::WaitingCustomer: {
@@ -131,7 +140,6 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
               case ECustomerAction::StockCheck:
               case ECustomerAction::SellItem:
                 check(CustomerAI->NegotiationAI->RelevantItem);
-                // TODO: Save potential ChoiceDialoguesSelectedIDs after negotiation.
                 if (CustomerAI->QuestChainData.QuestChainType == EQuestChainType::Negotiation)
                   EnterDialogue(Dialogue->DialogueArray,
                                 [this, Item, CustomerAI]() { EnterNegotiation(CustomerAI, Item, true); });
@@ -156,8 +164,9 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
           case EInteractionType::NpcStore: {
             if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
 
-            auto [StoreInventory, Dialogue] = Interactable->InteractNpcStore();
-            EnterDialogue(Dialogue->DialogueArray, [this, StoreInventory]() { EnterNpcStore(StoreInventory); });
+            auto [NpcStoreC, StoreInventory, Dialogue] = Interactable->InteractNpcStore();
+            EnterDialogue(Dialogue->DialogueArray,
+                          [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
             break;
           }
           case EInteractionType::Container: {
@@ -171,6 +180,29 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   }
 }
 
+void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
+  auto BuildStockDisplayFunc = [this](ABuildable* Buildable) {
+    if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Store->Money) return false;
+
+    Buildable->SetToStockDisplay();
+    if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
+
+    Store->Money -= Buildable->BuildingPricesMap[EBuildableType::StockDisplay];
+    return true;
+  };
+  auto BuildDecorationFunc = [this](ABuildable* Buildable) {
+    if (Buildable->BuildingPricesMap[EBuildableType::Decoration] > Store->Money) return false;
+
+    Buildable->SetToDecoration();
+    if (Buildable->BuildableType != EBuildableType::Decoration) return false;
+
+    Store->Money -= Buildable->BuildingPricesMap[EBuildableType::Decoration];
+    return true;
+  };
+
+  HUD->SetAndOpenBuildableDisplay(Buildable, BuildStockDisplayFunc, BuildDecorationFunc);
+}
+
 void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC,
                                            UInventoryComponent* DisplayInventoryC) {
   auto PlayerToDisplayFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
@@ -179,7 +211,7 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
     // ? Have a function in the store to refetch all stock?
     if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess)
       Store->StoreStockItems.Add(
-          {DisplayInventoryC, DroppedItem});  // TODO: Check if the two item instances cause problems.
+          {DisplayInventoryC, DroppedItem});  // todo-low: Check if the two item instances cause problems.
   };
   auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
@@ -207,14 +239,16 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
   HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
 }
 
-void APlayerZDCharacter::EnterNpcStore(UInventoryComponent* StoreInventoryC) {
-  auto StoreToPlayerFunc = [this, StoreInventoryC](UItemBase* DroppedItem, UInventoryComponent* SourceInventory) {
+void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {
+  auto StoreToPlayerFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
+                                                              UInventoryComponent* SourceInventory) {
     check(SourceInventory == StoreInventoryC);
-    BuyItem(MarketEconomy, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
+    Market->BuyItem(NpcStoreC, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
   };
-  auto PlayerToStoreFunc = [this, StoreInventoryC](UItemBase* DroppedItem, UInventoryComponent* SourceInventory) {
+  auto PlayerToStoreFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
+                                                              UInventoryComponent* SourceInventory) {
     check(SourceInventory == PlayerInventoryComponent);
-    SellItem(MarketEconomy, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
+    Market->SellItem(NpcStoreC, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
   };
 
   HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);

@@ -65,6 +65,8 @@ public:
   float InteractionCheckDistance;
   void Interact(const FInputActionValue& Value);
 
+  // * Buildable
+  void EnterBuildableDisplay(class ABuildable* Buildable);
   // * Stock Display
   void EnterStockDisplay(class UStockDisplayComponent* StockDisplayC, class UInventoryComponent* DisplayInventoryC);
 
@@ -83,7 +85,7 @@ public:
                         bool bIsQuestAssociated = false);
 
   // * Npc Store
-  void EnterNpcStore(class UInventoryComponent* StoreInventoryC);
+  void EnterNpcStore(class UNpcStoreComponent* NpcStoreC, class UInventoryComponent* StoreInventoryC);
 
   // * Store
   UPROPERTY(EditAnywhere, Category = "Character | Store")
@@ -92,6 +94,10 @@ public:
   // * Game Store Phase Manager - to control the global game state.
   UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
   class AStorePhaseManager* StorePhaseManager;
+
+  // * Market
+  UPROPERTY(EditAnywhere, Category = "Character | Market")
+  class AMarket* Market;
 
   // * MarketEconomy
   UPROPERTY(EditAnywhere, Category = "Character | MarketEconomy")

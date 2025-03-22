@@ -28,7 +28,7 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   // ? Move to data manager?
-  // TODO: Assert that customer data links to valid pop data.
+  // todo-low: Assert that customer data links to valid pop data.
   UPROPERTY(EditAnywhere, Category = "Economy")
   TObjectPtr<const class UDataTable> BasePopTypeToEconomyTable;
   UPROPERTY(EditAnywhere, Category = "Economy")

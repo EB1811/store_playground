@@ -26,4 +26,7 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   class UInventoryComponent* InventoryComponent;
+
+  UPROPERTY(EditAnywhere, Category = "NPCStore")
+  class UNpcStoreComponent* NpcStoreComponent;
 };

@@ -2,6 +2,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Market/NpcStoreComponent.h"
 
 ANPCStore::ANPCStore() {
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -11,9 +12,7 @@ ANPCStore::ANPCStore() {
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));
   InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+  NpcStoreComponent = CreateDefaultSubobject<UNpcStoreComponent>(TEXT("NpcStoreComponent"));
 }
 
-void ANPCStore::BeginPlay() {
-  Super::BeginPlay();
-  InteractionComponent->InteractionType = EInteractionType::NpcStore;
-}
+void ANPCStore::BeginPlay() { Super::BeginPlay(); }

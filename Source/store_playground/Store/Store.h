@@ -35,19 +35,17 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "Store Data")
+  UPROPERTY(EditAnywhere, Category = "Store")
+  class TSubclassOf<class AActor> BuildableClass;
+
+  UPROPERTY(EditAnywhere, Category = "Store")
   float Money;
-  UPROPERTY(EditAnywhere, Category = "Store Data")
+  UPROPERTY(EditAnywhere, Category = "Store")
   FStoreStats StoreStats;
 
-  UPROPERTY(EditAnywhere, Category = "Store Stock")
+  // TODO: Initialize stock displays.
+  UPROPERTY(EditAnywhere, Category = "Store")
   TArray<FStockItem> StoreStockItems;
 
-  // ? Put state in game manager?
-  // UPROPERTY(EditAnywhere, Category = "Store")
-  // state
-
-  UPROPERTY(EditAnywhere, Category = "TESTING")
-  class TSubclassOf<class AActor> StockDisplayClass;
   void InitStockDisplays();
 };

@@ -12,6 +12,7 @@
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "store_playground/Level/LevelManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -23,6 +24,7 @@ void AStorePGGameMode::BeginPlay() {
         StoreClass);
 
   // * Initialize the game world and all systems.
+  ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
@@ -36,8 +38,12 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->NegotiationSystem = NegotiationSystem;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
+  PlayerCharacter->Market = Market;
   PlayerCharacter->MarketEconomy = MarketEconomy;
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
+
+  LevelManager->Store = Store;
+  LevelManager->Market = Market;
 
   StorePhaseManager->Store = Store;
   StorePhaseManager->Market = Market;
@@ -48,12 +54,16 @@ void AStorePGGameMode::BeginPlay() {
   CustomerAIManager->MarketEconomy = MarketEconomy;
   CustomerAIManager->Store = Store;
 
+  Market->GlobalDataManager = GlobalDataManager;
+  Market->MarketEconomy = MarketEconomy;
+
   NegotiationSystem->MarketEconomy = MarketEconomy;
   NegotiationSystem->DialogueSystem = DialogueSystem;
   NegotiationSystem->Store = Store;
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
   NegotiationSystem->CustomerAIManager = CustomerAIManager;
 
+  LevelManager->LoadLevel(ELevel::Store);
   StorePhaseManager->Start();
   Market->InitializeNPCStores();
   Store->InitStockDisplays();

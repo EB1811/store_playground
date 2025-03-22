@@ -13,12 +13,14 @@ void AGlobalDataManager::BeginPlay() {
 
   check(GenericCustomersDataTable && WantedItemTypesDataTable && UniqueNpcDataTable && UniqueNpcDialoguesTable &&
         QuestDialoguesTable && CustomerDialoguesTable && FriendlyNegDialoguesTable.DataTable &&
-        NeutralNegDialoguesTable.DataTable && HostileNegDialoguesTable.DataTable && FQuestChainDataDataTable);
+        NeutralNegDialoguesTable.DataTable && HostileNegDialoguesTable.DataTable && QuestChainDataDataTable &&
+        NpcStoreTypesDataTable && NpcStoreDialoguesTable);
 
   InitializeCustomerData();
   InitializeNPCData();
   InitializeDialogueData();
   InitializeQuestChainsData();
+  InitializeNpcStoreData();
 }
 
 void AGlobalDataManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -232,22 +234,30 @@ TArray<struct FDialogueData> AGlobalDataManager::GetRandomNpcDialogue(const TArr
   return UniqueNpcDialoguesMap[RandomDialogueChainID].Dialogues;
 }
 
-TArray<struct FDialogueData> AGlobalDataManager::GetRandomCustomerDialogue() const {
+TArray<struct FDialogueData> GetRandomDialogue(const TArray<struct FDialogueData>& DialogueArray) {
   TArray<struct FDialogueData> RandomDialogue;
 
-  int32 MapSize = CustomerDialogues.Num();
+  int32 MapSize = DialogueArray.Num();
   int32 RandomIndex = FMath::RandRange(0, MapSize - 1);
   for (int32 i = RandomIndex - 1; i >= 0; i--) {
-    if (CustomerDialogues[i].DialogueChainID != CustomerDialogues[RandomIndex].DialogueChainID) break;
+    if (DialogueArray[i].DialogueChainID != DialogueArray[RandomIndex].DialogueChainID) break;
     RandomIndex = i;
   }
 
   for (int32 i = RandomIndex; i < MapSize; i++) {
-    if (CustomerDialogues[i].DialogueChainID != CustomerDialogues[RandomIndex].DialogueChainID) break;
-    RandomDialogue.Add(CustomerDialogues[i]);
+    if (DialogueArray[i].DialogueChainID != DialogueArray[RandomIndex].DialogueChainID) break;
+    RandomDialogue.Add(DialogueArray[i]);
   }
 
   return RandomDialogue;
+}
+
+TArray<struct FDialogueData> AGlobalDataManager::GetRandomCustomerDialogue() const {
+  return GetRandomDialogue(CustomerDialogues);
+}
+
+TArray<struct FDialogueData> AGlobalDataManager::GetRandomNpcStoreDialogue() const {
+  return GetRandomDialogue(NpcStoreDialogues);
 }
 
 TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNegDialogueMap(
@@ -261,17 +271,7 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNeg
     RandomDialogueIndexMap.Add(Type, {});
 
     auto& Dialogues = DialoguesMap[Type].Dialogues;
-    int32 MapSize = Dialogues.Num();
-    int32 RandomIndex = FMath::RandRange(0, MapSize - 1);
-    for (int32 i = RandomIndex - 1; i >= 0; i--) {
-      if (Dialogues[i].DialogueChainID != Dialogues[RandomIndex].DialogueChainID) break;
-      RandomIndex = i;
-    }
-
-    for (int32 i = RandomIndex; i < MapSize; i++) {
-      if (Dialogues[i].DialogueChainID != Dialogues[RandomIndex].DialogueChainID) break;
-      RandomDialogueIndexMap[Type].Dialogues.Add(Dialogues[i]);
-    }
+    RandomDialogueIndexMap[Type].Dialogues = GetRandomDialogue(Dialogues);
   }
   return RandomDialogueIndexMap;
 }
@@ -293,7 +293,12 @@ void AGlobalDataManager::InitializeCustomerData() {
   TArray<FWantedItemTypeRow*> WantedItemTypesRows;
   WantedItemTypesDataTable->GetAllRows<FWantedItemTypeRow>("", WantedItemTypesRows);
   for (auto* Row : WantedItemTypesRows)
-    WantedItemTypesArray.Add({Row->WantedItemTypeID, Row->WantedItemTypeName, Row->ItemType, Row->ItemEconType});
+    WantedItemTypesArray.Add({
+        Row->WantedItemTypeID,
+        Row->WantedItemTypeName,
+        Row->ItemType,
+        Row->ItemEconType,
+    });
 
   check(GenericCustomersArray.Num() > 0);
   check(WantedItemTypesArray.Num() > 0);
@@ -375,6 +380,21 @@ void AGlobalDataManager::InitializeDialogueData() {
                                                              Row->DialogueText, Row->Action, Row->DialogueSpeaker,
                                                              Row->ChoicesAmount});
 
+  NpcStoreDialogues.Empty();
+  TArray<FDialogueDataTable*> NpcStoreDialoguesRows;
+  NpcStoreDialoguesTable->GetAllRows<FDialogueDataTable>("", NpcStoreDialoguesRows);
+  for (auto* Row : NpcStoreDialoguesRows)
+    NpcStoreDialogues.Add({
+        Row->DialogueChainID,
+        Row->DialogueID,
+        Row->DialogueType,
+        Row->DialogueText,
+        Row->Action,
+        Row->DialogueSpeaker,
+        Row->ChoicesAmount,
+    });
+
+  check(NpcStoreDialogues.Num() > 0);
   check(UniqueNpcDialoguesMap.Num() > 0);
   check(CustomerDialogues.Num() > 0);
   // for (auto Type : TEnumRange<ENegotiationDialogueType>())
@@ -382,16 +402,18 @@ void AGlobalDataManager::InitializeDialogueData() {
   //         HostileDialoguesMap[Type].Dialogues.Num() > 0);
 
   UniqueNpcDialoguesTable = nullptr;
+  QuestDialoguesTable = nullptr;
   CustomerDialoguesTable = nullptr;
   FriendlyNegDialoguesTable.DataTable = nullptr;
   NeutralNegDialoguesTable.DataTable = nullptr;
   HostileNegDialoguesTable.DataTable = nullptr;
+  NpcStoreDialoguesTable = nullptr;
 }
 
 void AGlobalDataManager::InitializeQuestChainsData() {
   QuestChainsArray.Empty();
   TArray<FQuestChainDataRow*> QuestChainRows;
-  FQuestChainDataDataTable->GetAllRows<FQuestChainDataRow>("", QuestChainRows);
+  QuestChainDataDataTable->GetAllRows<FQuestChainDataRow>("", QuestChainRows);
 
   for (auto* Row : QuestChainRows) {
     QuestChainsArray.Add({
@@ -412,7 +434,7 @@ void AGlobalDataManager::InitializeQuestChainsData() {
 
   check(QuestChainsArray.Num() > 0);
 
-  FQuestChainDataDataTable = nullptr;
+  QuestChainDataDataTable = nullptr;
 }
 
 void AGlobalDataManager::InitializeNPCData() {
@@ -435,4 +457,24 @@ void AGlobalDataManager::InitializeNPCData() {
   check(UniqueNpcArray.Num() > 0);
 
   UniqueNpcDataTable = nullptr;
+}
+
+void AGlobalDataManager::InitializeNpcStoreData() {
+  NpcStoreTypesArray.Empty();
+  TArray<FNpcStoreTypeRow*> NpcStoreTypesRows;
+  NpcStoreTypesDataTable->GetAllRows<FNpcStoreTypeRow>("", NpcStoreTypesRows);
+  for (auto* Row : NpcStoreTypesRows)
+    NpcStoreTypesArray.Add({
+        Row->NpcStoreTypeID,
+        Row->StoreTypeName,
+        Row->StoreSpawnWeight,
+        Row->StockCountRange,
+        Row->StorePriceMarkup,
+        Row->ItemTypeWeightMap,
+        Row->ItemEconTypeWeightMap,
+    });
+
+  check(NpcStoreTypesArray.Num() > 0);
+
+  NpcStoreTypesDataTable = nullptr;
 }

@@ -8,6 +8,7 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/AI/CustomerDataStructs.h"
+#include "store_playground/Market/MarketDataStructs.h"
 #include "GlobalDataManager.generated.h"
 
 // * Global data store to hold data used by random generation systems.
@@ -55,7 +56,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UniqueNpcDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
-  TObjectPtr<const class UDataTable> FQuestChainDataDataTable;
+  TObjectPtr<const class UDataTable> QuestChainDataDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> NpcStoreTypesDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> NpcStoreDialoguesTable;
 
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<struct FGenericCustomerData> GenericCustomersArray;
@@ -80,10 +85,16 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<struct FQuestChainData> QuestChainsArray;  // ? Change to TMap?
 
+  UPROPERTY(EditAnywhere, Category = "Store")
+  TArray<struct FNpcStoreType> NpcStoreTypesArray;
+  UPROPERTY(EditAnywhere, Category = "Store")
+  TArray<struct FDialogueData> NpcStoreDialogues;
+
   void InitializeCustomerData();
   void InitializeDialogueData();
   void InitializeQuestChainsData();
   void InitializeNPCData();
+  void InitializeNpcStoreData();
 
   TArray<struct FUniqueNpcData> GetEligibleNpcs(const TMap<EReqFilterOperand, std::any>& GameDataMap) const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
@@ -94,6 +105,22 @@ public:
 
   TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
   TArray<struct FDialogueData> GetRandomCustomerDialogue() const;
+  TArray<struct FDialogueData> GetRandomNpcStoreDialogue() const;
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 };
+
+// * Utility Functions.
+template <typename T>
+T GetWeightedRandomItem(const TArray<T>& Items, std::function<float(const T&)> WeightFunc) {
+  float TotalWeight = 0.0f;
+  for (const T& Item : Items) TotalWeight += WeightFunc(Item);
+
+  float RandomItem = FMath::FRandRange(0.0f, TotalWeight);
+  for (const T& Item : Items) {
+    if (RandomItem < WeightFunc(Item)) return Item;
+    RandomItem -= WeightFunc(Item);
+  }
+
+  return Items[0];
+}

@@ -174,3 +174,49 @@ struct FEconItem {
   UPROPERTY(EditAnywhere)
   float PriceJumpMulti;  // * Reverse price stickiness, 1.0 = current price changes to perfect price in one cycle.
 };
+
+// * Store types.
+USTRUCT()
+struct FNpcStoreType {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName NpcStoreTypeID;
+
+  UPROPERTY(EditAnywhere)
+  FText StoreTypeName;
+  UPROPERTY(EditAnywhere)
+  float StoreSpawnWeight;
+  UPROPERTY(EditAnywhere)
+  TArray<int32> StockCountRange;  // * Min, max stock count.
+
+  UPROPERTY(EditAnywhere)
+  float StorePriceMarkup;
+
+  UPROPERTY(EditAnywhere)
+  TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
+  UPROPERTY(EditAnywhere)
+  TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
+};
+USTRUCT()
+struct FNpcStoreTypeRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName NpcStoreTypeID;
+
+  UPROPERTY(EditAnywhere)
+  FText StoreTypeName;
+  UPROPERTY(EditAnywhere)
+  float StoreSpawnWeight;
+  UPROPERTY(EditAnywhere)
+  TArray<int32> StockCountRange;  // * Min, max stock count.
+
+  UPROPERTY(EditAnywhere)
+  float StorePriceMarkup;
+
+  UPROPERTY(EditAnywhere)
+  TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
+  UPROPERTY(EditAnywhere)
+  TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
+};

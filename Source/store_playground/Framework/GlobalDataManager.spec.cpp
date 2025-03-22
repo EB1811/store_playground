@@ -26,7 +26,7 @@ END_DEFINE_SPEC(AGlobalDataManagerSpec)
 void AGlobalDataManagerSpec::Define() {
   Describe("EvaluateRequirementsFilter basic operators.", [this]() {
     It("should return true if the filter is empty", EAsyncExecution::ThreadPool, [this]() {
-      TEST_TRUE(EvaluateRequirementsFilter(NAME_None, {{EReqFilterOperand::Money, 0}}));
+      TEST_TRUE(EvaluateRequirementsFilter(NAME_None, MONEY(0)));
       TEST_TRUE(EvaluateRequirementsFilter("", MONEY(0)));
     });
 

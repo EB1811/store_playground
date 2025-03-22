@@ -19,6 +19,8 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class ALevelManager> LevelManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AGlobalDataManager> GlobalDataManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStorePhaseManager> StorePhaseManagerClass;

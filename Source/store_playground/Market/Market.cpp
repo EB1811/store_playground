@@ -1,11 +1,15 @@
-
 #include "Market.h"
+#include "HAL/Platform.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/WorldObject/NPCStore.h"
+#include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Store/Store.h"
+#include "store_playground/Market/MarketEconomy.h"
+#include "store_playground/Market/NpcStoreComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
@@ -13,20 +17,7 @@ AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
 void AMarket::BeginPlay() {
   Super::BeginPlay();
 
-  check(NpcStoreDialoguesTable && AllItemsTable && NPCStoreClass);
-
-  TArray<FDialogueDataTable*> NpcStoreDialoguesRows;
-  NpcStoreDialoguesTable->GetAllRows<FDialogueDataTable>("", NpcStoreDialoguesRows);
-  for (auto* Row : NpcStoreDialoguesRows)
-    NpcStoreDialogues.Add({
-        Row->DialogueChainID,
-        Row->DialogueID,
-        Row->DialogueType,
-        Row->DialogueText,
-        Row->Action,
-        Row->DialogueSpeaker,
-        Row->ChoicesAmount,
-    });
+  check(AllItemsTable && NPCStoreClass);
 
   TArray<FItemDataRow*> ItemRows;
   AllItemsTable->GetAllRows<FItemDataRow>("", ItemRows);
@@ -47,49 +38,66 @@ void AMarket::BeginPlay() {
     AllItems.Add(Item);
   }
 
-  check(NpcStoreDialogues.Num() > 0);
   check(AllItems.Num() > 0);
 
-  NpcStoreDialoguesTable = nullptr;
   AllItemsTable = nullptr;
 }
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void AMarket::InitializeNPCStores() {
+  check(GlobalDataManager);
+
   TArray<AActor*> FoundActors;
   UGameplayStatics::GetAllActorsOfClass(GetWorld(), NPCStoreClass, FoundActors);
+  UE_LOG(LogTemp, Warning, TEXT("Found %d NPC stores"), FoundActors.Num());
 
   for (AActor* Actor : FoundActors) {
     ANPCStore* NPCStore = Cast<ANPCStore>(Actor);
     check(NPCStore);
 
-    TArray<int32> RandomDialogueIndexes = GetRandomDialogueIndexes();
-    for (int32 RandomDialogue : RandomDialogueIndexes)
-      NPCStore->DialogueComponent->DialogueArray.Add(NpcStoreDialogues[RandomDialogue]);
-    NPCStore->InventoryComponent->ItemsArray = GetNewRandomItems(2);
+    // Reset.
+    NPCStore->InventoryComponent->ItemsArray.Empty();
+    NPCStore->DialogueComponent->DialogueArray.Empty();
+
+    NPCStore->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomNpcStoreDialogue();
+
+    auto NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
+        GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
+    NPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
+    int32 RandomStockCount = FMath::RandRange(NpcStoreType.StockCountRange[0], NpcStoreType.StockCountRange[1]);
+    // Get random joined item + econ types using their weights.
+    TMap<TTuple<EItemType, EItemEconType>, int32> RandomTypesCountMap;
+    for (int32 i = 0; i < RandomStockCount; i++) {
+      EItemType RandomItemType =
+          GetWeightedRandomItem<TTuple<EItemType, float>>(NpcStoreType.ItemTypeWeightMap.Array(), [](const auto& Pair) {
+            return Pair.Value;
+          }).Key;
+      EItemEconType RandomItemEconType =
+          GetWeightedRandomItem<TTuple<EItemEconType, float>>(NpcStoreType.ItemEconTypeWeightMap.Array(),
+                                                              [](const auto& Pair) { return Pair.Value; })
+              .Key;
+
+      RandomTypesCountMap.FindOrAdd(TTuple<EItemType, EItemEconType>(RandomItemType, RandomItemEconType), 0)++;
+    }
+    check(RandomTypesCountMap.Num() > 0);
+
+    TMap<TTuple<EItemType, EItemEconType>, TArray<FName>> PossibleItemIdsMap;
+    for (const auto& Item : AllItems)
+      if (RandomTypesCountMap.Contains(TTuple<EItemType, EItemEconType>(Item->ItemType, Item->ItemEconType)))
+        PossibleItemIdsMap.FindOrAdd(TTuple<EItemType, EItemEconType>(Item->ItemType, Item->ItemEconType))
+            .Add(Item->ItemID);
+
+    TArray<UItemBase*> StoreItems;
+    for (const auto& Pair : RandomTypesCountMap) {
+      if (!PossibleItemIdsMap.Contains(Pair.Key)) continue;
+
+      TArray<FName> ItemIds = PossibleItemIdsMap[Pair.Key];
+      for (int32 i = 0; i < Pair.Value; i++) NPCStore->InventoryComponent->AddItem(GetRandomItem(ItemIds));
+    }
   }
 }
 
-TArray<int32> AMarket::GetRandomDialogueIndexes() {
-  TArray<int32> RandomDialogueIndexes;
-
-  int32 MapSize = NpcStoreDialogues.Num();
-  int32 RandomIndex = FMath::RandRange(0, MapSize - 1);
-  for (int32 i = RandomIndex - 1; i >= 0; i--) {
-    if (NpcStoreDialogues[i].DialogueChainID != NpcStoreDialogues[RandomIndex].DialogueChainID) break;
-    RandomIndex = i;
-  }
-
-  for (int32 i = RandomIndex; i < MapSize; i++) {
-    if (NpcStoreDialogues[i].DialogueChainID != NpcStoreDialogues[RandomIndex].DialogueChainID) break;
-    RandomDialogueIndexes.Add(i);
-  }
-
-  return RandomDialogueIndexes;
-}
-
-// ? Get items based on factors?
 TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
@@ -100,7 +108,53 @@ TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
   return NewItems;
 }
 
-UItemBase* AMarket::GetItemByID(const TArray<FName> ItemIds) const {
+UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
   FName RandomId = ItemIds[FMath::RandRange(0, ItemIds.Num() - 1)];
   return *(AllItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
+}
+
+bool AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
+                      UInventoryComponent* NPCStoreInventory,
+                      UInventoryComponent* PlayerInventory,
+                      AStore* PlayerStore,
+                      UItemBase* Item,
+                      int32 Quantity) {
+  check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
+  if (!NPCStoreInventory->ItemsArray.ContainsByPredicate(
+          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+    return false;
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
+
+  float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
+  if (PlayerStore->Money < TotalPrice) return false;
+
+  if (!TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess) return false;
+
+  PlayerStore->Money -= TotalPrice;
+  return true;
+}
+
+bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
+                       UInventoryComponent* NPCStoreInventory,
+                       UInventoryComponent* PlayerInventory,
+                       AStore* PlayerStore,
+                       UItemBase* Item,
+                       int32 Quantity) {
+  check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
+  if (!PlayerInventory->ItemsArray.ContainsByPredicate(
+          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+    return false;
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
+
+  if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
+
+  PlayerStore->Money +=
+      EconItem->CurrentPrice * Quantity * (1.0f - (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
+  return true;
 }

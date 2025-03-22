@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
+#include "store_playground/Market/MarketDataStructs.h"
 #include "Market.generated.h"
 
 USTRUCT()
@@ -11,7 +12,7 @@ struct FMarketParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  int32 MinPrice;
+  float Money;
 };
 
 UCLASS(Blueprintable)
@@ -25,37 +26,37 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Market")
-  TObjectPtr<const class UDataTable> NpcStoreDialoguesTable;
+  const class AGlobalDataManager* GlobalDataManager;
+
   UPROPERTY(EditAnywhere, Category = "Market")
   TObjectPtr<const class UDataTable> AllItemsTable;
-  // * One store for now.
   UPROPERTY(EditAnywhere, Category = "Market")
   class TSubclassOf<class AActor> NPCStoreClass;
 
-  UPROPERTY(EditAnywhere, Category = "Market")
-  TArray<struct FDialogueData> NpcStoreDialogues;
+  // ? Store list of all stores?
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TArray<class UItemBase*> AllItems;
+
   UPROPERTY(EditAnywhere, Category = "Market")
-  TMap<FName, float> MarketPrices;
+  class AMarketEconomy* MarketEconomy;
 
   void InitializeNPCStores();
 
   TArray<int32> GetRandomDialogueIndexes();
   TArray<class UItemBase*> GetNewRandomItems(int32 Amount) const;
-  class UItemBase* GetItemByID(const TArray<FName> ItemIds) const;
-};
+  class UItemBase* GetRandomItem(const TArray<FName> ItemIds) const;
 
-void BuyItem(class AMarketEconomy* MarketEconomy,
-             class UInventoryComponent* NPCStoreInventory,
-             class UInventoryComponent* PlayerInventory,
-             class AStore* PLayerStore,
-             class UItemBase* Item,
-             int32 Quantity = 1);
-void SellItem(class AMarketEconomy* MarketEconomy,
-              class UInventoryComponent* NPCStoreInventory,
-              class UInventoryComponent* PlayerInventory,
-              class AStore* PlayerStore,
-              class UItemBase* Item,
-              int32 Quantity = 1);
+  bool BuyItem(class UNpcStoreComponent* NpcStoreC,
+               class UInventoryComponent* NPCStoreInventory,
+               class UInventoryComponent* PlayerInventory,
+               class AStore* PlayerStore,
+               class UItemBase* Item,
+               int32 Quantity = 1);
+  bool SellItem(class UNpcStoreComponent* NpcStoreC,
+                class UInventoryComponent* NPCStoreInventory,
+                class UInventoryComponent* PlayerInventory,
+                class AStore* PlayerStore,
+                class UItemBase* Item,
+                int32 Quantity = 1);
+};
