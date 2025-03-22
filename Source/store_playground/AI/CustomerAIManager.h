@@ -84,13 +84,15 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
   float LastSpawnTime;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
+  TArray<FName> RecentlySpawnedUniqueNpcIds;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
   float LastPickItemCheckTime;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
   FTimerHandle PickItemTimer;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
-  TArray<FGuid> CustomersPickingIds;
+  TMap<FGuid, FGuid> PickingItemIdsMap;  // Item ID to Customer ID
 
   // ? Have separate arrays for each state?
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Customers Array")

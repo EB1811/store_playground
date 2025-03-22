@@ -33,6 +33,9 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
+  FGuid CustomerID;
+
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerType CustomerType;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")

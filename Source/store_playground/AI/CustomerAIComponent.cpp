@@ -6,6 +6,7 @@
 UCustomerAIComponent::UCustomerAIComponent() {
   PrimaryComponentTick.bCanEverTick = false;
 
+  CustomerID = FGuid::NewGuid();
   CustomerType = ECustomerType::Generic;
 }
 

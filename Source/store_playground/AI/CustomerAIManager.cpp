@@ -1,7 +1,4 @@
-
 #include "CustomerAIManager.h"
-#include <functional>
-#include <vector>
 #include "Containers/Array.h"
 #include "CustomerAIComponent.h"
 #include "Misc/AssertionMacros.h"
@@ -17,20 +14,6 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/Market.h"
-
-template <typename T>
-T GetWeightedRandomItem(const TArray<T>& Items, std::function<float(const T&)> WeightFunc) {
-  float TotalWeight = 0.0f;
-  for (const T& Item : Items) TotalWeight += WeightFunc(Item);
-
-  float RandomItem = FMath::FRandRange(0.0f, TotalWeight);
-  for (const T& Item : Items) {
-    if (RandomItem < WeightFunc(Item)) return Item;
-    RandomItem -= WeightFunc(Item);
-  }
-
-  return Items[0];
-}
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
@@ -77,7 +60,7 @@ void ACustomerAIManager::EndCustomerAI() {
   ManagerParams.bSpawnCustomers = false;
   SetActorTickEnabled(false);
 
-  CustomersPickingIds.Empty();
+  PickingItemIdsMap.Empty();
 
   TArray<ACustomer*> CustomersToRemove;
   for (ACustomer* Customer : AllCustomers) CustomersToRemove.Add(Customer);
@@ -96,9 +79,11 @@ void ACustomerAIManager::SpawnUniqueNpc() {
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  // TODO: Add recently spawned penalty.
+  for (auto& Npc : EligibleNpcs)
+    if (RecentlySpawnedUniqueNpcIds.Contains(Npc.NpcID)) Npc.SpawnChanceWeight *= 0.25f;
   FUniqueNpcData UniqueNpcData =
       GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
+  RecentlySpawnedUniqueNpcIds.Add(UniqueNpcData.NpcID);
 
   UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
   ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
@@ -153,7 +138,7 @@ void ACustomerAIManager::SpawnUniqueNpc() {
             return;  // * Couldn't start quest.
           break;
         case ECustomerAction::SellItem:
-          CustomerSellItem(UniqueCustomer->CustomerAIComponent, Market->GetItemByID(IDs));
+          CustomerSellItem(UniqueCustomer->CustomerAIComponent, Market->GetRandomItem(IDs));
           break;
         default: break;
       }
@@ -189,10 +174,19 @@ void ACustomerAIManager::SpawnCustomers() {
         CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
         GetActorRotation(), SpawnParams);
 
-    // TODO: Spawn probabilities with weights.
+    // Temp: Only population weighted.
+    TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
+    for (const auto& GenericCustomer : GlobalDataManager->GenericCustomersArray) {
+      const FPopMoneySpendData* PopData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
+          [GenericCustomer](const FPopMoneySpendData& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
+      WeightedCustomers.Add(MakeTuple(GenericCustomer, PopData->Population));
+    }
+
     const FGenericCustomerData RandomCustomerData =
-        GlobalDataManager
-            ->GenericCustomersArray[FMath::RandRange(0, GlobalDataManager->GenericCustomersArray.Num() - 1)];
+        GetWeightedRandomItem<TTuple<FGenericCustomerData, float>>(WeightedCustomers, [](const auto& Item) {
+          return Item.Value;
+        }).Key;
+
     const FCustomerPop* CustomerPopData = MarketEconomy->AllCustomerPops.FindByPredicate(
         [RandomCustomerData](const FCustomerPop& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
     const FPopMoneySpendData* PopMoneySpendData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
@@ -216,21 +210,14 @@ void ACustomerAIManager::SpawnCustomers() {
 
 void ACustomerAIManager::PerformCustomerAILoop() {
   check(Store);
-
   LastPickItemCheckTime = GetWorld()->GetTimeSeconds();
-
-  // ? Call function somewhere to remove the picked item on successful negotiation?
-  CustomersPickingIds = CustomersPickingIds.FilterByPredicate([this](FGuid ItemID) {
-    return Store->StoreStockItems.ContainsByPredicate(
-        [ItemID](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == ItemID; });
-  });
 
   TArray<ACustomer*> CustomersToRemove;
 
   for (ACustomer* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
-        if (CustomersPickingIds.Num() >= ManagerParams.MaxCustomersPickingAtOnce) break;
+        if (PickingItemIdsMap.Num() >= ManagerParams.MaxCustomersPickingAtOnce) break;
 
         if (FMath::FRand() * 100 < ManagerParams.PerformActionChance)
           CustomerPerformAction(Customer->CustomerAIComponent, Customer->InteractionComponent);
@@ -257,11 +244,12 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 
   for (ACustomer* Customer : CustomersToRemove) {
     AllCustomers.RemoveSingleSwap(Customer);
-    // ? Store struct of picked ids and associated customer?
-    if (Customer->CustomerAIComponent->NegotiationAI) {
-      if (Customer->CustomerAIComponent->NegotiationAI->RelevantItem)
-        CustomersPickingIds.RemoveSingleSwap(Customer->CustomerAIComponent->NegotiationAI->RelevantItem->UniqueItemID);
 
+    // ? Call function somewhere to remove the picked item on successful negotiation?
+    if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerID))
+      PickingItemIdsMap.Remove(*ItemID);
+
+    if (Customer->CustomerAIComponent->NegotiationAI) {
       Customer->CustomerAIComponent->NegotiationAI->RelevantItem = nullptr;
       Customer->CustomerAIComponent->NegotiationAI = nullptr;
     }
@@ -271,8 +259,6 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 
 void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   check(CustomerAI && Interaction);
-
-  // TODO: RandomAction wighted by if relevant items in stock/inv.
 
   TMap<ECustomerAction, float> ActionWeights = ManagerParams.ActionWeights;
   if (Store->StoreStockItems.Num() < 5.0f)
@@ -306,10 +292,10 @@ void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI,
 // ? Use item ids to pick items?
 bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
                                           std::function<bool(const FStockItem& StockItem)> FilterFunc) {
-  if (Store->StoreStockItems.Num() <= 0 || CustomersPickingIds.Num() >= Store->StoreStockItems.Num()) return false;
+  if (Store->StoreStockItems.Num() <= 0 || PickingItemIdsMap.Num() >= Store->StoreStockItems.Num()) return false;
 
   TArray<FStockItem> NonPickedItems = Store->StoreStockItems.FilterByPredicate(
-      [this](const FStockItem& StockItem) { return !CustomersPickingIds.Contains(StockItem.Item->UniqueItemID); });
+      [this](const FStockItem& StockItem) { return !PickingItemIdsMap.Contains(StockItem.Item->UniqueItemID); });
   auto RelevantItems = FilterFunc ? NonPickedItems.FilterByPredicate(FilterFunc)
                                   : NonPickedItems.FilterByPredicate([CustomerAI](const FStockItem& StockItem) {
                                       return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
@@ -317,12 +303,13 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
                                     });
   if (RelevantItems.Num() <= 0) return false;
 
+  // TODO: Weighted by stock display stats.
   const FStockItem& StockItem = RelevantItems[FMath::RandRange(0, RelevantItems.Num() - 1)];
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
   CustomerAI->NegotiationAI->RelevantItem = StockItem.Item;
   CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;
 
-  CustomersPickingIds.Add(StockItem.Item->UniqueItemID);
+  PickingItemIdsMap.Add(StockItem.Item->UniqueItemID, CustomerAI->CustomerID);
   return true;
 }
 
@@ -376,7 +363,6 @@ void ACustomerAIManager::CompleteQuestChain(const FQuestChainData& QuestChainDat
   if (QuestsCompleted.Contains(QuestChainData.QuestID)) return;
   switch (QuestChainData.QuestAction) {
     case EQuestAction::Continue: {
-      UE_LOG(LogTemp, Warning, TEXT("Continuing quest chain: %s."), *QuestChainData.QuestChainID.ToString());
       QuestInProgressMap.FindOrAdd(QuestChainData.QuestID, {});
       QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.QuestChainID);
       if (QuestChainData.QuestChainType == EQuestChainType::DialogueChoice)

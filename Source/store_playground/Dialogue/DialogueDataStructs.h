@@ -66,7 +66,7 @@ USTRUCT()
 struct FNextDialogueRes {
   GENERATED_BODY()
 
-  std::optional<FDialogueData> DialogueData;
+  TOptional<FDialogueData> DialogueData;
   EDialogueState State;
 };
 

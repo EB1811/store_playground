@@ -15,3 +15,4 @@ AllowShortBlocksOnASingleLine: true
 AllowAllParametersOfDeclarationOnNextLine: false
 AlignAfterOpenBracket: Align
 AllowShortCaseLabelsOnASingleLine: true
+ReflowComments: false
