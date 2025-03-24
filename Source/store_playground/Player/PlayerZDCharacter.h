@@ -33,8 +33,10 @@ public:
   class ASpgHUD* HUD;
 
   // * Input
+  // Temp: Move to input manager / a map.
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputMappingContext* InputMappingContext;
+
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* MoveAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
@@ -43,6 +45,8 @@ public:
   class UInputAction* CloseAllMenusAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* OpenInventoryViewAction;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  class UInputAction* BuildModeAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* InteractAction;
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -53,6 +57,8 @@ public:
   void CloseAllMenus(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenInventoryView(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void EnterBuildMode(const FInputActionValue& Value);
 
   // * Inventory
   UPROPERTY(EditAnywhere, Category = "Character | Inventory")

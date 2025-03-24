@@ -236,7 +236,6 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         break;
       }
       case (ECustomerState::PerformingQuest): {
-        // ? Check if quest is completed.
         break;
       }
       default: checkNoEntry();
@@ -331,7 +330,6 @@ bool ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
   return true;
 }
 
-// ? Use item id?
 void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UItemBase* HasItem) {
   // Temp: Random item.
   UItemBase* Item = HasItem ? HasItem : Market->GetNewRandomItems(1)[0];

@@ -39,6 +39,10 @@ void ABuildable::SetToStockDisplay() {
   BuildableType = EBuildableType::StockDisplay;
   Mesh->SetStaticMesh(MeshesMap[BuildableType]);
 
+  Mesh->SetVisibility(true);
+  Mesh->SetSimulatePhysics(true);
+  Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
   InteractionComponent->InteractionType = EInteractionType::StockDisplay;
 }
 
@@ -48,12 +52,20 @@ void ABuildable::SetToDecoration() {
   BuildableType = EBuildableType::Decoration;
   Mesh->SetStaticMesh(MeshesMap[BuildableType]);
 
+  Mesh->SetVisibility(true);
+  Mesh->SetSimulatePhysics(true);
+  Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
   InteractionComponent->InteractionType = EInteractionType::Decoration;
 }
 
 void ABuildable::SetToNone() {
   BuildableType = EBuildableType::None;
   Mesh->SetStaticMesh(MeshesMap[BuildableType]);
+
+  Mesh->SetVisibility(false);
+  Mesh->SetSimulatePhysics(false);
+  Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
   InteractionComponent->InteractionType = EInteractionType::Buildable;
 }

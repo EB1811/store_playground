@@ -7,21 +7,22 @@
 #include "StorePhaseManager.generated.h"
 
 UENUM()
-enum class EShopPhaseState : uint8 {
+enum class EStorePhaseState : uint8 {
   None UMETA(DisplayName = "NONE"),
   Morning UMETA(DisplayName = "Morning"),
+  MorningBuildMode UMETA(DisplayName = "Morning Build Mode"),  // * Toggle for when the player wants to build.
   ShopOpen UMETA(DisplayName = "Shop Open"),
   Night UMETA(DisplayName = "Night"),
 };
 UENUM()
-enum class EShopPhaseAction : uint8 {
+enum class EStorePhaseAction : uint8 {
   Start UMETA(DisplayName = "Start"),
   OpenShop UMETA(DisplayName = "Open Shop"),
+  ToggleBuildMode UMETA(DisplayName = "Toggle Build Mode"),
   CloseShop UMETA(DisplayName = "Close Shop"),
   EndDay UMETA(DisplayName = "End Day"),
 };
-
-EShopPhaseState GetNextShopPhaseState(EShopPhaseState CurrentState, EShopPhaseAction Action);
+EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action);
 
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AStorePhaseManager : public AInfo {
@@ -33,8 +34,11 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  UPROPERTY(EditAnywhere, Category = "Store")
+  class TSubclassOf<class AActor> BuildableClass;
+
   UPROPERTY(EditAnywhere, Category = "Store Phase")
-  EShopPhaseState ShopPhaseState;
+  EStorePhaseState StorePhaseState;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class AStore* Store;
@@ -44,6 +48,7 @@ public:
   class ACustomerAIManager* CustomerAIManager;
 
   void Start();
+  void BuildMode();
   void OpenShop();
   void CloseShop();
   void EndDay();

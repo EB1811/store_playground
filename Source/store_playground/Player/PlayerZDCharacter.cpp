@@ -42,12 +42,15 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
   if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
     EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Move);
+
     EnhancedInputComponent->BindAction(CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::CloseTopOpenMenu);
     EnhancedInputComponent->BindAction(CloseAllMenusAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::CloseAllMenus);
     EnhancedInputComponent->BindAction(OpenInventoryViewAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenInventoryView);
+    EnhancedInputComponent->BindAction(BuildModeAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::EnterBuildMode);
     EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Interact);
   }
 }
@@ -78,6 +81,14 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
 
   AddMovementInput(ForwardDirection, MovementVector.Y);
   AddMovementInput(RightDirection, MovementVector.X);
+
+  FRotator NewRotation = FQuat::FindBetweenVectors(FVector::ForwardVector, ForwardDirection * MovementVector.Y +
+                                                                               RightDirection * MovementVector.X)
+                             .Rotator();
+  NewRotation.Pitch = 0.0f;
+  NewRotation.Roll = 0.0f;
+  NewRotation.Normalize();
+  SetActorRotation(NewRotation);
 }
 
 void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }
@@ -88,9 +99,17 @@ void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent, Store);
 }
 
+void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
+  if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning &&
+      StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode)
+    return;
+
+  StorePhaseManager->BuildMode();
+}
+
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
-  FVector TraceEnd{TraceStart + GetViewRotation().Vector() * InteractionCheckDistance};
+  FVector TraceEnd{TraceStart + GetActorRotation().Vector() * InteractionCheckDistance};
 
   DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.1f, 0, 5.0f);
 
@@ -120,14 +139,14 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             break;
           }
           case EInteractionType::Buildable: {
-            if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
+            if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) break;
 
             auto Buildable = Interactable->InteractBuildable();
             EnterBuildableDisplay(Buildable.GetValue());
             break;
           }
           case EInteractionType::StockDisplay: {
-            if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
+            if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
 
             auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
             EnterStockDisplay(DisplayC, DisplayInventoryC);
@@ -175,7 +194,7 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             break;
           }
           case EInteractionType::NpcStore: {
-            if (StorePhaseManager->ShopPhaseState != EShopPhaseState::Morning) break;
+            if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
 
             auto [NpcStoreC, StoreInventory, Dialogue] = Interactable->InteractNpcStore();
             EnterDialogue(Dialogue->DialogueArray,
@@ -269,13 +288,16 @@ void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventory
 
 void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   // * Allowed level transitions.
-  switch (StorePhaseManager->ShopPhaseState) {
-    case EShopPhaseState::Morning:
+  switch (StorePhaseManager->StorePhaseState) {
+    case EStorePhaseState::Morning:
+    case EStorePhaseState::MorningBuildMode:
       if (LevelManager->CurrentLevel == ELevel::Store && LevelChangeC->LevelToLoad != ELevel::Market) return;
       if (LevelManager->CurrentLevel == ELevel::Market && LevelChangeC->LevelToLoad != ELevel::Store) return;
+
+      if (StorePhaseManager->StorePhaseState == EStorePhaseState::MorningBuildMode) StorePhaseManager->BuildMode();
       break;
-    case EShopPhaseState::ShopOpen: return;
-    case EShopPhaseState::Night: return;
+    case EStorePhaseState::ShopOpen: return;
+    case EStorePhaseState::Night: return;
   }
 
   auto LevelReadyFunc = [this, LevelChangeC]() {
