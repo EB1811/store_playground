@@ -268,6 +268,16 @@ void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventory
 }
 
 void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
+  // * Allowed level transitions.
+  switch (StorePhaseManager->ShopPhaseState) {
+    case EShopPhaseState::Morning:
+      if (LevelManager->CurrentLevel == ELevel::Store && LevelChangeC->LevelToLoad != ELevel::Market) return;
+      if (LevelManager->CurrentLevel == ELevel::Market && LevelChangeC->LevelToLoad != ELevel::Store) return;
+      break;
+    case EShopPhaseState::ShopOpen: return;
+    case EShopPhaseState::Night: return;
+  }
+
   auto LevelReadyFunc = [this, LevelChangeC]() {
     TArray<AActor*> FoundActors;
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), SpawnPointClass, FoundActors);

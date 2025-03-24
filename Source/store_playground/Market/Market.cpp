@@ -11,6 +11,7 @@
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "store_playground/Framework/UtilFuncs.h"
 
 AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -44,6 +45,24 @@ void AMarket::BeginPlay() {
 }
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+void AMarket::SaveMarketLevelState() {
+  MarketLevelState.NpcStoreSaveMap.Empty();
+
+  TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
+  for (ANPCStore* Store : FoundStores)
+    MarketLevelState.NpcStoreSaveMap.Add(Store->NpcStoreId, SaveNpcStoreSaveState(Store));
+}
+
+void AMarket::LoadMarketLevelState() {
+  if (MarketLevelState.NpcStoreSaveMap.Num() == 0) return InitializeNPCStores();
+
+  TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
+  for (ANPCStore* Store : FoundStores) {
+    check(MarketLevelState.NpcStoreSaveMap.Contains(Store->NpcStoreId));
+    LoadNpcStoreSaveState(Store, MarketLevelState.NpcStoreSaveMap[Store->NpcStoreId]);
+  }
+}
 
 void AMarket::InitializeNPCStores() {
   check(GlobalDataManager);

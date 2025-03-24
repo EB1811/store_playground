@@ -46,7 +46,10 @@ void ALevelManager::OnLevelShown() {
   if (LevelReadyFunc) LevelReadyFunc();
   LevelReadyFunc = nullptr;
 
-  if (CurrentLevel != ELevel::None) BeginUnloadLevel(CurrentLevel);
+  if (CurrentLevel != ELevel::None) {
+    SaveLevelState(CurrentLevel);
+    BeginUnloadLevel(CurrentLevel);
+  }
   CurrentLevel = LoadedLevel;
 }
 
@@ -54,11 +57,24 @@ void ALevelManager::InitLevel(ELevel Level) {
   switch (Level) {
     case ELevel::Store:
       check(Store);
-      Store->InitStockDisplays();
+      Store->LoadStoreLevelState();
       break;
     case ELevel::Market:
       check(Market);
-      Market->InitializeNPCStores();
+      Market->LoadMarketLevelState();
+      break;
+  }
+}
+
+void ALevelManager::SaveLevelState(ELevel Level) {
+  switch (Level) {
+    case ELevel::Store:
+      check(Store);
+      Store->SaveStoreLevelState();
+      break;
+    case ELevel::Market:
+      check(Market);
+      Market->SaveMarketLevelState();
       break;
   }
 }

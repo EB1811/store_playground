@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "store_playground/Market/MarketDataStructs.h"
+#include "store_playground/WorldObject/NPCStore.h"
 #include "Market.generated.h"
 
 USTRUCT()
@@ -13,6 +14,14 @@ struct FMarketParams {
 
   UPROPERTY(EditAnywhere)
   float Money;
+};
+
+USTRUCT()
+struct FMarketLevelState {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  TMap<FGuid, struct FNpcStoreSaveState> NpcStoreSaveMap;
 };
 
 UCLASS(Blueprintable)
@@ -33,6 +42,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market")
   class TSubclassOf<class AActor> NPCStoreClass;
 
+  UPROPERTY(EditAnywhere, Category = "Store")
+  FMarketLevelState MarketLevelState;
+
   // ? Store list of all stores?
 
   UPROPERTY(EditAnywhere, Category = "Market")
@@ -41,6 +53,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market")
   class AMarketEconomy* MarketEconomy;
 
+  void SaveMarketLevelState();
+  void LoadMarketLevelState();
   void InitializeNPCStores();
 
   TArray<int32> GetRandomDialogueIndexes();

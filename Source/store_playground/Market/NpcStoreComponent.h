@@ -17,7 +17,7 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere, Category = "NPC Store")
-  FGuid NpcStoreID;
+  FGuid NpcStoreCID;
 
   UPROPERTY(EditAnywhere, Category = "NPC Store")
   FNpcStoreType NpcStoreType;

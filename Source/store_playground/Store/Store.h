@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "store_playground/WorldObject/Buildable.h"
 #include "GameFramework/Info.h"
 #include "Store.generated.h"
 
@@ -26,6 +27,14 @@ struct FStoreStats {
   float Reputation;
 };
 
+USTRUCT()
+struct FStoreLevelState {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  TMap<FGuid, FBuildableSaveState> BuildableSaveMap;
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AStore : public AInfo {
   GENERATED_BODY()
@@ -39,13 +48,17 @@ public:
   class TSubclassOf<class AActor> BuildableClass;
 
   UPROPERTY(EditAnywhere, Category = "Store")
+  FStoreLevelState StoreLevelState;
+
+  UPROPERTY(EditAnywhere, Category = "Store")
   float Money;
   UPROPERTY(EditAnywhere, Category = "Store")
   FStoreStats StoreStats;
 
-  // TODO: Initialize stock displays.
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<FStockItem> StoreStockItems;
 
+  void SaveStoreLevelState();
+  void LoadStoreLevelState();
   void InitStockDisplays();
 };

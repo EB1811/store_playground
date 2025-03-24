@@ -44,7 +44,9 @@ public:
 
   UFUNCTION()
   void OnLevelShown();
+
   void InitLevel(ELevel Level);
+  void SaveLevelState(ELevel Level);
 
   std::function<void()> LevelReadyFunc;  // * Callback for the player.
 };

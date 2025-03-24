@@ -43,7 +43,6 @@ struct FInventoryTransferRes {
 
   bool bSuccess;
 };
-
 FInventoryTransferRes TransferItem(UInventoryComponent* From,
                                    UInventoryComponent* To,
                                    UItemBase* Item,

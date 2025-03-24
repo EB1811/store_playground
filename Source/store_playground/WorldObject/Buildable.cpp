@@ -6,6 +6,8 @@
 ABuildable::ABuildable() {
   PrimaryActorTick.bCanEverTick = true;
 
+  if (!BuildableId.IsValid()) BuildableId = FGuid::NewGuid();
+
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetSimulatePhysics(true);
   SetRootComponent(Mesh);
@@ -18,10 +20,10 @@ ABuildable::ABuildable() {
 void ABuildable::BeginPlay() {
   Super::BeginPlay();
 
-  for (auto BType : TEnumRange<EBuildableType>()) {
-    check(MeshesMap.Contains(BType));
-    check(IsBuildableMap.Contains(BType));
-    check(BuildingPricesMap.Contains(BType));
+  for (auto Type : TEnumRange<EBuildableType>()) {
+    check(MeshesMap.Contains(Type));
+    check(IsBuildableMap.Contains(Type));
+    check(BuildingPricesMap.Contains(Type));
   }
 
   switch (BuildableType) {
@@ -70,3 +72,19 @@ void ABuildable::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
   }
 }
 #endif
+
+FBuildableSaveState SaveBuildableSaveState(ABuildable* Buildable) {
+  return {Buildable->BuildableId, Buildable->BuildableType, Buildable->StockInventory->ItemsArray};
+}
+
+void LoadBuildableSaveState(ABuildable* Buildable, FBuildableSaveState SaveState) {
+  check(SaveState.BuildableId == Buildable->BuildableId);
+
+  switch (SaveState.BuildableType) {
+    case EBuildableType::StockDisplay: Buildable->SetToStockDisplay(); break;
+    case EBuildableType::Decoration: Buildable->SetToDecoration(); break;
+    default: Buildable->SetToNone();
+  }
+
+  Buildable->StockInventory->ItemsArray = SaveState.ItemsArray;
+}

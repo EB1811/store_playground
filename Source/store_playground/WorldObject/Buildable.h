@@ -24,6 +24,9 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere, Category = "Buildable")
+  FGuid BuildableId;
+
+  UPROPERTY(EditAnywhere, Category = "Buildable")
   TMap<EBuildableType, UStaticMesh*> MeshesMap;
   UPROPERTY(EditAnywhere, Category = "Buildable")
   UStaticMeshComponent* Mesh;
@@ -52,3 +55,18 @@ public:
   virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 };
+
+USTRUCT()
+struct FBuildableSaveState {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FGuid BuildableId;
+
+  UPROPERTY(EditAnywhere)
+  EBuildableType BuildableType;
+  UPROPERTY(EditAnywhere)
+  TArray<TObjectPtr<class UItemBase>> ItemsArray;  // Temp.
+};
+FBuildableSaveState SaveBuildableSaveState(ABuildable* Buildable);
+void LoadBuildableSaveState(ABuildable* Buildable, FBuildableSaveState SaveState);

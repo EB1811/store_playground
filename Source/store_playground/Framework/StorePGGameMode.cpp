@@ -66,8 +66,6 @@ void AStorePGGameMode::BeginPlay() {
 
   LevelManager->BeginLoadLevel(ELevel::Store);
   StorePhaseManager->Start();
-  Market->InitializeNPCStores();
-  Store->InitStockDisplays();
 
   UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
 }

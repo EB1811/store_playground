@@ -14,6 +14,7 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/Framework/UtilFuncs.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;

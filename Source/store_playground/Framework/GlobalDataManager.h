@@ -109,18 +109,3 @@ public:
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 };
-
-// * Utility Functions.
-template <typename T>
-T GetWeightedRandomItem(const TArray<T>& Items, std::function<float(const T&)> WeightFunc) {
-  float TotalWeight = 0.0f;
-  for (const T& Item : Items) TotalWeight += WeightFunc(Item);
-
-  float RandomItem = FMath::FRandRange(0.0f, TotalWeight);
-  for (const T& Item : Items) {
-    if (RandomItem < WeightFunc(Item)) return Item;
-    RandomItem -= WeightFunc(Item);
-  }
-
-  return Items[0];
-}

@@ -5,6 +5,7 @@
 #include "store_playground/WorldObject/Buildable.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "store_playground/WorldObject/Buildable.h"
+#include "store_playground/Framework/UtilFuncs.h"
 
 AStore::AStore() {
   PrimaryActorTick.bCanEverTick = false;
@@ -18,16 +19,31 @@ void AStore::BeginPlay() {
 
   check(BuildableClass);
 }
+void AStore::SaveStoreLevelState() {
+  StoreLevelState.BuildableSaveMap.Empty();
+
+  TArray<ABuildable*> FoundBuildables = GetAllActorsOf<ABuildable>(GetWorld(), BuildableClass);
+  for (ABuildable* Buildable : FoundBuildables)
+    StoreLevelState.BuildableSaveMap.Add(Buildable->BuildableId, SaveBuildableSaveState(Buildable));
+}
+
+void AStore::LoadStoreLevelState() {
+  if (StoreLevelState.BuildableSaveMap.Num() == 0) return InitStockDisplays();
+
+  TArray<ABuildable*> FoundBuildables = GetAllActorsOf<ABuildable>(GetWorld(), BuildableClass);
+  for (ABuildable* Buildable : FoundBuildables) {
+    check(StoreLevelState.BuildableSaveMap.Contains(Buildable->BuildableId));
+    LoadBuildableSaveState(Buildable, StoreLevelState.BuildableSaveMap[Buildable->BuildableId]);
+  }
+
+  InitStockDisplays();
+}
 
 void AStore::InitStockDisplays() {
   StoreStockItems.Empty();
 
-  TArray<AActor*> FoundActors;
-  UGameplayStatics::GetAllActorsOfClass(GetWorld(), BuildableClass, FoundActors);
-
-  for (AActor* Actor : FoundActors) {
-    ABuildable* Buildable = Cast<ABuildable>(Actor);
-    check(Buildable);
+  TArray<ABuildable*> FoundBuildables = GetAllActorsOf<ABuildable>(GetWorld(), BuildableClass);
+  for (ABuildable* Buildable : FoundBuildables) {
     if (Buildable->BuildableType != EBuildableType::StockDisplay) continue;
 
     auto* Stock = Buildable->StockInventory;

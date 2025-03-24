@@ -3,7 +3,7 @@
 UNpcStoreComponent::UNpcStoreComponent() {
   PrimaryComponentTick.bCanEverTick = false;
 
-  NpcStoreID = FGuid::NewGuid();
+  NpcStoreCID = FGuid::NewGuid();
 }
 
 void UNpcStoreComponent::BeginPlay() { Super::BeginPlay(); }

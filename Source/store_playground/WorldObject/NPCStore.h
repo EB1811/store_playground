@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "store_playground/Market/MarketDataStructs.h"
 #include "NPCStore.generated.h"
 
 UCLASS()
@@ -14,6 +15,9 @@ public:
   ANPCStore();
 
   virtual void BeginPlay() override;
+
+  UPROPERTY(EditAnywhere, Category = "NPCStore")
+  FGuid NpcStoreId;
 
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   UStaticMeshComponent* Mesh;
@@ -30,3 +34,21 @@ public:
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   class UNpcStoreComponent* NpcStoreComponent;
 };
+
+USTRUCT()
+struct FNpcStoreSaveState {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FGuid NpcStoreId;
+
+  // Temp. Changing to serialized component.
+  UPROPERTY(EditAnywhere)
+  TArray<struct FDialogueData> DialogueArray;
+  UPROPERTY(EditAnywhere)
+  TArray<TObjectPtr<class UItemBase>> ItemsArray;
+  UPROPERTY(EditAnywhere)
+  FNpcStoreType NpcStoreType;
+};
+FNpcStoreSaveState SaveNpcStoreSaveState(ANPCStore* NpcStore);
+void LoadNpcStoreSaveState(ANPCStore* NpcStore, FNpcStoreSaveState SaveState);
