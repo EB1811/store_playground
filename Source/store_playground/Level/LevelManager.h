@@ -5,7 +5,6 @@
 #include "LevelManager.generated.h"
 
 // * Responsible for loading and unloading levels dynamically.
-// ? Store variables on level unload to use later?
 
 UENUM()
 enum class ELevel : uint8 {

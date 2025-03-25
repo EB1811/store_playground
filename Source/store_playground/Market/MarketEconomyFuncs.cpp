@@ -1,6 +1,6 @@
 #include "MarketEconomy.h"
 
-TArray<float> GetRandomMoneySplit(int32 Buckets, float Money) {
+TArray<float> GetRandomSplit(int32 Buckets, float Value) {
   float Sum = 0;
   TArray<float> RandomMoneyBuckets;
   for (int i = 0; i < Buckets; i++) {
@@ -9,7 +9,7 @@ TArray<float> GetRandomMoneySplit(int32 Buckets, float Money) {
     Sum += RandomRange;
   }
 
-  float scale = Money / Sum;
+  float scale = Value / Sum;
   for (int i = 0; i < Buckets; i++) RandomMoneyBuckets[i] = std::round(RandomMoneyBuckets[i] * scale);
 
   return RandomMoneyBuckets;

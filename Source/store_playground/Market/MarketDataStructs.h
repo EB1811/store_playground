@@ -92,6 +92,8 @@ struct FPopEconData {
   UPROPERTY(EditAnywhere)
   float MSharePercent;
   UPROPERTY(EditAnywhere)
+  TArray<EItemEconType> ItemEconTypes;
+  UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, float> ItemSpendPercent;
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, int32> ItemNeeds;
@@ -119,22 +121,6 @@ struct FCustomerPop {
 };
 
 USTRUCT()
-struct FPopEconGenData {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  FName PopID;
-
-  UPROPERTY(EditAnywhere)
-  int32 Population;
-
-  UPROPERTY(EditAnywhere)
-  int32 MGen;
-  UPROPERTY(EditAnywhere)
-  float MSharePercent;
-};
-
-USTRUCT()
 struct FPopMoneySpendData {
   GENERATED_BODY()
 
@@ -147,9 +133,19 @@ struct FPopMoneySpendData {
   int32 Population;
 
   UPROPERTY(EditAnywhere)
+  EPopType PopType;
+  UPROPERTY(EditAnywhere)
+  EPopWealthType WealthType;
+
+  UPROPERTY(EditAnywhere)
+  TArray<EItemEconType> ItemEconTypes;
+  UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, float> ItemSpendPercent;
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, int32> ItemNeeds;
+
+  UPROPERTY(EditAnywhere)
+  float GoodsBoughtPerCapita;  // * Total goods bought / population.
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, float> ItemNeedsFulfilled;
 };
@@ -160,6 +156,8 @@ struct FEconItem {
 
   UPROPERTY(EditAnywhere)
   FName ItemID;
+  UPROPERTY(EditAnywhere)
+  EItemEconType ItemEconType;
   UPROPERTY(EditAnywhere)
   EItemWealthType ItemWealthType;
 

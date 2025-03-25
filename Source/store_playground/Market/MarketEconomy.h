@@ -15,6 +15,13 @@ struct FEconomyParams {
   float NeedsfulfilledPercent;  // Artificially set for 60% of the needs fulfilled at the start of the game.
   UPROPERTY(EditAnywhere)
   float SingleUnitPriceMulti;
+
+  UPROPERTY(EditAnywhere)
+  float BasePromotionChance;  // Promote to a higher wealth type.
+  UPROPERTY(EditAnywhere)
+  float BaseDemotionChance;  // Demote to a lower wealth type.
+  UPROPERTY(EditAnywhere)
+  float BaseCrossPromotionChance;  // Change to a different economy type.
 };
 
 UCLASS(Blueprintable)
@@ -47,9 +54,7 @@ public:
   float TotaBought;
 
   UPROPERTY(EditAnywhere, Category = "Economy")
-  TArray<FCustomerPop> AllCustomerPops;  // ? Needed?
-  UPROPERTY(EditAnywhere, Category = "Economy")
-  TArray<FPopEconGenData> PopEconGenDataArray;
+  TArray<FCustomerPop> AllCustomerPops;
   UPROPERTY(EditAnywhere, Category = "Economy")
   TArray<FPopMoneySpendData> PopMoneySpendDataArray;
 
@@ -63,4 +68,4 @@ public:
   void InitializeEconomyData();
 };
 
-TArray<float> GetRandomMoneySplit(int32 Buckets, float Money);
+TArray<float> GetRandomSplit(int32 Buckets, float Money);
