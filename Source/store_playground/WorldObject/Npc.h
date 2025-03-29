@@ -4,29 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Customer.generated.h"
+#include "Npc.generated.h"
+
+// ? Combine with customer?
 
 UCLASS()
-class STORE_PLAYGROUND_API ACustomer : public AActor {
+class STORE_PLAYGROUND_API ANpc : public AActor {
   GENERATED_BODY()
 
 public:
-  ACustomer();
+  ANpc();
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "Customer")
+  UPROPERTY(EditAnywhere, Category = "Npc")
   UStaticMeshComponent* Mesh;
 
-  UPROPERTY(EditAnywhere, Category = "Customer")
+  UPROPERTY(EditAnywhere, Category = "Npc")
   class UInteractionComponent* InteractionComponent;
 
-  UPROPERTY(EditAnywhere, Category = "Customer")
+  UPROPERTY(EditAnywhere, Category = "Npc")
   class UDialogueComponent* DialogueComponent;
 
-  UPROPERTY(EditAnywhere, Category = "Customer")
+  UPROPERTY(EditAnywhere, Category = "Npc")
   class UQuestComponent* QuestComponent;
-
-  UPROPERTY(EditAnywhere, Category = "Customer")
-  class UCustomerAIComponent* CustomerAIComponent;
 };

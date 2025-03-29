@@ -1,9 +1,11 @@
 #include "Market.h"
 #include "HAL/Platform.h"
+#include "Math/UnrealMathUtility.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/WorldObject/NPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
@@ -12,7 +14,10 @@
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "store_playground/Framework/UtilFuncs.h"
-#include "store_playground/WorldObject/Level/CustomerSpawnPoint.h"
+#include "store_playground/WorldObject/Level/NpcSpawnPoint.h"
+#include "store_playground/WorldObject/Npc.h"
+#include "store_playground/Quest/QuestManager.h"
+#include "store_playground/Quest/QuestComponent.h"
 
 AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -138,7 +143,12 @@ void AMarket::SaveMarketLevelState() {
 }
 
 void AMarket::LoadMarketLevelState() {
-  if (MarketLevelState.NpcStoreSaveMap.Num() == 0) return InitializeNPCStores();
+  // * Initial day's state.
+  if (MarketLevelState.NpcStoreSaveMap.Num() == 0) {
+    InitNPCStores();
+    InitMarketNpcs();
+    return;
+  }
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* Store : FoundStores) {
@@ -147,18 +157,13 @@ void AMarket::LoadMarketLevelState() {
   }
 }
 
-void AMarket::InitializeNPCStores() {
+void AMarket::InitNPCStores() {
   check(GlobalDataManager);
 
-  TArray<AActor*> FoundActors;
-  UGameplayStatics::GetAllActorsOfClass(GetWorld(), NPCStoreClass, FoundActors);
-  UE_LOG(LogTemp, Warning, TEXT("Found %d NPC stores"), FoundActors.Num());
+  TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
+  check(FoundStores.Num() > 0);
 
-  for (AActor* Actor : FoundActors) {
-    ANPCStore* NPCStore = Cast<ANPCStore>(Actor);
-    check(NPCStore);
-
-    // Reset.
+  for (ANPCStore* NPCStore : FoundStores) {
     NPCStore->InventoryComponent->ItemsArray.Empty();
     NPCStore->DialogueComponent->DialogueArray.Empty();
 
@@ -198,4 +203,65 @@ void AMarket::InitializeNPCStores() {
       for (int32 i = 0; i < Pair.Value; i++) NPCStore->InventoryComponent->AddItem(GetRandomItem(ItemIds));
     }
   }
+}
+
+void AMarket::InitMarketNpcs() {
+  TArray<ANpcSpawnPoint*> SpawnPoints = GetAllActorsOf<ANpcSpawnPoint>(GetWorld(), NpcSpawnPointClass);
+  check(SpawnPoints.Num() > 0);
+
+  FActorSpawnParameters SpawnParams;
+  SpawnParams.Owner = this;
+  SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
+  SpawnParams.bNoFail = true;
+  SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+  for (ANpcSpawnPoint* SpawnPoint : SpawnPoints) {
+    UE_LOG(LogTemp, Warning, TEXT("Spawn."));
+    if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance) continue;
+
+    if (TrySpawnUniqueNpc(SpawnPoint, SpawnParams)) continue;
+
+    ANpc* Npc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation(),
+                                             SpawnParams);
+    Npc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+    Npc->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomCustomerDialogue();
+  }
+}
+
+bool AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) {
+  if (FMath::FRand() * 100 >= MarketParams.UniqueNpcBaseSpawnChance) return false;
+  UE_LOG(LogTemp, Warning, TEXT("Trying unique npc:"));
+
+  const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // Temp.
+  TArray<struct FUniqueNpcData> EligibleNpcs =
+      GlobalDataManager->GetEligibleNpcs(GameDataMap).FilterByPredicate([this](const auto& Npc) {
+        return !RecentlySpawnedUniqueNpcIds.Contains(Npc.NpcID);
+      });
+  if (EligibleNpcs.Num() <= 0) return false;
+
+  FUniqueNpcData UniqueNpcData =
+      GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
+  RecentlySpawnedUniqueNpcIds.Add(UniqueNpcData.NpcID);
+
+  ANpc* UniqueNpc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(),
+                                                 SpawnPoint->GetActorRotation(), SpawnParams);
+  UniqueNpc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+  UniqueNpc->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
+
+  // Quest override.
+  auto MarketQuestChains =
+      QuestManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs).FilterByPredicate([](const auto& Chain) {
+        return Chain.CustomerAction == ECustomerAction::None;
+      });
+  if (MarketQuestChains.Num() <= 0) return true;
+
+  const FQuestChainData& RandomQuestChainData =
+      GetWeightedRandomItem<FQuestChainData>(MarketQuestChains, [](const auto& Chain) { return Chain.StartChance; });
+  if (FMath::FRand() * 100 >= RandomQuestChainData.StartChance) return true;
+
+  UniqueNpc->QuestComponent->QuestChainData = RandomQuestChainData;
+  UniqueNpc->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
+  UniqueNpc->DialogueComponent->DialogueArray = GlobalDataManager->GetQuestDialogue(RandomQuestChainData);
+
+  return true;
 }

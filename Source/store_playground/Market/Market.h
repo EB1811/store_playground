@@ -13,6 +13,8 @@ struct FMarketParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  float UniqueNpcBaseSpawnChance;
+  UPROPERTY(EditAnywhere)
   float BaseEconEventStartChance;  // * Chance to start for each event.
 };
 
@@ -36,11 +38,17 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Market")
   const class AGlobalDataManager* GlobalDataManager;
+  UPROPERTY(EditAnywhere, Category = "Market")
+  const class AQuestManager* QuestManager;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TObjectPtr<const class UDataTable> AllItemsTable;
   UPROPERTY(EditAnywhere, Category = "Market")
   class TSubclassOf<class ANPCStore> NPCStoreClass;
+  UPROPERTY(EditAnywhere, Category = "Market")
+  class TSubclassOf<class ANpcSpawnPoint> NpcSpawnPointClass;
+  UPROPERTY(EditAnywhere, Category = "Market")
+  class TSubclassOf<class ANpc> NpcClass;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   FMarketParams MarketParams;
@@ -49,6 +57,9 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Market")
   class AMarketEconomy* MarketEconomy;
+
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
+  TArray<FName> RecentlySpawnedUniqueNpcIds;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TArray<FName> OccurredEconEvents;
@@ -78,5 +89,8 @@ public:
   void SaveMarketLevelState();
   void LoadMarketLevelState();
 
-  void InitializeNPCStores();
+  void InitNPCStores();
+  void InitMarketNpcs();
+
+  bool TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams);
 };

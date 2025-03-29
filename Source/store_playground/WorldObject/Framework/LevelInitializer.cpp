@@ -49,6 +49,6 @@ void ALevelInitializer::InitializeMarketLevel() {
     AMarket* Market = Cast<AMarket>(Actor);
     check(Market);
 
-    Market->InitializeNPCStores();
+    Market->InitNPCStores();
   }
 }
