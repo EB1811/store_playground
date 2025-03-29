@@ -39,18 +39,6 @@ struct FManagerParams {
   TMap<ECustomerAction, float> ActionWeights;
 };
 
-USTRUCT()
-struct FQuestInProgressData {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  TArray<FName> ChainCompletedIDs;
-  UPROPERTY(EditAnywhere)
-  TArray<FName> ChoicesMade;
-  UPROPERTY(EditAnywhere)
-  TMap<FName, bool> NegotiationOutcomesMap;
-};
-
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ACustomerAIManager : public AInfo {
   GENERATED_BODY()
@@ -72,16 +60,11 @@ public:
   const class AMarketEconomy* MarketEconomy;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
   const class AStore* Store;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Quests")
+  const class AQuestManager* QuestManager;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Params")
   struct FManagerParams ManagerParams;
-
-  // ? Seperate quests into another system?
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Tracking")
-  TArray<FName> QuestsCompleted;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Tracking")
-  TMap<FName, FQuestInProgressData> QuestInProgressMap;
-
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
   float LastSpawnTime;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
@@ -94,7 +77,6 @@ public:
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
   TMap<FGuid, FGuid> PickingItemIdsMap;  // Item ID to Customer ID
 
-  // ? Have separate arrays for each state?
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Customers Array")
   TArray<class ACustomer*> AllCustomers;
 
@@ -113,8 +95,4 @@ public:
                           std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr);
   void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr);
   void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
-
-  void CompleteQuestChain(const FQuestChainData& QuestChainData,
-                          TArray<FName> MadeChoiceIds = {},
-                          bool bNegotiationSuccess = false);
 };

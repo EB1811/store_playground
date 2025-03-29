@@ -52,7 +52,8 @@ public:
 
   TOptional<TArray<FDialogueData>> InteractNPCDialogue() const;
   TTuple<class UCustomerAIComponent*, const class UItemBase*> InteractWaitingCustomer() const;
-  TTuple<class UCustomerAIComponent*, class UDialogueComponent*, const class UItemBase*> InteractUniqueNPCQuest() const;
+  TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*>
+  InteractUniqueNPCQuest() const;
 
   TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
   class UInventoryComponent* InteractContainer() const;

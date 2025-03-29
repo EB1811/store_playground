@@ -7,8 +7,9 @@
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
-#include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Market/MarketEconomy.h"
+#include "store_playground/Quest/QuestManager.h"
+#include "store_playground/Quest/QuestComponent.h"
 
 UNegotiationSystem::UNegotiationSystem() {
   NStateTransitions = {
@@ -62,12 +63,14 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
                                           const UItemBase* Item,
                                           UInventoryComponent* _FromInventory,
                                           bool _bIsQuestAssociated,
+                                          UQuestComponent* _QuestComponent,
                                           ENegotiationState InitState) {
   NegotiatedItems.Empty();
   Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
                                                                                    : NegotiationType::PlayerSell;
   CustomerAI = _CustomerAI;
   bIsQuestAssociated = _bIsQuestAssociated;
+  QuestComponent = _QuestComponent;
   NegotiationState = InitState;
 
   BoughtAtPrice = 0;
@@ -194,18 +197,22 @@ void UNegotiationSystem::NegotiationSuccess() {
   }
 
   CustomerAI->PostNegotiation();
-  if (bIsQuestAssociated) CustomerAIManager->CompleteQuestChain(CustomerAI->QuestChainData, {}, true);
+  if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent->QuestChainData, {}, true);
 
   NegotiatedItems.Empty();
   CustomerAI = nullptr;
+  bIsQuestAssociated = false;
+  QuestComponent = nullptr;
   FromInventory = nullptr;
 }
 
 void UNegotiationSystem::NegotiationFailure() {
   CustomerAI->PostNegotiation();
-  if (bIsQuestAssociated) CustomerAIManager->CompleteQuestChain(CustomerAI->QuestChainData, {}, false);
+  if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent->QuestChainData, {}, false);
 
   NegotiatedItems.Empty();
   CustomerAI = nullptr;
+  bIsQuestAssociated = false;
+  QuestComponent = nullptr;
   FromInventory = nullptr;
 }

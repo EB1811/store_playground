@@ -49,8 +49,6 @@ public:
   ECustomerAction CustomerAction;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
-  UPROPERTY(EditAnywhere, Category = "Decision AI")
-  FQuestChainData QuestChainData;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   class UNegotiationAI* NegotiationAI;

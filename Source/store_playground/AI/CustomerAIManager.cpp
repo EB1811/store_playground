@@ -15,6 +15,9 @@
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/Quest/QuestManager.h"
+#include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/NPC/NpcDataStructs.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
@@ -72,16 +75,19 @@ void ACustomerAIManager::EndCustomerAI() {
 void ACustomerAIManager::SpawnUniqueNpcs() {
   // Temp: Need info about player.
   const TMap<EReqFilterOperand, std::any> GameDataMap = {{EReqFilterOperand::Money, Store->Money}};
-  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs(GameDataMap);
+  TArray<struct FUniqueNpcData> EligibleNpcs =
+      GlobalDataManager->GetEligibleNpcs(GameDataMap).FilterByPredicate([this](const auto& Npc) {
+        return !RecentlySpawnedUniqueNpcIds.Contains(Npc.NpcID);
+      });
   if (EligibleNpcs.Num() <= 0) return;
 
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
+  // TODO: Spawn in level.
+  // SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  for (auto& Npc : EligibleNpcs)
-    if (RecentlySpawnedUniqueNpcIds.Contains(Npc.NpcID)) Npc.SpawnChanceWeight *= 0.25f;
   FUniqueNpcData UniqueNpcData =
       GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
   RecentlySpawnedUniqueNpcIds.Add(UniqueNpcData.NpcID);
@@ -116,44 +122,39 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   AllCustomers.Add(UniqueCustomer);
 
   // Quest override.
-  TMap<FName, FName> PrevChainCompletedMap = {};
-  for (const auto& QuestInProgress : QuestInProgressMap)
-    PrevChainCompletedMap.Add(QuestInProgress.Key, QuestInProgress.Value.ChainCompletedIDs.Last());
+  auto EligibleQuestChains = QuestManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs);
+  if (EligibleQuestChains.Num() <= 0) return;
 
-  TArray<struct FQuestChainData> EligibleQuestChains = GlobalDataManager->GetEligibleQuestChains(
-      UniqueNpcData.QuestIDs, GameDataMap, QuestsCompleted, PrevChainCompletedMap);
-  if (EligibleQuestChains.Num() > 0) {
-    // Most likely quest chain.
-    FQuestChainData RandomQuestChainData = GetWeightedRandomItem<FQuestChainData>(
-        EligibleQuestChains, [](const auto& Chain) { return Chain.StartChance; });
-    if (FMath::FRand() * 100 < RandomQuestChainData.StartChance) {
-      auto& IDs = RandomQuestChainData.ActionRelevantIDs;
-      switch (RandomQuestChainData.CustomerActionToPerform) {
-        case ECustomerAction::PickItem:
-          if (!CustomerPickItem(UniqueCustomer->CustomerAIComponent,
-                                [&IDs](const auto& StockItem) { return IDs.Contains(StockItem.Item->ItemID); }))
-            return;  // * Couldn't start quest.
-          break;
-        case ECustomerAction::StockCheck:
-          if (!CustomerStockCheck(UniqueCustomer->CustomerAIComponent,
-                                  [&IDs](const auto& ItemType) { return IDs.Contains(ItemType.WantedItemTypeID); }))
-            return;  // * Couldn't start quest.
-          break;
-        case ECustomerAction::SellItem:
-          CustomerSellItem(UniqueCustomer->CustomerAIComponent, Market->GetRandomItem(IDs));
-          break;
-        default: break;
-      }
+  const FQuestChainData& RandomQuestChainData =
+      GetWeightedRandomItem<FQuestChainData>(EligibleQuestChains, [](const auto& Chain) { return Chain.StartChance; });
+  if (FMath::FRand() * 100 >= RandomQuestChainData.StartChance) return;
 
-      UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::PerformingQuest;
-      UniqueCustomer->CustomerAIComponent->CustomerAction = RandomQuestChainData.CustomerActionToPerform;
-      UniqueCustomer->CustomerAIComponent->ActionRelevantIDs = RandomQuestChainData.ActionRelevantIDs;
-      UniqueCustomer->CustomerAIComponent->QuestChainData = RandomQuestChainData;
-
-      UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
-      UniqueCustomer->DialogueComponent->DialogueArray = GlobalDataManager->GetQuestDialogue(RandomQuestChainData);
-    }
+  switch (RandomQuestChainData.CustomerAction) {
+    case ECustomerAction::PickItem:
+      if (!CustomerPickItem(UniqueCustomer->CustomerAIComponent, [&RandomQuestChainData](const auto& StockItem) {
+            return RandomQuestChainData.ActionRelevantIDs.Contains(StockItem.Item->ItemID);
+          }))
+        return;
+      break;
+    case ECustomerAction::StockCheck:
+      if (!CustomerStockCheck(UniqueCustomer->CustomerAIComponent, [&RandomQuestChainData](const auto& ItemType) {
+            return RandomQuestChainData.ActionRelevantIDs.Contains(ItemType.WantedItemTypeID);
+          }))
+        return;
+      break;
+    case ECustomerAction::SellItem:
+      CustomerSellItem(UniqueCustomer->CustomerAIComponent,
+                       Market->GetRandomItem(RandomQuestChainData.ActionRelevantIDs));
+      break;
+    default: break;
   }
+
+  UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::PerformingQuest;
+
+  UniqueCustomer->QuestComponent->QuestChainData = RandomQuestChainData;
+
+  UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
+  UniqueCustomer->DialogueComponent->DialogueArray = GlobalDataManager->GetQuestDialogue(RandomQuestChainData);
 }
 
 void ACustomerAIManager::SpawnCustomers() {
@@ -164,6 +165,8 @@ void ACustomerAIManager::SpawnCustomers() {
 
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
+  // TODO: Spawn in level.
+  // SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
@@ -176,7 +179,6 @@ void ACustomerAIManager::SpawnCustomers() {
         CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
         GetActorRotation(), SpawnParams);
 
-    // Temp: Only population weighted.
     TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
     for (const auto& GenericCustomer : GlobalDataManager->GenericCustomersArray) {
       const FPopMoneySpendData* PopData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
@@ -355,28 +357,4 @@ void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.10f
                                                                              : 0.15f;
   CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
-}
-
-void ACustomerAIManager::CompleteQuestChain(const FQuestChainData& QuestChainData,
-                                            TArray<FName> MadeChoiceIds,
-                                            bool bNegotiationSuccess) {
-  if (QuestsCompleted.Contains(QuestChainData.QuestID)) return;
-  switch (QuestChainData.QuestAction) {
-    case EQuestAction::Continue: {
-      QuestInProgressMap.FindOrAdd(QuestChainData.QuestID, {});
-      QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.QuestChainID);
-      if (QuestChainData.QuestChainType == EQuestChainType::DialogueChoice)
-        QuestInProgressMap[QuestChainData.QuestID].ChoicesMade.Append(MadeChoiceIds);
-      if (QuestChainData.QuestChainType == EQuestChainType::Negotiation)
-        QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestChainData.QuestChainID,
-                                                                              bNegotiationSuccess);
-      return;
-    }
-    case EQuestAction::End: {
-      QuestsCompleted.Add(QuestChainData.QuestChainID);
-      if (QuestInProgressMap.Contains(QuestChainData.QuestID)) QuestInProgressMap.Remove(QuestChainData.QuestID);
-      return;
-    }
-    default: return;
-  }
 }

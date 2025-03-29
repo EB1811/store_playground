@@ -79,7 +79,7 @@ struct FQuestChainData {
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
   UPROPERTY(EditAnywhere)
-  ECustomerAction CustomerActionToPerform;
+  ECustomerAction CustomerAction;  // * What a customer does as part of the quest, if any.
   UPROPERTY(EditAnywhere)
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
 
@@ -113,7 +113,7 @@ struct FQuestChainDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FName DialogueChainID;
   UPROPERTY(EditAnywhere)
-  ECustomerAction CustomerAction;
+  ECustomerAction CustomerAction;  // * What a customer does as part of the quest, if any.
   UPROPERTY(EditAnywhere)
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
 

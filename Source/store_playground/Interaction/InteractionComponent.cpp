@@ -10,6 +10,7 @@
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/Level/LevelChangeComponent.h"
+#include "store_playground/Quest/QuestComponent.h"
 
 UInteractionComponent::UInteractionComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -58,14 +59,17 @@ TTuple<class UCustomerAIComponent*, const class UItemBase*> UInteractionComponen
   return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAI->RelevantItem};
 }
 
-TTuple<UCustomerAIComponent*, UDialogueComponent*, const class UItemBase*>
+TTuple<UDialogueComponent*, UQuestComponent*, UCustomerAIComponent*, const UItemBase*>
 UInteractionComponent::InteractUniqueNPCQuest() const {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
-  check(OwnerCustomerAIC);
+  UQuestComponent* OwnerQuestC = GetOwner()->FindComponentByClass<UQuestComponent>();
   check(OwnerDialogueC);
+  check(OwnerQuestC);
 
-  return {OwnerCustomerAIC, OwnerDialogueC, OwnerCustomerAIC->NegotiationAI->RelevantItem};
+  const class UItemBase* RelevantItem = OwnerCustomerAIC ? OwnerCustomerAIC->NegotiationAI->RelevantItem : nullptr;
+
+  return {OwnerDialogueC, OwnerQuestC, OwnerCustomerAIC, RelevantItem};
 }
 
 TTuple<UNpcStoreComponent*, UInventoryComponent*, UDialogueComponent*> UInteractionComponent::InteractNpcStore() const {

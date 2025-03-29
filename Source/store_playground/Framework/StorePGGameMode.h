@@ -27,6 +27,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ACustomerAIManager> CustomerAIManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AQuestManager> QuestManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AMarket> MarketClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AMarketEconomy> MarketEconomyClass;

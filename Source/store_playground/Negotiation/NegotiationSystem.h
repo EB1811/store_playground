@@ -74,7 +74,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UInventoryComponent* PlayerInventory;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class ACustomerAIManager* CustomerAIManager;
+  class AQuestManager* QuestManager;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   float BoughtAtPrice;
@@ -97,8 +97,11 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UCustomerAIComponent* CustomerAI;
+
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   bool bIsQuestAssociated;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class UQuestComponent* QuestComponent;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   FOfferResponse CustomerOfferResponse;
@@ -107,6 +110,7 @@ public:
                         const class UItemBase* NegotiatedItem = nullptr,
                         class UInventoryComponent* _FromInventory = nullptr,
                         bool _bIsQuestAssociated = false,
+                        UQuestComponent* _QuestComponent = nullptr,
                         ENegotiationState InitState = ENegotiationState::None);
 
   struct FNextDialogueRes NPCRequestNegotiation();

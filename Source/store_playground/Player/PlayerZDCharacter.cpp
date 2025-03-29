@@ -21,6 +21,8 @@
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "store_playground/NewsGen/NewsGen.h"
+#include "store_playground/Quest/QuestManager.h"
+#include "store_playground/Quest/QuestComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -169,34 +171,10 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             break;
           }
           case EInteractionType::UniqueNPCQuest: {
-            auto [CustomerAI, Dialogue, Item] = Interactable->InteractUniqueNPCQuest();
-            check(CustomerAI->QuestChainData.QuestID != NAME_None);
+            auto [Dialogue, QuestC, CustomerAI, Item] = Interactable->InteractUniqueNPCQuest();
+            check(QuestC->QuestChainData.QuestID != NAME_None);
 
-            // TODO: Put CustomerAction switch in function.
-            switch (CustomerAI->CustomerAction) {
-              case ECustomerAction::PickItem:
-              case ECustomerAction::StockCheck:
-              case ECustomerAction::SellItem:
-                check(CustomerAI->NegotiationAI->RelevantItem);
-                if (CustomerAI->QuestChainData.QuestChainType == EQuestChainType::Negotiation)
-                  EnterDialogue(Dialogue->DialogueArray,
-                                [this, Item, CustomerAI]() { EnterNegotiation(CustomerAI, Item, true); });
-                else
-                  EnterDialogue(Dialogue->DialogueArray, [this, Item, CustomerAI]() {
-                    CustomerAIManager->CompleteQuestChain(CustomerAI->QuestChainData,
-                                                          DialogueSystem->ChoiceDialoguesSelectedIDs);
-                    EnterNegotiation(CustomerAI, Item);
-                  });
-                break;
-              case ECustomerAction::None:
-              case ECustomerAction::Leave:
-                EnterDialogue(Dialogue->DialogueArray, [this, CustomerAI]() {
-                  CustomerAIManager->CompleteQuestChain(CustomerAI->QuestChainData,
-                                                        DialogueSystem->ChoiceDialoguesSelectedIDs);
-                  CustomerAI->CustomerState = ECustomerState::Leaving;
-                });
-                break;
-            }
+            EnterQuest(QuestC, Dialogue, CustomerAI, Item);
             break;
           }
           case EInteractionType::NpcStore: {
@@ -271,10 +249,49 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
 
 void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
                                           const UItemBase* Item,
-                                          bool bIsQuestAssociated) {
+                                          bool bIsQuestAssociated,
+                                          UQuestComponent* QuestComponent) {
   NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAI->StockDisplayInventory,
-                                      bIsQuestAssociated);
+                                      bIsQuestAssociated, QuestComponent);
   HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
+}
+
+void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
+                                    UDialogueComponent* DialogueC,
+                                    UCustomerAIComponent* CustomerAI,
+                                    const UItemBase* Item) {
+  if (!CustomerAI)
+    return EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
+      QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+    });
+
+  switch (QuestC->QuestChainData.CustomerAction) {
+    case ECustomerAction::PickItem:
+    case ECustomerAction::StockCheck:
+    case ECustomerAction::SellItem:
+      check(CustomerAI->NegotiationAI->RelevantItem);
+      if (QuestC->QuestChainData.QuestChainType == EQuestChainType::Negotiation)
+        EnterDialogue(DialogueC->DialogueArray,
+                      [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
+      else
+        EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI, Item]() {
+          QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+          EnterNegotiation(CustomerAI, Item);
+        });
+      break;
+    case ECustomerAction::Leave:
+      EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
+        QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+        CustomerAI->CustomerState = ECustomerState::Leaving;
+      });
+      break;
+    case ECustomerAction::None:
+      EnterDialogue(DialogueC->DialogueArray, [this, QuestC]() {
+        QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+      });
+      break;
+    default: checkNoEntry(); break;
+  }
 }
 
 void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {

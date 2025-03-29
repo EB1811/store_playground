@@ -92,7 +92,14 @@ public:
   class UNegotiationSystem* NegotiationSystem;
   void EnterNegotiation(class UCustomerAIComponent* CustomerAI,
                         const class UItemBase* Item = nullptr,
-                        bool bIsQuestAssociated = false);
+                        bool bIsQuestAssociated = false,
+                        class UQuestComponent* QuestComponent = nullptr);
+
+  // * Quest Logic
+  void EnterQuest(class UQuestComponent* QuestC,
+                  class UDialogueComponent* DialogueC,
+                  class UCustomerAIComponent* CustomerAI = nullptr,
+                  const class UItemBase* Item = nullptr);
 
   // * Npc Store
   void EnterNpcStore(class UNpcStoreComponent* NpcStoreC, class UInventoryComponent* StoreInventoryC);
@@ -124,6 +131,10 @@ public:
   // * CustomerAIManager
   UPROPERTY(EditAnywhere, Category = "Character | CustomerAIManager")
   class ACustomerAIManager* CustomerAIManager;
+
+  // * QuestManager
+  UPROPERTY(EditAnywhere, Category = "Character | QuestManager")
+  class AQuestManager* QuestManager;
 
   // * NewsGen
   UPROPERTY(EditAnywhere, Category = "Character | NewsGen")

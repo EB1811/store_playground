@@ -14,6 +14,7 @@
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
 #include "store_playground/Level/LevelManager.h"
+#include "store_playground/Quest/QuestManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -21,14 +22,15 @@ void AStorePGGameMode::BeginPlay() {
   Super::BeginPlay();
 
   APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-  check(PlayerCharacter && StorePhaseManagerClass && CustomerAIManagerClass && MarketClass && MarketEconomyClass &&
-        StoreClass);
+  check(PlayerCharacter && StorePhaseManagerClass && CustomerAIManagerClass && QuestManagerClass && MarketClass &&
+        MarketEconomyClass && StoreClass);
 
   // * Initialize the game world and all systems.
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
+  AQuestManager* QuestManager = GetWorld()->SpawnActor<AQuestManager>(QuestManagerClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   AMarketEconomy* MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
   ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
@@ -44,6 +46,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->Market = Market;
   PlayerCharacter->MarketEconomy = MarketEconomy;
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
+  PlayerCharacter->QuestManager = QuestManager;
   PlayerCharacter->NewsGen = NewsGen;
 
   LevelManager->Store = Store;
@@ -57,8 +60,12 @@ void AStorePGGameMode::BeginPlay() {
   CustomerAIManager->Market = Market;
   CustomerAIManager->MarketEconomy = MarketEconomy;
   CustomerAIManager->Store = Store;
+  CustomerAIManager->QuestManager = QuestManager;
+
+  QuestManager->GlobalDataManager = GlobalDataManager;
 
   Market->GlobalDataManager = GlobalDataManager;
+  Market->QuestManager = QuestManager;
   Market->MarketEconomy = MarketEconomy;
 
   NewsGen->GlobalDataManager = GlobalDataManager;
@@ -68,7 +75,7 @@ void AStorePGGameMode::BeginPlay() {
   NegotiationSystem->DialogueSystem = DialogueSystem;
   NegotiationSystem->Store = Store;
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
-  NegotiationSystem->CustomerAIManager = CustomerAIManager;
+  NegotiationSystem->QuestManager = QuestManager;
 
   LevelManager->BeginLoadLevel(ELevel::Store);
   StorePhaseManager->Start();
