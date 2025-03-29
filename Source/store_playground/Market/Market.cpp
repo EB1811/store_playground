@@ -12,6 +12,7 @@
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/WorldObject/Level/CustomerSpawnPoint.h"
 
 AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -45,6 +46,88 @@ void AMarket::BeginPlay() {
 }
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
+  TArray<UItemBase*> NewItems;
+  for (int32 i = 0; i < Amount; i++) {
+    int32 RandomIndex = FMath::RandRange(0, AllItems.Num() - 1);
+    NewItems.Add(AllItems[RandomIndex]->CreateItemCopy());
+  }
+
+  return NewItems;
+}
+
+UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
+  FName RandomId = ItemIds[FMath::RandRange(0, ItemIds.Num() - 1)];
+  return *(AllItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
+}
+
+bool AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
+                      UInventoryComponent* NPCStoreInventory,
+                      UInventoryComponent* PlayerInventory,
+                      AStore* PlayerStore,
+                      UItemBase* Item,
+                      int32 Quantity) {
+  check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
+  if (!NPCStoreInventory->ItemsArray.ContainsByPredicate(
+          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+    return false;
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
+
+  float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
+  if (PlayerStore->Money < TotalPrice) return false;
+
+  if (!TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess) return false;
+
+  PlayerStore->Money -= TotalPrice;
+  return true;
+}
+
+bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
+                       UInventoryComponent* NPCStoreInventory,
+                       UInventoryComponent* PlayerInventory,
+                       AStore* PlayerStore,
+                       UItemBase* Item,
+                       int32 Quantity) {
+  check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
+  if (!PlayerInventory->ItemsArray.ContainsByPredicate(
+          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+    return false;
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
+  check(EconItem);
+
+  if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
+
+  PlayerStore->Money +=
+      EconItem->CurrentPrice * Quantity * (1.0f - (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
+  return true;
+}
+
+FEconEvent AMarket::ConsiderEconEvent() {
+  const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // TODO: Get game data.
+
+  TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(GameDataMap, OccurredEconEvents);
+  if (EligibleEvents.Num() <= 0) return {};
+
+  for (auto& Event : EligibleEvents)
+    if (RecentEconEvents.Contains(Event.EconEventID)) Event.StartChance *= 0.25f;
+  FEconEvent RandomEvent =
+      GetWeightedRandomItem<FEconEvent>(EligibleEvents, [](const auto& Event) { return Event.StartChance; });
+  if (FMath::FRand() * 100 > RandomEvent.StartChance) return {};
+
+  TArray<struct FPriceEffect> PriceEffects = GlobalDataManager->GetPriceEffects(RandomEvent.PriceEffectIDs);
+  for (const auto& PriceEffect : PriceEffects) MarketEconomy->ActivePriceEffects.Add(PriceEffect);
+
+  OccurredEconEvents.Add(RandomEvent.EconEventID);  // ? Don't add if repeatable?
+  RecentEconEvents.Add(RandomEvent.EconEventID);
+
+  return RandomEvent;
+}
 
 void AMarket::SaveMarketLevelState() {
   MarketLevelState.NpcStoreSaveMap.Empty();
@@ -115,65 +198,4 @@ void AMarket::InitializeNPCStores() {
       for (int32 i = 0; i < Pair.Value; i++) NPCStore->InventoryComponent->AddItem(GetRandomItem(ItemIds));
     }
   }
-}
-
-TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
-  TArray<UItemBase*> NewItems;
-  for (int32 i = 0; i < Amount; i++) {
-    int32 RandomIndex = FMath::RandRange(0, AllItems.Num() - 1);
-    NewItems.Add(AllItems[RandomIndex]->CreateItemCopy());
-  }
-
-  return NewItems;
-}
-
-UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
-  FName RandomId = ItemIds[FMath::RandRange(0, ItemIds.Num() - 1)];
-  return *(AllItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
-}
-
-bool AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
-                      UInventoryComponent* NPCStoreInventory,
-                      UInventoryComponent* PlayerInventory,
-                      AStore* PlayerStore,
-                      UItemBase* Item,
-                      int32 Quantity) {
-  check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
-  if (!NPCStoreInventory->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
-    return false;
-
-  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
-  check(EconItem);
-
-  float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
-  if (PlayerStore->Money < TotalPrice) return false;
-
-  if (!TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess) return false;
-
-  PlayerStore->Money -= TotalPrice;
-  return true;
-}
-
-bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
-                       UInventoryComponent* NPCStoreInventory,
-                       UInventoryComponent* PlayerInventory,
-                       AStore* PlayerStore,
-                       UItemBase* Item,
-                       int32 Quantity) {
-  check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
-  if (!PlayerInventory->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
-    return false;
-
-  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
-  check(EconItem);
-
-  if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
-
-  PlayerStore->Money +=
-      EconItem->CurrentPrice * Quantity * (1.0f - (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
-  return true;
 }

@@ -1,4 +1,5 @@
 
+#include "Containers/Array.h"
 #include "Containers/Set.h"
 #include "MarketEconomy.h"
 #include "Misc/AssertionMacros.h"
@@ -70,9 +71,6 @@ void AMarketEconomy::Tick(float DeltaTime) {
 }
 
 void AMarketEconomy::PerformEconomyTick() {
-  // * Economic Events.
-  // TODO: Implement.
-
   // * Pop Simulation.
   // Calculate total wealth.
   TotalWealth = 0;
@@ -86,8 +84,9 @@ void AMarketEconomy::PerformEconomyTick() {
 
   // Calculate the amount of total goods bought, and the needs fulfilled for each pop.
   TotaBought = 0;
-  TMap<EItemWealthType, float> TotalBoughtMap;
-  for (auto WealthType : TEnumRange<EItemWealthType>()) TotalBoughtMap.Add(WealthType, 0);
+  TMap<TTuple<EItemEconType, EItemWealthType>, float> TotalBoughtMap;
+  for (auto EconType : TEnumRange<EItemEconType>())
+    for (auto WealthType : TEnumRange<EItemWealthType>()) TotalBoughtMap.Add({EconType, WealthType}, 0);
 
   // Data for pop promotion/demotion.
   // ? Store goods bought for each pop?
@@ -96,114 +95,143 @@ void AMarketEconomy::PerformEconomyTick() {
 
   for (FPopMoneySpendData& PopSpend : PopMoneySpendDataArray) {
     PopSpend.Money = PopWealthMap[PopSpend.PopID];
+    PopSpend.ItemNeedsFulfilled.Empty();
+    for (auto WealthType : TEnumRange<EItemWealthType>()) PopSpend.ItemNeedsFulfilled.Add(WealthType, 0);
 
     float PopTotalBought = 0;
-    TMap<EItemWealthType, float> PopBoughtMap;
-    TMap<EItemWealthType, bool> NeedsFulfilledMap;
-    for (auto WealthType : TEnumRange<EItemWealthType>()) {
-      PopBoughtMap.Add(WealthType, 0);
-      NeedsFulfilledMap.Add(WealthType, false);
-    }
-    float Money = PopSpend.Money;
-    float RemainingMoney = 0;
 
-    // ItemSpendPercent pass.
-    for (auto WealthType : TEnumRange<EItemWealthType>()) {
-      float Need = PopSpend.ItemNeeds[WealthType] * PopSpend.Population;
-      float Spending = Money * (PopSpend.ItemSpendPercent[WealthType] / 100);
-      float Price = WealthTypePricesMap[WealthType];
+    TArray<EItemEconType> PopEconTypes = PopSpend.ItemEconTypes;
+    for (auto EconType : PopEconTypes) {
+      float Money = PopSpend.Money / PopEconTypes.Num();
+      float RemainingMoney = 0;
 
-      // Buy as many to reach need.
-      float BuyAmount = Spending / Price;
-      if (BuyAmount >= Need) {
-        PopBoughtMap[WealthType] = Need;
-        NeedsFulfilledMap[WealthType] = true;
-        float Excess = BuyAmount - Need;
-        RemainingMoney += Excess * Price;
-        continue;
+      TMap<EItemWealthType, float> PopBoughtMap;
+      TMap<EItemWealthType, bool> NeedsFulfilledMap;
+      for (auto WealthType : TEnumRange<EItemWealthType>()) {
+        PopBoughtMap.Add(WealthType, 0);
+        NeedsFulfilledMap.Add(WealthType, false);
       }
-      PopBoughtMap[WealthType] = BuyAmount;
-    }
 
-    // Remaining money sequential pass.
-    for (auto WealthType : TEnumRange<EItemWealthType>()) {
-      if (NeedsFulfilledMap[WealthType]) continue;
-      if (RemainingMoney <= 0) break;
+      // ItemSpendPercent pass.
+      for (auto WealthType : TEnumRange<EItemWealthType>()) {
+        float Need = PopSpend.ItemNeeds[WealthType] * PopSpend.Population;
+        float Spending = Money * (PopSpend.ItemSpendPercent[WealthType] / 100);
+        float Price = EconTypePricesMap[EconType].WealthTypePricesMap[WealthType];
 
-      float Need = PopSpend.ItemNeeds[WealthType] * PopSpend.Population;
-      float Spending = RemainingMoney;
-      float Price = WealthTypePricesMap[WealthType];
-
-      float AdditionalBuyAmount = Spending / Price;
-      float BuyAmount = PopBoughtMap[WealthType] + AdditionalBuyAmount;
-      if (BuyAmount >= Need) {
-        PopBoughtMap[WealthType] = Need;
-        NeedsFulfilledMap[WealthType] = true;
-        float Excess = BuyAmount - Need;
-        RemainingMoney += Excess * Price;
-        continue;
+        // Buy as many to reach need.
+        float BuyAmount = Spending / Price;
+        if (BuyAmount >= Need) {
+          PopBoughtMap[WealthType] = Need;
+          NeedsFulfilledMap[WealthType] = true;
+          float Excess = BuyAmount - Need;
+          RemainingMoney += Excess * Price;
+          continue;
+        }
+        PopBoughtMap[WealthType] = BuyAmount;
       }
-      PopBoughtMap[WealthType] = BuyAmount;
-      RemainingMoney -= Spending;
+
+      // Remaining money sequential pass.
+      for (auto WealthType : TEnumRange<EItemWealthType>()) {
+        if (NeedsFulfilledMap[WealthType]) continue;
+        if (RemainingMoney <= 0) break;
+
+        float Need = PopSpend.ItemNeeds[WealthType] * PopSpend.Population;
+        float Spending = RemainingMoney;
+        float Price = EconTypePricesMap[EconType].WealthTypePricesMap[WealthType];
+
+        float AdditionalBuyAmount = Spending / Price;
+        float BuyAmount = PopBoughtMap[WealthType] + AdditionalBuyAmount;
+        if (BuyAmount >= Need) {
+          PopBoughtMap[WealthType] = Need;
+          NeedsFulfilledMap[WealthType] = true;
+          float Excess = BuyAmount - Need;
+          RemainingMoney += Excess * Price;
+          continue;
+        }
+        PopBoughtMap[WealthType] = BuyAmount;
+        RemainingMoney -= Spending;
+      }
+
+      // If all needs fulfilled, buy luxury items.
+      if (RemainingMoney > 0) {
+        float Spending = RemainingMoney;
+        float Price = EconTypePricesMap[EconType].WealthTypePricesMap[EItemWealthType::Luxury];
+
+        float BuyAmount = Spending / Price;
+        PopBoughtMap[EItemWealthType::Luxury] += BuyAmount;
+      }
+
+      // Update total bought map.
+      for (auto WealthType : TEnumRange<EItemWealthType>()) {
+        PopTotalBought += PopBoughtMap[WealthType];
+        TotaBought += PopBoughtMap[WealthType];
+        PopSpend.ItemNeedsFulfilled[WealthType] +=
+            PopBoughtMap[WealthType] / (PopSpend.ItemNeeds[WealthType] * PopSpend.Population);
+
+        TotalBoughtMap[{EconType, WealthType}] += PopBoughtMap[WealthType];
+      }
+
+      // Add a deviation in population's goods bought and check promotion/demotion.
+      TArray<float> EssentialBoughtSplit =
+          GetRandomSplit(std::min(PopSpend.Population, 5), PopBoughtMap[EItemWealthType::Essential]);
+      float EssentialBucketNeeds = PopSpend.ItemNeeds[EItemWealthType::Essential] * PopSpend.Population / 5;
+      for (float Bought : EssentialBoughtSplit)
+        if (Bought / EssentialBucketNeeds < 0.2f) DemotionConsiderPops.Add(PopSpend);
+
+      TArray<float> LuxuryBoughtSplit =
+          GetRandomSplit(std::min(PopSpend.Population, 5), PopBoughtMap[EItemWealthType::Luxury]);
+      float LuxuryBucketNeeds = PopSpend.ItemNeeds[EItemWealthType::Luxury] * PopSpend.Population / 5;
+      for (float Bought : LuxuryBoughtSplit)
+        if (std::max(Bought, 0.1f) / std::max(LuxuryBucketNeeds, 1.0f) > 0.8f) PromotionConsiderPops.Add(PopSpend);
     }
 
-    // If all needs fulfilled, buy luxury items.
-    if (RemainingMoney > 0) {
-      float Spending = RemainingMoney;
-      float Price = WealthTypePricesMap[EItemWealthType::Luxury];
-
-      float BuyAmount = Spending / Price;
-      PopBoughtMap[EItemWealthType::Luxury] += BuyAmount;
-    }
-
-    // Update total bought map.
-    for (auto WealthType : TEnumRange<EItemWealthType>()) {
-      PopTotalBought += PopBoughtMap[WealthType];
-      TotaBought += PopBoughtMap[WealthType];
-      TotalBoughtMap[WealthType] += PopBoughtMap[WealthType];
-      PopSpend.ItemNeedsFulfilled.Add(
-          WealthType, PopBoughtMap[WealthType] / (PopSpend.ItemNeeds[WealthType] * PopSpend.Population));
-    }
     PopSpend.GoodsBoughtPerCapita = PopTotalBought / PopSpend.Population;
-
-    // Add a deviation in population's goods bought and check promotion/demotion.
-    TArray<float> EssentialBoughtSplit =
-        GetRandomSplit(std::min(PopSpend.Population, 5), PopBoughtMap[EItemWealthType::Essential]);
-    float EssentialBucketNeeds = PopSpend.ItemNeeds[EItemWealthType::Essential] * PopSpend.Population / 5;
-    for (float Bought : EssentialBoughtSplit)
-      if (Bought / EssentialBucketNeeds < 0.2f) DemotionConsiderPops.Add(PopSpend);
-
-    TArray<float> LuxuryBoughtSplit =
-        GetRandomSplit(std::min(PopSpend.Population, 5), PopBoughtMap[EItemWealthType::Luxury]);
-    float LuxuryBucketNeeds = PopSpend.ItemNeeds[EItemWealthType::Luxury] * PopSpend.Population / 5;
-    for (float Bought : LuxuryBoughtSplit)
-      if (std::max(Bought, 0.1f) / std::max(LuxuryBucketNeeds, 1.0f) > 0.8f) PromotionConsiderPops.Add(PopSpend);
+    for (auto WealthType : TEnumRange<EItemWealthType>()) PopSpend.ItemNeedsFulfilled[WealthType] /= PopEconTypes.Num();
   }
 
   // Calculate perfect prices based on amount of bought items + small random variation.
   for (auto& Item : EconItems)
-    if (TotalBoughtMap[Item.ItemWealthType] > 0)
-      Item.PerfectPrice =
-          TotalBoughtMap[Item.ItemWealthType] * FMath::RandRange(0.98f, 1.02f) * Item.BoughtToPriceMulti;
+    if (TotalBoughtMap[{Item.ItemEconType, Item.ItemWealthType}] > 0)
+      Item.PerfectPrice = TotalBoughtMap[{Item.ItemEconType, Item.ItemWealthType}] * FMath::RandRange(0.98f, 1.02f) *
+                          Item.BoughtToPriceMulti;
 
-  // Calculate current prices based on perfect prices and update WealthTypePricesMap average.
-  TMap<EItemWealthType, float> WealthTypePricesSumMap;
-  TMap<EItemWealthType, int32> ItemsCountMap;
-  for (auto WealthType : TEnumRange<EItemWealthType>()) {
-    WealthTypePricesSumMap.Add(WealthType, 0);
-    ItemsCountMap.Add(WealthType, 0);
+  // * Economic Events.
+  if (ActivePriceEffects.Num() > 0) {
+    for (auto& Item : EconItems) {
+      float PriceAddition = 0;
+      for (auto& PriceEffect : ActivePriceEffects)
+        if (PriceEffect.ItemTypes.Contains(Item.ItemType) &&
+            PriceEffect.ItemWealthTypes.Contains(Item.ItemWealthType) &&
+            PriceEffect.ItemEconTypes.Contains(Item.ItemEconType))
+          PriceAddition += Item.PerfectPrice * PriceEffect.PriceMultiPercent / 100.0f;
+
+      Item.PerfectPrice += PriceAddition;
+    }
+  }
+
+  // * Calculate current prices based on perfect prices and update WealthTypePricesMap average.
+  TMap<TTuple<EItemEconType, EItemWealthType>, float> WealthTypePricesSumMap;
+  TMap<TTuple<EItemEconType, EItemWealthType>, int32> ItemsCountMap;
+  for (auto EconType : TEnumRange<EItemEconType>()) {
+    for (auto WealthType : TEnumRange<EItemWealthType>()) {
+      WealthTypePricesSumMap.Add({EconType, WealthType}, 0);
+      ItemsCountMap.Add({EconType, WealthType}, 0);
+    }
   }
 
   for (auto& Item : EconItems) {
     Item.CurrentPrice += (Item.PerfectPrice - Item.CurrentPrice) * Item.PriceJumpMulti;
 
-    WealthTypePricesSumMap[Item.ItemWealthType] += Item.CurrentPrice * EconomyParams.SingleUnitPriceMulti;
-    ItemsCountMap[Item.ItemWealthType] += 1;
+    WealthTypePricesSumMap[{Item.ItemEconType, Item.ItemWealthType}] +=
+        Item.CurrentPrice * EconomyParams.SingleUnitPriceMulti;
+    ItemsCountMap[{Item.ItemEconType, Item.ItemWealthType}] += 1;
   }
 
-  for (auto WealthType : TEnumRange<EItemWealthType>())
-    if (WealthTypePricesSumMap[WealthType] > 0 && ItemsCountMap[WealthType] > 0)
-      WealthTypePricesMap[WealthType] = WealthTypePricesSumMap[WealthType] / ItemsCountMap[WealthType];
+  for (auto EconType : TEnumRange<EItemEconType>())
+    for (auto WealthType : TEnumRange<EItemWealthType>())
+      if (WealthTypePricesSumMap[{EconType, WealthType}] > 0 && ItemsCountMap[{EconType, WealthType}] > 0)
+        EconTypePricesMap[EconType].WealthTypePricesMap[WealthType] =
+            WealthTypePricesSumMap[{EconType, WealthType}] / ItemsCountMap[{EconType, WealthType}];
 
   // * Pop Changes.
   TArray<FPopMoneySpendData> PromotionPops;
@@ -361,6 +389,7 @@ void AMarketEconomy::InitializeEconomyData() {
   for (auto Row : ItemRows) {
     EconItems.Add({
         Row->ItemID,
+        Row->ItemType,
         Row->ItemEconType,
         Row->ItemWealthType,
         Row->BasePrice,
@@ -373,56 +402,79 @@ void AMarketEconomy::InitializeEconomyData() {
   // * Data normalization mgen values.
   // Normalization = calculate the mgen given that the average needs are fulfilled.
   // Alternative would be to manually set the "right" values in the data.
-  TMap<EItemWealthType, float> AverageNeedsMap;
-  TMap<EItemWealthType, float> AverageUnitPriceMap;
-  TMap<EItemWealthType, int32> ItemCountMap;
-  for (auto WealthType : TEnumRange<EItemWealthType>()) {
-    AverageNeedsMap.Add(WealthType, 0);
-    AverageUnitPriceMap.Add(WealthType, 0);
-    ItemCountMap.Add(WealthType, 0);
+  TMap<TTuple<EItemEconType, EItemWealthType>, float> AverageNeedsMap;
+  TMap<TTuple<EItemEconType, EItemWealthType>, float> AverageUnitPriceMap;
+  TMap<TTuple<EItemEconType, EItemWealthType>, int32> ItemCountMap;
+  for (auto EconType : TEnumRange<EItemEconType>()) {
+    for (auto WealthType : TEnumRange<EItemWealthType>()) {
+      AverageNeedsMap.Add({EconType, WealthType}, 0);
+      AverageUnitPriceMap.Add({EconType, WealthType}, 0);
+      ItemCountMap.Add({EconType, WealthType}, 0);
+    }
   }
   for (auto& Pop : AllCustomerPops) {
     // Preserving ratio of needs.
-    float TotalNeeds = 0;
-    for (auto WealthType : TEnumRange<EItemWealthType>())
-      TotalNeeds += float(Pop.EconData.ItemNeeds[WealthType]) * float(Pop.EconData.Population);
-    for (auto WealthType : TEnumRange<EItemWealthType>())
-      AverageNeedsMap[WealthType] += TotalNeeds * (Pop.EconData.ItemSpendPercent[WealthType] / 100.0f);
+    for (auto EconType : Pop.ItemEconTypes) {
+      float TotalNeeds = 0;
+      for (auto WealthType : TEnumRange<EItemWealthType>())
+        TotalNeeds += float(Pop.EconData.ItemNeeds[WealthType]) * float(Pop.EconData.Population);
+      for (auto WealthType : TEnumRange<EItemWealthType>())
+        AverageNeedsMap[{EconType, WealthType}] += TotalNeeds * (Pop.EconData.ItemSpendPercent[WealthType] / 100.0f);
+    }
   }
   for (auto& Item : EconItems) {
-    AverageUnitPriceMap[Item.ItemWealthType] += Item.CurrentPrice * EconomyParams.SingleUnitPriceMulti;
-    ItemCountMap[Item.ItemWealthType] += 1;
+    AverageUnitPriceMap[{Item.ItemEconType, Item.ItemWealthType}] +=
+        Item.CurrentPrice * EconomyParams.SingleUnitPriceMulti;
+    ItemCountMap[{Item.ItemEconType, Item.ItemWealthType}] += 1;
   }
-  for (auto WealthType : TEnumRange<EItemWealthType>()) {
-    AverageNeedsMap[WealthType] /= float(PopMoneySpendDataArray.Num());
+  for (auto EconType : TEnumRange<EItemEconType>()) {
+    for (auto WealthType : TEnumRange<EItemWealthType>()) {
+      TArray<FPopMoneySpendData> RelevantPops = PopMoneySpendDataArray.FilterByPredicate(
+          [EconType, WealthType](const auto& Pop) { return Pop.ItemEconTypes.Contains(EconType); });
+      AverageNeedsMap[{EconType, WealthType}] /= float(std::max(RelevantPops.Num(), 1));
 
-    if (AverageUnitPriceMap[WealthType] <= 0 || ItemCountMap[WealthType] <= 0) {
-      AverageUnitPriceMap[WealthType] = 1;
-      continue;
+      if (AverageUnitPriceMap[{EconType, WealthType}] <= 0 || ItemCountMap[{EconType, WealthType}] <= 0) {
+        AverageUnitPriceMap[{EconType, WealthType}] = 1;
+        continue;
+      }
+      AverageUnitPriceMap[{EconType, WealthType}] /= ItemCountMap[{EconType, WealthType}];
     }
-    AverageUnitPriceMap[WealthType] /= ItemCountMap[WealthType];
   }
 
   float BaseTotalMoney = 0;
   for (auto& Pop : AllCustomerPops) BaseTotalMoney += Pop.EconData.MGen * Pop.EconData.Population;
   float ActualTotalMoney = 0;
-  for (auto WealthType : TEnumRange<EItemWealthType>())
-    ActualTotalMoney += AverageUnitPriceMap[WealthType] *
-                        (AverageNeedsMap[WealthType] * EconomyParams.NeedsfulfilledPercent * AllCustomerPops.Num());
-
+  for (auto EconType : TEnumRange<EItemEconType>()) {
+    for (auto WealthType : TEnumRange<EItemWealthType>()) {
+      TArray<FPopMoneySpendData> RelevantPops = PopMoneySpendDataArray.FilterByPredicate(
+          [EconType, WealthType](const auto& Pop) { return Pop.ItemEconTypes.Contains(EconType); });
+      ActualTotalMoney +=
+          AverageUnitPriceMap[{EconType, WealthType}] *
+          (AverageNeedsMap[{EconType, WealthType}] * EconomyParams.NeedsfulfilledPercent * RelevantPops.Num());
+    }
+  }
   float MGenMulti = (ActualTotalMoney / BaseTotalMoney);
   check(MGenMulti > 0);
   for (auto& Pop : AllCustomerPops) Pop.EconData.MGen *= MGenMulti;
 
   // Calc BoughtToPriceMulti.
-  for (auto& Item : EconItems)
-    Item.BoughtToPriceMulti = Item.CurrentPrice / (AverageNeedsMap[Item.ItemWealthType] * AllCustomerPops.Num() *
-                                                   EconomyParams.NeedsfulfilledPercent);
+  for (auto& Item : EconItems) {
+    TArray<FPopMoneySpendData> RelevantPops = PopMoneySpendDataArray.FilterByPredicate(
+        [Item](const auto& Pop) { return Pop.ItemEconTypes.Contains(Item.ItemEconType); });
+    Item.BoughtToPriceMulti = Item.CurrentPrice / std::max((AverageNeedsMap[{Item.ItemEconType, Item.ItemWealthType}] *
+                                                            RelevantPops.Num() * EconomyParams.NeedsfulfilledPercent),
+                                                           1.0f);
+  }
 
   // Setting WealthTypePricesMap.
-  for (auto WealthType : TEnumRange<EItemWealthType>()) WealthTypePricesMap.Add(WealthType, 0);
-  for (auto WealthType : TEnumRange<EItemWealthType>())
-    WealthTypePricesMap[WealthType] = AverageUnitPriceMap[WealthType];
+  for (auto EconType : TEnumRange<EItemEconType>()) {
+    EconTypePricesMap.Add(EconType, FEconTypePrices());
+    for (auto WealthType : TEnumRange<EItemWealthType>())
+      EconTypePricesMap[EconType].WealthTypePricesMap.Add(WealthType, 0);
+  }
+  for (auto EconType : TEnumRange<EItemEconType>())
+    for (auto WealthType : TEnumRange<EItemWealthType>())
+      EconTypePricesMap[EconType].WealthTypePricesMap[WealthType] = AverageUnitPriceMap[{EconType, WealthType}];
 
   BasePopTypeToEconomyTable = nullptr;
   CustomerPopDataTable = nullptr;

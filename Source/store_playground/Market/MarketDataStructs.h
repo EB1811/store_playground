@@ -156,6 +156,9 @@ struct FEconItem {
 
   UPROPERTY(EditAnywhere)
   FName ItemID;
+
+  UPROPERTY(EditAnywhere)
+  EItemType ItemType;
   UPROPERTY(EditAnywhere)
   EItemEconType ItemEconType;
   UPROPERTY(EditAnywhere)
@@ -217,4 +220,114 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
   UPROPERTY(EditAnywhere)
   TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
+};
+
+// * Economic events.
+USTRUCT()
+struct FPriceEffect {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName PriceEffectID;
+
+  UPROPERTY(EditAnywhere)
+  TArray<EItemEconType> ItemEconTypes;
+  UPROPERTY(EditAnywhere)
+  TArray<EItemWealthType> ItemWealthTypes;
+  UPROPERTY(EditAnywhere)
+  TArray<EItemType> ItemTypes;
+
+  UPROPERTY(EditAnywhere)
+  float PriceMultiPercent;  // * Positive and negative, additive.
+  UPROPERTY(EditAnywhere)
+  int32 Duration;  // * Duration in days.
+  UPROPERTY(EditAnywhere)
+  float PriceMultiPercentFalloff;  // * Falloff each day, if any.
+};
+USTRUCT()
+struct FPriceEffectRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName PriceEffectID;
+
+  UPROPERTY(EditAnywhere)
+  TArray<EItemEconType> ItemEconTypes;
+  UPROPERTY(EditAnywhere)
+  TArray<EItemWealthType> ItemWealthTypes;
+  UPROPERTY(EditAnywhere)
+  TArray<EItemType> ItemTypes;
+
+  UPROPERTY(EditAnywhere)
+  float PriceMultiPercent;  // * Positive and negative, additive.
+  UPROPERTY(EditAnywhere)
+  int32 Duration;  // * Duration in days.
+  UPROPERTY(EditAnywhere)
+  float PriceMultiPercentFalloff;  // * Falloff each day, if any.
+};
+
+USTRUCT()
+struct FEconEventTextData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FText Name;
+  UPROPERTY(EditAnywhere)
+  FText Description;
+};
+USTRUCT()
+struct FEconEventAssetData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  class UTexture2D* Icon;
+};
+
+USTRUCT()
+struct FEconEvent {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName EconEventID;
+
+  UPROPERTY(EditAnywhere)
+  FName RequirementsFilter;
+  UPROPERTY(EditAnywhere)
+  float StartChance;
+  UPROPERTY(EditAnywhere)
+  bool bIsRepeatable;
+
+  UPROPERTY(EditAnywhere)
+  TArray<FName> PriceEffectIDs;
+  UPROPERTY(EditAnywhere)
+  FName ArticleID;  // * Linked article that will guarantee appear, if any.
+
+  UPROPERTY(EditAnywhere)
+  FEconEventTextData TextData;
+  UPROPERTY(EditAnywhere)
+  FEconEventAssetData AssetData;
+};
+USTRUCT()
+struct FEconEventRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName EconEventID;
+
+  UPROPERTY(EditAnywhere)
+  FName RequirementsFilter;
+  UPROPERTY(EditAnywhere)
+  float StartChance;
+  UPROPERTY(EditAnywhere)
+  bool bIsRepeatable;
+
+  UPROPERTY(EditAnywhere)
+  TArray<FName> PriceEffectIDs;
+  UPROPERTY(EditAnywhere)
+  FName ArticleID;  // * Linked article that will guarantee appear, if any.
+
+  UPROPERTY(EditAnywhere)
+  FEconEventTextData TextData;
+  UPROPERTY(EditAnywhere)
+  FEconEventAssetData AssetData;
 };

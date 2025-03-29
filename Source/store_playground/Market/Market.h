@@ -13,7 +13,7 @@ struct FMarketParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  float Money;
+  float BaseEconEventStartChance;  // * Chance to start for each event.
 };
 
 USTRUCT()
@@ -40,24 +40,21 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market")
   TObjectPtr<const class UDataTable> AllItemsTable;
   UPROPERTY(EditAnywhere, Category = "Market")
-  class TSubclassOf<class AActor> NPCStoreClass;
+  class TSubclassOf<class ANPCStore> NPCStoreClass;
 
-  UPROPERTY(EditAnywhere, Category = "Store")
-  FMarketLevelState MarketLevelState;
-
-  // ? Store list of all stores?
-
+  UPROPERTY(EditAnywhere, Category = "Market")
+  FMarketParams MarketParams;
   UPROPERTY(EditAnywhere, Category = "Market")
   TArray<class UItemBase*> AllItems;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   class AMarketEconomy* MarketEconomy;
 
-  void SaveMarketLevelState();
-  void LoadMarketLevelState();
-  void InitializeNPCStores();
+  UPROPERTY(EditAnywhere, Category = "Market")
+  TArray<FName> OccurredEconEvents;
+  UPROPERTY(EditAnywhere, Category = "Market")
+  TArray<FName> RecentEconEvents;
 
-  TArray<int32> GetRandomDialogueIndexes();
   TArray<class UItemBase*> GetNewRandomItems(int32 Amount) const;
   class UItemBase* GetRandomItem(const TArray<FName> ItemIds) const;
 
@@ -73,4 +70,13 @@ public:
                 class AStore* PlayerStore,
                 class UItemBase* Item,
                 int32 Quantity = 1);
+
+  FEconEvent ConsiderEconEvent();
+
+  // ? Move to save manager?
+  UPROPERTY(EditAnywhere, Category = "Store") FMarketLevelState MarketLevelState;
+  void SaveMarketLevelState();
+  void LoadMarketLevelState();
+
+  void InitializeNPCStores();
 };
