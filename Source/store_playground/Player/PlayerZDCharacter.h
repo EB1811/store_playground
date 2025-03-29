@@ -49,6 +49,8 @@ public:
   class UInputAction* BuildModeAction;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   class UInputAction* InteractAction;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  class UInputAction* OpenNewspaperAction;
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Move(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -59,6 +61,8 @@ public:
   void OpenInventoryView(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void EnterBuildMode(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void OpenNewspaper(const FInputActionValue& Value);
 
   // * Inventory
   UPROPERTY(EditAnywhere, Category = "Character | Inventory")
@@ -120,4 +124,8 @@ public:
   // * CustomerAIManager
   UPROPERTY(EditAnywhere, Category = "Character | CustomerAIManager")
   class ACustomerAIManager* CustomerAIManager;
+
+  // * NewsGen
+  UPROPERTY(EditAnywhere, Category = "Character | NewsGen")
+  class ANewsGen* NewsGen;
 };

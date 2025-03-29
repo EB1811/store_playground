@@ -40,6 +40,8 @@ public:
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UNegotiationWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> NewspaperWidgetClass;
 
   // UPROPERTY()
   // class UMainMenu* MainMenu;
@@ -94,4 +96,8 @@ public:
   UPROPERTY()
   class UNegotiationWidget* NegotiationWidget;
   void SetAndOpenNegotiation(const class UNegotiationSystem* Negotiation, class UInventoryComponent* PlayerInventoryC);
+
+  UPROPERTY()
+  class UNewspaperWidget* NewspaperWidget;
+  void SetAndOpenNewspaper(const class ANewsGen* NewsGenRef);
 };

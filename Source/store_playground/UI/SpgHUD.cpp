@@ -11,7 +11,9 @@
 #include "store_playground/UI/NPCStore/NpcStoreWidget.h"
 #include "store_playground/UI/Store/StockDisplayWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayWidget.h"
+#include "store_playground/UI/Newspaper/NewspaperWidget.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/NewsGen/NewsGen.h"
 #include "Components/TextBlock.h"
 
 ASpgHUD::ASpgHUD() {}
@@ -28,6 +30,7 @@ void ASpgHUD::BeginPlay() {
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
   check(StockDisplayWidgetClass);
+  check(NewspaperWidgetClass);
 
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
@@ -56,6 +59,10 @@ void ASpgHUD::BeginPlay() {
   NegotiationWidget = CreateWidget<UNegotiationWidget>(GetWorld(), UNegotiationWidgetClass);
   NegotiationWidget->AddToViewport(10);
   NegotiationWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  NewspaperWidget = CreateWidget<UNewspaperWidget>(GetWorld(), NewspaperWidgetClass);
+  NewspaperWidget->AddToViewport(10);
+  NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -262,4 +269,21 @@ void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInve
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(NegotiationWidget);
+}
+
+void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
+  check(NewspaperWidget);
+
+  if (OpenedWidgets.Contains(NewspaperWidget)) return CloseWidget(NewspaperWidget);
+
+  NewspaperWidget->NewsGenRef = NewsGenRef;
+  NewspaperWidget->RefreshNewspaperUI();
+
+  NewspaperWidget->SetVisibility(ESlateVisibility::Visible);
+
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(NewspaperWidget);
 }

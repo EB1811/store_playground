@@ -14,11 +14,13 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/StorePhaseManager.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/WorldObject/Level/SpawnPoint.h"
 #include "store_playground/Level/LevelChangeComponent.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/UI/SpgHUD.h"
+#include "store_playground/NewsGen/NewsGen.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -52,6 +54,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     EnhancedInputComponent->BindAction(BuildModeAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::EnterBuildMode);
     EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Interact);
+    EnhancedInputComponent->BindAction(OpenNewspaperAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenNewspaper);
   }
 }
 
@@ -106,6 +110,8 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 
   StorePhaseManager->BuildMode();
 }
+
+void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) { HUD->SetAndOpenNewspaper(NewsGen); }
 
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
@@ -301,10 +307,10 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   }
 
   auto LevelReadyFunc = [this, LevelChangeC]() {
-    TArray<AActor*> FoundActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), SpawnPointClass, FoundActors);
-    ASpawnPoint* SpawnPoint = Cast<ASpawnPoint>(*(FoundActors.FindByPredicate(
-        [LevelChangeC](const AActor* Actor) { return Cast<ASpawnPoint>(Actor)->Level == LevelChangeC->LevelToLoad; })));
+    ASpawnPoint* SpawnPoint = *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)
+                                   .FindByPredicate([LevelChangeC](const ASpawnPoint* SpawnPoint) {
+                                     return SpawnPoint->Level == LevelChangeC->LevelToLoad;
+                                   });
     check(SpawnPoint);
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
