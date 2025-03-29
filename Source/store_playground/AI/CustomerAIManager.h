@@ -101,7 +101,7 @@ public:
   void StartCustomerAI();
   void EndCustomerAI();
 
-  void SpawnUniqueNpc();
+  void SpawnUniqueNpcs();
   void SpawnCustomers();
   void PerformCustomerAILoop();
 

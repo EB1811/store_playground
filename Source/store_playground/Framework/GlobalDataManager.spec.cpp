@@ -14,7 +14,7 @@
 #define ARRAY_NAMES(...)                                                \
   {                                                                     \
     {                                                                   \
-      EReqFilterOperand::CompletedQuests, TArray<FName> { __VA_ARGS__ } \
+      EReqFilterOperand::QuestsCompleted, TArray<FName> { __VA_ARGS__ } \
     }                                                                   \
   }
 
@@ -130,84 +130,84 @@ void AGlobalDataManagerSpec::Define() {
 
     It("should evaluate array contains operator correctly", EAsyncExecution::ThreadPool, [this]() {
       // Single item
-      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, Quest1)"), ARRAY_NAMES(FName("Quest1"))));
-      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, Quest2)"), ARRAY_NAMES(FName("Quest1"))));
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest1)"), ARRAY_NAMES(FName("Quest1"))));
+      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest2)"), ARRAY_NAMES(FName("Quest1"))));
 
       // Multiple items - array contains all specified items
-      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, [Quest1, Quest2])"),
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [Quest1, Quest2])"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
-      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, [Quest1, Quest4])"),
+      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [Quest1, Quest4])"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
 
       // Empty array
-      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, Quest1)"), ARRAY_NAMES()));
+      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest1)"), ARRAY_NAMES()));
 
       // Array with many items
       TEST_TRUE(EvaluateRequirementsFilter(
-          FName("contains(CompletedQuests, Quest5)"),
+          FName("contains(QuestsCompleted, Quest5)"),
           ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"), FName("Quest4"), FName("Quest5"))));
     });
 
     It("should evaluate array count comparisons correctly", EAsyncExecution::ThreadPool, [this]() {
       // Count equals
-      TEST_TRUE(EvaluateRequirementsFilter(FName("CompletedQuests = 3"),
+      TEST_TRUE(EvaluateRequirementsFilter(FName("QuestsCompleted = 3"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
-      TEST_FALSE(EvaluateRequirementsFilter(FName("CompletedQuests = 2"),
+      TEST_FALSE(EvaluateRequirementsFilter(FName("QuestsCompleted = 2"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
 
       // Count greater than
-      TEST_TRUE(EvaluateRequirementsFilter(FName("CompletedQuests > 2"),
+      TEST_TRUE(EvaluateRequirementsFilter(FName("QuestsCompleted > 2"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
-      TEST_FALSE(EvaluateRequirementsFilter(FName("CompletedQuests > 3"),
+      TEST_FALSE(EvaluateRequirementsFilter(FName("QuestsCompleted > 3"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
 
       // Count less than
-      TEST_TRUE(EvaluateRequirementsFilter(FName("CompletedQuests < 4"),
+      TEST_TRUE(EvaluateRequirementsFilter(FName("QuestsCompleted < 4"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
-      TEST_FALSE(EvaluateRequirementsFilter(FName("CompletedQuests < 3"),
+      TEST_FALSE(EvaluateRequirementsFilter(FName("QuestsCompleted < 3"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
     });
 
     It("should evaluate complex expressions with arrays correctly", EAsyncExecution::ThreadPool, [this]() {
       // Array contains with money condition
       TEST_TRUE(EvaluateRequirementsFilter(
-          FName("contains(CompletedQuests, Quest1) AND Money >= 100"),
-          {{EReqFilterOperand::CompletedQuests, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 100.0f}}));
+          FName("contains(QuestsCompleted, Quest1) AND Money >= 100"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 100.0f}}));
 
       TEST_FALSE(EvaluateRequirementsFilter(
-          FName("contains(CompletedQuests, Quest1) AND Money >= 100"),
-          {{EReqFilterOperand::CompletedQuests, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 50.0f}}));
+          FName("contains(QuestsCompleted, Quest1) AND Money >= 100"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 50.0f}}));
 
       // Complex condition with array count
       TEST_TRUE(EvaluateRequirementsFilter(
-          FName("CompletedQuests > 2 OR Money >= 200"),
-          {{EReqFilterOperand::CompletedQuests, TArray<FName>{FName("Quest1"), FName("Quest2"), FName("Quest3")}},
+          FName("QuestsCompleted > 2 OR Money >= 200"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1"), FName("Quest2"), FName("Quest3")}},
            {EReqFilterOperand::Money, 150.0f}}));
 
       TEST_TRUE(EvaluateRequirementsFilter(
-          FName("CompletedQuests > 2 OR Money >= 200"),
-          {{EReqFilterOperand::CompletedQuests, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 250.0f}}));
+          FName("QuestsCompleted > 2 OR Money >= 200"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 250.0f}}));
 
       TEST_FALSE(EvaluateRequirementsFilter(
-          FName("CompletedQuests > 2 OR Money >= 200"),
-          {{EReqFilterOperand::CompletedQuests, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 150.0f}}));
+          FName("QuestsCompleted > 2 OR Money >= 200"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 150.0f}}));
 
       // Three-part expression with arrays and money
       TEST_TRUE(EvaluateRequirementsFilter(
-          FName("contains(CompletedQuests, Quest1) AND CompletedQuests > 2 AND Money >= 100"),
-          {{EReqFilterOperand::CompletedQuests, TArray<FName>{FName("Quest1"), FName("Quest2"), FName("Quest3")}},
+          FName("contains(QuestsCompleted, Quest1) AND QuestsCompleted > 2 AND Money >= 100"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1"), FName("Quest2"), FName("Quest3")}},
            {EReqFilterOperand::Money, 150.0f}}));
     });
 
     It("should handle special array function syntax correctly", EAsyncExecution::ThreadPool, [this]() {
       // Function-like syntax for contains
-      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, Quest1)"),
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest1)"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"))));
 
-      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, [Quest1, Quest2])"),
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [Quest1, Quest2])"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
 
-      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(CompletedQuests, Quest4)"),
+      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest4)"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
     });
   });

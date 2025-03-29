@@ -69,7 +69,7 @@ void ACustomerAIManager::EndCustomerAI() {
   for (ACustomer* Customer : CustomersToRemove) Customer->Destroy();
 }
 
-void ACustomerAIManager::SpawnUniqueNpc() {
+void ACustomerAIManager::SpawnUniqueNpcs() {
   // Temp: Need info about player.
   const TMap<EReqFilterOperand, std::any> GameDataMap = {{EReqFilterOperand::Money, Store->Money}};
   TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs(GameDataMap);
@@ -119,6 +119,7 @@ void ACustomerAIManager::SpawnUniqueNpc() {
   TMap<FName, FName> PrevChainCompletedMap = {};
   for (const auto& QuestInProgress : QuestInProgressMap)
     PrevChainCompletedMap.Add(QuestInProgress.Key, QuestInProgress.Value.ChainCompletedIDs.Last());
+
   TArray<struct FQuestChainData> EligibleQuestChains = GlobalDataManager->GetEligibleQuestChains(
       UniqueNpcData.QuestIDs, GameDataMap, QuestsCompleted, PrevChainCompletedMap);
   if (EligibleQuestChains.Num() > 0) {
@@ -166,7 +167,7 @@ void ACustomerAIManager::SpawnCustomers() {
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) SpawnUniqueNpc();
+  if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) SpawnUniqueNpcs();
 
   int32 CustomersToSpawn = FMath::RandRange(0, ManagerParams.MaxCustomers - AllCustomers.Num());
   UE_LOG(LogTemp, Warning, TEXT("Spawning %d customers."), CustomersToSpawn);

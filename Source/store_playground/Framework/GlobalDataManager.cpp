@@ -14,13 +14,16 @@ void AGlobalDataManager::BeginPlay() {
   check(GenericCustomersDataTable && WantedItemTypesDataTable && UniqueNpcDataTable && UniqueNpcDialoguesTable &&
         QuestDialoguesTable && CustomerDialoguesTable && FriendlyNegDialoguesTable.DataTable &&
         NeutralNegDialoguesTable.DataTable && HostileNegDialoguesTable.DataTable && QuestChainDataDataTable &&
-        NpcStoreTypesDataTable && NpcStoreDialoguesTable);
+        NpcStoreTypesDataTable && NpcStoreDialoguesTable && PriceEffectsDataTable && EconEventsDataTable &&
+        ArticlesDataTable);
 
   InitializeCustomerData();
   InitializeNPCData();
   InitializeDialogueData();
   InitializeQuestChainsData();
   InitializeNpcStoreData();
+  InitializeMarketData();
+  InitializeNewsData();
 }
 
 void AGlobalDataManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -81,8 +84,10 @@ bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, cons
 }
 
 // ! Simplified inorder parser works due to no operator precedence.
+// ? Move GameDataMap into data manager?
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap) {
   if (RequirementsFilter == NAME_None) return true;
+  if (GameDataMap.Num() <= 0) return true;
 
   FString FilterString = RequirementsFilter.ToString();
   if (FilterString.IsEmpty()) return true;
@@ -198,7 +203,7 @@ TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
     TArray<FName> CompletedQuestIDs,
     TMap<FName, FName> PrevChainCompletedMap) const {
   auto FilteredQuestChains = QuestChainsArray.FilterByPredicate([&](const FQuestChainData& Chain) {
-    return QuestIDs.Contains(Chain.QuestID) && (!CompletedQuestIDs.Contains(Chain.QuestID) || Chain.bIsRepeatable);
+    return QuestIDs.Contains(Chain.QuestID) && (Chain.bIsRepeatable || !CompletedQuestIDs.Contains(Chain.QuestID));
   });
 
   // Quest in progress tracking.
@@ -274,6 +279,32 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNeg
     RandomDialogueIndexMap[Type].Dialogues = GetRandomDialogue(Dialogues);
   }
   return RandomDialogueIndexMap;
+}
+
+TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(
+    const TMap<EReqFilterOperand, std::any>& GameDataMap,
+    const TArray<FName>& OccurredEconEvents) const {
+  return EconEventsArray.FilterByPredicate([&](const FEconEvent& Event) {
+    return (Event.bIsRepeatable || !OccurredEconEvents.Contains(Event.EconEventID)) &&
+           EvaluateRequirementsFilter(Event.RequirementsFilter, GameDataMap);
+  });
+}
+
+TArray<struct FPriceEffect> AGlobalDataManager::GetPriceEffects(const TArray<FName>& PriceEffectIDs) const {
+  return PriceEffectsArray.FilterByPredicate(
+      [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.PriceEffectID); });
+}
+
+TArray<struct FArticle> AGlobalDataManager::GetEligibleArticles(const TMap<EReqFilterOperand, std::any>& GameDataMap,
+                                                                const TArray<FName>& PublishedArticles) const {
+  return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
+    return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) &&
+           EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
+  });
+}
+
+FArticle AGlobalDataManager::GetArticle(const FName& ArticleID) const {
+  return *ArticlesArray.FindByPredicate([&](const FArticle& Article) { return Article.ArticleID == ArticleID; });
 }
 
 void AGlobalDataManager::InitializeCustomerData() {
@@ -477,4 +508,60 @@ void AGlobalDataManager::InitializeNpcStoreData() {
   check(NpcStoreTypesArray.Num() > 0);
 
   NpcStoreTypesDataTable = nullptr;
+}
+
+void AGlobalDataManager::InitializeMarketData() {
+  PriceEffectsArray.Empty();
+  TArray<FPriceEffectRow*> PriceEffectRows;
+  PriceEffectsDataTable->GetAllRows<FPriceEffectRow>("", PriceEffectRows);
+  for (auto* Row : PriceEffectRows)
+    PriceEffectsArray.Add({
+        Row->PriceEffectID,
+        Row->ItemEconTypes,
+        Row->ItemWealthTypes,
+        Row->ItemTypes,
+        Row->PriceMultiPercent,
+        Row->Duration,
+        Row->PriceMultiPercentFalloff,
+    });
+
+  EconEventsArray.Empty();
+  TArray<FEconEventRow*> EconEventRows;
+  EconEventsDataTable->GetAllRows<FEconEventRow>("", EconEventRows);
+  for (auto* Row : EconEventRows)
+    EconEventsArray.Add({
+        Row->EconEventID,
+        Row->RequirementsFilter,
+        Row->StartChance,
+        Row->bIsRepeatable,
+        Row->PriceEffectIDs,
+        Row->ArticleID,
+        Row->TextData,
+        Row->AssetData,
+    });
+
+  check(PriceEffectsArray.Num() > 0);
+  check(EconEventsArray.Num() > 0);
+
+  PriceEffectsDataTable = nullptr;
+  EconEventsDataTable = nullptr;
+}
+
+void AGlobalDataManager::InitializeNewsData() {
+  ArticlesArray.Empty();
+  TArray<FArticleRow*> ArticleRows;
+  ArticlesDataTable->GetAllRows<FArticleRow>("", ArticleRows);
+  for (auto* Row : ArticleRows)
+    ArticlesArray.Add({
+        Row->ArticleID,
+        Row->RequirementsFilter,
+        Row->AppearWeight,
+        Row->bIsRepeatable,
+        Row->Size,
+        Row->TextData,
+        Row->AssetData,
+    });
+
+  check(ArticlesArray.Num() > 0);
+  ArticlesDataTable = nullptr;
 }

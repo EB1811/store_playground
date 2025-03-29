@@ -42,7 +42,8 @@ enum class EItemEconType : uint8 {
 };
 ENUM_RANGE_BY_COUNT(EItemEconType, 4);
 
-USTRUCT() struct FItemTextData {
+USTRUCT()
+struct FItemTextData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)

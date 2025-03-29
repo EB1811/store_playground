@@ -24,6 +24,14 @@ struct FEconomyParams {
   float BaseCrossPromotionChance;  // Change to a different economy type.
 };
 
+USTRUCT()
+struct FEconTypePrices {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  TMap<EItemWealthType, float> WealthTypePricesMap;
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AMarketEconomy : public AInfo {
   GENERATED_BODY()
@@ -59,9 +67,12 @@ public:
   TArray<FPopMoneySpendData> PopMoneySpendDataArray;
 
   UPROPERTY(EditAnywhere, Category = "Economy")
+  TArray<FPriceEffect> ActivePriceEffects;
+
+  UPROPERTY(EditAnywhere, Category = "Economy")
   TArray<FEconItem> EconItems;  // ? Also need fast lookups?
   UPROPERTY(EditAnywhere, Category = "Economy")
-  TMap<EItemWealthType, float> WealthTypePricesMap;
+  TMap<EItemEconType, FEconTypePrices> EconTypePricesMap;
 
   void PerformEconomyTick();
 

@@ -8,6 +8,7 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/MarketEconomy.h"
+#include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
@@ -30,6 +31,7 @@ void AStorePGGameMode::BeginPlay() {
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   AMarketEconomy* MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
+  ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
   AStore* Store = GetWorld()->SpawnActor<AStore>(StoreClass);
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
   UNegotiationSystem* NegotiationSystem = NewObject<UNegotiationSystem>(this);
@@ -42,6 +44,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->Market = Market;
   PlayerCharacter->MarketEconomy = MarketEconomy;
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
+  PlayerCharacter->NewsGen = NewsGen;
 
   LevelManager->Store = Store;
   LevelManager->Market = Market;
@@ -58,6 +61,9 @@ void AStorePGGameMode::BeginPlay() {
   Market->GlobalDataManager = GlobalDataManager;
   Market->MarketEconomy = MarketEconomy;
 
+  NewsGen->GlobalDataManager = GlobalDataManager;
+  NewsGen->GenDaysRandomArticles();  // Temp.
+
   NegotiationSystem->MarketEconomy = MarketEconomy;
   NegotiationSystem->DialogueSystem = DialogueSystem;
   NegotiationSystem->Store = Store;
@@ -68,4 +74,7 @@ void AStorePGGameMode::BeginPlay() {
   StorePhaseManager->Start();
 
   UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
+
+  // * Clearing datatable refs mostly.
+  CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 }
