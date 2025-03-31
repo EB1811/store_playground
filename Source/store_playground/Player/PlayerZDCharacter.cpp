@@ -263,7 +263,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
   // * Differentiate between when quest is from a customer (store open), and when npc (e.g., in market).
   if (!CustomerAI)
     return EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
-      QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+      QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
     });
 
   switch (QuestC->QuestChainData.CustomerAction) {
@@ -276,19 +276,16 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                       [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
         EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI, Item]() {
-          QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+          QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
           EnterNegotiation(CustomerAI, Item);
         });
       break;
     case ECustomerAction::Leave:
-      EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
-        QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
-        CustomerAI->CustomerState = ECustomerState::Leaving;
-      });
-      break;
     case ECustomerAction::None:
-      EnterDialogue(DialogueC->DialogueArray, [this, QuestC]() {
-        QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);
+      if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
+      EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
+        QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
+        CustomerAI->CustomerState = ECustomerState::Leaving;
       });
       break;
     default: checkNoEntry(); break;

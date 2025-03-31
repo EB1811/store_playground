@@ -26,6 +26,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Buildable")
   FGuid BuildableId;
 
+  // ? Buildable component?
   UPROPERTY(EditAnywhere, Category = "Buildable")
   TMap<EBuildableType, UStaticMesh*> MeshesMap;
   UPROPERTY(EditAnywhere, Category = "Buildable")

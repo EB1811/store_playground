@@ -41,7 +41,7 @@ public:
   TMap<FName, FQuestInProgressData> QuestInProgressMap;
 
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs) const;
-  void CompleteQuestChain(const FQuestChainData& QuestChainData,
+  void CompleteQuestChain(class UQuestComponent* QuestC,
                           TArray<FName> MadeChoiceIds = {},
                           bool bNegotiationSuccess = false);
 };

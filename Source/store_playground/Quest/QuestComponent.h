@@ -18,4 +18,6 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Quest Data")
   FQuestChainData QuestChainData;
+
+  void PostQuest(TArray<struct FDialogueData> PostDialogues = {});
 };

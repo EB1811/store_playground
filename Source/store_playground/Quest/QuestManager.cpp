@@ -22,9 +22,8 @@ TArray<struct FQuestChainData> AQuestManager::GetEligibleQuestChains(const TArra
   return GlobalDataManager->GetEligibleQuestChains(QuestIDs, GameDataMap, QuestsCompleted, PrevChainCompletedMap);
 }
 
-void AQuestManager::CompleteQuestChain(const FQuestChainData& QuestChainData,
-                                       TArray<FName> MadeChoiceIds,
-                                       bool bNegotiationSuccess) {
+void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> MadeChoiceIds, bool bNegotiationSuccess) {
+  const FQuestChainData& QuestChainData = QuestC->QuestChainData;
   if (QuestsCompleted.Contains(QuestChainData.QuestID)) return;
 
   switch (QuestChainData.QuestAction) {
@@ -51,15 +50,5 @@ void AQuestManager::CompleteQuestChain(const FQuestChainData& QuestChainData,
   }
 
   // ? Store npcs with active quests?
-  TArray<ANpc*> UniqueNpcs = GetAllActorsOf<ANpc>(GetWorld(), NpcClass);
-  ANpc** UniqueNpc = UniqueNpcs.FindByPredicate([&QuestChainData](const ANpc* Npc) {
-    return Npc->QuestComponent && Npc->QuestComponent->QuestChainData.QuestID == QuestChainData.QuestID;
-  });
-  if (!UniqueNpc) return;
-
-  (*UniqueNpc)->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
-  (*UniqueNpc)->DialogueComponent->DialogueArray.Empty();
-  (*UniqueNpc)
-      ->DialogueComponent->DialogueArray.Append(
-          GlobalDataManager->GetQuestDialogue(QuestChainData.PostDialogueChainID));
+  QuestC->PostQuest(GlobalDataManager->GetQuestDialogue(QuestChainData.PostDialogueChainID));
 }

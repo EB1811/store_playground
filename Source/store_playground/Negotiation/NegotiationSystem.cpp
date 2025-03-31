@@ -197,7 +197,7 @@ void UNegotiationSystem::NegotiationSuccess() {
   }
 
   CustomerAI->PostNegotiation();
-  if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent->QuestChainData, {}, true);
+  if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, true);
 
   NegotiatedItems.Empty();
   CustomerAI = nullptr;
@@ -208,7 +208,7 @@ void UNegotiationSystem::NegotiationSuccess() {
 
 void UNegotiationSystem::NegotiationFailure() {
   CustomerAI->PostNegotiation();
-  if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent->QuestChainData, {}, false);
+  if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, false);
 
   NegotiatedItems.Empty();
   CustomerAI = nullptr;
