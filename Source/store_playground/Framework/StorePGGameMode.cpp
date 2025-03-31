@@ -15,6 +15,7 @@
 #include "store_playground/Player/PlayerZDCharacter.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/Quest/QuestManager.h"
+#include "store_playground/DayManager/DayManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -29,6 +30,7 @@ void AStorePGGameMode::BeginPlay() {
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
+  ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
   AQuestManager* QuestManager = GetWorld()->SpawnActor<AQuestManager>(QuestManagerClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
@@ -52,9 +54,13 @@ void AStorePGGameMode::BeginPlay() {
   LevelManager->Store = Store;
   LevelManager->Market = Market;
 
-  StorePhaseManager->Store = Store;
-  StorePhaseManager->Market = Market;
+  StorePhaseManager->DayManager = DayManager;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
+
+  DayManager->CustomerAIManager = CustomerAIManager;
+  DayManager->MarketEconomy = MarketEconomy;
+  DayManager->Market = Market;
+  DayManager->NewsGen = NewsGen;
 
   CustomerAIManager->GlobalDataManager = GlobalDataManager;
   CustomerAIManager->Market = Market;
@@ -69,7 +75,6 @@ void AStorePGGameMode::BeginPlay() {
   Market->MarketEconomy = MarketEconomy;
 
   NewsGen->GlobalDataManager = GlobalDataManager;
-  NewsGen->GenDaysRandomArticles();  // Temp.
 
   NegotiationSystem->MarketEconomy = MarketEconomy;
   NegotiationSystem->DialogueSystem = DialogueSystem;

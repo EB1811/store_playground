@@ -176,7 +176,7 @@ struct FUniqueNpcData {
   UPROPERTY(EditAnywhere)
   FName SpawnRequirementsFilter;  // * Identical to FQuestChainData.
   UPROPERTY(EditAnywhere)
-  float SpawnChanceWeight;
+  int32 SpawnWeight;
 
   // * NPC specific behaviour data.
   UPROPERTY(EditAnywhere)
@@ -206,7 +206,7 @@ struct FUniqueNpcDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FName SpawnRequirementsFilter;  // * Identical to FQuestChainData.
   UPROPERTY(EditAnywhere)
-  float SpawnChanceWeight;
+  int32 SpawnWeight;
 
   // * NPC specific behaviour data.
   UPROPERTY(EditAnywhere)

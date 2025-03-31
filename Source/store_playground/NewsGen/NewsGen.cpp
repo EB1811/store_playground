@@ -12,7 +12,7 @@ void ANewsGen::BeginPlay() { Super::BeginPlay(); }
 
 void ANewsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void ANewsGen::GenDaysRandomArticles(FName ArticleId) {
+void ANewsGen::GenDaysRandomArticles(TArray<FName> GuaranteedArticles) {
   check(GlobalDataManager);
 
   DaysArticles.Empty();
@@ -24,17 +24,23 @@ void ANewsGen::GenDaysRandomArticles(FName ArticleId) {
   // * Create a layout given the article size.
   // e.g, if chosen random article is large, the rest should be smaller to fit.
   int32 TotalLayoutSpace = FMath::RandRange(6, 8);
-  if (ArticleId != NAME_None) {
-    FArticle GuaranteedArticle = GlobalDataManager->GetArticle(ArticleId);
+  for (const FName& GuaranteeArticleId : GuaranteedArticles) {
+    FArticle GuaranteedArticle = GlobalDataManager->GetArticle(GuaranteeArticleId);
+    if (TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size] < 0) continue;
 
     PublishedArticles.Add(GuaranteedArticle.ArticleID);
-    RecentArticles.Add(GuaranteedArticle.ArticleID);
+    RecentArticlesMap.Add(GuaranteedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
     DaysArticles.Add(GuaranteedArticle);
 
     EligibleArticles.RemoveAllSwap(
         [&GuaranteedArticle](const FArticle& Article) { return Article.ArticleID == GuaranteedArticle.ArticleID; });
     TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size];
   }
+
+  EligibleArticles.RemoveAllSwap([this](const FArticle& Article) {
+    return Article.AppearWeight <= 0 || RecentArticlesMap.Contains(Article.ArticleID);
+  });
+  if (EligibleArticles.Num() <= 0) return;
 
   for (TotalLayoutSpace; TotalLayoutSpace > 0; TotalLayoutSpace--) {
     TArray<FArticle> SizedArticles =
@@ -47,12 +53,23 @@ void ANewsGen::GenDaysRandomArticles(FName ArticleId) {
         GetWeightedRandomItem<FArticle>(EligibleArticles, [](const auto& Article) { return Article.AppearWeight; });
 
     PublishedArticles.Add(SelectedArticle.ArticleID);
-    RecentArticles.Add(SelectedArticle.ArticleID);
+    RecentArticlesMap.Add(SelectedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
     DaysArticles.Add(SelectedArticle);
 
-    EligibleArticles.RemoveAll(
+    EligibleArticles.RemoveAllSwap(
         [&SelectedArticle](const FArticle& Article) { return Article.ArticleID == SelectedArticle.ArticleID; });
 
     TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size] + 1;
   }
+}
+
+void ANewsGen::TickDaysTimedVars() {
+  TArray<FName> ArticlesToRemove;
+  for (auto& Pair : RecentArticlesMap)
+    if (Pair.Value <= 1)
+      ArticlesToRemove.Add(Pair.Key);
+    else
+      Pair.Value--;
+
+  for (const FName& ArticleId : ArticlesToRemove) RecentArticlesMap.Remove(ArticleId);
 }

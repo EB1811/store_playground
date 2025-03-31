@@ -41,9 +41,7 @@ public:
   EStorePhaseState StorePhaseState;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase")
-  class AStore* Store;
-  UPROPERTY(EditAnywhere, Category = "Store Phase")
-  class AMarket* Market;
+  class ADayManager* DayManager;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ACustomerAIManager* CustomerAIManager;
 

@@ -16,6 +16,11 @@ struct FMarketParams {
   float UniqueNpcBaseSpawnChance;
   UPROPERTY(EditAnywhere)
   float BaseEconEventStartChance;  // * Chance to start for each event.
+
+  UPROPERTY(EditAnywhere)
+  int32 RecentNpcSpawnedKeepTime;
+  UPROPERTY(EditAnywhere)
+  int32 RecentEconEventsKeepTime;
 };
 
 USTRUCT()
@@ -60,12 +65,12 @@ public:
   class AMarketEconomy* MarketEconomy;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
-  TArray<FName> RecentlySpawnedUniqueNpcIds;
+  TMap<FName, int32> RecentlySpawnedUniqueNpcsMap;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TArray<FName> OccurredEconEvents;
   UPROPERTY(EditAnywhere, Category = "Market")
-  TArray<FName> RecentEconEvents;
+  TMap<FName, int32> RecentEconEventsMap;
 
   TArray<class UItemBase*> GetNewRandomItems(int32 Amount) const;
   class UItemBase* GetRandomItem(const TArray<FName> ItemIds) const;
@@ -83,12 +88,16 @@ public:
                 class UItemBase* Item,
                 int32 Quantity = 1);
 
-  FEconEvent ConsiderEconEvent();
+  TArray<struct FEconEvent> ConsiderEconEvents();
 
-  // ? Move to save manager?
-  UPROPERTY(EditAnywhere, Category = "Store") FMarketLevelState MarketLevelState;
+  void TickDaysTimedVars();
+
+  // ? Move level stuff to separate market level manager?
+  UPROPERTY(EditAnywhere, Category = "Store")
+  FMarketLevelState MarketLevelState;
   void SaveMarketLevelState();
   void LoadMarketLevelState();
+  void ResetMarketLevelState();
 
   void InitNPCStores();
   void InitMarketNpcs();

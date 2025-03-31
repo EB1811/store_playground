@@ -27,6 +27,8 @@ struct FManagerParams {
   float UniqueNpcBaseSpawnChance;
   UPROPERTY(EditAnywhere)
   int32 UNpcMaxSpawnPerDay;
+  UPROPERTY(EditAnywhere)
+  int32 RecentNpcSpawnedKeepTime;
 
   UPROPERTY(EditAnywhere)
   float PickItemFrequency;
@@ -68,7 +70,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
   float LastSpawnTime;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
-  TArray<FName> RecentlySpawnedUniqueNpcIds;
+  TMap<FName, int32> RecentlySpawnedUniqueNpcsMap;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
   float LastPickItemCheckTime;
@@ -95,4 +97,6 @@ public:
                           std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr);
   void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr);
   void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+
+  void TickDaysTimedVars();
 };

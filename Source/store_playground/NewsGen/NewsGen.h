@@ -12,6 +12,8 @@ struct FNewsGenParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  int32 RecentArticlesKeepTime;  // * How many days to keep the articles in the recent list.
+  UPROPERTY(EditAnywhere)
   TMap<EArticleSize, int32> ArticleSizeToSpaceMap;  // * The space each size takes in the layout.
 };
 
@@ -34,10 +36,12 @@ public:
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   TArray<FName> PublishedArticles;
   UPROPERTY(EditAnywhere, Category = "NewsGen")
-  TArray<FName> RecentArticles;
+  TMap<FName, int32> RecentArticlesMap;
 
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   TArray<FArticle> DaysArticles;
 
-  void GenDaysRandomArticles(FName ArticleId = NAME_None);
+  void GenDaysRandomArticles(TArray<FName> GuaranteedArticles = {});
+
+  void TickDaysTimedVars();
 };

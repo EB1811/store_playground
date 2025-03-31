@@ -1,4 +1,5 @@
 
+#include <cmath>
 #include "Containers/Array.h"
 #include "Containers/Set.h"
 #include "MarketEconomy.h"
@@ -301,6 +302,25 @@ void AMarketEconomy::PerformEconomyTick() {
 
     UE_LOG(LogTemp, Warning, TEXT("Pop %s changed to %s"), *Pop.PopID.ToString(), *RandomNewPop.PopID.ToString());
   }
+}
+
+void AMarketEconomy::TickDaysActivePriceEffects() {
+  TArray<FPriceEffect> PriceEffectsToRemove;
+
+  for (auto& PriceEffect : ActivePriceEffects) {
+    if (PriceEffect.DurationLeft <= 1) {
+      PriceEffectsToRemove.Add(PriceEffect);
+    } else {
+      PriceEffect.DurationLeft -= 1;
+      PriceEffect.PriceMultiPercent =
+          std::max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 1.0f);
+    }
+  }
+
+  for (auto& PriceEffect : PriceEffectsToRemove)
+    ActivePriceEffects.RemoveAllSwap([PriceEffect](const auto& OtherPriceEffect) {
+      return PriceEffect.PriceEffectID == OtherPriceEffect.PriceEffectID;
+    });
 }
 
 void AMarketEconomy::InitializeEconomyData() {

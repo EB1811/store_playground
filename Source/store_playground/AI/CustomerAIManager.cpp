@@ -77,7 +77,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   const TMap<EReqFilterOperand, std::any> GameDataMap = {{EReqFilterOperand::Money, Store->Money}};
   TArray<struct FUniqueNpcData> EligibleNpcs =
       GlobalDataManager->GetEligibleNpcs(GameDataMap).FilterByPredicate([this](const auto& Npc) {
-        return !RecentlySpawnedUniqueNpcIds.Contains(Npc.NpcID);
+        return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID);
       });
   if (EligibleNpcs.Num() <= 0) return;
 
@@ -89,8 +89,8 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
   FUniqueNpcData UniqueNpcData =
-      GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
-  RecentlySpawnedUniqueNpcIds.Add(UniqueNpcData.NpcID);
+      GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnWeight; });
+  RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.NpcID, ManagerParams.RecentNpcSpawnedKeepTime);
 
   UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
   ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
@@ -358,4 +358,15 @@ void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.10f
                                                                              : 0.15f;
   CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
+}
+
+void ACustomerAIManager::TickDaysTimedVars() {
+  TArray<FName> NpcsToRemove;
+  for (auto& Pair : RecentlySpawnedUniqueNpcsMap)
+    if (Pair.Value <= 1)
+      NpcsToRemove.Add(Pair.Key);
+    else
+      Pair.Value--;
+
+  for (const auto& NpcId : NpcsToRemove) RecentlySpawnedUniqueNpcsMap.Remove(NpcId);
 }

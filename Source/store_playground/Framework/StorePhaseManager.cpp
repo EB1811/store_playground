@@ -3,6 +3,7 @@
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/DayManager/DayManager.h"
 
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action) {
   switch (CurrentState) {
@@ -39,8 +40,10 @@ void AStorePhaseManager::BeginPlay() {
 void AStorePhaseManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void AStorePhaseManager::Start() {
-  check(Store && Market && CustomerAIManager);
+  check(CustomerAIManager);
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::Start);
+
+  DayManager->StartNewDay();
 }
 
 void AStorePhaseManager::BuildMode() {
@@ -81,6 +84,8 @@ void AStorePhaseManager::CloseShop() {
 
 void AStorePhaseManager::EndDay() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::EndDay);
+
+  DayManager->StartNewDay();
 }
 
 void AStorePhaseManager::NextPhase() {

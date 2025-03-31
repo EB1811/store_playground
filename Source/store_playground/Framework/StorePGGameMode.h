@@ -25,6 +25,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStorePhaseManager> StorePhaseManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class ADayManager> DayManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ACustomerAIManager> CustomerAIManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AQuestManager> QuestManagerClass;

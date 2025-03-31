@@ -76,6 +76,8 @@ public:
 
   void PerformEconomyTick();
 
+  void TickDaysActivePriceEffects();
+
   void InitializeEconomyData();
 };
 

@@ -5,15 +5,15 @@
 #include "CoreMinimal.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
-// * Utility functions.
+// * Utility functions and structs.
 // Mostly templates for generic functions.
 
 template <typename T>
-T GetWeightedRandomItem(const TArray<T>& Items, std::function<float(const T&)> WeightFunc) {
-  float TotalWeight = 0.0f;
+T GetWeightedRandomItem(const TArray<T>& Items, std::function<int32(const T&)> WeightFunc) {
+  int32 TotalWeight = 0;
   for (const T& Item : Items) TotalWeight += WeightFunc(Item);
 
-  float RandomItem = FMath::FRandRange(0.0f, TotalWeight);
+  int32 RandomItem = FMath::RandRange(0, TotalWeight);
   for (const T& Item : Items) {
     if (RandomItem < WeightFunc(Item)) return Item;
     RandomItem -= WeightFunc(Item);

@@ -187,7 +187,7 @@ struct FNpcStoreType {
   UPROPERTY(EditAnywhere)
   FText StoreTypeName;
   UPROPERTY(EditAnywhere)
-  float StoreSpawnWeight;
+  int32 StoreSpawnWeight;
   UPROPERTY(EditAnywhere)
   TArray<int32> StockCountRange;  // * Min, max stock count.
 
@@ -209,7 +209,7 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FText StoreTypeName;
   UPROPERTY(EditAnywhere)
-  float StoreSpawnWeight;
+  int32 StoreSpawnWeight;
   UPROPERTY(EditAnywhere)
   TArray<int32> StockCountRange;  // * Min, max stock count.
 
@@ -239,8 +239,9 @@ struct FPriceEffect {
 
   UPROPERTY(EditAnywhere)
   float PriceMultiPercent;  // * Positive and negative, additive.
+
   UPROPERTY(EditAnywhere)
-  int32 Duration;  // * Duration in days.
+  int32 DurationLeft;  // * Duration in days.
   UPROPERTY(EditAnywhere)
   float PriceMultiPercentFalloff;  // * Falloff each day, if any.
 };
@@ -260,6 +261,7 @@ struct FPriceEffectRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   float PriceMultiPercent;  // * Positive and negative, additive.
+
   UPROPERTY(EditAnywhere)
   int32 Duration;  // * Duration in days.
   UPROPERTY(EditAnywhere)

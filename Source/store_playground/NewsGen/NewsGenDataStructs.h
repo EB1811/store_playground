@@ -40,7 +40,7 @@ struct FArticle {
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;
   UPROPERTY(EditAnywhere)
-  float AppearWeight;
+  int32 AppearWeight;  // * 0 = never appears
   UPROPERTY(EditAnywhere)
   bool bIsRepeatable;
 
@@ -61,7 +61,7 @@ struct FArticleRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;
   UPROPERTY(EditAnywhere)
-  float AppearWeight;
+  int32 AppearWeight;  // * 0 = never appears
   UPROPERTY(EditAnywhere)
   bool bIsRepeatable;
 

@@ -480,7 +480,7 @@ void AGlobalDataManager::InitializeNPCData() {
         Row->LinkedPopID,
         Row->NpcName,
         Row->SpawnRequirementsFilter,
-        Row->SpawnChanceWeight,
+        Row->SpawnWeight,
         Row->QuestIDs,
         Row->DialogueChainIDs,
         Row->NegotiationData,

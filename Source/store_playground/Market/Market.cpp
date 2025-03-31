@@ -113,25 +113,50 @@ bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
   return true;
 }
 
-FEconEvent AMarket::ConsiderEconEvent() {
+TArray<struct FEconEvent> AMarket::ConsiderEconEvents() {
   const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // TODO: Get game data.
+
+  TArray<struct FEconEvent> RandomEconEvents = {};
 
   TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(GameDataMap, OccurredEconEvents);
   if (EligibleEvents.Num() <= 0) return {};
-
   for (auto& Event : EligibleEvents)
-    if (RecentEconEvents.Contains(Event.EconEventID)) Event.StartChance *= 0.25f;
-  FEconEvent RandomEvent =
-      GetWeightedRandomItem<FEconEvent>(EligibleEvents, [](const auto& Event) { return Event.StartChance; });
-  if (FMath::FRand() * 100 > RandomEvent.StartChance) return {};
+    if (RecentEconEventsMap.Contains(Event.EconEventID)) Event.StartChance *= 0.25f;
 
-  TArray<struct FPriceEffect> PriceEffects = GlobalDataManager->GetPriceEffects(RandomEvent.PriceEffectIDs);
-  for (const auto& PriceEffect : PriceEffects) MarketEconomy->ActivePriceEffects.Add(PriceEffect);
+  for (auto& Event : EligibleEvents) {
+    if (FMath::FRand() * 100 >= Event.StartChance) continue;
 
-  OccurredEconEvents.Add(RandomEvent.EconEventID);  // ? Don't add if repeatable?
-  RecentEconEvents.Add(RandomEvent.EconEventID);
+    RandomEconEvents.Add(Event);
+    TArray<struct FPriceEffect> PriceEffects = GlobalDataManager->GetPriceEffects(Event.PriceEffectIDs);
+    for (const auto& PriceEffect : PriceEffects) MarketEconomy->ActivePriceEffects.Add(PriceEffect);
 
-  return RandomEvent;
+    OccurredEconEvents.Add(Event.EconEventID);  // ? Don't add if repeatable?
+    RecentEconEventsMap.Add(Event.EconEventID, MarketParams.RecentEconEventsKeepTime);
+  }
+  // ? If no events, add a random one so there's at least one.
+  // FEconEvent RandomEvent =
+  //     GetWeightedRandomItem<FEconEvent>(EligibleEvents, [](const auto& Event) { return Event.StartChance; });
+
+  return RandomEconEvents;
+}
+
+void AMarket::TickDaysTimedVars() {
+  TArray<FName> NpcsToRemove;
+  for (auto& Pair : RecentlySpawnedUniqueNpcsMap)
+    if (Pair.Value <= 1)
+      NpcsToRemove.Add(Pair.Key);
+    else
+      Pair.Value--;
+
+  TArray<FName> EconEventsToRemove;
+  for (auto& Pair : RecentEconEventsMap)
+    if (Pair.Value <= 1)
+      EconEventsToRemove.Add(Pair.Key);
+    else
+      Pair.Value--;
+
+  for (const auto& NpcId : NpcsToRemove) RecentlySpawnedUniqueNpcsMap.Remove(NpcId);
+  for (const auto& EventId : EconEventsToRemove) RecentEconEventsMap.Remove(EventId);
 }
 
 void AMarket::SaveMarketLevelState() {
@@ -156,6 +181,8 @@ void AMarket::LoadMarketLevelState() {
     LoadNpcStoreSaveState(Store, MarketLevelState.NpcStoreSaveMap[Store->NpcStoreId]);
   }
 }
+
+void AMarket::ResetMarketLevelState() { MarketLevelState.NpcStoreSaveMap.Empty(); }
 
 void AMarket::InitNPCStores() {
   check(GlobalDataManager);
@@ -216,7 +243,6 @@ void AMarket::InitMarketNpcs() {
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
   for (ANpcSpawnPoint* SpawnPoint : SpawnPoints) {
-    UE_LOG(LogTemp, Warning, TEXT("Spawn."));
     if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance) continue;
 
     if (TrySpawnUniqueNpc(SpawnPoint, SpawnParams)) continue;
@@ -230,18 +256,17 @@ void AMarket::InitMarketNpcs() {
 
 bool AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) {
   if (FMath::FRand() * 100 >= MarketParams.UniqueNpcBaseSpawnChance) return false;
-  UE_LOG(LogTemp, Warning, TEXT("Trying unique npc:"));
 
   const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // Temp.
   TArray<struct FUniqueNpcData> EligibleNpcs =
       GlobalDataManager->GetEligibleNpcs(GameDataMap).FilterByPredicate([this](const auto& Npc) {
-        return !RecentlySpawnedUniqueNpcIds.Contains(Npc.NpcID);
+        return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID);
       });
   if (EligibleNpcs.Num() <= 0) return false;
 
   FUniqueNpcData UniqueNpcData =
-      GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnChanceWeight; });
-  RecentlySpawnedUniqueNpcIds.Add(UniqueNpcData.NpcID);
+      GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnWeight; });
+  RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.NpcID, MarketParams.RecentNpcSpawnedKeepTime);
 
   ANpc* UniqueNpc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(),
                                                  SpawnPoint->GetActorRotation(), SpawnParams);
