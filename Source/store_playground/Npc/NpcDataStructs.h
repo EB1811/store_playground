@@ -82,6 +82,8 @@ struct FQuestChainData {
   ECustomerAction CustomerAction;  // * What a customer does as part of the quest, if any.
   UPROPERTY(EditAnywhere)
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
+  UPROPERTY(EditAnywhere)
+  FName PostDialogueChainID;  // * Dialogue after the quest chain dialogue.
 
   UPROPERTY(EditAnywhere)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.
@@ -116,6 +118,8 @@ struct FQuestChainDataRow : public FTableRowBase {
   ECustomerAction CustomerAction;  // * What a customer does as part of the quest, if any.
   UPROPERTY(EditAnywhere)
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
+  UPROPERTY(EditAnywhere)
+  FName PostDialogueChainID;  // * Dialogue after the quest chain dialogue.
 
   UPROPERTY(EditAnywhere)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.

@@ -1,6 +1,10 @@
 #include "QuestManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/WorldObject/Npc.h"
+#include "store_playground/Interaction/InteractionComponent.h"
+#include "store_playground/Dialogue/DialogueComponent.h"
 
 AQuestManager::AQuestManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -26,7 +30,7 @@ void AQuestManager::CompleteQuestChain(const FQuestChainData& QuestChainData,
   switch (QuestChainData.QuestAction) {
     case EQuestAction::Continue: {
       QuestInProgressMap.FindOrAdd(QuestChainData.QuestID, {});
-      if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestChainData.QuestChainID)) return;
+      if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestChainData.QuestChainID)) break;
 
       QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.QuestChainID);
 
@@ -36,13 +40,26 @@ void AQuestManager::CompleteQuestChain(const FQuestChainData& QuestChainData,
       if (QuestChainData.QuestChainType == EQuestChainType::Negotiation)
         QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestChainData.QuestChainID,
                                                                               bNegotiationSuccess);
-      return;
+      break;
     }
     case EQuestAction::End: {
       QuestsCompleted.Add(QuestChainData.QuestChainID);
       if (QuestInProgressMap.Contains(QuestChainData.QuestID)) QuestInProgressMap.Remove(QuestChainData.QuestID);
-      return;
+      break;
     }
-    default: return;
+    default: break;
   }
+
+  // ? Store npcs with active quests?
+  TArray<ANpc*> UniqueNpcs = GetAllActorsOf<ANpc>(GetWorld(), NpcClass);
+  ANpc** UniqueNpc = UniqueNpcs.FindByPredicate([&QuestChainData](const ANpc* Npc) {
+    return Npc->QuestComponent && Npc->QuestComponent->QuestChainData.QuestID == QuestChainData.QuestID;
+  });
+  if (!UniqueNpc) return;
+
+  (*UniqueNpc)->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+  (*UniqueNpc)->DialogueComponent->DialogueArray.Empty();
+  (*UniqueNpc)
+      ->DialogueComponent->DialogueArray.Append(
+          GlobalDataManager->GetQuestDialogue(QuestChainData.PostDialogueChainID));
 }

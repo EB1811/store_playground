@@ -261,7 +261,8 @@ bool AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnPar
 
   UniqueNpc->QuestComponent->QuestChainData = RandomQuestChainData;
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
-  UniqueNpc->DialogueComponent->DialogueArray = GlobalDataManager->GetQuestDialogue(RandomQuestChainData);
+  UniqueNpc->DialogueComponent->DialogueArray =
+      GlobalDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
 
   return true;
 }

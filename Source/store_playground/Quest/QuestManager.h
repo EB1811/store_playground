@@ -32,6 +32,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "QuestManager | Data")
   const class AGlobalDataManager* GlobalDataManager;
 
+  UPROPERTY(EditAnywhere, Category = "Market")
+  class TSubclassOf<class ANpc> NpcClass;
+
   UPROPERTY(EditAnywhere, Category = "QuestManager | Tracking")
   TArray<FName> QuestsCompleted;
   UPROPERTY(EditAnywhere, Category = "QuestManager | Tracking")

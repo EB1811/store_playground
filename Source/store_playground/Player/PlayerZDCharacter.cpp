@@ -260,6 +260,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UDialogueComponent* DialogueC,
                                     UCustomerAIComponent* CustomerAI,
                                     const UItemBase* Item) {
+  // * Differentiate between when quest is from a customer (store open), and when npc (e.g., in market).
   if (!CustomerAI)
     return EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
       QuestManager->CompleteQuestChain(QuestC->QuestChainData, DialogueSystem->ChoiceDialoguesSelectedIDs);

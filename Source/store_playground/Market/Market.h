@@ -43,6 +43,7 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TObjectPtr<const class UDataTable> AllItemsTable;
+  // ? Move class and casts to level manager, then pass as param to init functions?
   UPROPERTY(EditAnywhere, Category = "Market")
   class TSubclassOf<class ANPCStore> NPCStoreClass;
   UPROPERTY(EditAnywhere, Category = "Market")

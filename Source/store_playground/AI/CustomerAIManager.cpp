@@ -154,7 +154,8 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->QuestComponent->QuestChainData = RandomQuestChainData;
 
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
-  UniqueCustomer->DialogueComponent->DialogueArray = GlobalDataManager->GetQuestDialogue(RandomQuestChainData);
+  UniqueCustomer->DialogueComponent->DialogueArray =
+      GlobalDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
 }
 
 void ACustomerAIManager::SpawnCustomers() {

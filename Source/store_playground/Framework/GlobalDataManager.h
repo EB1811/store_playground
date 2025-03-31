@@ -118,7 +118,7 @@ public:
                                                         const TMap<EReqFilterOperand, std::any>& GameDataMap,
                                                         TArray<FName> CompletedQuestIDs,
                                                         TMap<FName, FName> PrevChainCompletedMap) const;
-  TArray<struct FDialogueData> GetQuestDialogue(const FQuestChainData& QuestChain) const;
+  TArray<struct FDialogueData> GetQuestDialogue(const FName& DialogueChainID) const;
 
   TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
   TArray<struct FDialogueData> GetRandomCustomerDialogue() const;

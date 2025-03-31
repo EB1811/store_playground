@@ -229,8 +229,9 @@ TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
   });
 }
 
-TArray<struct FDialogueData> AGlobalDataManager::GetQuestDialogue(const FQuestChainData& QuestChain) const {
-  return QuestDialoguesMap[QuestChain.DialogueChainID].Dialogues;
+TArray<struct FDialogueData> AGlobalDataManager::GetQuestDialogue(const FName& DialogueChainID) const {
+  check(QuestDialoguesMap.Contains(DialogueChainID));
+  return QuestDialoguesMap[DialogueChainID].Dialogues;
 }
 
 TArray<struct FDialogueData> AGlobalDataManager::GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const {
@@ -454,6 +455,7 @@ void AGlobalDataManager::InitializeQuestChainsData() {
         Row->DialogueChainID,
         Row->CustomerAction,
         Row->ActionRelevantIDs,
+        Row->PostDialogueChainID,
         Row->StartRequirementsFilter,
         Row->StartChance,
         Row->bIsRepeatable,

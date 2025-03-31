@@ -22,12 +22,15 @@ T GetWeightedRandomItem(const TArray<T>& Items, std::function<float(const T&)> W
   return Items[0];
 }
 
+// Save as a variable first.
+// Copies the array, so don't use it on large arrays.
 template <typename T>
 TArray<T*> GetAllActorsOf(UWorld* World, TSubclassOf<class AActor> ActorClass) {
   TArray<AActor*> FoundActors;
   UGameplayStatics::GetAllActorsOfClass(World, ActorClass, FoundActors);
 
   TArray<T*> FoundActorsOfT;
+  FoundActorsOfT.Reserve(FoundActors.Num());
   for (AActor* Actor : FoundActors) {
     T* CastedActor = Cast<T>(Actor);
     check(CastedActor);
