@@ -112,7 +112,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
   class AStorePhaseManager* StorePhaseManager;
 
-  // * Level Manager
+  // * DayManager
+  UPROPERTY(EditAnywhere, Category = "Character | DayManager")
+  class ADayManager* DayManager;
+
+  // * LevelManager
   UPROPERTY(EditAnywhere, Category = "Character | LevelManager")
   class ALevelManager* LevelManager;
 

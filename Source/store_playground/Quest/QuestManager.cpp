@@ -13,13 +13,11 @@ void AQuestManager::BeginPlay() { Super::BeginPlay(); }
 void AQuestManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 TArray<struct FQuestChainData> AQuestManager::GetEligibleQuestChains(const TArray<FName>& QuestIDs) const {
-  const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // Temp.
-
   TMap<FName, FName> PrevChainCompletedMap = {};
   for (const auto& QuestInProgress : QuestInProgressMap)
     PrevChainCompletedMap.Add(QuestInProgress.Key, QuestInProgress.Value.ChainCompletedIDs.Last());
 
-  return GlobalDataManager->GetEligibleQuestChains(QuestIDs, GameDataMap, QuestsCompleted, PrevChainCompletedMap);
+  return GlobalDataManager->GetEligibleQuestChains(QuestIDs, QuestsCompleted, PrevChainCompletedMap);
 }
 
 void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> MadeChoiceIds, bool bNegotiationSuccess) {

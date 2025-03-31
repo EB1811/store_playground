@@ -40,3 +40,11 @@ TArray<T*> GetAllActorsOf(UWorld* World, TSubclassOf<class AActor> ActorClass) {
 
   return FoundActorsOfT;
 }
+
+template <typename T>
+TArray<FName> FormIdList(const TArray<T>& Items, std::function<FName(const T&)> IdFunc) {
+  TArray<FName> Ids;
+  Ids.Reserve(Items.Num());
+  for (const auto& Item : Items) Ids.Add(IdFunc(Item));
+  return Ids;
+}

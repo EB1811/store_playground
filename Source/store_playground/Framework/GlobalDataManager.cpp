@@ -3,8 +3,16 @@
 #include "Engine/DataTable.h"
 #include "Misc/CString.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Player/PlayerZDCharacter.h"
+#include "store_playground/Market/Market.h"
+#include "store_playground/AI/CustomerAIManager.h"
+#include "store_playground/Store/Store.h"
+#include "store_playground/DayManager/DayManager.h"
+#include "store_playground/NewsGen/NewsGen.h"
+#include "store_playground/Quest/QuestManager.h"
 
 AGlobalDataManager::AGlobalDataManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -190,16 +198,53 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
   return Result;
 }
 
-// Temp: Only money for now.
-TArray<struct FUniqueNpcData> AGlobalDataManager::GetEligibleNpcs(
-    const TMap<EReqFilterOperand, std::any>& GameDataMap) const {
+const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() const {
+  check(PlayerCharacter);
+
+  const TArray<FName> InventoryItems = FormIdList<TObjectPtr<UItemBase>>(
+      PlayerCharacter->PlayerInventoryComponent->ItemsArray, [](const UItemBase* Item) { return Item->ItemID; });
+  TArray<FName> MadeDialogueChoices = {};
+  for (const auto& Choice : PlayerCharacter->QuestManager->QuestInProgressMap)
+    MadeDialogueChoices.Append(Choice.Value.ChoicesMade);
+  TArray<FName> RecentEconEvents = {};
+  PlayerCharacter->Market->RecentEconEventsMap.GetKeys(RecentEconEvents);
+
+  const TMap<EReqFilterOperand, std::any> GameDataMap = {
+      {EReqFilterOperand::Time, PlayerCharacter->DayManager->CurrentDay},
+      {EReqFilterOperand::Money, PlayerCharacter->Store->Money},
+      {EReqFilterOperand::Inventory, InventoryItems},
+      {EReqFilterOperand::QuestsCompleted, PlayerCharacter->QuestManager->QuestsCompleted},
+      {EReqFilterOperand::MadeDialogueChoices, MadeDialogueChoices},
+      {EReqFilterOperand::RecentEconEvents, RecentEconEvents},
+  };
+
+  // UE_LOG(LogTemp, Warning, TEXT("GameDataMap: "));
+  // UE_LOG(LogTemp, Warning, TEXT("Time: %d"), std::any_cast<int32>(GameDataMap[EReqFilterOperand::Time]));
+  // UE_LOG(LogTemp, Warning, TEXT("Money: %f"), std::any_cast<float>(GameDataMap[EReqFilterOperand::Money]));
+  // UE_LOG(LogTemp, Warning, TEXT("Inventory: "));
+  // for (const auto& Item : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::Inventory]))
+  //   UE_LOG(LogTemp, Warning, TEXT("Item: %s"), *Item.ToString());
+  // UE_LOG(LogTemp, Warning, TEXT("QuestsCompleted: "));
+  // for (const auto& Quest : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::QuestsCompleted]))
+  //   UE_LOG(LogTemp, Warning, TEXT("Quest: %s"), *Quest.ToString());
+  // UE_LOG(LogTemp, Warning, TEXT("MadeDialogueChoices: "));
+  // for (const auto& Choice : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::MadeDialogueChoices]))
+  //   UE_LOG(LogTemp, Warning, TEXT("Choice: %s"), *Choice.ToString());
+  // UE_LOG(LogTemp, Warning, TEXT("RecentEconEvents: "));
+  // for (const auto& Event : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::RecentEconEvents]))
+  //   UE_LOG(LogTemp, Warning, TEXT("Event: %s"), *Event.ToString());
+
+  return GameDataMap;
+}
+
+TArray<struct FUniqueNpcData> AGlobalDataManager::GetEligibleNpcs() const {
+  const auto GameDataMap = GetGameDataMap();
   return UniqueNpcArray.FilterByPredicate(
       [&](const FUniqueNpcData& Npc) { return EvaluateRequirementsFilter(Npc.SpawnRequirementsFilter, GameDataMap); });
 }
 
 TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
     const TArray<FName>& QuestIDs,
-    const TMap<EReqFilterOperand, std::any>& GameDataMap,
     TArray<FName> CompletedQuestIDs,
     TMap<FName, FName> PrevChainCompletedMap) const {
   auto FilteredQuestChains = QuestChainsArray.FilterByPredicate([&](const FQuestChainData& Chain) {
@@ -224,6 +269,7 @@ TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
   }
 
   // Evaluate last since it is the most expensive.
+  const auto GameDataMap = GetGameDataMap();
   return QuestChainToStart.FilterByPredicate([&](const FQuestChainData& Chain) {
     return EvaluateRequirementsFilter(Chain.StartRequirementsFilter, GameDataMap);
   });
@@ -282,9 +328,8 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNeg
   return RandomDialogueIndexMap;
 }
 
-TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(
-    const TMap<EReqFilterOperand, std::any>& GameDataMap,
-    const TArray<FName>& OccurredEconEvents) const {
+TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(const TArray<FName>& OccurredEconEvents) const {
+  const auto GameDataMap = GetGameDataMap();
   return EconEventsArray.FilterByPredicate([&](const FEconEvent& Event) {
     return (Event.bIsRepeatable || !OccurredEconEvents.Contains(Event.EconEventID)) &&
            EvaluateRequirementsFilter(Event.RequirementsFilter, GameDataMap);
@@ -296,8 +341,8 @@ TArray<struct FPriceEffect> AGlobalDataManager::GetPriceEffects(const TArray<FNa
       [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.PriceEffectID); });
 }
 
-TArray<struct FArticle> AGlobalDataManager::GetEligibleArticles(const TMap<EReqFilterOperand, std::any>& GameDataMap,
-                                                                const TArray<FName>& PublishedArticles) const {
+TArray<struct FArticle> AGlobalDataManager::GetEligibleArticles(const TArray<FName>& PublishedArticles) const {
+  const auto GameDataMap = GetGameDataMap();
   return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
     return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) &&
            EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);

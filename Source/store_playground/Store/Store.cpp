@@ -46,7 +46,8 @@ void AStore::InitStockDisplays() {
   for (ABuildable* Buildable : FoundBuildables) {
     if (Buildable->BuildableType != EBuildableType::StockDisplay) continue;
 
-    auto* Stock = Buildable->StockInventory;
-    for (UItemBase* Item : Stock->ItemsArray) StoreStockItems.Add({Stock, Item});
+    auto* StockInventory = Buildable->StockInventory;
+    for (UItemBase* Item : StockInventory->ItemsArray)
+      StoreStockItems.Add({Buildable->StockDisplay->DisplayStats, Item, StockInventory});
   }
 }

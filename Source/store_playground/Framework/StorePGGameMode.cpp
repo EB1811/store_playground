@@ -45,11 +45,14 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->LevelManager = LevelManager;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
+  PlayerCharacter->DayManager = DayManager;
   PlayerCharacter->Market = Market;
   PlayerCharacter->MarketEconomy = MarketEconomy;
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
   PlayerCharacter->QuestManager = QuestManager;
   PlayerCharacter->NewsGen = NewsGen;
+
+  GlobalDataManager->PlayerCharacter = PlayerCharacter;
 
   LevelManager->Store = Store;
   LevelManager->Market = Market;

@@ -123,7 +123,7 @@ void UNegotiationSystem::PlayerReadRequest() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerReadRequest);
 }
 
-// TODO: Support multiple items.
+// todo-low: Support multiple items.
 void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _FromInventory) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 

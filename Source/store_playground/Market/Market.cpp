@@ -114,11 +114,9 @@ bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
 }
 
 TArray<struct FEconEvent> AMarket::ConsiderEconEvents() {
-  const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // TODO: Get game data.
-
   TArray<struct FEconEvent> RandomEconEvents = {};
 
-  TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(GameDataMap, OccurredEconEvents);
+  TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(OccurredEconEvents);
   if (EligibleEvents.Num() <= 0) return {};
   for (auto& Event : EligibleEvents)
     if (RecentEconEventsMap.Contains(Event.EconEventID)) Event.StartChance *= 0.25f;
@@ -257,11 +255,8 @@ void AMarket::InitMarketNpcs() {
 bool AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) {
   if (FMath::FRand() * 100 >= MarketParams.UniqueNpcBaseSpawnChance) return false;
 
-  const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // Temp.
-  TArray<struct FUniqueNpcData> EligibleNpcs =
-      GlobalDataManager->GetEligibleNpcs(GameDataMap).FilterByPredicate([this](const auto& Npc) {
-        return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID);
-      });
+  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(
+      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID); });
   if (EligibleNpcs.Num() <= 0) return false;
 
   FUniqueNpcData UniqueNpcData =

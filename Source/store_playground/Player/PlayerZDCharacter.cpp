@@ -19,6 +19,7 @@
 #include "store_playground/WorldObject/Level/SpawnPoint.h"
 #include "store_playground/Level/LevelChangeComponent.h"
 #include "store_playground/Level/LevelManager.h"
+#include "store_playground/DayManager/DayManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
@@ -226,8 +227,8 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
     check(SourceInventory == PlayerInventoryComponent);
     // ? Have a function in the store to refetch all stock?
     if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess)
-      Store->StoreStockItems.Add(
-          {DisplayInventoryC, DroppedItem});  // todo-low: Check if the two item instances cause problems.
+      Store->StoreStockItems.Add({StockDisplayC->DisplayStats, DroppedItem,
+                                  DisplayInventoryC});  // todo-low: Check if the two item instances cause problems.
   };
   auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {

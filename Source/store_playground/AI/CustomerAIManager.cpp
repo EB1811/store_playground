@@ -10,6 +10,7 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -73,17 +74,13 @@ void ACustomerAIManager::EndCustomerAI() {
 }
 
 void ACustomerAIManager::SpawnUniqueNpcs() {
-  // Temp: Need info about player.
-  const TMap<EReqFilterOperand, std::any> GameDataMap = {{EReqFilterOperand::Money, Store->Money}};
-  TArray<struct FUniqueNpcData> EligibleNpcs =
-      GlobalDataManager->GetEligibleNpcs(GameDataMap).FilterByPredicate([this](const auto& Npc) {
-        return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID);
-      });
+  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(
+      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID); });
   if (EligibleNpcs.Num() <= 0) return;
 
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
-  // TODO: Spawn in level.
+  // todo-low: Spawn in level.
   // SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -166,7 +163,7 @@ void ACustomerAIManager::SpawnCustomers() {
 
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
-  // TODO: Spawn in level.
+  // todo-low: Spawn in level.
   // SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -307,8 +304,8 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
                                     });
   if (RelevantItems.Num() <= 0) return false;
 
-  // TODO: Weighted by stock display stats.
-  const FStockItem& StockItem = RelevantItems[FMath::RandRange(0, RelevantItems.Num() - 1)];
+  const FStockItem& StockItem = GetWeightedRandomItem<FStockItem>(
+      RelevantItems, [](const auto& StockItem) { return StockItem.DisplayStats.PickRateWeightModifier; });
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
   CustomerAI->NegotiationAI->RelevantItem = StockItem.Item;
   CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;

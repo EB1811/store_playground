@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "GameFramework/Info.h"
 #include "Store.generated.h"
@@ -12,9 +13,11 @@ struct FStockItem {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  class UInventoryComponent* BelongingStockInventoryC;
+  struct FDisplayStats DisplayStats;
   UPROPERTY(EditAnywhere)
   class UItemBase* Item;  // ? Change to item id?
+  UPROPERTY(EditAnywhere)
+  class UInventoryComponent* BelongingStockInventoryC;
 };
 
 USTRUCT()

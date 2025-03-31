@@ -17,8 +17,7 @@ void ANewsGen::GenDaysRandomArticles(TArray<FName> GuaranteedArticles) {
 
   DaysArticles.Empty();
 
-  const TMap<EReqFilterOperand, std::any> GameDataMap = {{}};  // TODO: Get game data.
-  TArray<FArticle> EligibleArticles = GlobalDataManager->GetEligibleArticles(GameDataMap, PublishedArticles);
+  TArray<FArticle> EligibleArticles = GlobalDataManager->GetEligibleArticles(PublishedArticles);
   if (EligibleArticles.Num() <= 0) return;
 
   // * Create a layout given the article size.

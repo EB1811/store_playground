@@ -39,6 +39,11 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  // * To retrieve game's state for evaluating requirements.
+  UPROPERTY(EditAnywhere, Category = "PlayerData")
+  const class APlayerZDCharacter* PlayerCharacter;
+  const TMap<EReqFilterOperand, std::any> GetGameDataMap() const;
+
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> GenericCustomersDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
@@ -113,9 +118,8 @@ public:
   void InitializeMarketData();
   void InitializeNewsData();
 
-  TArray<struct FUniqueNpcData> GetEligibleNpcs(const TMap<EReqFilterOperand, std::any>& GameDataMap) const;
+  TArray<struct FUniqueNpcData> GetEligibleNpcs() const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
-                                                        const TMap<EReqFilterOperand, std::any>& GameDataMap,
                                                         TArray<FName> CompletedQuestIDs,
                                                         TMap<FName, FName> PrevChainCompletedMap) const;
   TArray<struct FDialogueData> GetQuestDialogue(const FName& DialogueChainID) const;
@@ -126,11 +130,9 @@ public:
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 
-  TArray<struct FEconEvent> GetEligibleEconEvents(const TMap<EReqFilterOperand, std::any>& GameDataMap,
-                                                  const TArray<FName>& OccurredEconEvents) const;
+  TArray<struct FEconEvent> GetEligibleEconEvents(const TArray<FName>& OccurredEconEvents) const;
   TArray<struct FPriceEffect> GetPriceEffects(const TArray<FName>& PriceEffectIDs) const;
 
-  TArray<struct FArticle> GetEligibleArticles(const TMap<EReqFilterOperand, std::any>& GameDataMap,
-                                              const TArray<FName>& PublishedArticles) const;
+  TArray<struct FArticle> GetEligibleArticles(const TArray<FName>& PublishedArticles) const;
   FArticle GetArticle(const FName& ArticleID) const;
 };

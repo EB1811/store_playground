@@ -11,7 +11,7 @@ struct FDisplayStats {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  float PickRateModifier;
+  int32 PickRateWeightModifier;
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
