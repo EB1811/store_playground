@@ -30,7 +30,7 @@ void ADayManager::StartNewDay() {
 
   TArray<FName> GuaranteedArticles;
   for (const FEconEvent& EconEvent : EconEvents)
-    if (EconEvent.ArticleID != NAME_None) GuaranteedArticles.Add(EconEvent.ArticleID);
+    if (!EconEvent.ArticleID.IsNone()) GuaranteedArticles.Add(EconEvent.ArticleID);
   NewsGen->GenDaysRandomArticles(GuaranteedArticles);
 
   Market->ResetMarketLevelState();

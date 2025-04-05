@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "Types/SlateEnums.h"
 #include "ItemDataStructs.generated.h"
 
 UENUM()
@@ -93,6 +94,8 @@ struct FItemDataRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   EItemType ItemType;
+  UPROPERTY(EditAnywhere)
+  bool bIsUnlockable;
 
   UPROPERTY(EditAnywhere)
   FItemTextData TextData;

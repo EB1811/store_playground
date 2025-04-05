@@ -24,6 +24,7 @@
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -112,6 +113,9 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
     return;
 
   StorePhaseManager->BuildMode();
+
+  // Test
+  UpgradeManager->SelectUpgrade("first");
 }
 
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) { HUD->SetAndOpenNewspaper(NewsGen); }
@@ -173,7 +177,7 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
           }
           case EInteractionType::UniqueNPCQuest: {
             auto [Dialogue, QuestC, CustomerAI, Item] = Interactable->InteractUniqueNPCQuest();
-            check(QuestC->QuestChainData.QuestID != NAME_None);
+            check(!QuestC->QuestChainData.QuestID.IsNone());
 
             EnterQuest(QuestC, Dialogue, CustomerAI, Item);
             break;

@@ -19,7 +19,12 @@
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
 
-AMarket::AMarket() { PrimaryActorTick.bCanEverTick = false; }
+AMarket::AMarket() {
+  PrimaryActorTick.bCanEverTick = false;
+
+  Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) { ChangeBehaviorParam(ParamValues); };
+  Upgradeable.UnlockIDs = [this](const FName DataName, const TArray<FName>& Ids) { UnlockIDs(DataName, Ids); };
+}
 
 void AMarket::BeginPlay() {
   Super::BeginPlay();
@@ -42,21 +47,25 @@ void AMarket::BeginPlay() {
     Item->FlavorData = Row->FlavorData;
     Item->PriceData.BoughtAt = Row->BasePrice;
 
-    AllItems.Add(Item);
+    if (Row->bIsUnlockable)
+      UnlockableItems.Add(Item);
+    else
+      EligibleItems.Add(Item);
   }
 
-  check(AllItems.Num() > 0);
+  check(UnlockableItems.Num() > 0);
+  check(EligibleItems.Num() > 0);
 
   AllItemsTable = nullptr;
 }
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
+auto AMarket::GetNewRandomItems(int32 Amount) const -> TArray<UItemBase*> {
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
-    int32 RandomIndex = FMath::RandRange(0, AllItems.Num() - 1);
-    NewItems.Add(AllItems[RandomIndex]->CreateItemCopy());
+    int32 RandomIndex = FMath::RandRange(0, EligibleItems.Num() - 1);
+    NewItems.Add(EligibleItems[RandomIndex]->CreateItemCopy());
   }
 
   return NewItems;
@@ -64,15 +73,15 @@ TArray<UItemBase*> AMarket::GetNewRandomItems(int32 Amount) const {
 
 UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
   FName RandomId = ItemIds[FMath::RandRange(0, ItemIds.Num() - 1)];
-  return *(AllItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
+  return *(EligibleItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
 }
 
-bool AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
+auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
                       UInventoryComponent* NPCStoreInventory,
                       UInventoryComponent* PlayerInventory,
                       AStore* PlayerStore,
                       UItemBase* Item,
-                      int32 Quantity) {
+                      int32 Quantity) const -> bool {
   check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
   if (!NPCStoreInventory->ItemsArray.ContainsByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
@@ -82,7 +91,10 @@ bool AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
       [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
   check(EconItem);
 
-  float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
+  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti / 100.0f;
+  float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + StoreMarkup);
+  UE_LOG(LogTemp, Warning, TEXT("StoreMarkup: %f"), StoreMarkup);
+  UE_LOG(LogTemp, Warning, TEXT("TotalPrice: %f"), TotalPrice);
   if (PlayerStore->Money < TotalPrice) return false;
 
   if (!TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess) return false;
@@ -91,12 +103,12 @@ bool AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
   return true;
 }
 
-bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
+auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
                        UInventoryComponent* NPCStoreInventory,
                        UInventoryComponent* PlayerInventory,
                        AStore* PlayerStore,
                        UItemBase* Item,
-                       int32 Quantity) {
+                       int32 Quantity) const -> bool {
   check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
   if (!PlayerInventory->ItemsArray.ContainsByPredicate(
           [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
@@ -108,12 +120,12 @@ bool AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
 
   if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
 
-  PlayerStore->Money +=
-      EconItem->CurrentPrice * Quantity * (1.0f - (NpcStoreC->NpcStoreType.StorePriceMarkup / 100.0f));
+  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti / 100.0f;
+  PlayerStore->Money += EconItem->CurrentPrice * Quantity * (1.0f - StoreMarkup);
   return true;
 }
 
-TArray<struct FEconEvent> AMarket::ConsiderEconEvents() {
+auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
   TArray<struct FEconEvent> RandomEconEvents = {};
 
   TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(OccurredEconEvents);
@@ -155,6 +167,33 @@ void AMarket::TickDaysTimedVars() {
 
   for (const auto& NpcId : NpcsToRemove) RecentlySpawnedUniqueNpcsMap.Remove(NpcId);
   for (const auto& EventId : EconEventsToRemove) RecentEconEventsMap.Remove(EventId);
+}
+
+void AMarket::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    EMarketBehaviorParam Param = EMarketBehaviorParam::None;
+    for (auto P : TEnumRange<EMarketBehaviorParam>()) {
+      if (ParamPair.Key == UEnum::GetDisplayValueAsText(P).ToString()) {
+        Param = P;
+        break;
+      }
+    }
+    check(Param != EMarketBehaviorParam::None);
+
+    switch (Param) {
+      case EMarketBehaviorParam::StoreMarkupMulti: BehaviorParams.StoreMarkupMulti = ParamPair.Value; break;
+      default: checkNoEntry();
+    }
+  }
+}
+
+void AMarket::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {
+  TArray<UItemBase*> ItemsToUnlock =
+      UnlockableItems.FilterByPredicate([Ids](const UItemBase* Item) { return Ids.Contains(Item->ItemID); });
+  for (auto Item : ItemsToUnlock) {
+    EligibleItems.Add(Item->CreateItemCopy());
+    UnlockableItems.RemoveSingleSwap(Item);
+  }
 }
 
 void AMarket::SaveMarketLevelState() {
@@ -215,7 +254,7 @@ void AMarket::InitNPCStores() {
     check(RandomTypesCountMap.Num() > 0);
 
     TMap<TTuple<EItemType, EItemEconType>, TArray<FName>> PossibleItemIdsMap;
-    for (const auto& Item : AllItems)
+    for (const auto& Item : EligibleItems)
       if (RandomTypesCountMap.Contains(TTuple<EItemType, EItemEconType>(Item->ItemType, Item->ItemEconType)))
         PossibleItemIdsMap.FindOrAdd(TTuple<EItemType, EItemEconType>(Item->ItemType, Item->ItemEconType))
             .Add(Item->ItemID);
@@ -252,7 +291,7 @@ void AMarket::InitMarketNpcs() {
   }
 }
 
-bool AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) {
+auto AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) -> bool {
   if (FMath::FRand() * 100 >= MarketParams.UniqueNpcBaseSpawnChance) return false;
 
   TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(

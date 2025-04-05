@@ -16,6 +16,7 @@
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -29,6 +30,7 @@ void AStorePGGameMode::BeginPlay() {
   // * Initialize the game world and all systems.
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
+  AUpgradeManager* UpgradeManager = GetWorld()->SpawnActor<AUpgradeManager>(UpgradeManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
@@ -51,8 +53,11 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
   PlayerCharacter->QuestManager = QuestManager;
   PlayerCharacter->NewsGen = NewsGen;
+  PlayerCharacter->UpgradeManager = UpgradeManager;
 
   GlobalDataManager->PlayerCharacter = PlayerCharacter;
+
+  UpgradeManager->Market = Market;
 
   LevelManager->Store = Store;
   LevelManager->Market = Market;

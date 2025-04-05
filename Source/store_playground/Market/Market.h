@@ -6,6 +6,7 @@
 #include "GameFramework/Info.h"
 #include "store_playground/Market/MarketDataStructs.h"
 #include "store_playground/WorldObject/NPCStore.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "Market.generated.h"
 
 USTRUCT()
@@ -21,6 +22,20 @@ struct FMarketParams {
   int32 RecentNpcSpawnedKeepTime;
   UPROPERTY(EditAnywhere)
   int32 RecentEconEventsKeepTime;
+};
+
+UENUM()
+enum class EMarketBehaviorParam : uint8 {
+  None UMETA(DisplayName = "None"),
+  StoreMarkupMulti UMETA(DisplayName = "StoreMarkupMulti"),
+};
+ENUM_RANGE_BY_COUNT(EMarketBehaviorParam, 2);
+USTRUCT()
+struct FMarketBehaviorParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  float StoreMarkupMulti;
 };
 
 USTRUCT()
@@ -59,12 +74,17 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market")
   FMarketParams MarketParams;
   UPROPERTY(EditAnywhere, Category = "Market")
-  TArray<class UItemBase*> AllItems;
+  TArray<class UItemBase*> UnlockableItems;
+  UPROPERTY(EditAnywhere, Category = "Market")
+  TArray<class UItemBase*> EligibleItems;
+
+  UPROPERTY(EditAnywhere, Category = "Market")
+  FMarketBehaviorParams BehaviorParams;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   class AMarketEconomy* MarketEconomy;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
+  UPROPERTY(EditAnywhere, Category = "Market")
   TMap<FName, int32> RecentlySpawnedUniqueNpcsMap;
 
   UPROPERTY(EditAnywhere, Category = "Market")
@@ -72,25 +92,30 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market")
   TMap<FName, int32> RecentEconEventsMap;
 
-  TArray<class UItemBase*> GetNewRandomItems(int32 Amount) const;
-  class UItemBase* GetRandomItem(const TArray<FName> ItemIds) const;
+  auto GetNewRandomItems(int32 Amount) const -> TArray<class UItemBase*>;
+  auto GetRandomItem(const TArray<FName> ItemIds) const -> class UItemBase*;
 
-  bool BuyItem(class UNpcStoreComponent* NpcStoreC,
+  auto BuyItem(class UNpcStoreComponent* NpcStoreC,
                class UInventoryComponent* NPCStoreInventory,
                class UInventoryComponent* PlayerInventory,
                class AStore* PlayerStore,
                class UItemBase* Item,
-               int32 Quantity = 1);
-  bool SellItem(class UNpcStoreComponent* NpcStoreC,
+               int32 Quantity = 1) const -> bool;
+  auto SellItem(class UNpcStoreComponent* NpcStoreC,
                 class UInventoryComponent* NPCStoreInventory,
                 class UInventoryComponent* PlayerInventory,
                 class AStore* PlayerStore,
                 class UItemBase* Item,
-                int32 Quantity = 1);
+                int32 Quantity = 1) const -> bool;
 
-  TArray<struct FEconEvent> ConsiderEconEvents();
+  auto ConsiderEconEvents() -> TArray<struct FEconEvent>;
 
   void TickDaysTimedVars();
+
+  UPROPERTY(EditAnywhere, Category = "Market")
+  FUpgradeable Upgradeable;
+  void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
+  void UnlockIDs(const FName DataName, const TArray<FName>& Ids);
 
   // ? Move level stuff to separate market level manager?
   UPROPERTY(EditAnywhere, Category = "Store")
@@ -102,5 +127,5 @@ public:
   void InitNPCStores();
   void InitMarketNpcs();
 
-  bool TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams);
+  auto TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) -> bool;
 };

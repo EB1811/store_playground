@@ -192,7 +192,7 @@ struct FNpcStoreType {
   TArray<int32> StockCountRange;  // * Min, max stock count.
 
   UPROPERTY(EditAnywhere)
-  float StorePriceMarkup;
+  float StoreMarkup;
 
   UPROPERTY(EditAnywhere)
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
@@ -214,7 +214,7 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   TArray<int32> StockCountRange;  // * Min, max stock count.
 
   UPROPERTY(EditAnywhere)
-  float StorePriceMarkup;
+  float StoreMarkup;
 
   UPROPERTY(EditAnywhere)
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.

@@ -143,4 +143,8 @@ public:
   // * NewsGen
   UPROPERTY(EditAnywhere, Category = "Character | NewsGen")
   class ANewsGen* NewsGen;
+
+  // * UpgradeManager
+  UPROPERTY(EditAnywhere, Category = "Character | UpgradeManager")
+  class AUpgradeManager* UpgradeManager;
 };

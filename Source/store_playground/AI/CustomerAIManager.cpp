@@ -264,6 +264,7 @@ void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI,
   TMap<ECustomerAction, float> ActionWeights = ManagerParams.ActionWeights;
   if (Store->StoreStockItems.Num() < 5.0f)
     ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
+
   ECustomerAction RandomAction =
       GetWeightedRandomItem<TTuple<ECustomerAction, float>>(ActionWeights.Array(), [](const auto& Action) {
         return Action.Value;

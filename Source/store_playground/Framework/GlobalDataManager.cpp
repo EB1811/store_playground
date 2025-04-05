@@ -92,9 +92,8 @@ bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, cons
 }
 
 // ! Simplified inorder parser works due to no operator precedence.
-// ? Move GameDataMap into data manager?
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap) {
-  if (RequirementsFilter == NAME_None) return true;
+  if (RequirementsFilter.IsNone()) return true;
   if (GameDataMap.Num() <= 0) return true;
 
   FString FilterString = RequirementsFilter.ToString();
@@ -547,7 +546,7 @@ void AGlobalDataManager::InitializeNpcStoreData() {
         Row->StoreTypeName,
         Row->StoreSpawnWeight,
         Row->StockCountRange,
-        Row->StorePriceMarkup,
+        Row->StoreMarkup,
         Row->ItemTypeWeightMap,
         Row->ItemEconTypeWeightMap,
     });
