@@ -147,4 +147,5 @@ public:
   // * UpgradeManager
   UPROPERTY(EditAnywhere, Category = "Character | UpgradeManager")
   class AUpgradeManager* UpgradeManager;
+  void EnterUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC);
 };

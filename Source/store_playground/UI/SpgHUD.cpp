@@ -14,6 +14,9 @@
 #include "store_playground/UI/Newspaper/NewspaperWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
+#include "store_playground/UI/Upgrade/UpgradeListWidget.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
+#include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "Components/TextBlock.h"
 
 ASpgHUD::ASpgHUD() {}
@@ -31,6 +34,7 @@ void ASpgHUD::BeginPlay() {
   check(UDialogueWidgetClass);
   check(StockDisplayWidgetClass);
   check(NewspaperWidgetClass);
+  check(UpgradeSelectWidgetClass);
 
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
@@ -63,6 +67,10 @@ void ASpgHUD::BeginPlay() {
   NewspaperWidget = CreateWidget<UNewspaperWidget>(GetWorld(), NewspaperWidgetClass);
   NewspaperWidget->AddToViewport(10);
   NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  UpgradeSelectWidget = CreateWidget<UUpgradeListWidget>(GetWorld(), UpgradeSelectWidgetClass);
+  UpgradeSelectWidget->AddToViewport(10);
+  UpgradeSelectWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -286,4 +294,23 @@ void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(NewspaperWidget);
+}
+
+void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, AUpgradeManager* UpgradeManager) {
+  check(UpgradeSelectWidget);
+
+  UpgradeSelectWidget->UpgradeManagerRef = UpgradeManager;
+
+  UpgradeSelectWidget->SelectUpgradeFunc = [this, UpgradeManager](FName UpgradeID) {
+    UpgradeManager->SelectUpgrade(UpgradeID);
+  };
+  UpgradeSelectWidget->SetUpgradeClass(UpgradeSelectC->UpgradeClass, UpgradeSelectC->Title,
+                                       UpgradeSelectC->Description);
+
+  UpgradeSelectWidget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(UpgradeSelectWidget);
 }

@@ -42,6 +42,8 @@ public:
   TSubclassOf<class UUserWidget> UNegotiationWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> NewspaperWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UUserWidget> UpgradeSelectWidgetClass;
 
   // UPROPERTY()
   // class UMainMenu* MainMenu;
@@ -100,4 +102,8 @@ public:
   UPROPERTY()
   class UNewspaperWidget* NewspaperWidget;
   void SetAndOpenNewspaper(const class ANewsGen* NewsGenRef);
+
+  UPROPERTY()
+  class UUpgradeListWidget* UpgradeSelectWidget;
+  void SetAndOpenUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC, class AUpgradeManager* UpgradeManager);
 };

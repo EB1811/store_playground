@@ -72,7 +72,7 @@ struct FQuestChainData {
   UPROPERTY(EditAnywhere)
   FName QuestID;
   UPROPERTY(EditAnywhere)
-  FName QuestChainID;  // * For tracking quest chains.
+  FName ID;  // * For tracking quest chains.
   UPROPERTY(EditAnywhere)
   EQuestChainType QuestChainType;
 
@@ -108,7 +108,7 @@ struct FQuestChainDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FName QuestID;
   UPROPERTY(EditAnywhere)
-  FName QuestChainID;  // * For tracking quest chains.
+  FName ID;  // * For tracking quest chains.
   UPROPERTY(EditAnywhere)
   EQuestChainType QuestChainType;
 
@@ -166,7 +166,7 @@ struct FUniqueNpcData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName NpcID;
+  FName ID;
   UPROPERTY(EditAnywhere)
   FName LinkedPopID;  // Fallback
 
@@ -196,7 +196,7 @@ struct FUniqueNpcDataRow : public FTableRowBase {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName NpcID;
+  FName ID;
   UPROPERTY(EditAnywhere)
   FName LinkedPopID;  // Fallback
 

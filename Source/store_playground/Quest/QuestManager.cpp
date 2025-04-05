@@ -27,20 +27,19 @@ void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> Ma
   switch (QuestChainData.QuestAction) {
     case EQuestAction::Continue: {
       QuestInProgressMap.FindOrAdd(QuestChainData.QuestID, {});
-      if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestChainData.QuestChainID)) break;
+      if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestChainData.ID)) break;
 
-      QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.QuestChainID);
+      QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.ID);
 
       if (QuestChainData.QuestChainType == EQuestChainType::DialogueChoice)
         QuestInProgressMap[QuestChainData.QuestID].ChoicesMade.Append(MadeChoiceIds);
 
       if (QuestChainData.QuestChainType == EQuestChainType::Negotiation)
-        QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestChainData.QuestChainID,
-                                                                              bNegotiationSuccess);
+        QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestChainData.ID, bNegotiationSuccess);
       break;
     }
     case EQuestAction::End: {
-      QuestsCompleted.Add(QuestChainData.QuestChainID);
+      QuestsCompleted.Add(QuestChainData.ID);
       if (QuestInProgressMap.Contains(QuestChainData.QuestID)) QuestInProgressMap.Remove(QuestChainData.QuestID);
       break;
     }

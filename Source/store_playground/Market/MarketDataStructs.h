@@ -30,7 +30,7 @@ struct FCustomerPopDataRow : public FTableRowBase {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName PopID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   FText PopName;
@@ -105,7 +105,7 @@ struct FCustomerPop {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName PopID;
+  FName ID;
   UPROPERTY(EditAnywhere)
   FText PopName;
 
@@ -182,7 +182,7 @@ struct FNpcStoreType {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName NpcStoreTypeID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   FText StoreTypeName;
@@ -204,7 +204,7 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName NpcStoreTypeID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   FText StoreTypeName;
@@ -228,7 +228,7 @@ struct FPriceEffect {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName PriceEffectID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   TArray<EItemEconType> ItemEconTypes;
@@ -250,7 +250,7 @@ struct FPriceEffectRow : public FTableRowBase {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName PriceEffectID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   TArray<EItemEconType> ItemEconTypes;
@@ -290,7 +290,7 @@ struct FEconEvent {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName EconEventID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;
@@ -314,7 +314,7 @@ struct FEconEventRow : public FTableRowBase {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  FName EconEventID;
+  FName ID;
 
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;

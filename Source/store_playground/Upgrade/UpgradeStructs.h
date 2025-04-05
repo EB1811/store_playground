@@ -21,10 +21,10 @@
 UENUM()
 enum class EUpgradeEffectType : uint8 {
   ChangeBehaviorParam UMETA(DisplayName = "ChangeBehaviorParam"),  // * Changes a parameter value.
-  ChangeDataParam UMETA(DisplayName = "ChangeDataParam"),          // * Changes a parameter value in data manager.
+  ChangeData UMETA(DisplayName = "ChangeData"),                    // * Changes a parameter value in data manager.
   UnlockIDs UMETA(DisplayName = "UnlockIDs"),                      // * Function to unlock ids.
   FeatureUnlock UMETA(DisplayName = "FeatureUnlock"),              // * Unlocks a feature.
-  Function UMETA(DisplayName = "Function"),                        // * Named function.
+  UpgradeFunction UMETA(DisplayName = "UpgradeFunction"),          // * Custom named function.
 };
 ENUM_RANGE_BY_COUNT(EUpgradeEffectType, 4);
 UENUM()
@@ -34,6 +34,7 @@ enum class EUpgradeEffectSystem : uint8 {
   Market UMETA(DisplayName = "Market"),                // * Market / behavior changes.
   MarketEconomy UMETA(DisplayName = "MarketEconomy"),  // * MarketEconomy changes.
   GlobalData UMETA(DisplayName = "GlobalData"),        // * GlobalData changes.
+  Player UMETA(DisplayName = "Player"),                // * Player changes.
 };
 ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 7);
 
@@ -69,7 +70,7 @@ struct FUpgradeEffect {
   UPROPERTY(EditAnywhere)
   TArray<FName> RelevantIDs;  // * Item, npc, etc.
   UPROPERTY(EditAnywhere)
-  TMap<FName, float> RelevantValues;  // * Parameter name to additive, positive or negative value.
+  TMap<FName, float> RelevantValues;  // * Parameter name to new value.
 
   UPROPERTY(EditAnywhere)
   FUpgradeEffectTextData TextData;
@@ -91,7 +92,7 @@ struct FUpgradeEffectRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   TArray<FName> RelevantIDs;  // * Item, npc, etc.
   UPROPERTY(EditAnywhere)
-  TMap<FName, float> RelevantValues;  // * Parameter name to additive, positive or negative value.
+  TMap<FName, float> RelevantValues;  // * Parameter name to new value.
   UPROPERTY(EditAnywhere)
   FName RelevantName;  // * Feature or function name.
 
@@ -167,11 +168,16 @@ USTRUCT()
 struct FUpgradeable {
   GENERATED_BODY()
 
+  // * Param name to new value.
   std::function<void(const TMap<FName, float>&)> ChangeBehaviorParam;
-  std::function<void(const TMap<FName, float>&)> ChangeDataParam;
+  // * Data name, array of ids to apply to (all if empty), and param name to new value.
+  std::function<void(FName, const TArray<FName>&, const TMap<FName, float>&)> ChangeData;
+  // * Data name, array of ids to unlock.
   std::function<void(FName, const TArray<FName>&)> UnlockIDs;
+  // * Feature bool name to unlock.
   std::function<void(FName)> FeatureUnlock;
-  std::function<void(FName)> Function;
+  // * Function name to call and parameters.
+  std::function<void(FName, const TArray<FName>&, const TMap<FName, float>&)> UpgradeFunction;
 };
 
 // * Makes a class need to have all functions.

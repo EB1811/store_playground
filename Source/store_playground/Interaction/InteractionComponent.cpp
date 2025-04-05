@@ -11,6 +11,7 @@
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/Level/LevelChangeComponent.h"
 #include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/Upgrade/UpgradeSelectComponent.h"
 
 UInteractionComponent::UInteractionComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -22,21 +23,29 @@ void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
 
 void UInteractionComponent::InteractUse(FUIOnInteract* UIOnInteract) const {}
 
-ULevelChangeComponent* UInteractionComponent::InteractLevelChange() const {
+auto UInteractionComponent::InteractLevelChange() const -> ULevelChangeComponent* {
   ULevelChangeComponent* OwnerLevelChangeC = GetOwner()->FindComponentByClass<ULevelChangeComponent>();
   check(OwnerLevelChangeC);
 
   return OwnerLevelChangeC;
 }
 
-TOptional<class ABuildable*> UInteractionComponent::InteractBuildable() const {
+auto UInteractionComponent::InteractUpgradeSelect() const -> class UUpgradeSelectComponent* {
+  UUpgradeSelectComponent* OwnerUpgradeSelectC = GetOwner()->FindComponentByClass<UUpgradeSelectComponent>();
+  check(OwnerUpgradeSelectC);
+
+  return OwnerUpgradeSelectC;
+}
+
+auto UInteractionComponent::InteractBuildable() const -> TOptional<class ABuildable*> {
   ABuildable* OwnerBuildable = Cast<ABuildable>(GetOwner());
   check(OwnerBuildable);
 
   return OwnerBuildable;
 }
 
-TTuple<UStockDisplayComponent*, UInventoryComponent*> UInteractionComponent::InteractStockDisplay() const {
+auto UInteractionComponent::InteractStockDisplay() const
+    -> TTuple<class UStockDisplayComponent*, class UInventoryComponent*> {
   UStockDisplayComponent* OwnerStockDisplayC = GetOwner()->FindComponentByClass<UStockDisplayComponent>();
   UInventoryComponent* OwnerInventoryC = GetOwner()->FindComponentByClass<UInventoryComponent>();
   check(OwnerStockDisplayC);
@@ -45,22 +54,23 @@ TTuple<UStockDisplayComponent*, UInventoryComponent*> UInteractionComponent::Int
   return {OwnerStockDisplayC, OwnerInventoryC};
 }
 
-TOptional<TArray<struct FDialogueData>> UInteractionComponent::InteractNPCDialogue() const {
+auto UInteractionComponent::InteractNPCDialogue() const -> TOptional<TArray<FDialogueData>> {
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
   check(OwnerDialogueC);
 
   return OwnerDialogueC->DialogueArray;
 }
 
-TTuple<class UCustomerAIComponent*, const class UItemBase*> UInteractionComponent::InteractWaitingCustomer() const {
+auto UInteractionComponent::InteractWaitingCustomer() const
+    -> TTuple<class UCustomerAIComponent*, const class UItemBase*> {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   check(OwnerCustomerAIC);
 
   return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAI->RelevantItem};
 }
 
-TTuple<UDialogueComponent*, UQuestComponent*, UCustomerAIComponent*, const UItemBase*>
-UInteractionComponent::InteractUniqueNPCQuest() const {
+auto UInteractionComponent::InteractUniqueNPCQuest() const
+    -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*> {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
   UQuestComponent* OwnerQuestC = GetOwner()->FindComponentByClass<UQuestComponent>();
@@ -72,7 +82,8 @@ UInteractionComponent::InteractUniqueNPCQuest() const {
   return {OwnerDialogueC, OwnerQuestC, OwnerCustomerAIC, RelevantItem};
 }
 
-TTuple<UNpcStoreComponent*, UInventoryComponent*, UDialogueComponent*> UInteractionComponent::InteractNpcStore() const {
+auto UInteractionComponent::InteractNpcStore() const
+    -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*> {
   UNpcStoreComponent* OwnerNpcStoreC = GetOwner()->FindComponentByClass<UNpcStoreComponent>();
   UInventoryComponent* OwnerInventoryC = GetOwner()->FindComponentByClass<UInventoryComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
@@ -83,7 +94,7 @@ TTuple<UNpcStoreComponent*, UInventoryComponent*, UDialogueComponent*> UInteract
   return {OwnerNpcStoreC, OwnerInventoryC, OwnerDialogueC};
 }
 
-UInventoryComponent* UInteractionComponent::InteractContainer() const {
+auto UInteractionComponent::InteractContainer() const -> class UInventoryComponent* {
   UInventoryComponent* OwnerInventoryC = GetOwner()->FindComponentByClass<UInventoryComponent>();
   check(OwnerInventoryC);
 

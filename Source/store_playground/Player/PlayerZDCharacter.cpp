@@ -25,6 +25,7 @@
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
+#include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -145,6 +146,11 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
           }
           case EInteractionType::StoreNextPhase: {
             StorePhaseManager->NextPhase();
+            break;
+          }
+          case EInteractionType::UpgradeSelect: {
+            auto UpgradeSelectC = Interactable->InteractUpgradeSelect();
+            EnterUpgradeSelect(UpgradeSelectC);
             break;
           }
           case EInteractionType::Use: {
@@ -323,7 +329,10 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
       if (StorePhaseManager->StorePhaseState == EStorePhaseState::MorningBuildMode) StorePhaseManager->BuildMode();
       break;
     case EStorePhaseState::ShopOpen: return;
-    case EStorePhaseState::Night: return;
+    case EStorePhaseState::Night:
+      if (LevelManager->CurrentLevel == ELevel::Store && LevelChangeC->LevelToLoad != ELevel::Church) return;
+      if (LevelManager->CurrentLevel == ELevel::Church && LevelChangeC->LevelToLoad != ELevel::Store) return;
+      break;
   }
 
   auto LevelReadyFunc = [this, LevelChangeC]() {
@@ -337,4 +346,8 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   };
 
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
+}
+
+void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {
+  HUD->SetAndOpenUpgradeSelect(UpgradeSelectC, UpgradeManager);
 }

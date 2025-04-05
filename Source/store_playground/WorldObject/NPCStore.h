@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "store_playground/Market/MarketDataStructs.h"
+#include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "NPCStore.generated.h"
 
 UCLASS()

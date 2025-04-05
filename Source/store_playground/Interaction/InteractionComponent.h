@@ -18,6 +18,8 @@ enum class EInteractionType : uint8 {
   LevelChange UMETA(DisplayName = "Level Change"),
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
 
+  UpgradeSelect UMETA(DisplayName = "Upgrade Select"),
+
   Buildable UMETA(DisplayName = "Buildable"),
   StockDisplay UMETA(DisplayName = "StockDisplay"),
   Decoration UMETA(DisplayName = "Decoration"),
@@ -44,17 +46,19 @@ public:
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
 
-  class ULevelChangeComponent* InteractLevelChange() const;
+  auto InteractLevelChange() const -> class ULevelChangeComponent*;
 
-  TOptional<class ABuildable*> InteractBuildable() const;
-  TTuple<class UStockDisplayComponent*, class UInventoryComponent*> InteractStockDisplay() const;
-  // TTuple<class UInventoryComponent*, class UStockDisplayComponent*> InteractDecoration() const;
+  auto InteractUpgradeSelect() const -> class UUpgradeSelectComponent*;
 
-  TOptional<TArray<FDialogueData>> InteractNPCDialogue() const;
-  TTuple<class UCustomerAIComponent*, const class UItemBase*> InteractWaitingCustomer() const;
-  TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*>
-  InteractUniqueNPCQuest() const;
+  auto InteractBuildable() const -> TOptional<class ABuildable*>;
+  auto InteractStockDisplay() const -> TTuple<class UStockDisplayComponent*, class UInventoryComponent*>;
 
-  TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*> InteractNpcStore() const;
-  class UInventoryComponent* InteractContainer() const;
+  auto InteractNPCDialogue() const -> TOptional<TArray<FDialogueData>>;
+  auto InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, const class UItemBase*>;
+
+  auto InteractUniqueNPCQuest() const
+      -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*>;
+  auto InteractNpcStore() const
+      -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;
+  auto InteractContainer() const -> class UInventoryComponent*;
 };
