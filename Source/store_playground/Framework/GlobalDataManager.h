@@ -10,6 +10,7 @@
 #include "store_playground/AI/CustomerDataStructs.h"
 #include "store_playground/Market/MarketDataStructs.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "GlobalDataManager.generated.h"
 
 // * Global data store to hold data used by random generation systems.
@@ -110,14 +111,6 @@ public:
   UPROPERTY(EditAnywhere, Category = "News")
   TArray<struct FArticle> ArticlesArray;
 
-  void InitializeCustomerData();
-  void InitializeDialogueData();
-  void InitializeQuestChainsData();
-  void InitializeNPCData();
-  void InitializeNpcStoreData();
-  void InitializeMarketData();
-  void InitializeNewsData();
-
   TArray<struct FUniqueNpcData> GetEligibleNpcs() const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
                                                         TArray<FName> CompletedQuestIDs,
@@ -135,4 +128,16 @@ public:
 
   TArray<struct FArticle> GetEligibleArticles(const TArray<FName>& PublishedArticles) const;
   FArticle GetArticle(const FName& ArticleID) const;
+
+  UPROPERTY(EditAnywhere, Category = "GlobalDataManager")
+  FUpgradeable Upgradeable;
+  void ChangeData(FName DataName, const TArray<FName>& FilterIds, const TMap<FName, float>& ParamValues);
+
+  void InitializeCustomerData();
+  void InitializeDialogueData();
+  void InitializeQuestChainsData();
+  void InitializeNPCData();
+  void InitializeNpcStoreData();
+  void InitializeMarketData();
+  void InitializeNewsData();
 };

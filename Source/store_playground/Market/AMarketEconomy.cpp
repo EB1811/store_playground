@@ -26,7 +26,7 @@ EPopWealthType GetLowerWealthType(EPopWealthType WealthType) {
 }
 
 FCustomerPop RemovePop(TArray<FCustomerPop>& Pops, TArray<FPopMoneySpendData>& PopMoneySpend, FName PopID) {
-  FCustomerPop* Pop = Pops.FindByPredicate([PopID](const FCustomerPop& Pop) { return Pop.PopID == PopID; });
+  FCustomerPop* Pop = Pops.FindByPredicate([PopID](const FCustomerPop& Pop) { return Pop.ID == PopID; });
   FPopMoneySpendData* PopSpend =
       PopMoneySpend.FindByPredicate([PopID](const FPopMoneySpendData& PopSpend) { return PopSpend.PopID == PopID; });
   check(Pop && PopSpend);
@@ -38,7 +38,7 @@ FCustomerPop RemovePop(TArray<FCustomerPop>& Pops, TArray<FPopMoneySpendData>& P
 }
 
 FCustomerPop AddPop(TArray<FCustomerPop>& Pops, TArray<FPopMoneySpendData>& PopMoneySpend, FName PopID) {
-  FCustomerPop* Pop = Pops.FindByPredicate([PopID](const FCustomerPop& Pop) { return Pop.PopID == PopID; });
+  FCustomerPop* Pop = Pops.FindByPredicate([PopID](const FCustomerPop& Pop) { return Pop.ID == PopID; });
   FPopMoneySpendData* PopSpend =
       PopMoneySpend.FindByPredicate([PopID](const FPopMoneySpendData& PopSpend) { return PopSpend.PopID == PopID; });
   check(Pop && PopSpend);
@@ -79,7 +79,7 @@ void AMarketEconomy::PerformEconomyTick() {
   TMap<FName, float> PopWealthMap;
   for (FCustomerPop& Pop : AllCustomerPops)  // %share = diff(pop ratio, base %)
     PopWealthMap.Add(
-        Pop.PopID,
+        Pop.ID,
         TotalWealth *
             ((Pop.EconData.MSharePercent / 100.0f) + (float(Pop.EconData.Population) / float(TotalPopulation))) * 0.5f);
 
@@ -318,9 +318,8 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
   }
 
   for (auto& PriceEffect : PriceEffectsToRemove)
-    ActivePriceEffects.RemoveAllSwap([PriceEffect](const auto& OtherPriceEffect) {
-      return PriceEffect.PriceEffectID == OtherPriceEffect.PriceEffectID;
-    });
+    ActivePriceEffects.RemoveAllSwap(
+        [PriceEffect](const auto& OtherPriceEffect) { return PriceEffect.ID == OtherPriceEffect.ID; });
 }
 
 void AMarketEconomy::InitializeEconomyData() {
@@ -375,7 +374,7 @@ void AMarketEconomy::InitializeEconomyData() {
     check(PopEconGenDataMap[Row->PopType].Contains(Row->WealthType));
 
     FPopEconData PopEconData = {
-        Row->PopID,
+        Row->ID,
         Row->InitPopulation,
         PopEconGenDataMap[Row->PopType][Row->WealthType].MGen,
         PopEconGenDataMap[Row->PopType][Row->WealthType].MSharePercent,
@@ -384,13 +383,13 @@ void AMarketEconomy::InitializeEconomyData() {
         PopEconGenDataMap[Row->PopType][Row->WealthType].ItemNeeds,
     };
 
-    AllCustomerPops.Add({Row->PopID,
+    AllCustomerPops.Add({Row->ID,
                          Row->PopName,
                          Row->PopType,
                          Row->WealthType,
                          Row->ItemEconTypes,
                          {
-                             Row->PopID,
+                             Row->ID,
                              Row->InitPopulation,
                              PopEconData.MGen,
                              PopEconData.MSharePercent,
@@ -398,7 +397,7 @@ void AMarketEconomy::InitializeEconomyData() {
                              PopEconData.ItemSpendPercent,
                              PopEconData.ItemNeeds,
                          }});
-    PopMoneySpendDataArray.Add({Row->PopID, 0.0f, PopEconData.Population, Row->PopType, Row->WealthType,
+    PopMoneySpendDataArray.Add({Row->ID, 0.0f, PopEconData.Population, Row->PopType, Row->WealthType,
                                 PopEconData.ItemEconTypes, PopEconData.ItemSpendPercent, PopEconData.ItemNeeds});
 
     TotalPopulation += PopEconData.Population;

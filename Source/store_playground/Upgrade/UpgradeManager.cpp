@@ -1,12 +1,11 @@
 #include "UpgradeManager.h"
 #include "Containers/Map.h"
 #include "Misc/AssertionMacros.h"
+#include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/Framework/GlobalDataManager.h"
 
-AUpgradeManager::AUpgradeManager() {
-  PrimaryActorTick.bCanEverTick = true;
-  PrimaryActorTick.TickInterval = 1.0f;
-}
+AUpgradeManager::AUpgradeManager() { PrimaryActorTick.bCanEverTick = false; }
 
 void AUpgradeManager::BeginPlay() {
   Super::BeginPlay();
@@ -16,7 +15,7 @@ void AUpgradeManager::BeginPlay() {
 
 void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-TArray<FUpgrade> AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) {
+auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
   return Upgrades.FilterByPredicate([this, UpgradeClass](const FUpgrade& Upgrade) {
     return Upgrade.UpgradeClass == UpgradeClass &&
            !SelectedUpgrades.ContainsByPredicate(
@@ -24,15 +23,19 @@ TArray<FUpgrade> AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClas
   });
 }
 
-TArray<FUpgrade> AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) {
+auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
   return SelectedUpgrades.FilterByPredicate(
       [UpgradeClass](const FUpgrade& Upgrade) { return Upgrade.UpgradeClass == UpgradeClass; });
 }
 
 void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
   const TMap<EUpgradeEffectSystem, FUpgradeable> UpgradeableMap = {
-      {{EUpgradeEffectSystem::Market, Market->Upgradeable}},
+      {EUpgradeEffectSystem::CustomerAI, CustomerAIManager->Upgradeable},
+      {EUpgradeEffectSystem::Market, Market->Upgradeable},
+      {EUpgradeEffectSystem::GlobalData, GlobalDataManager->Upgradeable},
   };
+
+  UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 
   FUpgrade* Upgrade =
       Upgrades.FindByPredicate([UpgradeId](const FUpgrade& Upgrade) { return Upgrade.ID == UpgradeId; });
@@ -51,11 +54,11 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
         Upgradeable.ChangeBehaviorParam(Effect.RelevantValues);
         break;
       }
-      case EUpgradeEffectType::ChangeDataParam: {
-        checkf(Upgradeable.ChangeDataParam, TEXT("Upgradeable does not implement ChangeDataParam."));
-        check(Effect.RelevantValues.Num() > 0);
+      case EUpgradeEffectType::ChangeData: {
+        checkf(Upgradeable.ChangeData, TEXT("Upgradeable does not implement ChangeData."));
+        check(!Effect.RelevantName.IsNone() && Effect.RelevantValues.Num() > 0);
 
-        Upgradeable.ChangeDataParam(Effect.RelevantValues);
+        Upgradeable.ChangeData(Effect.RelevantName, Effect.RelevantIDs, Effect.RelevantValues);
         break;
       }
       case EUpgradeEffectType::UnlockIDs: {
@@ -72,16 +75,20 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
         Upgradeable.FeatureUnlock(Effect.RelevantName);
         break;
       }
-      case EUpgradeEffectType::Function: {
-        checkf(Upgradeable.Function, TEXT("Upgradeable does not implement Function."));
+      case EUpgradeEffectType::UpgradeFunction: {
+        checkf(Upgradeable.UpgradeFunction, TEXT("Upgradeable does not implement UpgradeFunction."));
         check(!Effect.RelevantName.IsNone());
 
-        Upgradeable.Function(Effect.RelevantName);
+        Upgradeable.UpgradeFunction(Effect.RelevantName, Effect.RelevantIDs, Effect.RelevantValues);
         break;
       }
       default: checkNoEntry();
     }
+
+    ActiveEffects.Add(Effect);
   }
+
+  SelectedUpgrades.Add(*Upgrade);
 }
 
 void AUpgradeManager::InitializeUpgradesData() {

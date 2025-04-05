@@ -2,6 +2,7 @@
 #include "Containers/Array.h"
 #include "Engine/DataTable.h"
 #include "Misc/CString.h"
+#include "UObject/Field.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
@@ -14,7 +15,14 @@
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
 
-AGlobalDataManager::AGlobalDataManager() { PrimaryActorTick.bCanEverTick = false; }
+AGlobalDataManager::AGlobalDataManager() {
+  PrimaryActorTick.bCanEverTick = false;
+
+  Upgradeable.ChangeData = [this](FName DataName, const TArray<FName>& FilterIds,
+                                  const TMap<FName, float>& ParamValues) {
+    ChangeData(DataName, FilterIds, ParamValues);
+  };
+}
 
 void AGlobalDataManager::BeginPlay() {
   Super::BeginPlay();
@@ -260,7 +268,7 @@ TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
   for (const auto& QuestInProgress : PrevChainCompletedMap) {
     FName AtQuestChainID = QuestInProgress.Value;
     int32 AtQuestChainIndex = FilteredQuestChains.IndexOfByPredicate(
-        [&](const FQuestChainData& Chain) { return Chain.QuestChainID == AtQuestChainID; });
+        [&](const FQuestChainData& Chain) { return Chain.ID == AtQuestChainID; });
     check(AtQuestChainIndex != INDEX_NONE);
 
     if (FilteredQuestChains[AtQuestChainIndex].QuestAction == EQuestAction::End) continue;
@@ -330,14 +338,14 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNeg
 TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(const TArray<FName>& OccurredEconEvents) const {
   const auto GameDataMap = GetGameDataMap();
   return EconEventsArray.FilterByPredicate([&](const FEconEvent& Event) {
-    return (Event.bIsRepeatable || !OccurredEconEvents.Contains(Event.EconEventID)) &&
+    return (Event.bIsRepeatable || !OccurredEconEvents.Contains(Event.ID)) &&
            EvaluateRequirementsFilter(Event.RequirementsFilter, GameDataMap);
   });
 }
 
 TArray<struct FPriceEffect> AGlobalDataManager::GetPriceEffects(const TArray<FName>& PriceEffectIDs) const {
   return PriceEffectsArray.FilterByPredicate(
-      [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.PriceEffectID); });
+      [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.ID); });
 }
 
 TArray<struct FArticle> AGlobalDataManager::GetEligibleArticles(const TArray<FName>& PublishedArticles) const {
@@ -350,6 +358,31 @@ TArray<struct FArticle> AGlobalDataManager::GetEligibleArticles(const TArray<FNa
 
 FArticle AGlobalDataManager::GetArticle(const FName& ArticleID) const {
   return *ArticlesArray.FindByPredicate([&](const FArticle& Article) { return Article.ArticleID == ArticleID; });
+}
+
+void AGlobalDataManager::ChangeData(const FName DataName,
+                                    const TArray<FName>& FilterIds,
+                                    const TMap<FName, float>& ParamValues) {
+  auto ArrayProp = CastField<FArrayProperty>(this->GetClass()->FindPropertyByName(DataName));
+  check(ArrayProp);
+
+  auto ArrayPtr = ArrayProp->ContainerPtrToValuePtr<void*>(this);
+  FScriptArrayHelper ArrayHelper(ArrayProp, ArrayPtr);
+  for (int32 i = 0; i < ArrayHelper.Num(); i++) {
+    auto StructProp = CastField<FStructProperty>(ArrayProp->Inner);
+    auto StructPtr = ArrayHelper.GetRawPtr(i);
+
+    if (FilterIds.Num() > 0) {
+      auto IdProp = StructProp->Struct->FindPropertyByName("ID");
+      check(IdProp);
+      FName* IdValuePtr = IdProp->ContainerPtrToValuePtr<FName>(StructPtr);
+      UE_LOG(LogTemp, Warning, TEXT("IdValuePtr: %s"), *IdValuePtr->ToString());
+      if (!FilterIds.Contains(*IdValuePtr)) continue;
+    }
+
+    for (const auto& ParamPair : ParamValues)
+      SetStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+  }
 }
 
 void AGlobalDataManager::InitializeCustomerData() {
@@ -494,7 +527,7 @@ void AGlobalDataManager::InitializeQuestChainsData() {
   for (auto* Row : QuestChainRows) {
     QuestChainsArray.Add({
         Row->QuestID,
-        Row->QuestChainID,
+        Row->ID,
         Row->QuestChainType,
         Row->DialogueChainID,
         Row->CustomerAction,
@@ -520,7 +553,7 @@ void AGlobalDataManager::InitializeNPCData() {
   UniqueNpcDataTable->GetAllRows<FUniqueNpcDataRow>("", UniqueNpcRows);
   for (auto* Row : UniqueNpcRows)
     UniqueNpcArray.Add({
-        Row->NpcID,
+        Row->ID,
         Row->LinkedPopID,
         Row->NpcName,
         Row->SpawnRequirementsFilter,
@@ -542,7 +575,7 @@ void AGlobalDataManager::InitializeNpcStoreData() {
   NpcStoreTypesDataTable->GetAllRows<FNpcStoreTypeRow>("", NpcStoreTypesRows);
   for (auto* Row : NpcStoreTypesRows)
     NpcStoreTypesArray.Add({
-        Row->NpcStoreTypeID,
+        Row->ID,
         Row->StoreTypeName,
         Row->StoreSpawnWeight,
         Row->StockCountRange,
@@ -562,7 +595,7 @@ void AGlobalDataManager::InitializeMarketData() {
   PriceEffectsDataTable->GetAllRows<FPriceEffectRow>("", PriceEffectRows);
   for (auto* Row : PriceEffectRows)
     PriceEffectsArray.Add({
-        Row->PriceEffectID,
+        Row->ID,
         Row->ItemEconTypes,
         Row->ItemWealthTypes,
         Row->ItemTypes,
@@ -576,7 +609,7 @@ void AGlobalDataManager::InitializeMarketData() {
   EconEventsDataTable->GetAllRows<FEconEventRow>("", EconEventRows);
   for (auto* Row : EconEventRows)
     EconEventsArray.Add({
-        Row->EconEventID,
+        Row->ID,
         Row->RequirementsFilter,
         Row->StartChance,
         Row->bIsRepeatable,

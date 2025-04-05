@@ -1,5 +1,6 @@
 #include "CustomerAIManager.h"
 #include "Containers/Array.h"
+#include "Containers/UnrealString.h"
 #include "CustomerAIComponent.h"
 #include "Misc/AssertionMacros.h"
 #include "NegotiationAI.h"
@@ -24,26 +25,34 @@ ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
   PrimaryActorTick.TickInterval = 1.0f;
 
-  ManagerParams.bSpawnCustomers = true;
+  ManagerParams.bSpawnCustomers = false;
   ManagerParams.CustomerSpawnInterval = 5.0f;
-  ManagerParams.MaxCustomers = 1;
-
   ManagerParams.UniqueNpcBaseSpawnChance = 10.0f;
+  ManagerParams.RecentNpcSpawnedKeepTime = 2.0f;
   ManagerParams.UNpcMaxSpawnPerDay = 1;
-
   ManagerParams.PickItemFrequency = 5.0f;
   ManagerParams.MaxCustomersPickingAtOnce = 2;
 
-  ManagerParams.PerformActionChance = 50.0f;
-  ManagerParams.ActionWeights = {
+  BehaviorParams.MaxCustomers = 1;
+  BehaviorParams.CustomerSpawnChance = 50.0f;
+  BehaviorParams.PerformActionChance = 50.0f;
+  BehaviorParams.ActionWeights = {
       {ECustomerAction::PickItem, 50.0f},
       {ECustomerAction::StockCheck, 25.0f},
       {ECustomerAction::SellItem, 15.0f},
       {ECustomerAction::Leave, 10.0f},
   };
+  BehaviorParams.AcceptanceMinMulti = 1.0f;
+  BehaviorParams.AcceptanceMaxMulti = 1.0f;
 
   LastSpawnTime = 0.0f;
   LastPickItemCheckTime = 0.0f;
+
+  Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) { ChangeBehaviorParam(ParamValues); };
+  Upgradeable.UpgradeFunction = [this](const FName FunctionName, const TArray<FName>& Ids,
+                                       const TMap<FName, float>& ParamValues) {
+    UpgradeFunction(FunctionName, Ids, ParamValues);
+  };
 }
 
 void ACustomerAIManager::BeginPlay() { Super::BeginPlay(); }
@@ -75,7 +84,7 @@ void ACustomerAIManager::EndCustomerAI() {
 
 void ACustomerAIManager::SpawnUniqueNpcs() {
   TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(
-      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID); });
+      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
   if (EligibleNpcs.Num() <= 0) return;
 
   FActorSpawnParameters SpawnParams;
@@ -87,9 +96,9 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
   FUniqueNpcData UniqueNpcData =
       GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnWeight; });
-  RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.NpcID, ManagerParams.RecentNpcSpawnedKeepTime);
+  RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.ID, ManagerParams.RecentNpcSpawnedKeepTime);
 
-  UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.NpcID.ToString());
+  UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.ID.ToString());
   ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
       CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
       GetActorRotation(), SpawnParams);
@@ -109,7 +118,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
       GlobalDataManager->GetRandomNegDialogueMap(UniqueNpcData.NegotiationData.Attitude);
 
   const FCustomerPop* CustomerPopData = MarketEconomy->AllCustomerPops.FindByPredicate(
-      [UniqueNpcData](const FCustomerPop& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
+      [UniqueNpcData](const FCustomerPop& Pop) { return Pop.ID == UniqueNpcData.LinkedPopID; });
   const FPopMoneySpendData* PopMoneySpendData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
       [UniqueNpcData](const FPopMoneySpendData& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
   check(CustomerPopData && PopMoneySpendData);
@@ -157,7 +166,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
 void ACustomerAIManager::SpawnCustomers() {
   check(CustomerClass && GlobalDataManager && MarketEconomy && Store);
-  if (AllCustomers.Num() >= ManagerParams.MaxCustomers) return;
+  if (AllCustomers.Num() >= BehaviorParams.MaxCustomers) return;
 
   LastSpawnTime = GetWorld()->GetTimeSeconds();
 
@@ -170,9 +179,11 @@ void ACustomerAIManager::SpawnCustomers() {
 
   if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) SpawnUniqueNpcs();
 
-  int32 CustomersToSpawn = FMath::RandRange(0, ManagerParams.MaxCustomers - AllCustomers.Num());
+  int32 CustomersToSpawn = FMath::RandRange(0, BehaviorParams.MaxCustomers - AllCustomers.Num());
   UE_LOG(LogTemp, Warning, TEXT("Spawning %d customers."), CustomersToSpawn);
   for (int32 i = 0; i < CustomersToSpawn; i++) {
+    if (BehaviorParams.CustomerSpawnChance < FMath::FRand() * 100) continue;
+
     ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
         CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
         GetActorRotation(), SpawnParams);
@@ -190,7 +201,7 @@ void ACustomerAIManager::SpawnCustomers() {
         }).Key;
 
     const FCustomerPop* CustomerPopData = MarketEconomy->AllCustomerPops.FindByPredicate(
-        [RandomCustomerData](const FCustomerPop& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
+        [RandomCustomerData](const FCustomerPop& Pop) { return Pop.ID == RandomCustomerData.LinkedPopID; });
     const FPopMoneySpendData* PopMoneySpendData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
         [RandomCustomerData](const FPopMoneySpendData& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
     check(CustomerPopData && PopMoneySpendData);
@@ -221,7 +232,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       case (ECustomerState::Browsing): {
         if (PickingItemIdsMap.Num() >= ManagerParams.MaxCustomersPickingAtOnce) break;
 
-        if (FMath::FRand() * 100 < ManagerParams.PerformActionChance)
+        if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance)
           CustomerPerformAction(Customer->CustomerAIComponent, Customer->InteractionComponent);
         break;
       }
@@ -261,7 +272,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
   check(CustomerAI && Interaction);
 
-  TMap<ECustomerAction, float> ActionWeights = ManagerParams.ActionWeights;
+  TMap<ECustomerAction, float> ActionWeights = BehaviorParams.ActionWeights;
   if (Store->StoreStockItems.Num() < 5.0f)
     ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
 
@@ -355,7 +366,8 @@ void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI
   float AcceptanceMax = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 0.25f
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.10f
                                                                              : 0.15f;
-  CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
+  CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(
+      AcceptanceMin * BehaviorParams.AcceptanceMinMulti, AcceptanceMax * BehaviorParams.AcceptanceMaxMulti);
 }
 
 void ACustomerAIManager::TickDaysTimedVars() {
@@ -367,4 +379,31 @@ void ACustomerAIManager::TickDaysTimedVars() {
       Pair.Value--;
 
   for (const auto& NpcId : NpcsToRemove) RecentlySpawnedUniqueNpcsMap.Remove(NpcId);
+}
+
+void ACustomerAIManager::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
+    auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
+    SetStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+  }
+}
+
+void ACustomerAIManager::UpgradeFunction(FName FunctionName,
+                                         const TArray<FName>& Ids,
+                                         const TMap<FName, float>& ParamValues) {
+  check(FunctionName == "ChangeActionWeights");  // Temp: only one function.
+
+  for (const auto& ParamPair : ParamValues) {
+    ECustomerAction Action = ECustomerAction::None;
+    for (auto A : TEnumRange<ECustomerAction>())
+      if (UEnum::GetDisplayValueAsText(A).ToString() == ParamPair.Key) {
+        Action = A;
+        break;
+      }
+    // UE_LOG(LogTemp, Warning, TEXT("ParamPair: %s"), *ParamPair.Key.ToString());
+    check(Action != ECustomerAction::None);
+
+    BehaviorParams.ActionWeights[Action] = FMath::Max(BehaviorParams.ActionWeights[Action], 1.0f) * ParamPair.Value;
+  }
 }

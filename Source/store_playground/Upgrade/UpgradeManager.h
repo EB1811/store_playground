@@ -32,17 +32,19 @@ public:
   TArray<FUpgrade> Upgrades;
 
   UPROPERTY(EditAnywhere, Category = "Upgrades")
+  class ACustomerAIManager* CustomerAIManager;
+  UPROPERTY(EditAnywhere, Category = "Upgrades")
   class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "Upgrades")
-  class ANewsGen* NewsGen;
+  class AGlobalDataManager* GlobalDataManager;
 
   UPROPERTY(EditAnywhere)
   TArray<FUpgrade> SelectedUpgrades;
   UPROPERTY(EditAnywhere)
   TArray<FUpgradeEffect> ActiveEffects;
 
-  TArray<FUpgrade> GetAvailableUpgrades(EUpgradeClass UpgradeClass);
-  TArray<FUpgrade> GetSelectedUpgrades(EUpgradeClass UpgradeClass);
+  auto GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
+  auto GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
 
   void SelectUpgrade(const FName UpgradeId);
 

@@ -24,12 +24,6 @@ struct FMarketParams {
   int32 RecentEconEventsKeepTime;
 };
 
-UENUM()
-enum class EMarketBehaviorParam : uint8 {
-  None UMETA(DisplayName = "None"),
-  StoreMarkupMulti UMETA(DisplayName = "StoreMarkupMulti"),
-};
-ENUM_RANGE_BY_COUNT(EMarketBehaviorParam, 2);
 USTRUCT()
 struct FMarketBehaviorParams {
   GENERATED_BODY()

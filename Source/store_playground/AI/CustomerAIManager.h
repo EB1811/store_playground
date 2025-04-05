@@ -8,20 +8,19 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/AI/CustomerDataStructs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "store_playground/Store/Store.h"
 #include "AIStructs.h"
 #include "CustomerAIManager.generated.h"
 
 USTRUCT()
-struct FManagerParams {
+struct FCustomerAIManagerParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
   bool bSpawnCustomers;
   UPROPERTY(EditAnywhere)
   float CustomerSpawnInterval;
-  UPROPERTY(EditAnywhere)
-  int32 MaxCustomers;
 
   UPROPERTY(EditAnywhere)
   float UniqueNpcBaseSpawnChance;
@@ -34,11 +33,26 @@ struct FManagerParams {
   float PickItemFrequency;
   UPROPERTY(EditAnywhere)
   int32 MaxCustomersPickingAtOnce;
+};
+
+USTRUCT()
+struct FCustomerAIBehaviorParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  int32 MaxCustomers;
+  UPROPERTY(EditAnywhere)
+  float CustomerSpawnChance;  // * Higher means more customers in the store at once.
 
   UPROPERTY(EditAnywhere)
   float PerformActionChance;
   UPROPERTY(EditAnywhere)
   TMap<ECustomerAction, float> ActionWeights;
+
+  UPROPERTY(EditAnywhere)
+  float AcceptanceMinMulti;
+  UPROPERTY(EditAnywhere)
+  float AcceptanceMaxMulti;
 };
 
 UCLASS(Blueprintable)
@@ -66,7 +80,11 @@ public:
   const class AQuestManager* QuestManager;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Params")
-  struct FManagerParams ManagerParams;
+  struct FCustomerAIManagerParams ManagerParams;
+
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Behaviour")
+  struct FCustomerAIBehaviorParams BehaviorParams;
+
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
   float LastSpawnTime;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
@@ -99,4 +117,9 @@ public:
   void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 
   void TickDaysTimedVars();
+
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Upgrade")
+  struct FUpgradeable Upgradeable;
+  void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
+  void UpgradeFunction(FName FunctionName, const TArray<FName>& Ids, const TMap<FName, float>& ParamValues);
 };

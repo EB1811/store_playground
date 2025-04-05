@@ -91,7 +91,7 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
       [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
   check(EconItem);
 
-  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti / 100.0f;
+  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
   float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + StoreMarkup);
   UE_LOG(LogTemp, Warning, TEXT("StoreMarkup: %f"), StoreMarkup);
   UE_LOG(LogTemp, Warning, TEXT("TotalPrice: %f"), TotalPrice);
@@ -120,7 +120,7 @@ auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
 
   if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
 
-  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti / 100.0f;
+  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
   PlayerStore->Money += EconItem->CurrentPrice * Quantity * (1.0f - StoreMarkup);
   return true;
 }
@@ -131,7 +131,7 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
   TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(OccurredEconEvents);
   if (EligibleEvents.Num() <= 0) return {};
   for (auto& Event : EligibleEvents)
-    if (RecentEconEventsMap.Contains(Event.EconEventID)) Event.StartChance *= 0.25f;
+    if (RecentEconEventsMap.Contains(Event.ID)) Event.StartChance *= 0.25f;
 
   for (auto& Event : EligibleEvents) {
     if (FMath::FRand() * 100 >= Event.StartChance) continue;
@@ -140,8 +140,8 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
     TArray<struct FPriceEffect> PriceEffects = GlobalDataManager->GetPriceEffects(Event.PriceEffectIDs);
     for (const auto& PriceEffect : PriceEffects) MarketEconomy->ActivePriceEffects.Add(PriceEffect);
 
-    OccurredEconEvents.Add(Event.EconEventID);  // ? Don't add if repeatable?
-    RecentEconEventsMap.Add(Event.EconEventID, MarketParams.RecentEconEventsKeepTime);
+    OccurredEconEvents.Add(Event.ID);  // ? Don't add if repeatable?
+    RecentEconEventsMap.Add(Event.ID, MarketParams.RecentEconEventsKeepTime);
   }
   // ? If no events, add a random one so there's at least one.
   // FEconEvent RandomEvent =
@@ -171,19 +171,9 @@ void AMarket::TickDaysTimedVars() {
 
 void AMarket::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
   for (const auto& ParamPair : ParamValues) {
-    EMarketBehaviorParam Param = EMarketBehaviorParam::None;
-    for (auto P : TEnumRange<EMarketBehaviorParam>()) {
-      if (ParamPair.Key == UEnum::GetDisplayValueAsText(P).ToString()) {
-        Param = P;
-        break;
-      }
-    }
-    check(Param != EMarketBehaviorParam::None);
-
-    switch (Param) {
-      case EMarketBehaviorParam::StoreMarkupMulti: BehaviorParams.StoreMarkupMulti = ParamPair.Value; break;
-      default: checkNoEntry();
-    }
+    auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
+    auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
+    SetStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }
 
@@ -295,12 +285,12 @@ auto AMarket::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnPar
   if (FMath::FRand() * 100 >= MarketParams.UniqueNpcBaseSpawnChance) return false;
 
   TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(
-      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.NpcID); });
+      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
   if (EligibleNpcs.Num() <= 0) return false;
 
   FUniqueNpcData UniqueNpcData =
       GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnWeight; });
-  RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.NpcID, MarketParams.RecentNpcSpawnedKeepTime);
+  RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.ID, MarketParams.RecentNpcSpawnedKeepTime);
 
   ANpc* UniqueNpc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(),
                                                  SpawnPoint->GetActorRotation(), SpawnParams);

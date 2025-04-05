@@ -48,3 +48,20 @@ TArray<FName> FormIdList(const TArray<T>& Items, std::function<FName(const T&)> 
   for (const auto& Item : Items) Ids.Add(IdFunc(Item));
   return Ids;
 }
+
+// * Dynamically change a parameter value in a struct using Unreal's reflection system.
+inline void SetStructPropertyValue(FStructProperty* StructProp,
+                                   void* StructPtr,
+                                   const FName& PropName,
+                                   float PropValue) {
+  auto Prop = StructProp->Struct->FindPropertyByName(PropName);
+  check(Prop);
+
+  if (Prop->IsA<FFloatProperty>()) {
+    float* PropValuePtr = Prop->ContainerPtrToValuePtr<float>(StructPtr);
+    *PropValuePtr = FMath::Max(*PropValuePtr, 1.0f) * PropValue;
+  } else if (Prop->IsA<FIntProperty>()) {
+    int32* PropValuePtr = Prop->ContainerPtrToValuePtr<int32>(StructPtr);
+    *PropValuePtr = static_cast<int32>(FMath::Max(*PropValuePtr, 1) * PropValue);
+  }
+}
