@@ -22,31 +22,19 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Upgrades")
-  TObjectPtr<const class UDataTable> UpgradeEffectsTable;
-  UPROPERTY(EditAnywhere, Category = "Upgrades")
-  TObjectPtr<const class UDataTable> UpgradesTable;
-
-  UPROPERTY(EditAnywhere, Category = "Upgrades")
-  TArray<FUpgradeEffect> UpgradeEffects;
-  UPROPERTY(EditAnywhere, Category = "Upgrades")
-  TArray<FUpgrade> Upgrades;
-
-  UPROPERTY(EditAnywhere, Category = "Upgrades")
   class ACustomerAIManager* CustomerAIManager;
   UPROPERTY(EditAnywhere, Category = "Upgrades")
   class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "Upgrades")
   class AGlobalDataManager* GlobalDataManager;
 
-  UPROPERTY(EditAnywhere)
-  TArray<FUpgrade> SelectedUpgrades;
-  UPROPERTY(EditAnywhere)
-  TArray<FUpgradeEffect> ActiveEffects;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FName> SelectedUpgradeIDs;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FName> ActiveEffectIDs;
 
   auto GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
   auto GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
 
   void SelectUpgrade(const FName UpgradeId);
-
-  void InitializeUpgradesData();
 };

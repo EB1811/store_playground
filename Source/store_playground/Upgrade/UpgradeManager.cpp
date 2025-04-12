@@ -7,25 +7,18 @@
 
 AUpgradeManager::AUpgradeManager() { PrimaryActorTick.bCanEverTick = false; }
 
-void AUpgradeManager::BeginPlay() {
-  Super::BeginPlay();
-
-  InitializeUpgradesData();
-}
+void AUpgradeManager::BeginPlay() { Super::BeginPlay(); }
 
 void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
-  return Upgrades.FilterByPredicate([this, UpgradeClass](const FUpgrade& Upgrade) {
-    return Upgrade.UpgradeClass == UpgradeClass &&
-           !SelectedUpgrades.ContainsByPredicate(
-               [Upgrade](const FUpgrade& SelectedUpgrade) { return SelectedUpgrade.ID == Upgrade.ID; });
-  });
+  return GlobalDataManager->GetAvailableUpgrades(UpgradeClass, SelectedUpgradeIDs);
 }
 
 auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
-  return SelectedUpgrades.FilterByPredicate(
-      [UpgradeClass](const FUpgrade& Upgrade) { return Upgrade.UpgradeClass == UpgradeClass; });
+  const auto& AllSelectedUpgrades = GlobalDataManager->GetUpgradesByIds(SelectedUpgradeIDs);
+  return AllSelectedUpgrades.FilterByPredicate(
+      [&](const FUpgrade& Upgrade) { return Upgrade.UpgradeClass == UpgradeClass; });
 }
 
 void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
@@ -37,12 +30,9 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
 
   UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 
-  FUpgrade* Upgrade =
-      Upgrades.FindByPredicate([UpgradeId](const FUpgrade& Upgrade) { return Upgrade.ID == UpgradeId; });
-  check(Upgrade);
+  FUpgrade Upgrade = GlobalDataManager->GetUpgradeById(UpgradeId);
 
-  TArray<FUpgradeEffect> Effects = UpgradeEffects.FilterByPredicate(
-      [Upgrade](const FUpgradeEffect& Effect) { return Upgrade->UpgradeEffectIDs.Contains(Effect.ID); });
+  TArray<FUpgradeEffect> Effects = GlobalDataManager->GetUpgradeEffectsByIds(Upgrade.UpgradeEffectIDs);
   for (const FUpgradeEffect& Effect : Effects) {
     FUpgradeable Upgradeable = UpgradeableMap[Effect.EffectSystem];
 
@@ -85,45 +75,8 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
       default: checkNoEntry();
     }
 
-    ActiveEffects.Add(Effect);
+    ActiveEffectIDs.Add(Effect.ID);
   }
 
-  SelectedUpgrades.Add(*Upgrade);
-}
-
-void AUpgradeManager::InitializeUpgradesData() {
-  check(UpgradeEffectsTable && UpgradesTable);
-
-  UpgradeEffects.Empty();
-  TArray<FUpgradeEffectRow*> UpgradeEffectsRows;
-  UpgradeEffectsTable->GetAllRows<FUpgradeEffectRow>("", UpgradeEffectsRows);
-  for (auto Row : UpgradeEffectsRows)
-    UpgradeEffects.Add({
-        Row->ID,
-        Row->EffectType,
-        Row->EffectSystem,
-        Row->RelevantName,
-        Row->RelevantIDs,
-        Row->RelevantValues,
-        Row->TextData,
-        Row->AssetData,
-    });
-
-  Upgrades.Empty();
-  TArray<FUpgradeRow*> UpgradesRows;
-  UpgradesTable->GetAllRows<FUpgradeRow>("", UpgradesRows);
-  for (auto Row : UpgradesRows)
-    Upgrades.Add({
-        Row->ID,
-        Row->UpgradeClass,
-        Row->UpgradeEffectIDs,
-        Row->TextData,
-        Row->AssetData,
-    });
-
-  check(UpgradeEffects.Num() > 0);
-  check(Upgrades.Num() > 0);
-
-  UpgradeEffectsTable = nullptr;
-  UpgradesTable = nullptr;
+  SelectedUpgradeIDs.Add(UpgradeId);
 }

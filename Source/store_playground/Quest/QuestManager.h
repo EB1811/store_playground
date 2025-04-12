@@ -11,11 +11,11 @@ USTRUCT()
 struct FQuestInProgressData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> ChainCompletedIDs;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> ChoicesMade;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<FName, bool> NegotiationOutcomesMap;
 };
 
@@ -29,15 +29,15 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  UPROPERTY(EditAnywhere, Category = "QuestManager | Data")
+  UPROPERTY(EditAnywhere, Category = "QuestManager")
   const class AGlobalDataManager* GlobalDataManager;
 
-  UPROPERTY(EditAnywhere, Category = "Market")
+  UPROPERTY(EditAnywhere, Category = "QuestManager")
   class TSubclassOf<class ANpc> NpcClass;
 
-  UPROPERTY(EditAnywhere, Category = "QuestManager | Tracking")
+  UPROPERTY(EditAnywhere, Category = "QuestManager", SaveGame)
   TArray<FName> QuestsCompleted;
-  UPROPERTY(EditAnywhere, Category = "QuestManager | Tracking")
+  UPROPERTY(EditAnywhere, Category = "QuestManager", SaveGame)
   TMap<FName, FQuestInProgressData> QuestInProgressMap;
 
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs) const;

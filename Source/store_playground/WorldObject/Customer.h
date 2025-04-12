@@ -3,20 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "PaperZDCharacter.h"
 #include "Customer.generated.h"
 
 UCLASS()
-class STORE_PLAYGROUND_API ACustomer : public AActor {
+class STORE_PLAYGROUND_API ACustomer : public APaperZDCharacter {
   GENERATED_BODY()
 
 public:
   ACustomer();
 
   virtual void BeginPlay() override;
-
-  UPROPERTY(EditAnywhere, Category = "Customer")
-  UStaticMeshComponent* Mesh;
 
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UInteractionComponent* InteractionComponent;

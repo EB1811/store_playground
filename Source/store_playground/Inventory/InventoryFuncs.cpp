@@ -1,9 +1,14 @@
+#include "Serialization/MemoryReader.h"
+#include "Serialization/MemoryWriter.h"
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/Item/ItemBase.h"
 
-FInventoryTransferRes TransferItem(UInventoryComponent* From,
-                                   UInventoryComponent* To,
-                                   UItemBase* Item,
-                                   int32 Quantity) {
+auto TransferItem(UInventoryComponent* From,
+                  UInventoryComponent* To,
+                  UItemBase* Item,
+                  int32 Quantity) -> FInventoryTransferRes {
   if (!From->ItemsArray.ContainsByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
     return FInventoryTransferRes{false};
 

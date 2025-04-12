@@ -31,7 +31,7 @@ void AGlobalDataManager::BeginPlay() {
         QuestDialoguesTable && CustomerDialoguesTable && FriendlyNegDialoguesTable.DataTable &&
         NeutralNegDialoguesTable.DataTable && HostileNegDialoguesTable.DataTable && QuestChainDataDataTable &&
         NpcStoreTypesDataTable && NpcStoreDialoguesTable && PriceEffectsDataTable && EconEventsDataTable &&
-        ArticlesDataTable);
+        ArticlesDataTable && UpgradesTable && UpgradeEffectsTable);
 
   InitializeCustomerData();
   InitializeNPCData();
@@ -40,6 +40,7 @@ void AGlobalDataManager::BeginPlay() {
   InitializeNpcStoreData();
   InitializeMarketData();
   InitializeNewsData();
+  InitializeUpgradesData();
 }
 
 void AGlobalDataManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -385,6 +386,25 @@ void AGlobalDataManager::ChangeData(const FName DataName,
   }
 }
 
+FUpgrade AGlobalDataManager::GetUpgradeById(const FName& UpgradeID) const {
+  return *UpgradesArray.FindByPredicate([&](const FUpgrade& Upgrade) { return Upgrade.ID == UpgradeID; });
+}
+TArray<struct FUpgrade> AGlobalDataManager::GetUpgradesByIds(const TArray<FName>& UpgradeIDs) const {
+  return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) { return UpgradeIDs.Contains(Upgrade.ID); });
+}
+
+TArray<struct FUpgradeEffect> AGlobalDataManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const {
+  return UpgradeEffectsArray.FilterByPredicate(
+      [&](const FUpgradeEffect& Effect) { return EffectIDs.Contains(Effect.ID); });
+}
+
+TArray<struct FUpgrade> AGlobalDataManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass,
+                                                                 const TArray<FName>& SelectedUpgradeIDs) const {
+  return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) {
+    return Upgrade.UpgradeClass == UpgradeClass && !SelectedUpgradeIDs.Contains(Upgrade.ID);
+  });
+}
+
 void AGlobalDataManager::InitializeCustomerData() {
   GenericCustomersArray.Empty();
   TArray<FCustomerDataRow*> GenericCustomersRows;
@@ -643,4 +663,39 @@ void AGlobalDataManager::InitializeNewsData() {
 
   check(ArticlesArray.Num() > 0);
   ArticlesDataTable = nullptr;
+}
+
+void AGlobalDataManager::InitializeUpgradesData() {
+  UpgradesArray.Empty();
+  TArray<FUpgradeRow*> UpgradesRows;
+  UpgradesTable->GetAllRows<FUpgradeRow>("", UpgradesRows);
+  for (auto Row : UpgradesRows)
+    UpgradesArray.Add({
+        Row->ID,
+        Row->UpgradeClass,
+        Row->UpgradeEffectIDs,
+        Row->TextData,
+        Row->AssetData,
+    });
+
+  UpgradeEffectsArray.Empty();
+  TArray<FUpgradeEffectRow*> UpgradeEffectsRows;
+  UpgradeEffectsTable->GetAllRows<FUpgradeEffectRow>("", UpgradeEffectsRows);
+  for (auto Row : UpgradeEffectsRows)
+    UpgradeEffectsArray.Add({
+        Row->ID,
+        Row->EffectType,
+        Row->EffectSystem,
+        Row->RelevantName,
+        Row->RelevantIDs,
+        Row->RelevantValues,
+        Row->TextData,
+        Row->AssetData,
+    });
+
+  check(UpgradesArray.Num() > 0);
+  check(UpgradeEffectsArray.Num() > 0);
+
+  UpgradesTable = nullptr;
+  UpgradeEffectsTable = nullptr;
 }

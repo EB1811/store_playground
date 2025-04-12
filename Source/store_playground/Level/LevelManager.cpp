@@ -1,4 +1,5 @@
 #include "LevelManager.h"
+#include "Engine/LevelStreaming.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
@@ -41,6 +42,7 @@ void ALevelManager::BeginUnloadLevel(ELevel Level) {
 }
 
 void ALevelManager::OnLevelShown() {
+  UE_LOG(LogTemp, Warning, TEXT("Level shown: %s"), *UEnum::GetDisplayValueAsText(LoadedLevel).ToString());
   InitLevel(LoadedLevel);
 
   if (LevelReadyFunc) LevelReadyFunc();
@@ -51,6 +53,37 @@ void ALevelManager::OnLevelShown() {
     BeginUnloadLevel(CurrentLevel);
   }
   CurrentLevel = LoadedLevel;
+}
+
+void ALevelManager::ReloadCurrentLevel(std::function<void()> _LevelReadyFunc) {
+  UE_LOG(LogTemp, Warning, TEXT("Reloading level"));
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[CurrentLevel])) {
+    LevelReadyFunc = _LevelReadyFunc;
+
+    Streaming->OnLevelUnloaded.Clear();
+    Streaming->OnLevelUnloaded.AddDynamic(this, &ALevelManager::OnLevelUnloaded);
+
+    FLatentActionInfo LatentInfo;
+    LatentInfo.CallbackTarget = this;
+    UGameplayStatics::UnloadStreamLevel(this, LevelNames[CurrentLevel], LatentInfo, false);
+  }
+}
+void ALevelManager::OnLevelUnloaded() {
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[CurrentLevel])) {
+    Streaming->OnLevelShown.Clear();
+    Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShownReload);
+
+    FLatentActionInfo LatentInfo;
+    LatentInfo.CallbackTarget = this;
+    LatentInfo.UUID = 1;
+    UGameplayStatics::LoadStreamLevel(this, LevelNames[CurrentLevel], true, false, LatentInfo);
+  }
+}
+void ALevelManager::OnLevelShownReload() {
+  InitLevel(CurrentLevel);
+
+  LevelReadyFunc();
+  LevelReadyFunc = nullptr;
 }
 
 void ALevelManager::InitLevel(ELevel Level) {

@@ -47,5 +47,12 @@ public:
   void InitLevel(ELevel Level);
   void SaveLevelState(ELevel Level);
 
+  // * Horrible but needed when loading a save while in a level.
+  void ReloadCurrentLevel(std::function<void()> _LevelReadyFunc);
+  UFUNCTION()
+  void OnLevelUnloaded();
+  UFUNCTION()
+  void OnLevelShownReload();
+
   std::function<void()> LevelReadyFunc;  // * Callback for the player.
 };

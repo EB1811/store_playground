@@ -75,6 +75,10 @@ public:
   TObjectPtr<const class UDataTable> EconEventsDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> ArticlesDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> UpgradesTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> UpgradeEffectsTable;
 
   UPROPERTY(EditAnywhere, Category = "GenericCustomer")
   TArray<struct FGenericCustomerData> GenericCustomersArray;
@@ -110,6 +114,10 @@ public:
   TArray<struct FEconEvent> EconEventsArray;
   UPROPERTY(EditAnywhere, Category = "News")
   TArray<struct FArticle> ArticlesArray;
+  UPROPERTY(EditAnywhere, Category = "Upgrades")
+  TArray<struct FUpgrade> UpgradesArray;
+  UPROPERTY(EditAnywhere, Category = "Upgrades")
+  TArray<struct FUpgradeEffect> UpgradeEffectsArray;
 
   TArray<struct FUniqueNpcData> GetEligibleNpcs() const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
@@ -129,6 +137,12 @@ public:
   TArray<struct FArticle> GetEligibleArticles(const TArray<FName>& PublishedArticles) const;
   FArticle GetArticle(const FName& ArticleID) const;
 
+  FUpgrade GetUpgradeById(const FName& UpgradeID) const;
+  TArray<struct FUpgrade> GetUpgradesByIds(const TArray<FName>& UpgradeIDs) const;
+  TArray<struct FUpgradeEffect> GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const;
+  TArray<struct FUpgrade> GetAvailableUpgrades(EUpgradeClass UpgradeClass,
+                                               const TArray<FName>& SelectedUpgradeIDs) const;
+
   UPROPERTY(EditAnywhere, Category = "GlobalDataManager")
   FUpgradeable Upgradeable;
   void ChangeData(FName DataName, const TArray<FName>& FilterIds, const TMap<FName, float>& ParamValues);
@@ -140,4 +154,5 @@ public:
   void InitializeNpcStoreData();
   void InitializeMarketData();
   void InitializeNewsData();
+  void InitializeUpgradesData();
 };

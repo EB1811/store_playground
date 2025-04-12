@@ -32,7 +32,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class ANewsGen* NewsGen;  // * Create new articles.
 
-  UPROPERTY(EditAnywhere, Category = "DayManager")
+  UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
   int32 CurrentDay;  // * Incremental counter.
 
   void StartNewDay();

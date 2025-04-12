@@ -21,3 +21,13 @@ UItemBase* UItemBase::CreateItemCopy() const {
 
   return ItemCopy;
 }
+
+void UItemBase::SetItemFromBase(const UItemBase* ItemBase) {
+  ItemType = ItemBase->ItemType;
+  ItemWealthType = ItemBase->ItemWealthType;
+  ItemEconType = ItemBase->ItemEconType;
+  TextData = ItemBase->TextData;
+  AssetData = ItemBase->AssetData;
+  FlavorData = ItemBase->FlavorData;
+  PriceData = ItemBase->PriceData;
+}

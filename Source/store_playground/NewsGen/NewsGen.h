@@ -33,12 +33,13 @@ public:
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   FNewsGenParams NewsGenParams;
 
-  UPROPERTY(EditAnywhere, Category = "NewsGen")
+  UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TArray<FName> PublishedArticles;
-  UPROPERTY(EditAnywhere, Category = "NewsGen")
+  UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TMap<FName, int32> RecentArticlesMap;
 
-  UPROPERTY(EditAnywhere, Category = "NewsGen")
+  // ? Use ids for saving?
+  UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TArray<FArticle> DaysArticles;
 
   void GenDaysRandomArticles(TArray<FName> GuaranteedArticles = {});

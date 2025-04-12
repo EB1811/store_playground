@@ -31,6 +31,9 @@ public:
   UCustomerAIComponent();
 
   virtual void BeginPlay() override;
+  virtual void TickComponent(float DeltaTime,
+                             ELevelTick TickType,
+                             FActorComponentTickFunction* ThisTickFunction) override;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   FGuid CustomerID;

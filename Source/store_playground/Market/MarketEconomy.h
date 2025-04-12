@@ -12,23 +12,31 @@ struct FEconomyParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  bool bRunSimulation;
+
+  UPROPERTY(EditAnywhere)
   float NeedsfulfilledPercent;  // Artificially set for 60% of the needs fulfilled at the start of the game.
   UPROPERTY(EditAnywhere)
   float SingleUnitPriceMulti;
+};
 
-  UPROPERTY(EditAnywhere)
-  float BasePromotionChance;  // Promote to a higher wealth type.
-  UPROPERTY(EditAnywhere)
-  float BaseDemotionChance;  // Demote to a lower wealth type.
-  UPROPERTY(EditAnywhere)
-  float BaseCrossPromotionChance;  // Change to a different economy type.
+USTRUCT()
+struct FEconomyBehaviorParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PromotionChance;  // Promote to a higher wealth type.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float DemotionChance;  // Demote to a lower wealth type.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float CrossPromotionChance;  // Change to a different economy type.
 };
 
 USTRUCT()
 struct FEconTypePrices {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<EItemWealthType, float> WealthTypePricesMap;
 };
 
@@ -61,17 +69,20 @@ public:
   UPROPERTY(EditAnywhere, Category = "Economy")
   float TotaBought;
 
-  UPROPERTY(EditAnywhere, Category = "Economy")
-  TArray<FCustomerPop> AllCustomerPops;
-  UPROPERTY(EditAnywhere, Category = "Economy")
-  TArray<FPopMoneySpendData> PopMoneySpendDataArray;
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
+  FEconomyBehaviorParams EconomyBehaviorParams;
 
   UPROPERTY(EditAnywhere, Category = "Economy")
+  TArray<FCustomerPop> CustomerPops;
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
+  TArray<FPopEconData> PopEconDataArray;
+
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FPriceEffect> ActivePriceEffects;
 
-  UPROPERTY(EditAnywhere, Category = "Economy")
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FEconItem> EconItems;  // ? Also need fast lookups?
-  UPROPERTY(EditAnywhere, Category = "Economy")
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TMap<EItemEconType, FEconTypePrices> EconTypePricesMap;
 
   void PerformEconomyTick();
@@ -81,4 +92,5 @@ public:
   void InitializeEconomyData();
 };
 
+// TODO: Remove to just be a function in the cpp.
 TArray<float> GetRandomSplit(int32 Buckets, float Money);

@@ -41,7 +41,7 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "Interaction")
+  UPROPERTY(EditAnywhere, Category = "Interaction", SaveGame)
   EInteractionType InteractionType;
 
   void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;

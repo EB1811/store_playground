@@ -20,12 +20,12 @@ UCLASS() class STORE_PLAYGROUND_API UItemBase : public UObject {
 public:
   UItemBase();
 
-  UPROPERTY(EditAnywhere, Category = "Item Data")
+  UPROPERTY(EditAnywhere, Category = "Item Data", SaveGame)
   FName ItemID;
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FGuid UniqueItemID;
 
-  UPROPERTY(EditAnywhere, Category = "Item Data", meta = (UIMin = 1))
+  UPROPERTY(EditAnywhere, Category = "Item Data", SaveGame)
   int32 Quantity;
 
   UPROPERTY(EditAnywhere)
@@ -47,9 +47,23 @@ public:
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FItemPriceData PriceData;
 
-  // UPROPERTY()
-  // class UInventoryComponent* OwningInventory;
-
   UFUNCTION(Category = "Item Functions")
   UItemBase* CreateItemCopy() const;
+
+  void SetItemFromBase(const UItemBase* ItemBase);
 };
+
+// USTRUCT()
+// struct FItemSaveState {
+//   GENERATED_BODY()
+
+//   UPROPERTY(SaveGame)
+//   FGuid Id;
+
+//   UPROPERTY(SaveGame)
+//   FName ItemID;
+//   UPROPERTY(SaveGame)
+//   int32 Quantity;
+// };
+// FItemSaveState SaveItemSaveState(UItemBase* Item);
+// void LoadItemSaveState(UItemBase* Item, FItemSaveState SaveState);

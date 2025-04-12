@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "GameFramework/Info.h"
@@ -19,14 +20,13 @@ struct FStockItem {
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* BelongingStockInventoryC;
 };
-
 USTRUCT()
 struct FStoreStats {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float Atmosphere;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float Reputation;
 };
 
@@ -34,8 +34,12 @@ USTRUCT()
 struct FStoreLevelState {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
-  TMap<FGuid, FBuildableSaveState> BuildableSaveMap;
+  UPROPERTY()
+  TMap<FGuid, FActorSavaState> ActorSaveMap;
+  UPROPERTY()
+  TMap<FGuid, FComponentSaveState> ComponentSaveMap;
+  UPROPERTY()
+  TArray<FObjectSaveState> ObjectSaveStates;
 };
 
 UCLASS(Blueprintable)
@@ -48,14 +52,17 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere, Category = "Store")
+  const class ASaveManager* SaveManager;
+
+  UPROPERTY(EditAnywhere, Category = "Store")
   class TSubclassOf<class AActor> BuildableClass;
 
   UPROPERTY(EditAnywhere, Category = "Store")
   FStoreLevelState StoreLevelState;
 
-  UPROPERTY(EditAnywhere, Category = "Store")
+  UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   float Money;
-  UPROPERTY(EditAnywhere, Category = "Store")
+  UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   FStoreStats StoreStats;
 
   UPROPERTY(EditAnywhere, Category = "Store")

@@ -9,7 +9,6 @@ ABuildable::ABuildable() {
   if (!BuildableId.IsValid()) BuildableId = FGuid::NewGuid();
 
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-  Mesh->SetSimulatePhysics(true);
   SetRootComponent(Mesh);
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
@@ -40,7 +39,6 @@ void ABuildable::SetToStockDisplay() {
   Mesh->SetStaticMesh(MeshesMap[BuildableType]);
 
   Mesh->SetVisibility(true);
-  Mesh->SetSimulatePhysics(true);
   Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
   InteractionComponent->InteractionType = EInteractionType::StockDisplay;
@@ -53,7 +51,6 @@ void ABuildable::SetToDecoration() {
   Mesh->SetStaticMesh(MeshesMap[BuildableType]);
 
   Mesh->SetVisibility(true);
-  Mesh->SetSimulatePhysics(true);
   Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
   InteractionComponent->InteractionType = EInteractionType::Decoration;
@@ -64,7 +61,6 @@ void ABuildable::SetToNone() {
   Mesh->SetStaticMesh(MeshesMap[BuildableType]);
 
   Mesh->SetVisibility(false);
-  Mesh->SetSimulatePhysics(false);
   Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
   InteractionComponent->InteractionType = EInteractionType::Buildable;
@@ -86,17 +82,14 @@ void ABuildable::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 #endif
 
 FBuildableSaveState SaveBuildableSaveState(ABuildable* Buildable) {
-  return {Buildable->BuildableId, Buildable->BuildableType, Buildable->StockInventory->ItemsArray};
+  return {Buildable->BuildableId, Buildable->BuildableType, {}};
 }
 
 void LoadBuildableSaveState(ABuildable* Buildable, FBuildableSaveState SaveState) {
-  check(SaveState.BuildableId == Buildable->BuildableId);
-
-  switch (SaveState.BuildableType) {
+  UE_LOG(LogTemp, Warning, TEXT("Buildable setting to %s"), *UEnum::GetValueAsString(Buildable->BuildableType));
+  switch (Buildable->BuildableType) {
     case EBuildableType::StockDisplay: Buildable->SetToStockDisplay(); break;
     case EBuildableType::Decoration: Buildable->SetToDecoration(); break;
     default: Buildable->SetToNone();
   }
-
-  Buildable->StockInventory->ItemsArray = SaveState.ItemsArray;
 }

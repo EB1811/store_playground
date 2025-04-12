@@ -26,6 +26,7 @@
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
+#include "store_playground/SaveManager/SaveManager.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -115,11 +116,22 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 
   StorePhaseManager->BuildMode();
 
-  // Test
-  UpgradeManager->SelectUpgrade("first");
+  // Temp
+  // SaveManager->LoadAllSystems(SaveManager->SystemSaves);
+  // SaveManager->LoadLevels(SaveManager->LevelsSave);
+  // SaveManager->LoadPlayer(SaveManager->PComponentSave, SaveManager->PObjectSaveStates);
+  LevelManager->ReloadCurrentLevel([this]() { SaveManager->LoadCurrentSlotFromDisk(); });
 }
 
-void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) { HUD->SetAndOpenNewspaper(NewsGen); }
+void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
+  HUD->SetAndOpenNewspaper(NewsGen);
+
+  // Temp
+  // SaveManager->SaveAllSystems();
+  // SaveManager->SaveLevels();
+  // SaveManager->SavePlayer();
+  SaveManager->CreateNewSaveGame();
+}
 
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};

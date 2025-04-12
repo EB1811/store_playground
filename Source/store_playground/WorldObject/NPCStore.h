@@ -35,21 +35,3 @@ public:
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   class UNpcStoreComponent* NpcStoreComponent;
 };
-
-USTRUCT()
-struct FNpcStoreSaveState {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  FGuid NpcStoreId;
-
-  // Temp. Changing to serialized component.
-  UPROPERTY(EditAnywhere)
-  TArray<struct FDialogueData> DialogueArray;
-  UPROPERTY(EditAnywhere)
-  TArray<TObjectPtr<class UItemBase>> ItemsArray;
-  UPROPERTY(EditAnywhere)
-  FNpcStoreType NpcStoreType;
-};
-FNpcStoreSaveState SaveNpcStoreSaveState(ANPCStore* NpcStore);
-void LoadNpcStoreSaveState(ANPCStore* NpcStore, FNpcStoreSaveState SaveState);

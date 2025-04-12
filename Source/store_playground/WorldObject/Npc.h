@@ -3,22 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "PaperZDCharacter.h"
 #include "Npc.generated.h"
 
 // ? Combine with customer?
+// TODO: Turn into character.
 
 UCLASS()
-class STORE_PLAYGROUND_API ANpc : public AActor {
+class STORE_PLAYGROUND_API ANpc : public APaperZDCharacter {
   GENERATED_BODY()
 
 public:
   ANpc();
 
   virtual void BeginPlay() override;
-
-  UPROPERTY(EditAnywhere, Category = "Npc")
-  UStaticMeshComponent* Mesh;
 
   UPROPERTY(EditAnywhere, Category = "Npc")
   class UInteractionComponent* InteractionComponent;

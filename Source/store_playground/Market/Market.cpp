@@ -1,6 +1,8 @@
 #include "Market.h"
+#include "Containers/Array.h"
 #include "HAL/Platform.h"
 #include "Math/UnrealMathUtility.h"
+#include "UObject/NameTypes.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
@@ -47,14 +49,12 @@ void AMarket::BeginPlay() {
     Item->FlavorData = Row->FlavorData;
     Item->PriceData.BoughtAt = Row->BasePrice;
 
-    if (Row->bIsUnlockable)
-      UnlockableItems.Add(Item);
-    else
-      EligibleItems.Add(Item);
+    AllItemsMap.Add(Row->ItemID, Item);
+    if (!Row->bIsUnlockable) EligibleItemIds.Add(Row->ItemID);
   }
 
-  check(UnlockableItems.Num() > 0);
-  check(EligibleItems.Num() > 0);
+  check(AllItemsMap.Num() > 0);
+  check(EligibleItemIds.Num() > 0);
 
   AllItemsTable = nullptr;
 }
@@ -64,16 +64,20 @@ void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 auto AMarket::GetNewRandomItems(int32 Amount) const -> TArray<UItemBase*> {
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
-    int32 RandomIndex = FMath::RandRange(0, EligibleItems.Num() - 1);
-    NewItems.Add(EligibleItems[RandomIndex]->CreateItemCopy());
+    int32 RandomIndex = FMath::RandRange(0, EligibleItemIds.Num() - 1);
+    NewItems.Add(AllItemsMap[EligibleItemIds[RandomIndex]]->CreateItemCopy());
   }
 
   return NewItems;
 }
 
 UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
-  FName RandomId = ItemIds[FMath::RandRange(0, ItemIds.Num() - 1)];
-  return *(EligibleItems.FindByPredicate([RandomId](const UItemBase* Item) { return Item->ItemID == RandomId; }));
+  const TArray<FName> ItemIdsEligible =
+      EligibleItemIds.FilterByPredicate([ItemIds](const FName& Id) { return ItemIds.Contains(Id); });
+  if (ItemIdsEligible.Num() <= 0) return nullptr;
+
+  FName RandomId = ItemIdsEligible[FMath::RandRange(0, ItemIds.Num() - 1)];
+  return AllItemsMap[RandomId]->CreateItemCopy();
 }
 
 auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
@@ -178,12 +182,9 @@ void AMarket::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
 }
 
 void AMarket::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {
-  TArray<UItemBase*> ItemsToUnlock =
-      UnlockableItems.FilterByPredicate([Ids](const UItemBase* Item) { return Ids.Contains(Item->ItemID); });
-  for (auto Item : ItemsToUnlock) {
-    EligibleItems.Add(Item->CreateItemCopy());
-    UnlockableItems.RemoveSingleSwap(Item);
-  }
+  TArray<FName> IdsFilteredDuplicates =
+      Ids.FilterByPredicate([this](const FName& Id) { return !EligibleItemIds.Contains(Id); });
+  for (auto Id : IdsFilteredDuplicates) EligibleItemIds.Add(Id);
 }
 
 void AMarket::SaveMarketLevelState() {
@@ -191,7 +192,12 @@ void AMarket::SaveMarketLevelState() {
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* Store : FoundStores)
-    MarketLevelState.NpcStoreSaveMap.Add(Store->NpcStoreId, SaveNpcStoreSaveState(Store));
+    MarketLevelState.NpcStoreSaveMap.Add(Store->NpcStoreId, {
+                                                                Store->NpcStoreId,
+                                                                Store->DialogueComponent->DialogueArray,
+                                                                Store->InventoryComponent->ItemsArray,
+                                                                Store->NpcStoreComponent->NpcStoreType,
+                                                            });
 }
 
 void AMarket::LoadMarketLevelState() {
@@ -205,7 +211,12 @@ void AMarket::LoadMarketLevelState() {
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* Store : FoundStores) {
     check(MarketLevelState.NpcStoreSaveMap.Contains(Store->NpcStoreId));
-    LoadNpcStoreSaveState(Store, MarketLevelState.NpcStoreSaveMap[Store->NpcStoreId]);
+
+    FNpcStoreSaveState SaveState = MarketLevelState.NpcStoreSaveMap[Store->NpcStoreId];
+    Store->NpcStoreId = SaveState.Id;
+    Store->DialogueComponent->DialogueArray = SaveState.DialogueArray;
+    Store->InventoryComponent->ItemsArray = SaveState.ItemsArray;
+    Store->NpcStoreComponent->NpcStoreType = SaveState.NpcStoreType;
   }
 }
 
@@ -244,10 +255,12 @@ void AMarket::InitNPCStores() {
     check(RandomTypesCountMap.Num() > 0);
 
     TMap<TTuple<EItemType, EItemEconType>, TArray<FName>> PossibleItemIdsMap;
-    for (const auto& Item : EligibleItems)
-      if (RandomTypesCountMap.Contains(TTuple<EItemType, EItemEconType>(Item->ItemType, Item->ItemEconType)))
-        PossibleItemIdsMap.FindOrAdd(TTuple<EItemType, EItemEconType>(Item->ItemType, Item->ItemEconType))
-            .Add(Item->ItemID);
+    for (const auto& Id : EligibleItemIds)
+      if (RandomTypesCountMap.Contains(
+              TTuple<EItemType, EItemEconType>(AllItemsMap[Id]->ItemType, AllItemsMap[Id]->ItemEconType)))
+        PossibleItemIdsMap
+            .FindOrAdd(TTuple<EItemType, EItemEconType>(AllItemsMap[Id]->ItemType, AllItemsMap[Id]->ItemEconType))
+            .Add(AllItemsMap[Id]->ItemID);
 
     TArray<UItemBase*> StoreItems;
     for (const auto& Pair : RandomTypesCountMap) {

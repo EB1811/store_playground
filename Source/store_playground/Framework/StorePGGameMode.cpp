@@ -17,6 +17,7 @@
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
+#include "store_playground/SaveManager/SaveManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -29,16 +30,17 @@ void AStorePGGameMode::BeginPlay() {
 
   // * Initialize the game world and all systems.
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
+  ASaveManager* SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
   AUpgradeManager* UpgradeManager = GetWorld()->SpawnActor<AUpgradeManager>(UpgradeManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
+  AStore* Store = GetWorld()->SpawnActor<AStore>(StoreClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
   AQuestManager* QuestManager = GetWorld()->SpawnActor<AQuestManager>(QuestManagerClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   AMarketEconomy* MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
   ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
-  AStore* Store = GetWorld()->SpawnActor<AStore>(StoreClass);
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
   UNegotiationSystem* NegotiationSystem = NewObject<UNegotiationSystem>(this);
 
@@ -54,6 +56,24 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->QuestManager = QuestManager;
   PlayerCharacter->NewsGen = NewsGen;
   PlayerCharacter->UpgradeManager = UpgradeManager;
+  PlayerCharacter->SaveManager = SaveManager;
+
+  SaveManager->PlayerCharacter = PlayerCharacter;
+  SaveManager->SystemsToSave = {
+      {"UpgradeManager", UpgradeManager},
+      {"GlobalDataManager", GlobalDataManager},
+      {"DayManager", DayManager},
+      {"Store", Store},
+      {"CustomerAIManager", CustomerAIManager},
+      {"QuestManager", QuestManager},
+      {"Market", Market},
+      {"MarketEconomy", MarketEconomy},
+      {"NewsGen", NewsGen},
+
+  };
+  SaveManager->Market = Market;
+  SaveManager->MarketEconomy = MarketEconomy;
+  SaveManager->Store = Store;
 
   UpgradeManager->CustomerAIManager = CustomerAIManager;
   UpgradeManager->Market = Market;
@@ -71,6 +91,8 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->MarketEconomy = MarketEconomy;
   DayManager->Market = Market;
   DayManager->NewsGen = NewsGen;
+
+  Store->SaveManager = SaveManager;
 
   CustomerAIManager->GlobalDataManager = GlobalDataManager;
   CustomerAIManager->Market = Market;

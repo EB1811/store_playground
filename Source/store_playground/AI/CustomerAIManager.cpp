@@ -2,6 +2,7 @@
 #include "Containers/Array.h"
 #include "Containers/UnrealString.h"
 #include "CustomerAIComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Misc/AssertionMacros.h"
 #include "NegotiationAI.h"
 #include "Engine/World.h"
@@ -20,6 +21,11 @@
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/NPC/NpcDataStructs.h"
+#include "store_playground/WorldObject/Level/SpawnPoint.h"
+#include "AIController.h"
+#include "NavigationSystem.h"
+#include "NegotiationAI.h"
+#include "Navigation/PathFollowingComponent.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
@@ -87,10 +93,12 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
       [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
   if (EligibleNpcs.Num() <= 0) return;
 
+  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];
+  check(SpawnPoint);
+
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
-  // todo-low: Spawn in level.
-  // SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
+  SpawnParams.OverrideLevel = SpawnPoint->GetLevel();
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
@@ -99,9 +107,8 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.ID, ManagerParams.RecentNpcSpawnedKeepTime);
 
   UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.ID.ToString());
-  ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(
-      CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
-      GetActorRotation(), SpawnParams);
+  ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(CustomerClass, SpawnPoint->GetActorLocation(),
+                                                                SpawnPoint->GetActorRotation(), SpawnParams);
 
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
@@ -117,13 +124,13 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap =
       GlobalDataManager->GetRandomNegDialogueMap(UniqueNpcData.NegotiationData.Attitude);
 
-  const FCustomerPop* CustomerPopData = MarketEconomy->AllCustomerPops.FindByPredicate(
+  const FCustomerPop* CustomerPopData = MarketEconomy->CustomerPops.FindByPredicate(
       [UniqueNpcData](const FCustomerPop& Pop) { return Pop.ID == UniqueNpcData.LinkedPopID; });
-  const FPopMoneySpendData* PopMoneySpendData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
-      [UniqueNpcData](const FPopMoneySpendData& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
-  check(CustomerPopData && PopMoneySpendData);
+  const FPopEconData* PopEconData = MarketEconomy->PopEconDataArray.FindByPredicate(
+      [UniqueNpcData](const FPopEconData& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
+  check(CustomerPopData && PopEconData);
   UniqueCustomer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
-  UniqueCustomer->CustomerAIComponent->MoneyToSpend = PopMoneySpendData->Money / PopMoneySpendData->Population;
+  UniqueCustomer->CustomerAIComponent->MoneyToSpend = PopEconData->Money / PopEconData->Population;
 
   AllCustomers.Add(UniqueCustomer);
 
@@ -170,10 +177,12 @@ void ACustomerAIManager::SpawnCustomers() {
 
   LastSpawnTime = GetWorld()->GetTimeSeconds();
 
+  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];
+  check(SpawnPoint);
+
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
-  // todo-low: Spawn in level.
-  // SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
+  SpawnParams.OverrideLevel = SpawnPoint->GetLevel();
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
@@ -184,14 +193,13 @@ void ACustomerAIManager::SpawnCustomers() {
   for (int32 i = 0; i < CustomersToSpawn; i++) {
     if (BehaviorParams.CustomerSpawnChance < FMath::FRand() * 100) continue;
 
-    ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
-        CustomerClass, GetActorLocation() + (GetActorForwardVector() + FMath::FRandRange(20.0f, 500.0f)),
-        GetActorRotation(), SpawnParams);
+    ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(CustomerClass, SpawnPoint->GetActorLocation(),
+                                                            SpawnPoint->GetActorRotation(), SpawnParams);
 
     TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
     for (const auto& GenericCustomer : GlobalDataManager->GenericCustomersArray) {
-      const FPopMoneySpendData* PopData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
-          [GenericCustomer](const FPopMoneySpendData& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
+      const auto* PopData = MarketEconomy->PopEconDataArray.FindByPredicate(
+          [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
       WeightedCustomers.Add(MakeTuple(GenericCustomer, PopData->Population));
     }
 
@@ -200,10 +208,10 @@ void ACustomerAIManager::SpawnCustomers() {
           return Item.Value;
         }).Key;
 
-    const FCustomerPop* CustomerPopData = MarketEconomy->AllCustomerPops.FindByPredicate(
+    const auto* CustomerPopData = MarketEconomy->CustomerPops.FindByPredicate(
         [RandomCustomerData](const FCustomerPop& Pop) { return Pop.ID == RandomCustomerData.LinkedPopID; });
-    const FPopMoneySpendData* PopMoneySpendData = MarketEconomy->PopMoneySpendDataArray.FindByPredicate(
-        [RandomCustomerData](const FPopMoneySpendData& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
+    const auto* PopMoneySpendData = MarketEconomy->PopEconDataArray.FindByPredicate(
+        [RandomCustomerData](const auto& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
     check(CustomerPopData && PopMoneySpendData);
 
     Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
@@ -227,13 +235,20 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 
   TArray<ACustomer*> CustomersToRemove;
 
+  UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
+  check(NavSystem);
+
   for (ACustomer* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
-        if (PickingItemIdsMap.Num() >= ManagerParams.MaxCustomersPickingAtOnce) break;
+        if (PickingItemIdsMap.Num() < ManagerParams.MaxCustomersPickingAtOnce) {
+          if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
+            CustomerPerformAction(Customer->CustomerAIComponent, Customer->InteractionComponent);
+            break;
+          }
+        }
 
-        if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance)
-          CustomerPerformAction(Customer->CustomerAIComponent, Customer->InteractionComponent);
+        MoveCustomerRandom(NavSystem, Customer);
         break;
       }
       case (ECustomerState::Requesting): {
@@ -267,6 +282,25 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     }
     Customer->Destroy();
   }
+}
+
+void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACustomer* Customer) {
+  check(NavSystem && Customer);
+
+  AAIController* OwnerAIController = Customer->GetController<AAIController>();
+  if (!OwnerAIController) return;
+  if (OwnerAIController->GetMoveStatus() != EPathFollowingStatus::Idle) return;
+
+  // TODO: Create central point in store and use it as a reference for the random point.
+  FNavLocation RandomLocation;
+  NavSystem->GetRandomPointInNavigableRadius(Customer->GetActorLocation(), float(300.0f), RandomLocation);
+
+  Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(50.0f, 250.0f);
+
+  // OwnerAIController->SetFocus(nullptr, EAIFocusPriority::Gameplay);
+  OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, true, false);
+
+  // UE_LOG(LogTemp, Warning, TEXT("Customer is moving."));
 }
 
 void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
@@ -344,7 +378,6 @@ bool ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
 }
 
 void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UItemBase* HasItem) {
-  // Temp: Random item.
   UItemBase* Item = HasItem ? HasItem : Market->GetNewRandomItems(1)[0];
   check(Item);
 

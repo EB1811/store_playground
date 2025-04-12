@@ -78,27 +78,6 @@ struct FBasePopTypeEconomyData {
   TMap<EItemWealthType, int32> ItemNeeds;
 };
 
-USTRUCT()
-struct FPopEconData {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  FName PopID;
-
-  UPROPERTY(EditAnywhere)
-  int32 Population;
-  UPROPERTY(EditAnywhere)
-  int32 MGen;
-  UPROPERTY(EditAnywhere)
-  float MSharePercent;
-  UPROPERTY(EditAnywhere)
-  TArray<EItemEconType> ItemEconTypes;
-  UPROPERTY(EditAnywhere)
-  TMap<EItemWealthType, float> ItemSpendPercent;
-  UPROPERTY(EditAnywhere)
-  TMap<EItemWealthType, int32> ItemNeeds;
-};
-
 // * CustomerPop is used for economic details, actual customer data simply uses this.
 USTRUCT()
 struct FCustomerPop {
@@ -113,29 +92,11 @@ struct FCustomerPop {
   EPopType PopType;
   UPROPERTY(EditAnywhere)
   EPopWealthType WealthType;
-  UPROPERTY(EditAnywhere)
-  TArray<EItemEconType> ItemEconTypes;
 
   UPROPERTY(EditAnywhere)
-  FPopEconData EconData;
-};
-
-USTRUCT()
-struct FPopMoneySpendData {
-  GENERATED_BODY()
-
+  int32 MGen;
   UPROPERTY(EditAnywhere)
-  FName PopID;
-
-  UPROPERTY(EditAnywhere)
-  float Money;
-  UPROPERTY(EditAnywhere)
-  int32 Population;
-
-  UPROPERTY(EditAnywhere)
-  EPopType PopType;
-  UPROPERTY(EditAnywhere)
-  EPopWealthType WealthType;
+  float MSharePercent;
 
   UPROPERTY(EditAnywhere)
   TArray<EItemEconType> ItemEconTypes;
@@ -143,10 +104,24 @@ struct FPopMoneySpendData {
   TMap<EItemWealthType, float> ItemSpendPercent;
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, int32> ItemNeeds;
+};
 
-  UPROPERTY(EditAnywhere)
+// * Dynamic data for each customer pop.
+USTRUCT()
+struct FPopEconData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName PopID;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 Population;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float Money;
+
+  UPROPERTY(EditAnywhere, SaveGame)
   float GoodsBoughtPerCapita;  // * Total goods bought / population.
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<EItemWealthType, float> ItemNeedsFulfilled;
 };
 
@@ -154,7 +129,7 @@ USTRUCT()
 struct FEconItem {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName ItemID;
 
   UPROPERTY(EditAnywhere)
@@ -164,7 +139,7 @@ struct FEconItem {
   UPROPERTY(EditAnywhere)
   EItemWealthType ItemWealthType;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float CurrentPrice;  // * Trends towards perfect price.
 
   UPROPERTY(EditAnywhere)
@@ -227,22 +202,22 @@ USTRUCT()
 struct FPriceEffect {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName ID;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<EItemEconType> ItemEconTypes;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<EItemWealthType> ItemWealthTypes;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<EItemType> ItemTypes;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float PriceMultiPercent;  // * Positive and negative, additive.
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 DurationLeft;  // * Duration in days.
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float PriceMultiPercentFalloff;  // * Falloff each day, if any.
 };
 USTRUCT()

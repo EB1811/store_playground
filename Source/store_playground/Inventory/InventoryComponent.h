@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "store_playground/Item/ItemBase.h"
+#include "store_playground/SaveManager/SaveStructs.h"
 #include "InventoryComponent.generated.h"
 
 UENUM()
@@ -25,9 +26,9 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Inventory")
   TArray<TObjectPtr<UItemBase>> ItemsArray;
-  UPROPERTY(EditAnywhere, Category = "Inventory")
+  UPROPERTY(EditAnywhere, Category = "Inventory", SaveGame)
   EInventoryType InventoryType;
-  UPROPERTY(EditAnywhere, Category = "Inventory")
+  UPROPERTY(EditAnywhere, Category = "Inventory", SaveGame)
   int32 MaxSlots;
 
   UPROPERTY(EditAnywhere, Category = "Inventory TESTING | Init State")
@@ -43,7 +44,7 @@ struct FInventoryTransferRes {
 
   bool bSuccess;
 };
-FInventoryTransferRes TransferItem(UInventoryComponent* From,
-                                   UInventoryComponent* To,
-                                   UItemBase* Item,
-                                   int32 Quantity = 1);
+auto TransferItem(UInventoryComponent* From,
+                  UInventoryComponent* To,
+                  UItemBase* Item,
+                  int32 Quantity = 1) -> FInventoryTransferRes;

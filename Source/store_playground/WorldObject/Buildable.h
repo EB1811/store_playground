@@ -36,7 +36,7 @@ public:
   TMap<EBuildableType, bool> IsBuildableMap;
   UPROPERTY(EditAnywhere, Category = "Buildable")
   TMap<EBuildableType, float> BuildingPricesMap;
-  UPROPERTY(EditAnywhere, Category = "Buildable")
+  UPROPERTY(EditAnywhere, Category = "Buildable", SaveGame)
   EBuildableType BuildableType;
 
   UPROPERTY(EditAnywhere, Category = "Buildable")
@@ -61,13 +61,14 @@ USTRUCT()
 struct FBuildableSaveState {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
-  FGuid BuildableId;
+  UPROPERTY(SaveGame)
+  FGuid Id;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(SaveGame)
   EBuildableType BuildableType;
-  UPROPERTY(EditAnywhere)
-  TArray<TObjectPtr<class UItemBase>> ItemsArray;  // Temp.
+
+  UPROPERTY(SaveGame)
+  TMap<FName, FGuid> ComponentsMap;
 };
 FBuildableSaveState SaveBuildableSaveState(ABuildable* Buildable);
 void LoadBuildableSaveState(ABuildable* Buildable, FBuildableSaveState SaveState);

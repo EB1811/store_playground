@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "store_playground/Market/MarketDataStructs.h"
-#include "store_playground/WorldObject/NPCStore.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
 #include "Market.generated.h"
 
@@ -28,10 +27,25 @@ USTRUCT()
 struct FMarketBehaviorParams {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float StoreMarkupMulti;
 };
 
+USTRUCT()
+struct FNpcStoreSaveState {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FGuid Id;
+
+  UPROPERTY(EditAnywhere)
+  TArray<struct FDialogueData> DialogueArray;
+  UPROPERTY(EditAnywhere)
+  TArray<TObjectPtr<class UItemBase>> ItemsArray;
+  UPROPERTY(EditAnywhere)
+  FNpcStoreType NpcStoreType;
+};
+// * Simplified save state since its not saved to disc.
 USTRUCT()
 struct FMarketLevelState {
   GENERATED_BODY()
@@ -67,23 +81,24 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Market")
   FMarketParams MarketParams;
+  // TODO: Move to data manager and store ids.
   UPROPERTY(EditAnywhere, Category = "Market")
-  TArray<class UItemBase*> UnlockableItems;
-  UPROPERTY(EditAnywhere, Category = "Market")
-  TArray<class UItemBase*> EligibleItems;
+  TMap<FName, class UItemBase*> AllItemsMap;
+  UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
+  TArray<FName> EligibleItemIds;
 
-  UPROPERTY(EditAnywhere, Category = "Market")
+  UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
   FMarketBehaviorParams BehaviorParams;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   class AMarketEconomy* MarketEconomy;
 
-  UPROPERTY(EditAnywhere, Category = "Market")
+  UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
   TMap<FName, int32> RecentlySpawnedUniqueNpcsMap;
 
-  UPROPERTY(EditAnywhere, Category = "Market")
+  UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
   TArray<FName> OccurredEconEvents;
-  UPROPERTY(EditAnywhere, Category = "Market")
+  UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
   TMap<FName, int32> RecentEconEventsMap;
 
   auto GetNewRandomItems(int32 Amount) const -> TArray<class UItemBase*>;
@@ -112,7 +127,7 @@ public:
   void UnlockIDs(const FName DataName, const TArray<FName>& Ids);
 
   // ? Move level stuff to separate market level manager?
-  UPROPERTY(EditAnywhere, Category = "Store")
+  UPROPERTY(EditAnywhere, Category = "Market")
   FMarketLevelState MarketLevelState;
   void SaveMarketLevelState();
   void LoadMarketLevelState();
@@ -120,6 +135,5 @@ public:
 
   void InitNPCStores();
   void InitMarketNpcs();
-
   auto TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) -> bool;
 };

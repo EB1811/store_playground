@@ -126,6 +126,7 @@ struct FUpgradeAssetData {
   class UTexture2D* Icon;
 };
 
+// TODO: Add and implement filter requirements for upgrades.
 USTRUCT()
 struct FUpgrade {
   GENERATED_BODY()

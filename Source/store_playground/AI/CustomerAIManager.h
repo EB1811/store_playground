@@ -39,19 +39,19 @@ USTRUCT()
 struct FCustomerAIBehaviorParams {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 MaxCustomers;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float CustomerSpawnChance;  // * Higher means more customers in the store at once.
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float PerformActionChance;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<ECustomerAction, float> ActionWeights;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float AcceptanceMinMulti;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float AcceptanceMaxMulti;
 };
 
@@ -65,39 +65,41 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Classes")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TSubclassOf<class ACustomer> CustomerClass;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  TSubclassOf<class ASpawnPoint> SpawnPointClass;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AGlobalDataManager* GlobalDataManager;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AMarket* Market;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AMarketEconomy* MarketEconomy;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Data")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AStore* Store;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Quests")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AQuestManager* QuestManager;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Params")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   struct FCustomerAIManagerParams ManagerParams;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Behaviour")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager", SaveGame)
   struct FCustomerAIBehaviorParams BehaviorParams;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
-  float LastSpawnTime;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Spawn Customers")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager", SaveGame)
   TMap<FName, int32> RecentlySpawnedUniqueNpcsMap;
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  float LastSpawnTime;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   float LastPickItemCheckTime;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   FTimerHandle PickItemTimer;
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Pick Item")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TMap<FGuid, FGuid> PickingItemIdsMap;  // Item ID to Customer ID
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Customers Array")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TArray<class ACustomer*> AllCustomers;
 
   void StartCustomerAI();
@@ -107,6 +109,7 @@ public:
   void SpawnCustomers();
   void PerformCustomerAILoop();
 
+  void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
   void CustomerPerformAction(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
 
   bool CustomerPickItem(class UCustomerAIComponent* CustomerAI,
@@ -118,7 +121,7 @@ public:
 
   void TickDaysTimedVars();
 
-  UPROPERTY(EditAnywhere, Category = "CustomerAIManager | Upgrade")
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   struct FUpgradeable Upgradeable;
   void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
   void UpgradeFunction(FName FunctionName, const TArray<FName>& Ids, const TMap<FName, float>& ParamValues);

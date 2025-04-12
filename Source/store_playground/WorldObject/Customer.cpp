@@ -5,9 +5,7 @@
 #include "store_playground/Quest/QuestComponent.h"
 
 ACustomer::ACustomer() {
-  Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-  Mesh->SetSimulatePhysics(true);
-  SetRootComponent(Mesh);
+  PrimaryActorTick.bCanEverTick = true;
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));
