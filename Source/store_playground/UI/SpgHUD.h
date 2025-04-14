@@ -9,9 +9,9 @@
 // todo Expand as needed.
 UENUM()
 enum class EHUDState : uint8 {
-  HS_IN_GAME UMETA(DisplayName = "InGame"),
-  HS_PAUSED UMETA(DisplayName = "Paused"),
-  HS_MAINMENU UMETA(DisplayName = "MainMenu")
+  InGame UMETA(DisplayName = "InGame"),
+  Paused UMETA(DisplayName = "Paused"),
+  MainMenu UMETA(DisplayName = "MainMenu")
 };
 
 UCLASS()
@@ -45,12 +45,12 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UpgradeSelectWidgetClass;
 
-  // UPROPERTY()
-  // class UMainMenu* MainMenu;
-  // UFUNCTION(BlueprintCallable, Category = "Widgets")
-  // void OpenMainMenu();
-
   UPROPERTY() EHUDState HUDState;
+
+  UPROPERTY()
+  class UMainMenuWidget* MainMenuWidget;
+  UFUNCTION(BlueprintCallable, Category = "Widgets")
+  void OpenMainMenu();
 
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TArray<class UUserWidget*> OpenedWidgets;

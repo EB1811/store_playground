@@ -81,12 +81,7 @@ void ABuildable::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 }
 #endif
 
-FBuildableSaveState SaveBuildableSaveState(ABuildable* Buildable) {
-  return {Buildable->BuildableId, Buildable->BuildableType, {}};
-}
-
-void LoadBuildableSaveState(ABuildable* Buildable, FBuildableSaveState SaveState) {
-  UE_LOG(LogTemp, Warning, TEXT("Buildable setting to %s"), *UEnum::GetValueAsString(Buildable->BuildableType));
+void LoadBuildableSaveState(ABuildable* Buildable) {
   switch (Buildable->BuildableType) {
     case EBuildableType::StockDisplay: Buildable->SetToStockDisplay(); break;
     case EBuildableType::Decoration: Buildable->SetToDecoration(); break;

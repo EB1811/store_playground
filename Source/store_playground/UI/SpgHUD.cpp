@@ -1,4 +1,5 @@
 #include "SpgHUD.h"
+#include "store_playground/UI/MainMenu/MainMenuWidget.h"
 #include "store_playground/UI/Inventory/PlayerAndContainerWidget.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
@@ -19,13 +20,14 @@
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "Components/TextBlock.h"
 
-ASpgHUD::ASpgHUD() {}
+ASpgHUD::ASpgHUD() { HUDState = EHUDState::InGame; }
 
 void ASpgHUD::DrawHUD() { Super::DrawHUD(); }
 
 void ASpgHUD::BeginPlay() {
   Super::BeginPlay();
 
+  check(MainMenuWidgetClass);
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
   check(BuildableDisplayWidgetClass);
@@ -35,6 +37,10 @@ void ASpgHUD::BeginPlay() {
   check(StockDisplayWidgetClass);
   check(NewspaperWidgetClass);
   check(UpgradeSelectWidgetClass);
+
+  MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
+  MainMenuWidget->AddToViewport(20);
+  MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
@@ -71,9 +77,24 @@ void ASpgHUD::BeginPlay() {
   UpgradeSelectWidget = CreateWidget<UUpgradeListWidget>(GetWorld(), UpgradeSelectWidgetClass);
   UpgradeSelectWidget->AddToViewport(10);
   UpgradeSelectWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  const FInputModeGameOnly InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(false);
 }
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+void ASpgHUD::OpenMainMenu() {
+  if (OpenedWidgets.Contains(MainMenuWidget)) return CloseWidget(MainMenuWidget);
+
+  MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeUIOnly InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(MainMenuWidget);
+}
 
 // ! System state is preserved (e.g., dialogue, negotiation).
 void ASpgHUD::CloseTopOpenMenu() {

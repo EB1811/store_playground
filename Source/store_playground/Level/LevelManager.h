@@ -38,6 +38,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   ELevel LoadedLevel;
 
+  void LoadLevel(ELevel Level);  // Blocking true.
+
   void BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc = nullptr);
   void BeginUnloadLevel(ELevel Level);
 

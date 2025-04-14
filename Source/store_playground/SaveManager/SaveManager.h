@@ -19,12 +19,17 @@ public:
   class APlayerZDCharacter* PlayerCharacter;
   UPROPERTY()
   TMap<FName, AInfo*> SystemsToSave;
+
   UPROPERTY()
   class AMarket* Market;
   UPROPERTY()
   class AMarketEconomy* MarketEconomy;
   UPROPERTY()
   class AStore* Store;
+  UPROPERTY()
+  class AUpgradeManager* UpgradeManager;
+  UPROPERTY()
+  class AGlobalDataManager* GlobalDataManager;
 
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;
@@ -36,14 +41,15 @@ public:
 
   auto SaveAllSystems() -> TArray<FSystemSaveState>;
   void LoadAllSystems(TArray<FSystemSaveState> SystemSaveStates);
-  void MarketEconomyCustomLoad(const FSystemSaveState& SystemSaveState) const;
-
+  void MarketEconomyCustomLoad(const FSystemSaveState& SystemSaveState);
   auto SaveLevels() -> FLevelsSaveData;
   void LoadLevels(FLevelsSaveData LevelsSaveData);
 
   // Only inventory component for now.
   auto SavePlayer() -> TTuple<FPlayerSavaState, FComponentSaveState, TArray<FObjectSaveState>>;
   void LoadPlayer(FComponentSaveState ComponentSaveState, TArray<FObjectSaveState> ObjectSaveStates);
+
+  void ApplyLoadedUpgradeEffects();  // * Apply ChangeData upgrade effects to the data manager.
 
   auto SaveInventoryCSaveState(class UInventoryComponent* InventoryC) const
       -> TTuple<FComponentSaveState, TArray<FObjectSaveState>>;

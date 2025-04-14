@@ -67,7 +67,7 @@ void AStore::LoadStoreLevelState() {
 
       Ar.ArIsSaveGame = true;
       Buildable->Serialize(Ar);
-      LoadBuildableSaveState(Buildable, {});
+      LoadBuildableSaveState(Buildable);
 
       FComponentSaveState ComponentSaveState =
           StoreLevelState.ComponentSaveMap[ActorSaveState.ActorComponentsMap["InventoryComponent"]];

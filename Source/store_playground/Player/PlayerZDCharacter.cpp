@@ -116,20 +116,12 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 
   StorePhaseManager->BuildMode();
 
-  // Temp
-  // SaveManager->LoadAllSystems(SaveManager->SystemSaves);
-  // SaveManager->LoadLevels(SaveManager->LevelsSave);
-  // SaveManager->LoadPlayer(SaveManager->PComponentSave, SaveManager->PObjectSaveStates);
   LevelManager->ReloadCurrentLevel([this]() { SaveManager->LoadCurrentSlotFromDisk(); });
 }
 
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
   HUD->SetAndOpenNewspaper(NewsGen);
 
-  // Temp
-  // SaveManager->SaveAllSystems();
-  // SaveManager->SaveLevels();
-  // SaveManager->SavePlayer();
   SaveManager->CreateNewSaveGame();
 }
 

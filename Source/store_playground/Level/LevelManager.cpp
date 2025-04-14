@@ -17,6 +17,22 @@ void ALevelManager::BeginPlay() {
 
 void ALevelManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void ALevelManager::LoadLevel(ELevel Level) {
+  UE_LOG(LogTemp, Warning, TEXT("Loading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
+
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[Level])) {
+    LoadedLevel = Level;
+
+    Streaming->OnLevelShown.Clear();
+    Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
+
+    FLatentActionInfo LatentInfo;
+    LatentInfo.CallbackTarget = this;
+    LatentInfo.UUID = 1;
+    UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, true, LatentInfo);
+  }
+}
+
 void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc) {
   UE_LOG(LogTemp, Warning, TEXT("Loading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
 

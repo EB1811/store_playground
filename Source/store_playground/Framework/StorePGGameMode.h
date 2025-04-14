@@ -6,9 +6,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "StorePGGameMode.generated.h"
 
-/**
- *
- */
 UCLASS()
 class STORE_PLAYGROUND_API AStorePGGameMode : public AGameModeBase {
   GENERATED_BODY()
@@ -42,4 +39,8 @@ public:
   TSubclassOf<class ANewsGen> NewsGenClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStore> StoreClass;
+
+  // * Storing some properties to be used in the post level load init.
+  UPROPERTY()
+  class ASaveManager* SaveManager;
 };

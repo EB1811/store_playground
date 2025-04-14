@@ -2,8 +2,10 @@
 
 #include "store_playground/Framework/StorePGGameMode.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/StorePhaseManager.h"
+#include "store_playground/Framework/StorePGGameInstance.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/Market.h"
@@ -30,7 +32,7 @@ void AStorePGGameMode::BeginPlay() {
 
   // * Initialize the game world and all systems.
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
-  ASaveManager* SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
+  SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
   AUpgradeManager* UpgradeManager = GetWorld()->SpawnActor<AUpgradeManager>(UpgradeManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
@@ -74,6 +76,8 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->Market = Market;
   SaveManager->MarketEconomy = MarketEconomy;
   SaveManager->Store = Store;
+  SaveManager->UpgradeManager = UpgradeManager;
+  SaveManager->GlobalDataManager = GlobalDataManager;
 
   UpgradeManager->CustomerAIManager = CustomerAIManager;
   UpgradeManager->Market = Market;
@@ -114,7 +118,15 @@ void AStorePGGameMode::BeginPlay() {
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
   NegotiationSystem->QuestManager = QuestManager;
 
-  LevelManager->BeginLoadLevel(ELevel::Store);
+  UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
+
+  // TODO: Don't double init level when loading from save.
+  LevelManager->LoadLevel(ELevel::Store);
+
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+  check(StorePGGameInstance);
+  if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadCurrentSlotFromDisk();
+
   StorePhaseManager->Start();
 
   UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));

@@ -57,18 +57,4 @@ public:
 #endif
 };
 
-USTRUCT()
-struct FBuildableSaveState {
-  GENERATED_BODY()
-
-  UPROPERTY(SaveGame)
-  FGuid Id;
-
-  UPROPERTY(SaveGame)
-  EBuildableType BuildableType;
-
-  UPROPERTY(SaveGame)
-  TMap<FName, FGuid> ComponentsMap;
-};
-FBuildableSaveState SaveBuildableSaveState(ABuildable* Buildable);
-void LoadBuildableSaveState(ABuildable* Buildable, FBuildableSaveState SaveState);
+void LoadBuildableSaveState(ABuildable* Buildable);

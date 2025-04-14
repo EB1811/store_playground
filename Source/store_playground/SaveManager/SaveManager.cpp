@@ -3,6 +3,7 @@
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/AI/CustomerAIManager.h"
+#include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/DayManager/DayManager.h"
@@ -86,6 +87,8 @@ void ASaveManager::LoadCurrentSlotFromDisk() {
 
   LoadAllSystems(CurrentSaveGame->SystemSaveStates);
 
+  ApplyLoadedUpgradeEffects();
+
   FLevelsSaveData LevelsSaveData;
   for (auto& Pair : CurrentSaveGame->LevelSaveStates) LevelsSaveData.LevelSaveMap.Add(Pair.Name, Pair);
   for (auto& Pair : CurrentSaveGame->ActorSaveStates) LevelsSaveData.ActorSaveMap.Add(Pair.Id, Pair);
@@ -132,7 +135,7 @@ void ASaveManager::LoadAllSystems(TArray<FSystemSaveState> SystemSaveStates) {
   MarketEconomyCustomLoad(MarketEconomySaveState);
 }
 
-void ASaveManager::MarketEconomyCustomLoad(const FSystemSaveState& SystemSaveState) const {
+void ASaveManager::MarketEconomyCustomLoad(const FSystemSaveState& SystemSaveState) {
   // To avoid saving everything, first use the data tables to create the default values.
   // Then copy the SaveGame values to the default values (by overwriting, then resetting the non SaveGame values).
 
@@ -213,6 +216,19 @@ auto ASaveManager::SavePlayer() -> TTuple<FPlayerSavaState, FComponentSaveState,
 }
 void ASaveManager::LoadPlayer(FComponentSaveState ComponentSaveState, TArray<FObjectSaveState> ObjectSaveStates) {
   LoadInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent, ComponentSaveState, ObjectSaveStates);
+}
+
+void ASaveManager::ApplyLoadedUpgradeEffects() {
+  TArray<FUpgradeEffect> Effects = GlobalDataManager->GetUpgradeEffectsByIds(UpgradeManager->ActiveEffectIDs);
+  TArray<FUpgradeEffect> ChangeDataEffects = Effects.FilterByPredicate(
+      [](const FUpgradeEffect& Effect) { return Effect.EffectType == EUpgradeEffectType::ChangeData; });
+
+  FUpgradeable Upgradeable = GlobalDataManager->Upgradeable;
+  for (const FUpgradeEffect& Effect : ChangeDataEffects) {
+    check(!Effect.RelevantName.IsNone() && Effect.RelevantValues.Num() > 0);
+
+    Upgradeable.ChangeData(Effect.RelevantName, Effect.RelevantIDs, Effect.RelevantValues);
+  }
 }
 
 auto ASaveManager::SaveInventoryCSaveState(UInventoryComponent* InventoryC) const
