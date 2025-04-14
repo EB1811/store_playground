@@ -90,6 +90,7 @@ void AStorePGGameMode::BeginPlay() {
 
   StorePhaseManager->DayManager = DayManager;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
+  StorePhaseManager->SaveManager = SaveManager;
 
   DayManager->CustomerAIManager = CustomerAIManager;
   DayManager->MarketEconomy = MarketEconomy;
@@ -120,12 +121,13 @@ void AStorePGGameMode::BeginPlay() {
 
   UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
 
-  // TODO: Don't double init level when loading from save.
   LevelManager->LoadLevel(ELevel::Store);
 
+  // ? Could put in post load callback.
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
   if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadCurrentSlotFromDisk();
+  // else LevelManager->InitLevel(ELevel::Store);
 
   StorePhaseManager->Start();
 

@@ -263,6 +263,7 @@ void ASaveManager::LoadInventoryCSaveState(UInventoryComponent* InventoryC,
 
     UItemBase* Item = NewObject<UItemBase>(InventoryC, UItemBase::StaticClass());
     Item->Serialize(OAr);
+    Item->UniqueItemID = FGuid::NewGuid();
 
     for (const auto& Id : Market->EligibleItemIds) {
       if (Id == Item->ItemID) {

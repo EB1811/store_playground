@@ -8,7 +8,7 @@ AccessModifierOffset: -2
 NamespaceIndentation: All
 PointerAlignment: Left
 RemoveBracesLLVM: true
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortBlocksOnASingleLine: true

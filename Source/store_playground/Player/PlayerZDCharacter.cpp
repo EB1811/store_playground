@@ -103,7 +103,11 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
 
 void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }
 
-void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) { HUD->CloseAllMenus(); }
+void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) {
+  HUD->CloseAllMenus();
+
+  // LevelManager->ReloadCurrentLevel([this]() { SaveManager->LoadCurrentSlotFromDisk(); });
+}
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent, Store);
@@ -115,14 +119,12 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
     return;
 
   StorePhaseManager->BuildMode();
-
-  LevelManager->ReloadCurrentLevel([this]() { SaveManager->LoadCurrentSlotFromDisk(); });
 }
 
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
   HUD->SetAndOpenNewspaper(NewsGen);
 
-  SaveManager->CreateNewSaveGame();
+  // SaveManager->CreateNewSaveGame();
 }
 
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
@@ -169,7 +171,7 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
             break;
           }
           case EInteractionType::StockDisplay: {
-            if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
+            // if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
 
             auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
             EnterStockDisplay(DisplayC, DisplayInventoryC);

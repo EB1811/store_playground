@@ -3,6 +3,7 @@
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/DayManager/DayManager.h"
 
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action) {
@@ -86,6 +87,8 @@ void AStorePhaseManager::EndDay() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::EndDay);
 
   DayManager->StartNewDay();
+
+  SaveManager->CreateNewSaveGame();
 }
 
 void AStorePhaseManager::NextPhase() {

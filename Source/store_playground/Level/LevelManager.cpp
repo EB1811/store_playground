@@ -1,5 +1,6 @@
 #include "LevelManager.h"
 #include "Engine/LevelStreaming.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
@@ -30,6 +31,7 @@ void ALevelManager::LoadLevel(ELevel Level) {
     LatentInfo.CallbackTarget = this;
     LatentInfo.UUID = 1;
     UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, true, LatentInfo);
+    // GetWorld()->FlushLevelStreaming();  // ! Breaks component begin play and tick.
   }
 }
 
