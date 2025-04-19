@@ -87,6 +87,8 @@ Content/*
 !/Content/*
 !/Content/**/*.uasset
 !/Content/**/*.umap
+Content/Assets/*
+Content/RawContent/*
 
 # Ignoring starter content since it can be easily downloaded
 Content/StarterContent/*

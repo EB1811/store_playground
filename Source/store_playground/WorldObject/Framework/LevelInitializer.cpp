@@ -28,27 +28,27 @@ void ALevelInitializer::BeginPlay() {
 }
 
 void ALevelInitializer::InitializeStoreLevel() {
-  TArray<AActor*> FoundActors;
-  UGameplayStatics::GetAllActorsOfClass(GetWorld(), RelevantActorClass, FoundActors);
-  UE_LOG(LogTemp, Warning, TEXT("Found %d stores"), FoundActors.Num());
+  // TArray<AActor*> FoundActors;
+  // UGameplayStatics::GetAllActorsOfClass(GetWorld(), RelevantActorClass, FoundActors);
+  // UE_LOG(LogTemp, Warning, TEXT("Found %d stores"), FoundActors.Num());
 
-  for (AActor* Actor : FoundActors) {
-    AStore* Store = Cast<AStore>(Actor);
-    check(Store);
+  // for (AActor* Actor : FoundActors) {
+  //   AStore* Store = Cast<AStore>(Actor);
+  //   check(Store);
 
-    Store->InitStockDisplays();
-  }
+  //   Store->InitStockDisplays();
+  // }
 }
 
 void ALevelInitializer::InitializeMarketLevel() {
-  TArray<AActor*> FoundActors;
-  UGameplayStatics::GetAllActorsOfClass(GetWorld(), RelevantActorClass, FoundActors);
-  UE_LOG(LogTemp, Warning, TEXT("Found %d markets"), FoundActors.Num());
+  // TArray<AActor*> FoundActors;
+  // UGameplayStatics::GetAllActorsOfClass(GetWorld(), RelevantActorClass, FoundActors);
+  // UE_LOG(LogTemp, Warning, TEXT("Found %d markets"), FoundActors.Num());
 
-  for (AActor* Actor : FoundActors) {
-    AMarket* Market = Cast<AMarket>(Actor);
-    check(Market);
+  // for (AActor* Actor : FoundActors) {
+  //   AMarket* Market = Cast<AMarket>(Actor);
+  //   check(Market);
 
-    Market->InitNPCStores();
-  }
+  //    MarketLevel->InitNPCStores();
+  // }
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
-#include "store_playground/Level/LevelManager.h"
+#include "store_playground/Level/LevelStructs.h"
 #include "LevelStreamerActor.generated.h"
 
 // * Responsible for loading and unloading levels dynamically using an overlap.

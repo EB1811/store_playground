@@ -15,9 +15,14 @@ class STORE_PLAYGROUND_API ANpcSpawnPoint : public AActor {
 
 public:
   ANpcSpawnPoint() {
+    if (!Id.IsValid()) Id = FGuid::NewGuid();
+
     PrimaryActorTick.bCanEverTick = false;
     SpawnChance = 0.0f;
   }
+
+  UPROPERTY(EditAnywhere, Category = "NPCStore")
+  FGuid Id;
 
   UPROPERTY(EditAnywhere, Category = "Spawn Point")
   float SpawnChance;

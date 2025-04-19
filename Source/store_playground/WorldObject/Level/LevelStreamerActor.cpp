@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/Level/LevelManager.h"
 
 ALevelStreamerActor::ALevelStreamerActor() {
   PrimaryActorTick.bCanEverTick = false;

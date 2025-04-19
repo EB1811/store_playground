@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "store_playground/Level/LevelManager.h"
+#include "store_playground/Level/LevelStructs.h"
 #include "SpawnPoint.generated.h"
 
 // * Location of spawn.

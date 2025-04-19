@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "store_playground/Level/LevelManager.h"
+#include "store_playground/Level/LevelStructs.h"
 #include "LevelChangeComponent.generated.h"
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))

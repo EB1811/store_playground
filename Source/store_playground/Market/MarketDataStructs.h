@@ -268,6 +268,9 @@ struct FEconEvent {
   FName ID;
 
   UPROPERTY(EditAnywhere)
+  bool bIsUnlocked;
+
+  UPROPERTY(EditAnywhere)
   FName RequirementsFilter;
   UPROPERTY(EditAnywhere)
   float StartChance;
@@ -290,6 +293,9 @@ struct FEconEventRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FName ID;
+
+  UPROPERTY(EditAnywhere)
+  bool bIsUnlockable;
 
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;

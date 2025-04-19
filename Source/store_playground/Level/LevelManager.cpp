@@ -5,8 +5,8 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "UObject/Class.h"
-#include "store_playground/Market/Market.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/Level/MarketLevel.h"
 
 ALevelManager::ALevelManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -61,10 +61,11 @@ void ALevelManager::BeginUnloadLevel(ELevel Level) {
 
 void ALevelManager::OnLevelShown() {
   UE_LOG(LogTemp, Warning, TEXT("Level shown: %s"), *UEnum::GetDisplayValueAsText(LoadedLevel).ToString());
-  InitLevel(LoadedLevel);
 
+  InitLevel(LoadedLevel);
   if (LevelReadyFunc) LevelReadyFunc();
   LevelReadyFunc = nullptr;
+  EnterLevel(LoadedLevel);
 
   if (CurrentLevel != ELevel::None) {
     SaveLevelState(CurrentLevel);
@@ -111,8 +112,18 @@ void ALevelManager::InitLevel(ELevel Level) {
       Store->LoadStoreLevelState();
       break;
     case ELevel::Market:
-      check(Market);
-      Market->LoadMarketLevelState();
+      check(MarketLevel);
+      MarketLevel->LoadLevelState();
+      break;
+  }
+}
+
+void ALevelManager::EnterLevel(ELevel Level) {
+  switch (Level) {
+    case ELevel::Store: break;
+    case ELevel::Market:
+      check(MarketLevel);
+      MarketLevel->EnterLevel();
       break;
   }
 }
@@ -124,8 +135,8 @@ void ALevelManager::SaveLevelState(ELevel Level) {
       Store->SaveStoreLevelState();
       break;
     case ELevel::Market:
-      check(Market);
-      Market->SaveMarketLevelState();
+      check(MarketLevel);
+      MarketLevel->SaveLevelState();
       break;
   }
 }
