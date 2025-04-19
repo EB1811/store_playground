@@ -6,6 +6,7 @@
 #include "store_playground/Market/MarketDataStructs.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Ability/AbilityManager.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 
 ADayManager::ADayManager() {
   PrimaryActorTick.bCanEverTick = false;
@@ -29,6 +30,8 @@ void ADayManager::StartNewDay() {
   Market->TickDaysTimedVars();
   MarketLevel->TickDaysTimedVars();
   NewsGen->TickDaysTimedVars();
+
+  StatisticsGen->CalcDayStatistics();
 
   TArray<struct FEconEvent> EconEvents = Market->ConsiderEconEvents();
 

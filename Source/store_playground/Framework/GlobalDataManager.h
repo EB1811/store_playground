@@ -5,11 +5,7 @@
 #include <any>
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
-#include "store_playground/Dialogue/DialogueDataStructs.h"
-#include "store_playground/Npc/NpcDataStructs.h"
-#include "store_playground/AI/CustomerDataStructs.h"
 #include "store_playground/Market/MarketDataStructs.h"
-#include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
 #include "GlobalDataManager.generated.h"
 

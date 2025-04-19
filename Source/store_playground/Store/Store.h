@@ -50,6 +50,7 @@ public:
   AStore();
 
   virtual void BeginPlay() override;
+  virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Store")
   const class ASaveManager* SaveManager;
@@ -58,7 +59,7 @@ public:
   class TSubclassOf<class AActor> BuildableClass;
 
   UPROPERTY(EditAnywhere, Category = "Store")
-  FStoreLevelState StoreLevelState;
+  class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   float Money;
@@ -68,6 +69,13 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<FStockItem> StoreStockItems;
 
+  void ItemBought(UItemBase* Item, float Price, int32 Quantity = 1);
+  void ItemSold(const UItemBase* Item, float Price, int32 Quantity = 1);
+  void MoneyGained(float Amount);
+  void MoneySpent(float Amount);
+
+  UPROPERTY(EditAnywhere, Category = "Store")
+  FStoreLevelState StoreLevelState;
   void SaveStoreLevelState();
   void LoadStoreLevelState();
   void InitStockDisplays();

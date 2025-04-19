@@ -322,7 +322,7 @@ void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataA
 }
 
 void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
-                                          const UItemBase* Item,
+                                          UItemBase* Item,
                                           bool bIsQuestAssociated,
                                           UQuestComponent* QuestComponent) {
   NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAI->StockDisplayInventory,
@@ -333,7 +333,7 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
 void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UDialogueComponent* DialogueC,
                                     UCustomerAIComponent* CustomerAI,
-                                    const UItemBase* Item) {
+                                    UItemBase* Item) {
   // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
     return EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {

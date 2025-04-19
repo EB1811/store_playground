@@ -52,9 +52,9 @@ public:
   auto InteractStockDisplay() const -> TTuple<class UStockDisplayComponent*, class UInventoryComponent*>;
 
   auto InteractNPCDialogue() const -> TOptional<TArray<FDialogueData>>;
-  auto InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, const class UItemBase*>;
+  auto InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, class UItemBase*>;
   auto InteractUniqueNPCQuest() const
-      -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*>;
+      -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, class UItemBase*>;
 
   auto InteractNpcStore() const
       -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;

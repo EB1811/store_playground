@@ -49,6 +49,8 @@ public:
   TSubclassOf<class AMarketLevel> MarketLevelClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AAbilityManager> AbilityManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AStatisticsGen> StatisticsGenClass;
 
   // * Storing some properties to be used in the post level load init.
   UPROPERTY()

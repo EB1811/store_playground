@@ -31,6 +31,8 @@ public:
   class AMarketEconomy* MarketEconomy;  // * Tick active price effects.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AMarket* Market;  // * Start new day events.
+  UPROPERTY(EditAnywhere, Category = "Store")
+  class AStatisticsGen* StatisticsGen;  // * Store profit history, market history, etc.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AMarketLevel* MarketLevel;  // * TickDaysTimedVars.
   UPROPERTY(EditAnywhere, Category = "DayManager")

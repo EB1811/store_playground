@@ -87,7 +87,7 @@ public:
   float OfferedPrice;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  TArray<const class UItemBase*> NegotiatedItems;
+  TArray<class UItemBase*> NegotiatedItems;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UInventoryComponent* FromInventory;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
@@ -107,7 +107,7 @@ public:
   FOfferResponse CustomerOfferResponse;
 
   void StartNegotiation(class UCustomerAIComponent* _CustomerAI,
-                        const class UItemBase* NegotiatedItem = nullptr,
+                        class UItemBase* NegotiatedItem = nullptr,
                         class UInventoryComponent* _FromInventory = nullptr,
                         bool _bIsQuestAssociated = false,
                         UQuestComponent* _QuestComponent = nullptr,

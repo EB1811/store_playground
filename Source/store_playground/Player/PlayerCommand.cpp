@@ -17,7 +17,7 @@ void APlayerCommand::CommandDialogue(TArray<struct FDialogueData> DialogueArray)
 }
 
 void APlayerCommand::CommandNegotiation(UCustomerAIComponent* CustomerAI,
-                                        const UItemBase* Item,
+                                        UItemBase* Item,
                                         bool bIsQuestAssociated,
                                         UQuestComponent* QuestComponent) {
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
@@ -28,7 +28,7 @@ void APlayerCommand::CommandNegotiation(UCustomerAIComponent* CustomerAI,
 void APlayerCommand::CommandQuest(UQuestComponent* QuestC,
                                   UDialogueComponent* DialogueC,
                                   UCustomerAIComponent* CustomerAI,
-                                  const UItemBase* Item) {
+                                  UItemBase* Item) {
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
   PlayerCharacter->EnterQuest(QuestC, DialogueC, CustomerAI, Item);

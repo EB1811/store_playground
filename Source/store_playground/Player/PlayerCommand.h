@@ -25,12 +25,12 @@ public:
 
   void CommandDialogue(TArray<struct FDialogueData> DialogueArray);
   void CommandNegotiation(class UCustomerAIComponent* CustomerAI,
-                          const class UItemBase* Item,
+                          class UItemBase* Item,
                           bool bIsQuestAssociated = false,
                           class UQuestComponent* QuestComponent = nullptr);
   void CommandQuest(class UQuestComponent* QuestC,
                     class UDialogueComponent* DialogueC,
                     class UCustomerAIComponent* CustomerAI = nullptr,
-                    const class UItemBase* Item = nullptr);
+                    class UItemBase* Item = nullptr);
   void CommandCutscene(TArray<struct FDialogueData> DialogueArray);
 };

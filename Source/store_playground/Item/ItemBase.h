@@ -10,7 +10,7 @@ USTRUCT()
 struct FItemPriceData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float BoughtAt;
 };
 
@@ -44,7 +44,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FItemFlavorData FlavorData;
 
-  UPROPERTY(EditAnywhere, Category = "Item Data")
+  // ? Or keep BoughtAt price in statistics gen?
+  UPROPERTY(EditAnywhere, Category = "Item Data", SaveGame)
   FItemPriceData PriceData;
 
   UFUNCTION(Category = "Item Functions")

@@ -60,7 +60,7 @@ ENegotiationState UNegotiationSystem::GetNextNegotiationState(ENegotiationState 
 }
 
 void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
-                                          const UItemBase* Item,
+                                          UItemBase* Item,
                                           UInventoryComponent* _FromInventory,
                                           bool _bIsQuestAssociated,
                                           UQuestComponent* _QuestComponent,
@@ -148,12 +148,9 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
 }
 
 FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
-  if (CustomerOfferResponse.Accepted)
-    AcceptOffer();
-  else if (CustomerOfferResponse.CounterOffer > 0)
-    OfferPrice(CustomerOfferResponse.CounterOffer);
-  else
-    RejectOffer();
+  if (CustomerOfferResponse.Accepted) AcceptOffer();
+  else if (CustomerOfferResponse.CounterOffer > 0) OfferPrice(CustomerOfferResponse.CounterOffer);
+  else RejectOffer();
 
   return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
 }
@@ -185,15 +182,15 @@ void UNegotiationSystem::NegotiationSuccess() {
   if (Type == NegotiationType::PlayerSell) {
     check(FromInventory);
 
+    for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemSold(NegotiatedItem, OfferedPrice);
     for (const UItemBase* NegotiatedItem : NegotiatedItems) FromInventory->RemoveItem(NegotiatedItem);
-    Store->Money += OfferedPrice;
-    Store->StoreStockItems.RemoveAllSwap(
-        [this](const FStockItem& StockItem) { return NegotiatedItems.Contains(StockItem.Item); });
+    // Store->StoreStockItems.RemoveAllSwap(
+    //     [this](const FStockItem& StockItem) { return NegotiatedItems.Contains(StockItem.Item); });
   } else {
     check(PlayerInventory);
 
+    for (UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemBought(NegotiatedItem, OfferedPrice);
     for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->AddItem(NegotiatedItem);
-    Store->Money -= OfferedPrice;
   }
 
   CustomerAI->PostNegotiation();

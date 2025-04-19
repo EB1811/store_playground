@@ -38,7 +38,7 @@ public:
   ECustomerRequestType RequestType;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  const class UItemBase* RelevantItem;
+  class UItemBase* RelevantItem;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   class UInventoryComponent* StockDisplayInventory;
 
@@ -54,5 +54,5 @@ public:
                                float MarketPrice,
                                float LastOfferedPrice,
                                float PlayerOfferedPrices) const;
-  FOfferResponse ConsiderStockCheck(class UItemBase* Item) const;
+  FOfferResponse ConsiderStockCheck(const class UItemBase* Item) const;
 };

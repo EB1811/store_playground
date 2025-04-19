@@ -12,6 +12,7 @@
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveManager.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 
 AStore::AStore() {
   PrimaryActorTick.bCanEverTick = false;
@@ -25,6 +26,34 @@ void AStore::BeginPlay() {
 
   check(BuildableClass);
 }
+
+void AStore::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
+  Money -= Price * Quantity;
+  Item->PriceData.BoughtAt = Price;
+
+  StatisticsGen->StoreMoneySpent(Price * Quantity);
+}
+void AStore::ItemSold(const UItemBase* Item, float Price, int32 Quantity) {
+  Money += Price * Quantity;
+  StoreStockItems.RemoveAllSwap(
+      [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
+
+  StatisticsGen->ItemDeal({Item->ItemID, Item->PriceData.BoughtAt, Price, Quantity});
+  StatisticsGen->StoreMoneyGained(Price * Quantity);
+}
+void AStore::MoneyGained(float Amount) {
+  Money += Amount;
+
+  StatisticsGen->StoreMoneyGained(Amount);
+}
+void AStore::MoneySpent(float Amount) {
+  Money -= Amount;
+
+  StatisticsGen->StoreMoneySpent(Amount);
+}
+
 void AStore::SaveStoreLevelState() {
   StoreLevelState.ActorSaveMap.Empty();
   StoreLevelState.ComponentSaveMap.Empty();

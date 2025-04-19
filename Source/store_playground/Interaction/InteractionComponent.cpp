@@ -62,8 +62,7 @@ auto UInteractionComponent::InteractNPCDialogue() const -> TOptional<TArray<FDia
   return OwnerDialogueC->DialogueArray;
 }
 
-auto UInteractionComponent::InteractWaitingCustomer() const
-    -> TTuple<class UCustomerAIComponent*, const class UItemBase*> {
+auto UInteractionComponent::InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, class UItemBase*> {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   check(OwnerCustomerAIC);
 
@@ -71,14 +70,14 @@ auto UInteractionComponent::InteractWaitingCustomer() const
 }
 
 auto UInteractionComponent::InteractUniqueNPCQuest() const
-    -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*> {
+    -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, class UItemBase*> {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
   UQuestComponent* OwnerQuestC = GetOwner()->FindComponentByClass<UQuestComponent>();
   check(OwnerDialogueC);
   check(OwnerQuestC);
 
-  const class UItemBase* RelevantItem = OwnerCustomerAIC ? OwnerCustomerAIC->NegotiationAI->RelevantItem : nullptr;
+  class UItemBase* RelevantItem = OwnerCustomerAIC ? OwnerCustomerAIC->NegotiationAI->RelevantItem : nullptr;
 
   return {OwnerDialogueC, OwnerQuestC, OwnerCustomerAIC, RelevantItem};
 }

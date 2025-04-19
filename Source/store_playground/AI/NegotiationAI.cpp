@@ -36,7 +36,7 @@ FOfferResponse UNegotiationAI::ConsiderOffer(bool NpcBuying,
                                             : DialoguesMap[ENegotiationDialogueType::SellItemClose].Dialogues)};
 }
 
-FOfferResponse UNegotiationAI::ConsiderStockCheck(UItemBase* Item) const {
+FOfferResponse UNegotiationAI::ConsiderStockCheck(const UItemBase* Item) const {
   if (Item->ItemType == WantedItemType.ItemType && Item->ItemEconType == WantedItemType.ItemEconType)
     return {true, 0, DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues};
 

@@ -26,6 +26,7 @@
 #include "store_playground/Minigame/MiniGameManager.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Ability/AbilityManager.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -57,6 +58,7 @@ void AStorePGGameMode::BeginPlay() {
   AMarketLevel* MarketLevel = GetWorld()->SpawnActor<AMarketLevel>(MarketLevelClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   AMarketEconomy* MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
+  AStatisticsGen* StatisticsGen = GetWorld()->SpawnActor<AStatisticsGen>(StatisticsGenClass);
   ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
   AMiniGameManager* MiniGameManager = GetWorld()->SpawnActor<AMiniGameManager>(MiniGameManagerClass);
 
@@ -108,6 +110,7 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->MarketEconomy = MarketEconomy;
   DayManager->Market = Market;
   DayManager->MarketLevel = MarketLevel;
+  DayManager->StatisticsGen = StatisticsGen;
   DayManager->NewsGen = NewsGen;
 
   UpgradeManager->CustomerAIManager = CustomerAIManager;
@@ -133,6 +136,7 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->PlayerCommand = PlayerCommand;
 
   Store->SaveManager = SaveManager;
+  Store->StatisticsGen = StatisticsGen;
 
   AbilityManager->GlobalDataManager = GlobalDataManager;
   AbilityManager->Market = Market;
@@ -149,6 +153,10 @@ void AStorePGGameMode::BeginPlay() {
   CustomerAIManager->MarketEconomy = MarketEconomy;
   CustomerAIManager->Store = Store;
   CustomerAIManager->QuestManager = QuestManager;
+
+  StatisticsGen->Store = Store;
+  StatisticsGen->Market = Market;
+  StatisticsGen->MarketEconomy = MarketEconomy;
 
   NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;
 

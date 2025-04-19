@@ -149,13 +149,13 @@ public:
   void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
                      std::function<void()> OnDialogueEndFunc = nullptr);
   void EnterNegotiation(class UCustomerAIComponent* CustomerAI,
-                        const class UItemBase* Item = nullptr,
+                        class UItemBase* Item = nullptr,
                         bool bIsQuestAssociated = false,
                         class UQuestComponent* QuestComponent = nullptr);
   void EnterQuest(class UQuestComponent* QuestC,
                   class UDialogueComponent* DialogueC,
                   class UCustomerAIComponent* CustomerAI = nullptr,
-                  const class UItemBase* Item = nullptr);
+                  class UItemBase* Item = nullptr);
   void EnterCutscene(const TArray<struct FDialogueData> DialogueDataArr);
 
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
