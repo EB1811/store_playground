@@ -29,6 +29,7 @@ void AStore::BeginPlay() {
 
 void AStore::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+// TODO: change all direct store changes to using this.
 void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
   Money -= Price * Quantity;
   Item->PriceData.BoughtAt = Price;
