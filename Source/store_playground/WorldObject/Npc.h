@@ -7,7 +7,6 @@
 #include "Npc.generated.h"
 
 // ? Combine with customer?
-// TODO: Turn into character.
 
 UCLASS()
 class STORE_PLAYGROUND_API ANpc : public APaperZDCharacter {

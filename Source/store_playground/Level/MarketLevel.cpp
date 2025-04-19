@@ -14,6 +14,7 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/WorldObject/NPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
@@ -42,7 +43,8 @@ void AMarketLevel::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void AMarketLevel::EnterLevel() {
   if (FMath::FRand() * 100 >= LevelParams.PlayerMiscDialogueChance) {
-    auto MiscDialogues = GlobalDataManager->GetRandomPlayerMiscDialogue({"Dialogue.Idle", "Dialogue.Level.Market"});
+    auto MiscDialogues =
+        GlobalStaticDataManager->GetRandomPlayerMiscDialogue({"Dialogue.Idle", "Dialogue.Level.Market"});
     PlayerCommand->CommandDialogue(MiscDialogues);
   }
 }
@@ -189,7 +191,7 @@ void AMarketLevel::InitNPCStores() {
     NPCStore->InventoryComponent->ItemsArray.Empty();
     NPCStore->DialogueComponent->DialogueArray.Empty();
 
-    NPCStore->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomNpcStoreDialogue();
+    NPCStore->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomNpcStoreDialogue();
 
     auto NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
         GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
@@ -250,14 +252,14 @@ void AMarketLevel::InitMarketNpcs() {
     Npc->SpawnPointId = SpawnPoint->Id;
 
     Npc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
-    Npc->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomMarketNpcDialogue();
+    Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue();
   }
 }
 
 auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) -> bool {
   if (FMath::FRand() * 100 >= LevelParams.UniqueNpcBaseSpawnChance) return false;
 
-  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(
+  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate(
       [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
   if (EligibleNpcs.Num() <= 0) return false;
 
@@ -270,7 +272,8 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpa
   UniqueNpc->SpawnPointId = SpawnPoint->Id;
 
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
-  UniqueNpc->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
+  UniqueNpc->DialogueComponent->DialogueArray =
+      GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
 
   // Quest override.
   auto MarketQuestChains =
@@ -283,10 +286,12 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpa
       GetWeightedRandomItem<FQuestChainData>(MarketQuestChains, [](const auto& Chain) { return Chain.StartChance; });
   if (FMath::FRand() * 100 >= RandomQuestChainData.StartChance) return true;
 
-  UniqueNpc->QuestComponent->QuestChainData = RandomQuestChainData;
+  UniqueNpc->QuestComponent->ChainID = RandomQuestChainData.ID;
+  UniqueNpc->QuestComponent->CustomerAction = RandomQuestChainData.CustomerAction;
+  UniqueNpc->QuestComponent->QuestOutcomeType = RandomQuestChainData.QuestOutcomeType;
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
   UniqueNpc->DialogueComponent->DialogueArray =
-      GlobalDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
+      GlobalStaticDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
 
   return true;
 }

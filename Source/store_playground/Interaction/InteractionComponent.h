@@ -8,12 +8,10 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "InteractionComponent.generated.h"
 
-// temp: move to player ui controller
-DECLARE_DELEGATE_OneParam(FUIOnInteract, int32);
-
 UENUM()
 enum class EInteractionType : uint8 {
   None UMETA(DisplayName = "None"),
+  Use UMETA(DisplayName = "Use"),
 
   LevelChange UMETA(DisplayName = "Level Change"),
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
@@ -25,7 +23,6 @@ enum class EInteractionType : uint8 {
   StockDisplay UMETA(DisplayName = "StockDisplay"),
   Decoration UMETA(DisplayName = "Decoration"),
 
-  Use UMETA(DisplayName = "Use"),
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
   UniqueNPCQuest UMETA(DisplayName = "Unique Npc Quest"),
@@ -46,20 +43,19 @@ public:
   UPROPERTY(EditAnywhere, Category = "Interaction", SaveGame)
   EInteractionType InteractionType;
 
-  void InteractUse(FUIOnInteract* UIOnInteract = nullptr) const;
+  void InteractUse() const;
 
   auto InteractLevelChange() const -> class ULevelChangeComponent*;
 
   auto InteractUpgradeSelect() const -> class UUpgradeSelectComponent*;
-
   auto InteractBuildable() const -> TOptional<class ABuildable*>;
   auto InteractStockDisplay() const -> TTuple<class UStockDisplayComponent*, class UInventoryComponent*>;
 
   auto InteractNPCDialogue() const -> TOptional<TArray<FDialogueData>>;
   auto InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, const class UItemBase*>;
-
   auto InteractUniqueNPCQuest() const
       -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, const class UItemBase*>;
+
   auto InteractNpcStore() const
       -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;
   auto InteractContainer() const -> class UInventoryComponent*;

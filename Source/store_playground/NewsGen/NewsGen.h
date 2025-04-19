@@ -28,7 +28,7 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "NewsGen")
-  const class AGlobalDataManager* GlobalDataManager;
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
 
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   FNewsGenParams NewsGenParams;
@@ -38,7 +38,6 @@ public:
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TMap<FName, int32> RecentArticlesMap;
 
-  // ? Use ids for saving?
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TArray<FArticle> DaysArticles;
 

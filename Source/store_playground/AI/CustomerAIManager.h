@@ -71,7 +71,7 @@ public:
   TSubclassOf<class ASpawnPoint> SpawnPointClass;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
-  const class AGlobalDataManager* GlobalDataManager;
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")

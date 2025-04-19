@@ -1,5 +1,5 @@
 #include "QuestManager.h"
-#include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/WorldObject/Npc.h"
@@ -17,30 +17,30 @@ TArray<struct FQuestChainData> AQuestManager::GetEligibleQuestChains(const TArra
   for (const auto& QuestInProgress : QuestInProgressMap)
     PrevChainCompletedMap.Add(QuestInProgress.Key, QuestInProgress.Value.ChainCompletedIDs.Last());
 
-  return GlobalDataManager->GetEligibleQuestChains(QuestIDs, QuestsCompleted, PrevChainCompletedMap);
+  return GlobalStaticDataManager->GetEligibleQuestChains(QuestIDs, QuestsCompleted, PrevChainCompletedMap);
 }
 
 void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> MadeChoiceIds, bool bNegotiationSuccess) {
-  const FQuestChainData& QuestChainData = QuestC->QuestChainData;
+  const FQuestChainData& QuestChainData = GlobalStaticDataManager->GetQuestChainById(QuestC->ChainID);
   if (QuestsCompleted.Contains(QuestChainData.QuestID)) return;
 
   switch (QuestChainData.QuestAction) {
     case EQuestAction::Continue:
     case EQuestAction::SplitBranch: {
       QuestInProgressMap.FindOrAdd(QuestChainData.QuestID, {});
-      if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestChainData.ID)) break;
+      if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestC->ChainID)) break;
 
-      QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.ID);
+      QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestC->ChainID);
 
-      if (QuestChainData.QuestOutcomeType == EQuestOutcomeType::DialogueChoice)
+      if (QuestC->QuestOutcomeType == EQuestOutcomeType::DialogueChoice)
         QuestInProgressMap[QuestChainData.QuestID].ChoicesMade.Append(MadeChoiceIds);
 
-      if (QuestChainData.QuestOutcomeType == EQuestOutcomeType::Negotiation)
-        QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestChainData.ID, bNegotiationSuccess);
+      if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
+        QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestC->ChainID, bNegotiationSuccess);
       break;
     }
     case EQuestAction::End: {
-      QuestsCompleted.Add(QuestChainData.ID);
+      QuestsCompleted.Add(QuestC->ChainID);
       if (QuestInProgressMap.Contains(QuestChainData.QuestID)) QuestInProgressMap.Remove(QuestChainData.QuestID);
       break;
     }
@@ -48,5 +48,5 @@ void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> Ma
   }
 
   // ? Store npcs with active quests?
-  QuestC->PostQuest(GlobalDataManager->GetQuestDialogue(QuestChainData.PostDialogueChainID));
+  QuestC->PostQuest(GlobalStaticDataManager->GetQuestDialogue(QuestChainData.PostDialogueChainID));
 }

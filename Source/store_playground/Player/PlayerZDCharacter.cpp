@@ -220,7 +220,6 @@ void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interact
     }
     case EInteractionType::UniqueNPCQuest: {
       auto [Dialogue, QuestC, CustomerAI, Item] = Interactable->InteractUniqueNPCQuest();
-      check(!QuestC->QuestChainData.QuestID.IsNone());
 
       EnterQuest(QuestC, Dialogue, CustomerAI, Item);
       break;
@@ -341,12 +340,12 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
       QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
     });
 
-  switch (QuestC->QuestChainData.CustomerAction) {
+  switch (QuestC->CustomerAction) {
     case ECustomerAction::PickItem:
     case ECustomerAction::StockCheck:
     case ECustomerAction::SellItem:
       check(CustomerAI->NegotiationAI->RelevantItem);
-      if (QuestC->QuestChainData.QuestOutcomeType == EQuestOutcomeType::Negotiation)
+      if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
         EnterDialogue(DialogueC->DialogueArray,
                       [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else

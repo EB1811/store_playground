@@ -63,7 +63,6 @@ void AMainMenuControlHUD::StartNewGame() {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   StorePGGameInstance->bFromSaveGame = false;
 
-  // TODO: Add fake loading screen.
   UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
 }
 

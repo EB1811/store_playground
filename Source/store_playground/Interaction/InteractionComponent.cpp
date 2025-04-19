@@ -22,7 +22,7 @@ UInteractionComponent::UInteractionComponent() {
 
 void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
 
-void UInteractionComponent::InteractUse(FUIOnInteract* UIOnInteract) const {}
+void UInteractionComponent::InteractUse() const {}
 
 auto UInteractionComponent::InteractLevelChange() const -> ULevelChangeComponent* {
   ULevelChangeComponent* OwnerLevelChangeC = GetOwner()->FindComponentByClass<ULevelChangeComponent>();

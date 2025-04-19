@@ -75,9 +75,9 @@ USTRUCT()
 struct FQuestChainData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere, SaveGame)
+  UPROPERTY(EditAnywhere)
   FName QuestID;
-  UPROPERTY(EditAnywhere, SaveGame)
+  UPROPERTY(EditAnywhere)
   FName ID;  // * For tracking quest chains.
   UPROPERTY(EditAnywhere, SaveGame)
   EQuestChainType QuestChainType;

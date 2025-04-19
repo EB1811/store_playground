@@ -12,7 +12,7 @@
 #include "AIController.h"
 
 UCustomerAIComponent::UCustomerAIComponent() {
-  PrimaryComponentTick.bCanEverTick = true;
+  PrimaryComponentTick.bCanEverTick = false;
   PrimaryComponentTick.TickInterval = 5.0f;
 
   if (!CustomerID.IsValid()) CustomerID = FGuid::NewGuid();
@@ -32,17 +32,6 @@ void UCustomerAIComponent::TickComponent(float DeltaTime,
                                          ELevelTick TickType,
                                          FActorComponentTickFunction* ThisTickFunction) {
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-  // TODO: Move to customer AI manager.
-  switch (CustomerState) {
-    case ECustomerState::Browsing:
-    case ECustomerState::Requesting:
-    case ECustomerState::Negotiating: break;
-    case ECustomerState::Leaving:
-      // * Leave the store.
-      break;
-    default: break;
-  }
 }
 
 void UCustomerAIComponent::StartNegotiation() { CustomerState = ECustomerState::Negotiating; }

@@ -64,10 +64,12 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  UPROPERTY(EditAnywhere, Category = "Store")
+  UPROPERTY(EditAnywhere, Category = "Market Level")
   const class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AGlobalDataManager* GlobalDataManager;
+  UPROPERTY(EditAnywhere, Category = "Market Level")
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "Market Level")

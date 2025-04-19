@@ -30,6 +30,8 @@ public:
   class AUpgradeManager* UpgradeManager;
   UPROPERTY()
   class AGlobalDataManager* GlobalDataManager;
+  UPROPERTY()
+  class AGlobalStaticDataManager* GlobalStaticDataManager;
 
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;

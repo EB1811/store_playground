@@ -30,7 +30,7 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "QuestManager")
-  const class AGlobalDataManager* GlobalDataManager;
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
 
   UPROPERTY(EditAnywhere, Category = "QuestManager")
   class TSubclassOf<class ANpc> NpcClass;

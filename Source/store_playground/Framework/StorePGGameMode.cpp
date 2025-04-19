@@ -4,6 +4,7 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Framework/StorePGGameInstance.h"
 #include "store_playground/AI/CustomerAIManager.h"
@@ -45,6 +46,8 @@ void AStorePGGameMode::BeginPlay() {
   APlayerCommand* PlayerCommand = GetWorld()->SpawnActor<APlayerCommand>(PlayerCommandClass);
   AUpgradeManager* UpgradeManager = GetWorld()->SpawnActor<AUpgradeManager>(UpgradeManagerClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
+  AGlobalStaticDataManager* GlobalStaticDataManager =
+      GetWorld()->SpawnActor<AGlobalStaticDataManager>(GlobalStaticDataManagerClass);
   AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
   AStore* Store = GetWorld()->SpawnActor<AStore>(StoreClass);
@@ -79,15 +82,9 @@ void AStorePGGameMode::BeginPlay() {
 
   SaveManager->PlayerCharacter = PlayerCharacter;
   SaveManager->SystemsToSave = {
-      {"UpgradeManager", UpgradeManager},
-      {"GlobalDataManager", GlobalDataManager},
-      {"DayManager", DayManager},
-      {"Store", Store},
-      {"CustomerAIManager", CustomerAIManager},
-      {"QuestManager", QuestManager},
-      {"Market", Market},
-      {"MarketEconomy", MarketEconomy},
-      {"NewsGen", NewsGen},
+      {"UpgradeManager", UpgradeManager},       {"DayManager", DayManager},     {"Store", Store},
+      {"CustomerAIManager", CustomerAIManager}, {"QuestManager", QuestManager}, {"Market", Market},
+      {"MarketEconomy", MarketEconomy},         {"NewsGen", NewsGen},
 
   };
   SaveManager->Market = Market;
@@ -95,6 +92,7 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->Store = Store;
   SaveManager->UpgradeManager = UpgradeManager;
   SaveManager->GlobalDataManager = GlobalDataManager;
+  SaveManager->GlobalStaticDataManager = GlobalStaticDataManager;
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
 
@@ -115,12 +113,20 @@ void AStorePGGameMode::BeginPlay() {
   UpgradeManager->CustomerAIManager = CustomerAIManager;
   UpgradeManager->Market = Market;
   UpgradeManager->GlobalDataManager = GlobalDataManager;
+  UpgradeManager->GlobalStaticDataManager = GlobalStaticDataManager;
   UpgradeManager->AbilityManager = AbilityManager;
 
   GlobalDataManager->PlayerCharacter = PlayerCharacter;
+  GlobalDataManager->DayManager = DayManager;
+  GlobalDataManager->Store = Store;
+  GlobalDataManager->QuestManager = QuestManager;
+  GlobalDataManager->Market = Market;
+
+  GlobalStaticDataManager->GlobalDataManager = GlobalDataManager;
 
   MarketLevel->SaveManager = SaveManager;
   MarketLevel->GlobalDataManager = GlobalDataManager;
+  MarketLevel->GlobalStaticDataManager = GlobalStaticDataManager;
   MarketLevel->QuestManager = QuestManager;
   MarketLevel->MiniGameManager = MiniGameManager;
   MarketLevel->Market = Market;
@@ -131,19 +137,20 @@ void AStorePGGameMode::BeginPlay() {
   AbilityManager->GlobalDataManager = GlobalDataManager;
   AbilityManager->Market = Market;
 
-  QuestManager->GlobalDataManager = GlobalDataManager;
+  QuestManager->GlobalStaticDataManager = GlobalStaticDataManager;
 
   Market->GlobalDataManager = GlobalDataManager;
+  Market->GlobalStaticDataManager = GlobalStaticDataManager;
   Market->QuestManager = QuestManager;
   Market->MarketEconomy = MarketEconomy;
 
-  CustomerAIManager->GlobalDataManager = GlobalDataManager;
+  CustomerAIManager->GlobalStaticDataManager = GlobalStaticDataManager;
   CustomerAIManager->Market = Market;
   CustomerAIManager->MarketEconomy = MarketEconomy;
   CustomerAIManager->Store = Store;
   CustomerAIManager->QuestManager = QuestManager;
 
-  NewsGen->GlobalDataManager = GlobalDataManager;
+  NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;
 
   MiniGameManager->Market = Market;
 

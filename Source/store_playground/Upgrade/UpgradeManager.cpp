@@ -5,6 +5,7 @@
 #include "store_playground/Market/Market.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 
 AUpgradeManager::AUpgradeManager() {
   PrimaryActorTick.bCanEverTick = false;
@@ -17,11 +18,11 @@ void AUpgradeManager::BeginPlay() { Super::BeginPlay(); }
 void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
-  return GlobalDataManager->GetAvailableUpgrades(UpgradeClass, SelectedUpgradeIDs);
+  return GlobalStaticDataManager->GetAvailableUpgrades(UpgradeClass, SelectedUpgradeIDs);
 }
 
 auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
-  const auto& AllSelectedUpgrades = GlobalDataManager->GetUpgradesByIds(SelectedUpgradeIDs);
+  const auto& AllSelectedUpgrades = GlobalStaticDataManager->GetUpgradesByIds(SelectedUpgradeIDs);
   return AllSelectedUpgrades.FilterByPredicate(
       [&](const FUpgrade& Upgrade) { return Upgrade.UpgradeClass == UpgradeClass; });
 }
@@ -36,9 +37,9 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
 
   UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 
-  FUpgrade Upgrade = GlobalDataManager->GetUpgradeById(UpgradeId);
+  FUpgrade Upgrade = GlobalStaticDataManager->GetUpgradeById(UpgradeId);
 
-  TArray<FUpgradeEffect> Effects = GlobalDataManager->GetUpgradeEffectsByIds(Upgrade.UpgradeEffectIDs);
+  TArray<FUpgradeEffect> Effects = GlobalStaticDataManager->GetUpgradeEffectsByIds(Upgrade.UpgradeEffectIDs);
   for (const FUpgradeEffect& Effect : Effects) {
     FUpgradeable SystemUpgradeable = UpgradeableMap[Effect.EffectSystem];
 

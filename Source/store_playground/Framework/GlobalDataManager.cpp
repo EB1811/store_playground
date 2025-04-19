@@ -28,27 +28,17 @@ AGlobalDataManager::AGlobalDataManager() {
 void AGlobalDataManager::BeginPlay() {
   Super::BeginPlay();
 
-  check(GenericCustomersDataTable && WantedItemTypesDataTable && UniqueNpcDataTable && PlayerMiscDialoguesTable &&
-        UniqueNpcDialoguesTable && QuestDialoguesTable && CustomerDialoguesTable && MarketNpcDialoguesTable &&
-        FriendlyNegDialoguesTable.DataTable && NeutralNegDialoguesTable.DataTable &&
-        HostileNegDialoguesTable.DataTable && QuestChainDataDataTable && NpcStoreTypesDataTable &&
-        NpcStoreDialoguesTable && PriceEffectsDataTable && EconEventsDataTable && ArticlesDataTable && UpgradesTable &&
-        UpgradeEffectsTable && EconEventAbilitiesTable);
+  check(NpcStoreTypesDataTable && EconEventsDataTable && EconEventAbilitiesTable);
 
-  InitializeCustomerData();
-  InitializeNPCData();
-  InitializeDialogueData();
-  InitializeQuestChainsData();
   InitializeNpcStoreData();
   InitializeMarketData();
-  InitializeNewsData();
   InitializeUpgradesData();
 }
 
 void AGlobalDataManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 template <typename T>
-bool ApplyOperator(const FString& Operator, const T& Value1, const T& Value2) {
+inline bool ApplyOperator(const FString& Operator, const T& Value1, const T& Value2) {
   if (Operator == TEXT("=")) return FMath::IsNearlyEqual(Value1, Value2, KINDA_SMALL_NUMBER);
   if (Operator == TEXT("!=")) return !FMath::IsNearlyEqual(Value1, Value2, KINDA_SMALL_NUMBER);
   if (Operator == TEXT("<")) return Value1 < Value2;
@@ -59,23 +49,23 @@ bool ApplyOperator(const FString& Operator, const T& Value1, const T& Value2) {
   return false;
 }
 template <>
-bool ApplyOperator<FName>(const FString& Operator, const FName& Value1, const FName& Value2) {
+inline bool ApplyOperator<FName>(const FString& Operator, const FName& Value1, const FName& Value2) {
   if (Operator == TEXT("=")) return Value1 == Value2;
   if (Operator == TEXT("!=")) return Value1 != Value2;
 
   return false;
 }
 template <>
-bool ApplyOperator<FString>(const FString& Operator, const FString& Value1, const FString& Value2) {
+inline bool ApplyOperator<FString>(const FString& Operator, const FString& Value1, const FString& Value2) {
   if (Operator == TEXT("=")) return Value1.Equals(Value2);
   if (Operator == TEXT("!=")) return !Value1.Equals(Value2);
 
   return false;
 }
 template <>
-bool ApplyOperator<const TArray<FName>>(const FString& Operator,
-                                        const TArray<FName>& Value1,
-                                        const TArray<FName>& Value2) {
+inline bool ApplyOperator<const TArray<FName>>(const FString& Operator,
+                                               const TArray<FName>& Value1,
+                                               const TArray<FName>& Value2) {
   // Array contains all.
   if (Operator == TEXT("contains")) {
     for (const FName& Value : Value2)
@@ -86,7 +76,7 @@ bool ApplyOperator<const TArray<FName>>(const FString& Operator,
   return false;
 }
 
-bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, const FString& ValueString) {
+inline bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, const FString& ValueString) {
   if (Operator == TEXT("contains")) {
     TArray<FString> ValueArray;
     if (ValueString.Contains("[") && ValueString.Contains(",") && ValueString.Contains("]"))
@@ -211,16 +201,15 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
   const TArray<FName> InventoryItems = FormIdList<TObjectPtr<UItemBase>>(
       PlayerCharacter->PlayerInventoryComponent->ItemsArray, [](const UItemBase* Item) { return Item->ItemID; });
   TArray<FName> MadeDialogueChoices = {};
-  for (const auto& Choice : PlayerCharacter->QuestManager->QuestInProgressMap)
-    MadeDialogueChoices.Append(Choice.Value.ChoicesMade);
+  for (const auto& Choice : QuestManager->QuestInProgressMap) MadeDialogueChoices.Append(Choice.Value.ChoicesMade);
   TArray<FName> RecentEconEvents = {};
-  PlayerCharacter->Market->RecentEconEventsMap.GetKeys(RecentEconEvents);
+  Market->RecentEconEventsMap.GetKeys(RecentEconEvents);
 
   const TMap<EReqFilterOperand, std::any> GameDataMap = {
-      {EReqFilterOperand::Time, PlayerCharacter->DayManager->CurrentDay},
-      {EReqFilterOperand::Money, PlayerCharacter->Store->Money},
+      {EReqFilterOperand::Time, DayManager->CurrentDay},
+      {EReqFilterOperand::Money, Store->Money},
       {EReqFilterOperand::Inventory, InventoryItems},
-      {EReqFilterOperand::QuestsCompleted, PlayerCharacter->QuestManager->QuestsCompleted},
+      {EReqFilterOperand::QuestsCompleted, QuestManager->QuestsCompleted},
       {EReqFilterOperand::MadeDialogueChoices, MadeDialogueChoices},
       {EReqFilterOperand::RecentEconEvents, RecentEconEvents},
   };
@@ -244,142 +233,6 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
   return GameDataMap;
 }
 
-TArray<struct FUniqueNpcData> AGlobalDataManager::GetEligibleNpcs() const {
-  const auto GameDataMap = GetGameDataMap();
-  return UniqueNpcArray.FilterByPredicate(
-      [&](const FUniqueNpcData& Npc) { return EvaluateRequirementsFilter(Npc.SpawnRequirementsFilter, GameDataMap); });
-}
-
-TArray<struct FQuestChainData> AGlobalDataManager::GetEligibleQuestChains(
-    const TArray<FName>& QuestIDs,
-    TArray<FName> CompletedQuestIDs,
-    TMap<FName, FName> PrevChainCompletedMap) const {
-  auto FilteredQuestChains = QuestChainsArray.FilterByPredicate([&](const FQuestChainData& Chain) {
-    return QuestIDs.Contains(Chain.QuestID) && (Chain.bIsRepeatable || !CompletedQuestIDs.Contains(Chain.QuestID));
-  });
-
-  // Quest in progress tracking.
-  TArray<struct FQuestChainData> QuestChainToStart;  // For each quest.
-  for (const FQuestChainData& Chain : FilteredQuestChains)
-    if (!PrevChainCompletedMap.Contains(Chain.QuestID) &&
-        !QuestChainToStart.ContainsByPredicate(
-            [&](const FQuestChainData& ChainToStart) { return ChainToStart.QuestID == Chain.QuestID; }))
-      QuestChainToStart.Add(Chain);
-  for (const auto& QuestInProgress : PrevChainCompletedMap) {
-    const FName AtQuestChainID = QuestInProgress.Value;
-    const int32 AtQuestChainIndex = FilteredQuestChains.IndexOfByPredicate(
-        [&](const FQuestChainData& Chain) { return Chain.ID == AtQuestChainID; });
-    check(AtQuestChainIndex != INDEX_NONE);
-
-    switch (FilteredQuestChains[AtQuestChainIndex].QuestAction) {
-      case EQuestAction::End: {
-        break;
-      }
-      case EQuestAction::Continue: {
-        QuestChainToStart.Add(FilteredQuestChains[AtQuestChainIndex + 1]);
-        break;
-      }
-      case EQuestAction::SplitBranch: {
-        int32 BranchesAmount = FilteredQuestChains[AtQuestChainIndex].BranchesAmount;
-        int32 IgnoreNext = 0;  // Ignoring inner branches.
-        for (int32 i = AtQuestChainIndex + 1; i < FilteredQuestChains.Num(); i++) {
-          if (FilteredQuestChains[i].QuestChainType == EQuestChainType::Branch) {
-            if (IgnoreNext > 0) {
-              IgnoreNext -= 1;
-              continue;
-            }
-
-            QuestChainToStart.Add(FilteredQuestChains[i]);
-            BranchesAmount--;
-            if (BranchesAmount <= 0) break;
-          }
-          if (FilteredQuestChains[i].QuestAction == EQuestAction::SplitBranch)
-            IgnoreNext = FilteredQuestChains[i].BranchesAmount;
-        }
-        break;
-      }
-      default: checkNoEntry();
-    }
-  }
-
-  // Evaluate last since it is the most expensive.
-  const auto GameDataMap = GetGameDataMap();
-  return QuestChainToStart.FilterByPredicate([&](const FQuestChainData& Chain) {
-    return EvaluateRequirementsFilter(Chain.StartRequirementsFilter, GameDataMap);
-  });
-}
-
-inline TArray<struct FDialogueData> GetRandomDialogue(const TArray<struct FDialogueData>& DialogueArray) {
-  TArray<struct FDialogueData> RandomDialogue;
-
-  int32 MapSize = DialogueArray.Num();
-  int32 RandomIndex = FMath::RandRange(0, MapSize - 1);
-  for (int32 i = RandomIndex - 1; i >= 0; i--) {
-    if (DialogueArray[i].DialogueChainID != DialogueArray[RandomIndex].DialogueChainID) break;
-    RandomIndex = i;
-  }
-
-  for (int32 i = RandomIndex; i < MapSize; i++) {
-    if (DialogueArray[i].DialogueChainID != DialogueArray[RandomIndex].DialogueChainID) break;
-    RandomDialogue.Add(DialogueArray[i]);
-  }
-
-  return RandomDialogue;
-}
-
-TArray<struct FDialogueData> AGlobalDataManager::GetQuestDialogue(const FName& DialogueChainID) const {
-  check(QuestDialoguesMap.Contains(DialogueChainID));
-  return QuestDialoguesMap[DialogueChainID].Dialogues;
-}
-
-TArray<struct FDialogueData> AGlobalDataManager::GetRandomPlayerMiscDialogue(const TArray<FName>& DialogueTags) const {
-  TArray<FGameplayTag> TagsArray;
-  for (const auto& TagString : DialogueTags) {
-    auto Tag = FGameplayTag::RequestGameplayTag(TagString);
-    check(Tag.IsValid());
-    TagsArray.Add(Tag);
-  }
-  FGameplayTagContainer TagsContainer = FGameplayTagContainer::CreateFromArray(TagsArray);
-
-  TArray<FDialogueData> Filtered = PlayerMiscDialogues.FilterByPredicate(
-      [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAll(TagsContainer); });
-  return GetRandomDialogue(Filtered);
-}
-
-TArray<struct FDialogueData> AGlobalDataManager::GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const {
-  FName RandomDialogueChainID = DialogueChainIDs[FMath::RandRange(0, DialogueChainIDs.Num() - 1)];
-
-  return UniqueNpcDialoguesMap[RandomDialogueChainID].Dialogues;
-}
-
-TArray<struct FDialogueData> AGlobalDataManager::GetRandomCustomerDialogue() const {
-  return GetRandomDialogue(CustomerDialogues);
-}
-
-TArray<struct FDialogueData> AGlobalDataManager::GetRandomMarketNpcDialogue() const {
-  return GetRandomDialogue(MarketNpcDialogues);
-}
-
-TArray<struct FDialogueData> AGlobalDataManager::GetRandomNpcStoreDialogue() const {
-  return GetRandomDialogue(NpcStoreDialogues);
-}
-
-TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalDataManager::GetRandomNegDialogueMap(
-    ECustomerAttitude Attitude) const {
-  auto& DialoguesMap = Attitude == ECustomerAttitude::Friendly  ? FriendlyDialoguesMap
-                       : Attitude == ECustomerAttitude::Neutral ? NeutralDialoguesMap
-                                                                : HostileDialoguesMap;
-
-  TMap<ENegotiationDialogueType, FDialoguesArray> RandomDialogueIndexMap;
-  for (auto Type : TEnumRange<ENegotiationDialogueType>()) {
-    RandomDialogueIndexMap.Add(Type, {});
-
-    auto& Dialogues = DialoguesMap[Type].Dialogues;
-    RandomDialogueIndexMap[Type].Dialogues = GetRandomDialogue(Dialogues);
-  }
-  return RandomDialogueIndexMap;
-}
-
 TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(const TArray<FName>& OccurredEconEvents) const {
   const auto GameDataMap = GetGameDataMap();
   return EconEventsArray.FilterByPredicate([&](const FEconEvent& Event) {
@@ -390,38 +243,7 @@ TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(const TArray
 TArray<struct FEconEvent> AGlobalDataManager::GetEconEventsByIds(const TArray<FName>& EventIDs) const {
   return EconEventsArray.FilterByPredicate([&](const FEconEvent& Event) { return EventIDs.Contains(Event.ID); });
 }
-TArray<struct FPriceEffect> AGlobalDataManager::GetPriceEffects(const TArray<FName>& PriceEffectIDs) const {
-  return PriceEffectsArray.FilterByPredicate(
-      [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.ID); });
-}
 
-TArray<struct FArticle> AGlobalDataManager::GetEligibleArticles(const TArray<FName>& PublishedArticles) const {
-  const auto GameDataMap = GetGameDataMap();
-  return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
-    return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) &&
-           EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
-  });
-}
-FArticle AGlobalDataManager::GetArticle(const FName& ArticleID) const {
-  return *ArticlesArray.FindByPredicate([&](const FArticle& Article) { return Article.ArticleID == ArticleID; });
-}
-
-FUpgrade AGlobalDataManager::GetUpgradeById(const FName& UpgradeID) const {
-  return *UpgradesArray.FindByPredicate([&](const FUpgrade& Upgrade) { return Upgrade.ID == UpgradeID; });
-}
-TArray<struct FUpgrade> AGlobalDataManager::GetUpgradesByIds(const TArray<FName>& UpgradeIDs) const {
-  return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) { return UpgradeIDs.Contains(Upgrade.ID); });
-}
-TArray<struct FUpgradeEffect> AGlobalDataManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const {
-  return UpgradeEffectsArray.FilterByPredicate(
-      [&](const FUpgradeEffect& Effect) { return EffectIDs.Contains(Effect.ID); });
-}
-TArray<struct FUpgrade> AGlobalDataManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass,
-                                                                 const TArray<FName>& SelectedUpgradeIDs) const {
-  return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) {
-    return Upgrade.UpgradeClass == UpgradeClass && !SelectedUpgradeIDs.Contains(Upgrade.ID);
-  });
-}
 auto AGlobalDataManager::GetEconEventAbilitiesByIds(const TArray<FName>& AbilityIDs) const
     -> TArray<struct FEconEventAbility> {
   return EconEventAbilitiesArray.FilterByPredicate(
@@ -453,178 +275,6 @@ void AGlobalDataManager::ChangeData(const FName DataName,
   }
 }
 
-void AGlobalDataManager::InitializeCustomerData() {
-  GenericCustomersArray.Empty();
-  TArray<FCustomerDataRow*> GenericCustomersRows;
-  GenericCustomersDataTable->GetAllRows<FCustomerDataRow>("", GenericCustomersRows);
-  for (auto* Row : GenericCustomersRows)
-    GenericCustomersArray.Add({
-        Row->CustomerID,
-        Row->LinkedPopID,
-        Row->CustomerName,
-        Row->InitAttitude,
-        Row->AssetData,
-    });
-
-  WantedItemTypesArray.Empty();
-  TArray<FWantedItemTypeRow*> WantedItemTypesRows;
-  WantedItemTypesDataTable->GetAllRows<FWantedItemTypeRow>("", WantedItemTypesRows);
-  for (auto* Row : WantedItemTypesRows)
-    WantedItemTypesArray.Add({
-        Row->WantedItemTypeID,
-        Row->WantedItemTypeName,
-        Row->ItemType,
-        Row->ItemEconType,
-    });
-
-  check(GenericCustomersArray.Num() > 0);
-  check(WantedItemTypesArray.Num() > 0);
-
-  GenericCustomersDataTable = nullptr;
-  WantedItemTypesDataTable = nullptr;
-}
-
-inline void AddDialogueTableRows(TArray<struct FDialogueData>& DialogueDataArray, const UDataTable* DialogueDataTable) {
-  DialogueDataArray.Empty();
-  TArray<FDialogueDataTable*> Rows;
-  DialogueDataTable->GetAllRows<FDialogueDataTable>("", Rows);
-  for (auto* Row : Rows) {
-    DialogueDataArray.Add({
-        Row->DialogueChainID,
-        Row->DialogueID,
-        Row->DialogueType,
-        Row->DialogueText,
-        Row->Action,
-        Row->DialogueSpeaker,
-        Row->ChoicesAmount,
-        Row->DialogueTags,
-    });
-  }
-}
-inline void AddDialogueTableRows(TMap<FName, FDialoguesArray>& DialogueDataMap, const UDataTable* DialogueDataTable) {
-  DialogueDataMap.Empty();
-  TArray<FDialogueDataTable*> Rows;
-  DialogueDataTable->GetAllRows<FDialogueDataTable>("", Rows);
-  for (auto* Row : Rows) {
-    DialogueDataMap.FindOrAdd(Row->DialogueChainID, {});
-    DialogueDataMap[Row->DialogueChainID].Dialogues.Add({
-        Row->DialogueChainID,
-        Row->DialogueID,
-        Row->DialogueType,
-        Row->DialogueText,
-        Row->Action,
-        Row->DialogueSpeaker,
-        Row->ChoicesAmount,
-        Row->DialogueTags,
-    });
-  }
-}
-
-void AGlobalDataManager::InitializeDialogueData() {
-  AddDialogueTableRows(PlayerMiscDialogues, PlayerMiscDialoguesTable);
-  AddDialogueTableRows(UniqueNpcDialoguesMap, UniqueNpcDialoguesTable);
-  AddDialogueTableRows(QuestDialoguesMap, QuestDialoguesTable);
-  AddDialogueTableRows(CustomerDialogues, CustomerDialoguesTable);
-  AddDialogueTableRows(MarketNpcDialogues, MarketNpcDialoguesTable);
-  AddDialogueTableRows(NpcStoreDialogues, NpcStoreDialoguesTable);
-
-  FriendlyDialoguesMap.Empty();
-  for (auto Type : TEnumRange<ENegotiationDialogueType>()) FriendlyDialoguesMap.Add(Type, {});
-  TArray<FNegotiationDialoguesDataTable*> FriendlyRows;
-  FriendlyNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(FriendlyRows, TEXT("Friendly Dialogues"));
-  for (FNegotiationDialoguesDataTable* Row : FriendlyRows)
-    FriendlyDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
-                                                              Row->DialogueText, Row->Action, Row->DialogueSpeaker,
-                                                              Row->ChoicesAmount, Row->DialogueTags});
-
-  NeutralDialoguesMap.Empty();
-  for (auto Type : TEnumRange<ENegotiationDialogueType>()) NeutralDialoguesMap.Add(Type, {});
-  TArray<FNegotiationDialoguesDataTable*> NeutralRows;
-  NeutralNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(NeutralRows, TEXT("Neutral Dialogues"));
-  for (FNegotiationDialoguesDataTable* Row : NeutralRows)
-    NeutralDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
-                                                             Row->DialogueText, Row->Action, Row->DialogueSpeaker,
-                                                             Row->ChoicesAmount, Row->DialogueTags});
-
-  HostileDialoguesMap.Empty();
-  for (auto Type : TEnumRange<ENegotiationDialogueType>()) HostileDialoguesMap.Add(Type, {});
-  TArray<FNegotiationDialoguesDataTable*> HostileRows;
-  HostileNegDialoguesTable.GetRows<FNegotiationDialoguesDataTable>(HostileRows, TEXT("Hostile Dialogues"));
-  for (FNegotiationDialoguesDataTable* Row : HostileRows)
-    HostileDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
-                                                             Row->DialogueText, Row->Action, Row->DialogueSpeaker,
-                                                             Row->ChoicesAmount, Row->DialogueTags});
-
-  check(PlayerMiscDialogues.Num() > 0);
-  check(UniqueNpcDialoguesMap.Num() > 0);
-  check(QuestDialoguesMap.Num() > 0);
-  check(CustomerDialogues.Num() > 0);
-  check(MarketNpcDialogues.Num() > 0);
-  check(NpcStoreDialogues.Num() > 0);
-  // for (auto Type : TEnumRange<ENegotiationDialogueType>())
-  //   check(FriendlyDialoguesMap[Type].Dialogues.Num() > 0 && NeutralDialoguesMap[Type].Dialogues.Num() > 0 &&
-  //         HostileDialoguesMap[Type].Dialogues.Num() > 0);
-
-  UniqueNpcDialoguesTable = nullptr;
-  QuestDialoguesTable = nullptr;
-  CustomerDialoguesTable = nullptr;
-  FriendlyNegDialoguesTable.DataTable = nullptr;
-  NeutralNegDialoguesTable.DataTable = nullptr;
-  HostileNegDialoguesTable.DataTable = nullptr;
-  NpcStoreDialoguesTable = nullptr;
-}
-
-void AGlobalDataManager::InitializeQuestChainsData() {
-  QuestChainsArray.Empty();
-  TArray<FQuestChainDataRow*> QuestChainRows;
-  QuestChainDataDataTable->GetAllRows<FQuestChainDataRow>("", QuestChainRows);
-
-  for (auto* Row : QuestChainRows) {
-    QuestChainsArray.Add({
-        Row->QuestID,
-        Row->ID,
-        Row->QuestChainType,
-        Row->DialogueChainID,
-        Row->CustomerAction,
-        Row->ActionRelevantIDs,
-        Row->PostDialogueChainID,
-        Row->StartRequirementsFilter,
-        Row->StartChance,
-        Row->bIsRepeatable,
-        Row->QuestOutcomeType,
-        Row->QuestAction,
-        Row->BranchesAmount,
-        Row->BranchRequiredChoiceIDs,
-    });
-  }
-
-  check(QuestChainsArray.Num() > 0);
-
-  QuestChainDataDataTable = nullptr;
-}
-
-void AGlobalDataManager::InitializeNPCData() {
-  UniqueNpcArray.Empty();
-  TArray<FUniqueNpcDataRow*> UniqueNpcRows;
-  UniqueNpcDataTable->GetAllRows<FUniqueNpcDataRow>("", UniqueNpcRows);
-  for (auto* Row : UniqueNpcRows)
-    UniqueNpcArray.Add({
-        Row->ID,
-        Row->LinkedPopID,
-        Row->NpcName,
-        Row->SpawnRequirementsFilter,
-        Row->SpawnWeight,
-        Row->QuestIDs,
-        Row->DialogueChainIDs,
-        Row->NegotiationData,
-        Row->AssetData,
-    });
-
-  check(UniqueNpcArray.Num() > 0);
-
-  UniqueNpcDataTable = nullptr;
-}
-
 void AGlobalDataManager::InitializeNpcStoreData() {
   NpcStoreTypesArray.Empty();
   TArray<FNpcStoreTypeRow*> NpcStoreTypesRows;
@@ -646,20 +296,6 @@ void AGlobalDataManager::InitializeNpcStoreData() {
 }
 
 void AGlobalDataManager::InitializeMarketData() {
-  PriceEffectsArray.Empty();
-  TArray<FPriceEffectRow*> PriceEffectRows;
-  PriceEffectsDataTable->GetAllRows<FPriceEffectRow>("", PriceEffectRows);
-  for (auto* Row : PriceEffectRows)
-    PriceEffectsArray.Add({
-        Row->ID,
-        Row->ItemEconTypes,
-        Row->ItemWealthTypes,
-        Row->ItemTypes,
-        Row->PriceMultiPercent,
-        Row->Duration,
-        Row->PriceMultiPercentFalloff,
-    });
-
   EconEventsArray.Empty();
   TArray<FEconEventRow*> EconEventRows;
   EconEventsDataTable->GetAllRows<FEconEventRow>("", EconEventRows);
@@ -675,61 +311,12 @@ void AGlobalDataManager::InitializeMarketData() {
         Row->TextData,
         Row->AssetData,
     });
-
-  check(PriceEffectsArray.Num() > 0);
   check(EconEventsArray.Num() > 0);
 
-  PriceEffectsDataTable = nullptr;
   EconEventsDataTable = nullptr;
 }
 
-void AGlobalDataManager::InitializeNewsData() {
-  ArticlesArray.Empty();
-  TArray<FArticleRow*> ArticleRows;
-  ArticlesDataTable->GetAllRows<FArticleRow>("", ArticleRows);
-  for (auto* Row : ArticleRows)
-    ArticlesArray.Add({
-        Row->ArticleID,
-        Row->RequirementsFilter,
-        Row->AppearWeight,
-        Row->bIsRepeatable,
-        Row->Size,
-        Row->TextData,
-        Row->AssetData,
-    });
-
-  check(ArticlesArray.Num() > 0);
-  ArticlesDataTable = nullptr;
-}
-
 void AGlobalDataManager::InitializeUpgradesData() {
-  UpgradesArray.Empty();
-  TArray<FUpgradeRow*> UpgradesRows;
-  UpgradesTable->GetAllRows<FUpgradeRow>("", UpgradesRows);
-  for (auto Row : UpgradesRows)
-    UpgradesArray.Add({
-        Row->ID,
-        Row->UpgradeClass,
-        Row->UpgradeEffectIDs,
-        Row->TextData,
-        Row->AssetData,
-    });
-
-  UpgradeEffectsArray.Empty();
-  TArray<FUpgradeEffectRow*> UpgradeEffectsRows;
-  UpgradeEffectsTable->GetAllRows<FUpgradeEffectRow>("", UpgradeEffectsRows);
-  for (auto Row : UpgradeEffectsRows)
-    UpgradeEffectsArray.Add({
-        Row->ID,
-        Row->EffectType,
-        Row->EffectSystem,
-        Row->RelevantName,
-        Row->RelevantIDs,
-        Row->RelevantValues,
-        Row->TextData,
-        Row->AssetData,
-    });
-
   EconEventAbilitiesArray.Empty();
   TArray<FEconEventAbilityRow*> EconEventAbilitiesRows;
   EconEventAbilitiesTable->GetAllRows<FEconEventAbilityRow>("", EconEventAbilitiesRows);
@@ -744,12 +331,7 @@ void AGlobalDataManager::InitializeUpgradesData() {
         Row->TextData,
         Row->AssetData,
     });
-
-  check(UpgradesArray.Num() > 0);
-  check(UpgradeEffectsArray.Num() > 0);
   check(EconEventAbilitiesArray.Num() > 0);
 
-  UpgradesTable = nullptr;
-  UpgradeEffectsTable = nullptr;
   EconEventAbilitiesTable = nullptr;
 }

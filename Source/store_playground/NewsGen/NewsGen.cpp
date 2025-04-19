@@ -2,7 +2,7 @@
 #include "HAL/Platform.h"
 #include "NewsGenDataStructs.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
-#include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -13,18 +13,18 @@ void ANewsGen::BeginPlay() { Super::BeginPlay(); }
 void ANewsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void ANewsGen::GenDaysRandomArticles(TArray<FName> GuaranteedArticles) {
-  check(GlobalDataManager);
+  check(GlobalStaticDataManager);
 
   DaysArticles.Empty();
 
-  TArray<FArticle> EligibleArticles = GlobalDataManager->GetEligibleArticles(PublishedArticles);
+  TArray<FArticle> EligibleArticles = GlobalStaticDataManager->GetEligibleArticles(PublishedArticles);
   if (EligibleArticles.Num() <= 0) return;
 
   // * Create a layout given the article size.
   // e.g, if chosen random article is large, the rest should be smaller to fit.
   int32 TotalLayoutSpace = FMath::RandRange(6, 8);
   for (const FName& GuaranteeArticleId : GuaranteedArticles) {
-    FArticle GuaranteedArticle = GlobalDataManager->GetArticle(GuaranteeArticleId);
+    FArticle GuaranteedArticle = GlobalStaticDataManager->GetArticle(GuaranteeArticleId);
     if (TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size] < 0) continue;
 
     PublishedArticles.Add(GuaranteedArticle.ArticleID);
@@ -65,10 +65,8 @@ void ANewsGen::GenDaysRandomArticles(TArray<FName> GuaranteedArticles) {
 void ANewsGen::TickDaysTimedVars() {
   TArray<FName> ArticlesToRemove;
   for (auto& Pair : RecentArticlesMap)
-    if (Pair.Value <= 1)
-      ArticlesToRemove.Add(Pair.Key);
-    else
-      Pair.Value--;
+    if (Pair.Value <= 1) ArticlesToRemove.Add(Pair.Key);
+    else Pair.Value--;
 
   for (const FName& ArticleId : ArticlesToRemove) RecentArticlesMap.Remove(ArticleId);
 }

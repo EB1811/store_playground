@@ -91,6 +91,3 @@ public:
 
   void InitializeEconomyData();
 };
-
-// TODO: Remove to just be a function in the cpp.
-TArray<float> GetRandomSplit(int32 Buckets, float Money);

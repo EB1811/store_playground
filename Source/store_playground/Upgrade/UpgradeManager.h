@@ -28,6 +28,8 @@ public:
   UPROPERTY(EditAnywhere)
   class AGlobalDataManager* GlobalDataManager;
   UPROPERTY(EditAnywhere)
+  class AGlobalStaticDataManager* GlobalStaticDataManager;
+  UPROPERTY(EditAnywhere)
   class AAbilityManager* AbilityManager;
 
   UPROPERTY(EditAnywhere, SaveGame)

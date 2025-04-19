@@ -4,6 +4,7 @@
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/DayManager/DayManager.h"
@@ -215,7 +216,7 @@ void ASaveManager::LoadPlayer(FComponentSaveState ComponentSaveState, TArray<FOb
 }
 
 void ASaveManager::ApplyLoadedUpgradeEffects() {
-  TArray<FUpgradeEffect> Effects = GlobalDataManager->GetUpgradeEffectsByIds(UpgradeManager->ActiveEffectIDs);
+  TArray<FUpgradeEffect> Effects = GlobalStaticDataManager->GetUpgradeEffectsByIds(UpgradeManager->ActiveEffectIDs);
   TArray<FUpgradeEffect> ChangeDataEffects = Effects.FilterByPredicate(
       [](const FUpgradeEffect& Effect) { return Effect.EffectType == EUpgradeEffectType::ChangeData; });
 
@@ -249,7 +250,6 @@ void ASaveManager::LoadInventoryCSaveState(UInventoryComponent* InventoryC,
   Ar.ArIsSaveGame = true;
   InventoryC->Serialize(Ar);
 
-  // TODO: Guarantee order.
   InventoryC->ItemsArray.Empty();
   InventoryC->ItemsArray.Reserve(ObjectSaveStates.Num());
   for (FObjectSaveState ObjectSaveState : ObjectSaveStates) {

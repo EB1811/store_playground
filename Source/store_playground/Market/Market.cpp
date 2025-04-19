@@ -11,6 +11,7 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/WorldObject/NPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/NpcStoreComponent.h"
@@ -58,12 +59,24 @@ void AMarket::BeginPlay() {
 
 void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-// TODO: pass in wanted item types control item rarity.
-auto AMarket::GetNewRandomItems(int32 Amount) const -> TArray<UItemBase*> {
+auto AMarket::GetNewRandomItems(int32 Amount,
+                                TArray<EItemType> ItemTypes,
+                                TArray<EItemWealthType> ItemWealthTypes,
+                                TArray<EItemEconType> ItemEconType) const -> TArray<UItemBase*> {
+  const TArray<FName> ItemIdsEligible = EligibleItemIds.FilterByPredicate([&](const FName& Id) {
+    const UItemBase* Item = AllItemsMap[Id];
+
+    if (ItemTypes.Num() > 0 && !ItemTypes.Contains(Item->ItemType)) return false;
+    if (ItemWealthTypes.Num() > 0 && !ItemWealthTypes.Contains(Item->ItemWealthType)) return false;
+    if (ItemEconType.Num() > 0 && !ItemEconType.Contains(Item->ItemEconType)) return false;
+    return true;
+  });
+  check(ItemIdsEligible.Num() > 0);
+
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
-    int32 RandomIndex = FMath::RandRange(0, EligibleItemIds.Num() - 1);
-    NewItems.Add(AllItemsMap[EligibleItemIds[RandomIndex]]->CreateItemCopy());
+    int32 RandomIndex = FMath::RandRange(0, ItemIdsEligible.Num() - 1);
+    NewItems.Add(AllItemsMap[ItemIdsEligible[RandomIndex]]->CreateItemCopy());
   }
 
   return NewItems;
@@ -146,7 +159,7 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
     if (FMath::FRand() * 100 < Event.StartChance) EconEvents.Add(Event);
 
   for (auto& Event : EconEvents) {
-    TArray<struct FPriceEffect> PriceEffects = GlobalDataManager->GetPriceEffects(Event.PriceEffectIDs);
+    TArray<struct FPriceEffect> PriceEffects = GlobalStaticDataManager->GetPriceEffects(Event.PriceEffectIDs);
     for (const auto& PriceEffect : PriceEffects) MarketEconomy->ActivePriceEffects.Add(PriceEffect);
 
     if (!OccurredEconEvents.Contains(Event.ID)) OccurredEconEvents.Add(Event.ID);  // ? Don't add if repeatable?

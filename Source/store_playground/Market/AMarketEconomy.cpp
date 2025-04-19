@@ -12,13 +12,28 @@
 #include "store_playground/WorldObject/NPCStore.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
-EPopWealthType GetHigherWealthType(EPopWealthType WealthType) {
+inline TArray<float> GetRandomSplit(int32 Buckets, float Value) {
+  float Sum = 0;
+  TArray<float> RandomMoneyBuckets;
+  for (int i = 0; i < Buckets; i++) {
+    float RandomRange = FMath::RandRange(0.3f, 0.7f);  // * Avoiding too high of a range.
+    RandomMoneyBuckets.Add(RandomRange);
+    Sum += RandomRange;
+  }
+
+  float scale = Value / Sum;
+  for (int i = 0; i < Buckets; i++) RandomMoneyBuckets[i] = std::round(RandomMoneyBuckets[i] * scale);
+
+  return RandomMoneyBuckets;
+}
+
+inline EPopWealthType GetHigherWealthType(EPopWealthType WealthType) {
   int32 WealthTypeIndex = static_cast<int32>(WealthType);
   if (WealthTypeIndex >= 2) return WealthType;
 
   return static_cast<EPopWealthType>(WealthTypeIndex + 1);
 }
-EPopWealthType GetLowerWealthType(EPopWealthType WealthType) {
+inline EPopWealthType GetLowerWealthType(EPopWealthType WealthType) {
   int32 WealthTypeIndex = static_cast<int32>(WealthType);
   if (WealthTypeIndex <= 0) return WealthType;
 
@@ -224,14 +239,12 @@ void AMarketEconomy::PerformEconomyTick() {
     if (FMath::FRand() * 100 < EconomyBehaviorParams.PromotionChance &&
         GetHigherWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
       PromotionPopIndexes.Add(Index);
-    else if (FMath::FRand() * 100 < EconomyBehaviorParams.CrossPromotionChance)
-      CrossPromotionPopIndexes.Add(Index);
+    else if (FMath::FRand() * 100 < EconomyBehaviorParams.CrossPromotionChance) CrossPromotionPopIndexes.Add(Index);
   for (int32 Index : DemotionConsiderPopIndexes)
     if (FMath::FRand() * 100 < EconomyBehaviorParams.DemotionChance &&
         GetLowerWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
       DemotionPopIndexes.Add(Index);
-    else if (FMath::FRand() * 100 < EconomyBehaviorParams.CrossPromotionChance)
-      CrossPromotionPopIndexes.Add(Index);
+    else if (FMath::FRand() * 100 < EconomyBehaviorParams.CrossPromotionChance) CrossPromotionPopIndexes.Add(Index);
 
   // Promote / Demote if next wealth type buys more goods than current wealth type.
   for (int32 Index : PromotionPopIndexes) {

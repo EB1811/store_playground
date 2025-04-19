@@ -42,6 +42,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market")
   const class AGlobalDataManager* GlobalDataManager;
   UPROPERTY(EditAnywhere, Category = "Market")
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
+  UPROPERTY(EditAnywhere, Category = "Market")
   const class AQuestManager* QuestManager;
 
   UPROPERTY(EditAnywhere, Category = "Market")
@@ -69,7 +71,10 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
   TMap<FName, int32> RecentEconEventsMap;
 
-  auto GetNewRandomItems(int32 Amount) const -> TArray<class UItemBase*>;
+  auto GetNewRandomItems(int32 Amount,
+                         TArray<EItemType> ItemTypes = {},
+                         TArray<EItemWealthType> ItemWealthTypes = {},
+                         TArray<EItemEconType> ItemEconType = {}) const -> TArray<class UItemBase*>;
   auto GetRandomItem(const TArray<FName> ItemIds) const -> class UItemBase*;
 
   auto BuyItem(class UNpcStoreComponent* NpcStoreC,

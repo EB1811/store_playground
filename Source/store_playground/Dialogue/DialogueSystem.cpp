@@ -11,7 +11,7 @@ EDialogueState GetNextDialogueState(EDialogueState CurrentState, EDialogueAction
     default: return EDialogueState::None;
   }
 }
-// ? Maybe better to just create a tree structure for dialogues.
+
 // Note: Preorder traversal, only looking for direct children.
 TArray<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr,
                                     int32 StartIndex,

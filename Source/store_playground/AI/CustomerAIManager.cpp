@@ -14,6 +14,7 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/Market.h"
@@ -89,7 +90,7 @@ void ACustomerAIManager::EndCustomerAI() {
 }
 
 void ACustomerAIManager::SpawnUniqueNpcs() {
-  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalDataManager->GetEligibleNpcs().FilterByPredicate(
+  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate(
       [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
   if (EligibleNpcs.Num() <= 0) return;
 
@@ -113,7 +114,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
   UniqueCustomer->DialogueComponent->DialogueArray =
-      GlobalDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
+      GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
 
   UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
   UniqueCustomer->CustomerAIComponent->Attitude = UniqueNpcData.NegotiationData.Attitude;
@@ -122,7 +123,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
                         UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
       100.0f;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap =
-      GlobalDataManager->GetRandomNegDialogueMap(UniqueNpcData.NegotiationData.Attitude);
+      GlobalStaticDataManager->GetRandomNegDialogueMap(UniqueNpcData.NegotiationData.Attitude);
 
   const FCustomerPop* CustomerPopData = MarketEconomy->CustomerPops.FindByPredicate(
       [UniqueNpcData](const FCustomerPop& Pop) { return Pop.ID == UniqueNpcData.LinkedPopID; });
@@ -164,15 +165,17 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::PerformingQuest;
 
-  UniqueCustomer->QuestComponent->QuestChainData = RandomQuestChainData;
+  UniqueCustomer->QuestComponent->ChainID = RandomQuestChainData.ID;
+  UniqueCustomer->QuestComponent->CustomerAction = RandomQuestChainData.CustomerAction;
+  UniqueCustomer->QuestComponent->QuestOutcomeType = RandomQuestChainData.QuestOutcomeType;
 
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
   UniqueCustomer->DialogueComponent->DialogueArray =
-      GlobalDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
+      GlobalStaticDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
 }
 
 void ACustomerAIManager::SpawnCustomers() {
-  check(CustomerClass && GlobalDataManager && MarketEconomy && Store);
+  check(CustomerClass && GlobalStaticDataManager && MarketEconomy && Store);
   if (AllCustomers.Num() >= BehaviorParams.MaxCustomers) return;
 
   LastSpawnTime = GetWorld()->GetTimeSeconds();
@@ -197,7 +200,7 @@ void ACustomerAIManager::SpawnCustomers() {
                                                             SpawnPoint->GetActorRotation(), SpawnParams);
 
     TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
-    for (const auto& GenericCustomer : GlobalDataManager->GenericCustomersArray) {
+    for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
       const auto* PopData = MarketEconomy->PopEconDataArray.FindByPredicate(
           [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
       WeightedCustomers.Add(MakeTuple(GenericCustomer, PopData->Population));
@@ -222,7 +225,7 @@ void ACustomerAIManager::SpawnCustomers() {
 
     Customer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
 
-    Customer->DialogueComponent->DialogueArray = GlobalDataManager->GetRandomCustomerDialogue();
+    Customer->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomCustomerDialogue();
 
     // ? Maybe have two arrays for customers ai and customer interaction components?
     AllCustomers.Add(Customer);
@@ -291,7 +294,6 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   if (!OwnerAIController) return;
   if (OwnerAIController->GetMoveStatus() != EPathFollowingStatus::Idle) return;
 
-  // TODO: Create central point in store and use it as a reference for the random point.
   FNavLocation RandomLocation;
   NavSystem->GetRandomPointInNavigableRadius(Customer->GetActorLocation(), float(300.0f), RandomLocation);
 
@@ -363,12 +365,11 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
 // Note: Agnostic about if player has item type or not.
 bool ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
                                             std::function<bool(const FWantedItemType& ItemType)> FilterFunc) {
-  auto ValidItemTypes =
-      FilterFunc
-          ? GlobalDataManager->WantedItemTypesArray.FilterByPredicate(FilterFunc)
-          : GlobalDataManager->WantedItemTypesArray.FilterByPredicate([CustomerAI](const FWantedItemType& ItemType) {
-              return CustomerAI->ItemEconTypes.Contains(ItemType.ItemEconType);
-            });
+  auto ValidItemTypes = FilterFunc ? GlobalStaticDataManager->WantedItemTypesArray.FilterByPredicate(FilterFunc)
+                                   : GlobalStaticDataManager->WantedItemTypesArray.FilterByPredicate(
+                                         [CustomerAI](const FWantedItemType& ItemType) {
+                                           return CustomerAI->ItemEconTypes.Contains(ItemType.ItemEconType);
+                                         });
   if (ValidItemTypes.Num() <= 0) return false;
 
   const FWantedItemType& WantedItemType = ValidItemTypes[FMath::RandRange(0, ValidItemTypes.Num() - 1)];
@@ -378,7 +379,7 @@ bool ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
 }
 
 void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UItemBase* HasItem) {
-  UItemBase* Item = HasItem ? HasItem : Market->GetNewRandomItems(1)[0];
+  UItemBase* Item = HasItem ? HasItem : Market->GetNewRandomItems(1, {}, {}, CustomerAI->ItemEconTypes)[0];
   check(Item);
 
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::SellItem;
@@ -389,7 +390,7 @@ void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI
   CustomerAI->CustomerState = ECustomerState::Requesting;
   Interaction->InteractionType = EInteractionType::WaitingCustomer;
 
-  CustomerAI->NegotiationAI->DialoguesMap = GlobalDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
+  CustomerAI->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
 
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 
@@ -406,10 +407,8 @@ void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI
 void ACustomerAIManager::TickDaysTimedVars() {
   TArray<FName> NpcsToRemove;
   for (auto& Pair : RecentlySpawnedUniqueNpcsMap)
-    if (Pair.Value <= 1)
-      NpcsToRemove.Add(Pair.Key);
-    else
-      Pair.Value--;
+    if (Pair.Value <= 1) NpcsToRemove.Add(Pair.Key);
+    else Pair.Value--;
 
   for (const auto& NpcId : NpcsToRemove) RecentlySpawnedUniqueNpcsMap.Remove(NpcId);
 }
