@@ -61,6 +61,9 @@ public:
   auto SaveActor(AActor* Actor, FGuid Id) const -> FActorSavaState;
   auto SaveComponent(UActorComponent* Component, FGuid Id) const -> FComponentSaveState;
   auto SaveObject(UObject* Object, FGuid Id) const -> FObjectSaveState;
+
+  void LoadActor(AActor* Actor, FActorSavaState SaveState) const;
+  void LoadComponent(UActorComponent* Component, FComponentSaveState SaveState) const;
 };
 
 // template <typename T>

@@ -25,16 +25,17 @@ void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> Ma
   if (QuestsCompleted.Contains(QuestChainData.QuestID)) return;
 
   switch (QuestChainData.QuestAction) {
-    case EQuestAction::Continue: {
+    case EQuestAction::Continue:
+    case EQuestAction::SplitBranch: {
       QuestInProgressMap.FindOrAdd(QuestChainData.QuestID, {});
       if (QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Contains(QuestChainData.ID)) break;
 
       QuestInProgressMap[QuestChainData.QuestID].ChainCompletedIDs.Add(QuestChainData.ID);
 
-      if (QuestChainData.QuestChainType == EQuestChainType::DialogueChoice)
+      if (QuestChainData.QuestOutcomeType == EQuestOutcomeType::DialogueChoice)
         QuestInProgressMap[QuestChainData.QuestID].ChoicesMade.Append(MadeChoiceIds);
 
-      if (QuestChainData.QuestChainType == EQuestChainType::Negotiation)
+      if (QuestChainData.QuestOutcomeType == EQuestOutcomeType::Negotiation)
         QuestInProgressMap[QuestChainData.QuestID].NegotiationOutcomesMap.Add(QuestChainData.ID, bNegotiationSuccess);
       break;
     }
@@ -43,7 +44,7 @@ void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> Ma
       if (QuestInProgressMap.Contains(QuestChainData.QuestID)) QuestInProgressMap.Remove(QuestChainData.QuestID);
       break;
     }
-    default: break;
+    default: checkNoEntry();
   }
 
   // ? Store npcs with active quests?

@@ -24,11 +24,15 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "DayManager")
+  class AAbilityManager* AbilityManager;  // * Tick active upgrades.
+  UPROPERTY(EditAnywhere, Category = "DayManager")
   class ACustomerAIManager* CustomerAIManager;  // * TickDaysTimedVars
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AMarketEconomy* MarketEconomy;  // * Tick active price effects.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AMarket* Market;  // * Start new day events.
+  UPROPERTY(EditAnywhere, Category = "DayManager")
+  class AMarketLevel* MarketLevel;  // * TickDaysTimedVars.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class ANewsGen* NewsGen;  // * Create new articles.
 

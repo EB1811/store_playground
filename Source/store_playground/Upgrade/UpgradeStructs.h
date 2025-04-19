@@ -7,17 +7,82 @@
 #include "Types/SlateEnums.h"
 #include "UpgradeStructs.generated.h"
 
-// UENUM()
-// enum class EUpgradeEffectCategory : uint8 {
-//   UnlockItems UMETA(DisplayName = "UnlockItems"),  // * Possible items to appear.
-//   BuyItems UMETA(DisplayName = "BuyItems"),        // * Items in upgrade store.
-//   Store UMETA(DisplayName = "Store"),              // * Store upgrades.
-//   Customer UMETA(DisplayName = "Customer"),        // * Customer / behavior changes.
-//   NpcStore UMETA(DisplayName = "NpcStore"),        // * NpcStore / behavior changes.
-//   Economy UMETA(DisplayName = "Economy"),          // * Economy changes.
-//   Gameplay UMETA(DisplayName = "Gameplay"),        // * Gameplay modifications / new mechanics.
-// };
+UENUM()
+enum class EUpgradeClass : uint8 {
+  Holy UMETA(DisplayName = "Holy"),
+  Demonic UMETA(DisplayName = "Demonic"),
+  Artisanal UMETA(DisplayName = "Artisanal"),
+};
 
+USTRUCT()
+struct FEconEventAbilityTextData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FText Name;
+  UPROPERTY(EditAnywhere)
+  FText Description;
+};
+USTRUCT()
+struct FEconEventAbilityAssetData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  class UTexture2D* Icon;
+};
+
+USTRUCT()
+struct FEconEventAbility {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName ID;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName EconEventId;  // * Linked econ event id.
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float Cost;  // * Cost in money.
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 DurationLeft;  // * In days.
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 Cooldown;  // * In days.
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  EUpgradeClass UpgradeClass;
+
+  UPROPERTY(EditAnywhere)
+  FEconEventAbilityTextData TextData;
+  UPROPERTY(EditAnywhere)
+  FEconEventAbilityAssetData AssetData;
+};
+USTRUCT()
+struct FEconEventAbilityRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName ID;
+
+  UPROPERTY(EditAnywhere)
+  FName EconEventId;  // * Linked econ event id.
+
+  UPROPERTY(EditAnywhere)
+  float Cost;  // * Cost in money.
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 Duration;  // * In days.
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 Cooldown;  // * In days.
+
+  UPROPERTY(EditAnywhere)
+  EUpgradeClass UpgradeClass;
+
+  UPROPERTY(EditAnywhere)
+  FEconEventAbilityTextData TextData;
+  UPROPERTY(EditAnywhere)
+  FEconEventAbilityAssetData AssetData;
+};
+
+// ! Currently 3 different ways to keep track of unlocked ids.
 UENUM()
 enum class EUpgradeEffectType : uint8 {
   ChangeBehaviorParam UMETA(DisplayName = "ChangeBehaviorParam"),  // * Changes a parameter value.
@@ -35,6 +100,7 @@ enum class EUpgradeEffectSystem : uint8 {
   MarketEconomy UMETA(DisplayName = "MarketEconomy"),  // * MarketEconomy changes.
   GlobalData UMETA(DisplayName = "GlobalData"),        // * GlobalData changes.
   Player UMETA(DisplayName = "Player"),                // * Player changes.
+  Ability UMETA(DisplayName = "Ability"),              // * Ability changes.
 };
 ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 7);
 
@@ -102,13 +168,6 @@ struct FUpgradeEffectRow : public FTableRowBase {
   FUpgradeEffectAssetData AssetData;
 };
 
-UENUM()
-enum class EUpgradeClass : uint8 {
-  Holy UMETA(DisplayName = "Holy"),
-  Demonic UMETA(DisplayName = "Demonic"),
-  Artisanal UMETA(DisplayName = "Artisanal"),
-};
-
 USTRUCT()
 struct FUpgradeTextData {
   GENERATED_BODY()
@@ -126,7 +185,6 @@ struct FUpgradeAssetData {
   class UTexture2D* Icon;
 };
 
-// TODO: Add and implement filter requirements for upgrades.
 USTRUCT()
 struct FUpgrade {
   GENERATED_BODY()

@@ -48,14 +48,10 @@ void ASaveManager::BeginPlay() { Super::BeginPlay(); }
 void ASaveManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void ASaveManager::CreateNewSaveGame() {
-  // Having two slots for backup.
-  FString SlotName = "SaveSlot_Main";
-  FString BackupSlotName = "SaveSlot_Backup";
-
   CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
   check(CurrentSaveGame);
 
-  CurrentSaveGame->Initialize(SlotName);
+  CurrentSaveGame->Initialize("SaveSlot_Main");
   SaveCurrentSlotToDisk();
 }
 
@@ -76,10 +72,10 @@ void ASaveManager::SaveCurrentSlotToDisk() {
   CurrentSaveGame->ObjectSaveStates.Append(PObjectSaveStates);
 
   UGameplayStatics::SaveGameToSlot(CurrentSaveGame, CurrentSaveGame->SlotName, 0);
+  UGameplayStatics::SaveGameToSlot(CurrentSaveGame, "SaveSlot_Backup", 1);
 }
 
 void ASaveManager::LoadCurrentSlotFromDisk() {
-  // Having two slots for backup.
   FString SlotName = "SaveSlot_Main";
 
   CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
@@ -320,4 +316,16 @@ auto ASaveManager::SaveObject(UObject* Object, FGuid Id) const -> FObjectSaveSta
   Object->Serialize(Ar);
 
   return SaveState;
+}
+void ASaveManager::LoadActor(AActor* Actor, FActorSavaState SaveState) const {
+  FMemoryReader MemReader(SaveState.ByteData);
+  FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+  Ar.ArIsSaveGame = true;
+  Actor->Serialize(Ar);
+}
+void ASaveManager::LoadComponent(UActorComponent* Component, FComponentSaveState SaveState) const {
+  FMemoryReader MemReader(SaveState.ByteData);
+  FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+  Ar.ArIsSaveGame = true;
+  Component->Serialize(Ar);
 }

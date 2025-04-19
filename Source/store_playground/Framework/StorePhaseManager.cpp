@@ -88,7 +88,7 @@ void AStorePhaseManager::EndDay() {
 
   DayManager->StartNewDay();
 
-  SaveManager->CreateNewSaveGame();
+  // SaveManager->CreateNewSaveGame();
 }
 
 void AStorePhaseManager::NextPhase() {

@@ -24,6 +24,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ASaveManager> SaveManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class APlayerCommand> PlayerCommandClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStorePhaseManager> StorePhaseManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ADayManager> DayManagerClass;
@@ -39,6 +41,12 @@ public:
   TSubclassOf<class ANewsGen> NewsGenClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStore> StoreClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AMiniGameManager> MiniGameManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AMarketLevel> MarketLevelClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AAbilityManager> AbilityManagerClass;
 
   // * Storing some properties to be used in the post level load init.
   UPROPERTY()

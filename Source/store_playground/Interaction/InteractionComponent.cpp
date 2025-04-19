@@ -12,6 +12,7 @@
 #include "store_playground/Level/LevelChangeComponent.h"
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
+#include "store_playground/Minigame/MiniGameComponent.h"
 
 UInteractionComponent::UInteractionComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -99,4 +100,13 @@ auto UInteractionComponent::InteractContainer() const -> class UInventoryCompone
   check(OwnerInventoryC);
 
   return OwnerInventoryC;
+}
+
+auto UInteractionComponent::InteractMiniGame() const -> TTuple<class UMiniGameComponent*, class UDialogueComponent*> {
+  UMiniGameComponent* OwnerMiniGameC = GetOwner()->FindComponentByClass<UMiniGameComponent>();
+  UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  check(OwnerMiniGameC);
+  check(OwnerDialogueC);
+
+  return {OwnerMiniGameC, OwnerDialogueC};
 }

@@ -19,6 +19,7 @@ enum class EInteractionType : uint8 {
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
 
   UpgradeSelect UMETA(DisplayName = "Upgrade Select"),
+  AbilitySelect UMETA(DisplayName = "Ability Select"),
 
   Buildable UMETA(DisplayName = "Buildable"),
   StockDisplay UMETA(DisplayName = "StockDisplay"),
@@ -30,6 +31,7 @@ enum class EInteractionType : uint8 {
   UniqueNPCQuest UMETA(DisplayName = "Unique Npc Quest"),
   NpcStore UMETA(DisplayName = "NPC Store"),
   Container UMETA(DisplayName = "Container"),
+  MiniGame UMETA(DisplayName = "MiniGame"),
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -61,4 +63,6 @@ public:
   auto InteractNpcStore() const
       -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;
   auto InteractContainer() const -> class UInventoryComponent*;
+
+  auto InteractMiniGame() const -> TTuple<class UMiniGameComponent*, class UDialogueComponent*>;
 };

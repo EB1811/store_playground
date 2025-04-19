@@ -16,7 +16,8 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "Quest Data")
+  // TODO: Use subset of FQuestChainData variables.
+  UPROPERTY(EditAnywhere, Category = "Quest Data", SaveGame)
   FQuestChainData QuestChainData;
 
   void PostQuest(TArray<struct FDialogueData> PostDialogues = {});
