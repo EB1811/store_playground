@@ -7,14 +7,48 @@
 #include "PaperZDCharacter.h"
 #include "PlayerZDCharacter.generated.h"
 
+UENUM()
+enum class EPlayerState : uint8 {
+  Normal UMETA(DisplayName = "Normal"),              // * Normal state.
+  Cutscene UMETA(DisplayName = "Cutscene"),          // * In a cutscene.
+  FocussedMenu UMETA(DisplayName = "FocussedMenu"),  // * In a focussed menu (dialogue, negotiation, etc.).
+};
+
+USTRUCT()
+struct FInputActions {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* MoveAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* CloseTopOpenMenuAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* CloseAllMenusAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* OpenInventoryViewAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* BuildModeAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* InteractAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* OpenNewspaperAction;
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* AdvanceUIAction;  // * Advance UI (dialogue, negotiation, etc.).
+};
+
 USTRUCT()
 struct FInteractionData {
   GENERATED_BODY()
 
-  UPROPERTY()
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
   float LastInteractionCheckTime;
-  UPROPERTY()
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
   bool IsInteracting;
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
+  float InteractionCheckFrequency;
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
+  float InteractionCheckDistance;
 };
 
 UCLASS()
@@ -29,28 +63,20 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  UPROPERTY(EditAnywhere, Category = "Character | PlayerState")
+  EPlayerState PlayerBehaviourState;
+  void ChangePlayerState(EPlayerState NewState);
+
   UPROPERTY()
   class ASpgHUD* HUD;
 
   // * Input
-  // Temp: Move to input manager / a map.
   UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputMappingContext* InputMappingContext;
+  TMap<EPlayerState, class UInputMappingContext*> InputContexts;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  FInputActions InputActions;
 
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* MoveAction;
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* CloseTopOpenMenuAction;
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* CloseAllMenusAction;
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* OpenInventoryViewAction;
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* BuildModeAction;
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* InteractAction;
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  class UInputAction* OpenNewspaperAction;
+  // * Input functions
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Move(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -63,93 +89,78 @@ public:
   void EnterBuildMode(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenNewspaper(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void TryInteract(const FInputActionValue& Value);
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  FInteractionData InteractionData;
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void AdvanceUI(const FInputActionValue& Value);
 
-  // * Inventory
-  UPROPERTY(EditAnywhere, Category = "Character | Inventory")
+  // * Const refs.
+  UPROPERTY(EditAnywhere, Category = "Character | Const")
+  const class AMarket* Market;
+  UPROPERTY(EditAnywhere, Category = "Character | Const")
+  const class ACustomerAIManager* CustomerAIManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Const")
+  const class ANewsGen* NewsGen;
+
+  // * Modifiable refs.
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AStore* Store;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AStorePhaseManager* StorePhaseManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class ADayManager* DayManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class ALevelManager* LevelManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AQuestManager* QuestManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AUpgradeManager* UpgradeManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AAbilityManager* AbilityManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AMiniGameManager* MiniGameManager;
+
+  // * Player systems.
+  UPROPERTY(EditAnywhere, Category = "Character | Systems")
+  class UDialogueSystem* DialogueSystem;
+  UPROPERTY(EditAnywhere, Category = "Character | Systems")
+  class UNegotiationSystem* NegotiationSystem;
+
+  // * Components
+  UPROPERTY(EditAnywhere, Category = "Character | Components")
   class UInventoryComponent* PlayerInventoryComponent;
 
-  // * Interaction
-  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
-  float InteractionCheckFrequency;
-  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
-  float InteractionCheckDistance;
-  void Interact(const FInputActionValue& Value);
+  // * Classes
+  UPROPERTY(EditAnywhere, Category = "Character | Classes")
+  TSubclassOf<class ASpawnPoint> SpawnPointClass;
 
-  // * Buildable
+  void HandleInteraction(const class UInteractionComponent* Interactable);
+
+  // * Entries into HUDs and menus.
   void EnterBuildableDisplay(class ABuildable* Buildable);
-  // * Stock Display
   void EnterStockDisplay(class UStockDisplayComponent* StockDisplayC, class UInventoryComponent* DisplayInventoryC);
+  void EnterNpcStore(class UNpcStoreComponent* NpcStoreC, class UInventoryComponent* StoreInventoryC);
+  void EnterUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC);
+  void EnterAbilitySelect();
+  void EnterMiniGame(class UMiniGameComponent* MiniGameC);
 
-  // * Dialogue
-  UPROPERTY(EditAnywhere, Category = "Character | Dialogue")
-  class UDialogueSystem* DialogueSystem;
   void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
                      std::function<void()> OnDialogueEndFunc = nullptr);
-  void ExitDialogue();
-
-  // * Negotiation
-  UPROPERTY(EditAnywhere, Category = "Character | Negotiation")
-  class UNegotiationSystem* NegotiationSystem;
   void EnterNegotiation(class UCustomerAIComponent* CustomerAI,
                         const class UItemBase* Item = nullptr,
                         bool bIsQuestAssociated = false,
                         class UQuestComponent* QuestComponent = nullptr);
-
-  // * Quest Logic
   void EnterQuest(class UQuestComponent* QuestC,
                   class UDialogueComponent* DialogueC,
                   class UCustomerAIComponent* CustomerAI = nullptr,
                   const class UItemBase* Item = nullptr);
+  void EnterCutscene(const TArray<struct FDialogueData> DialogueDataArr);
 
-  // * Npc Store
-  void EnterNpcStore(class UNpcStoreComponent* NpcStoreC, class UInventoryComponent* StoreInventoryC);
-
-  // * Store
-  UPROPERTY(EditAnywhere, Category = "Character | Store")
-  class AStore* Store;
-
-  // * Game Store Phase Manager - to control the global game state.
-  UPROPERTY(EditAnywhere, Category = "Character | StorePhaseManager")
-  class AStorePhaseManager* StorePhaseManager;
-
-  // * DayManager
-  UPROPERTY(EditAnywhere, Category = "Character | DayManager")
-  class ADayManager* DayManager;
-
-  // * LevelManager
-  UPROPERTY(EditAnywhere, Category = "Character | LevelManager")
-  class ALevelManager* LevelManager;
-
-  UPROPERTY(EditAnywhere, Category = "Character | LevelManager")
-  TSubclassOf<class ASpawnPoint> SpawnPointClass;
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
 
-  // * Market
-  UPROPERTY(EditAnywhere, Category = "Character | Market")
-  class AMarket* Market;
-
-  // * MarketEconomy
-  UPROPERTY(EditAnywhere, Category = "Character | MarketEconomy")
-  class AMarketEconomy* MarketEconomy;
-
-  // * CustomerAIManager
-  UPROPERTY(EditAnywhere, Category = "Character | CustomerAIManager")
-  class ACustomerAIManager* CustomerAIManager;
-
-  // * QuestManager
-  UPROPERTY(EditAnywhere, Category = "Character | QuestManager")
-  class AQuestManager* QuestManager;
-
-  // * NewsGen
-  UPROPERTY(EditAnywhere, Category = "Character | NewsGen")
-  class ANewsGen* NewsGen;
-
-  // * UpgradeManager
-  UPROPERTY(EditAnywhere, Category = "Character | UpgradeManager")
-  class AUpgradeManager* UpgradeManager;
-  void EnterUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC);
-
-  // * SaveManager
-  UPROPERTY(EditAnywhere, Category = "Character | SaveManager")
-  class ASaveManager* SaveManager;
+  // // * SaveManager
+  // UPROPERTY(EditAnywhere, Category = "Character | SaveManager")
+  // class ASaveManager* SaveManager;
 };

@@ -5,7 +5,9 @@
 #include <optional>
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "Misc/EnumRange.h"
+#include "store_playground/Level/LevelStructs.h"
 #include "DialogueDataStructs.generated.h"
 
 UENUM()
@@ -16,7 +18,6 @@ enum class EDialogueState : uint8 {
   PlayerChoice UMETA(DisplayName = "Player Choice"),
   End UMETA(DisplayName = "End"),
 };
-
 UENUM()
 enum class EDialogueAction : uint8 {
   None UMETA(DisplayName = "NONE"),
@@ -25,51 +26,53 @@ enum class EDialogueAction : uint8 {
   AskPlayer UMETA(DisplayName = "Ask Player"),
   End UMETA(DisplayName = "End"),
 };
-
 UENUM()
 enum class EDialogueSpeaker : uint8 {
   None UMETA(DisplayName = "NONE"),
   NPC UMETA(DisplayName = "NPC"),
   Player UMETA(DisplayName = "Player"),
 };
-
 UENUM()
 enum class EDialogueType : uint8 {
   Dialogue UMETA(DisplayName = "Dialogue"),
   Choice UMETA(DisplayName = "Choice"),
 };
 
+// * Dialogue tags for systems to filter further.
+// Mostly for systems that retrieve random dialogues.
+// UENUM()
+// enum class EDialogueTag : uint8 {
+//   LevelStore UMETA(DisplayName = "LevelStore"),
+//   LevelMarket UMETA(DisplayName = "LevelMarket"),
+//   LevelChurch UMETA(DisplayName = "LevelChurch"),
+//   Idle UMETA(DisplayName = "Idle"),
+// };
+
 USTRUCT()
 struct FDialogueData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName DialogueChainID;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName DialogueID;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   EDialogueType DialogueType;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FString DialogueText;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   EDialogueAction Action;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   EDialogueSpeaker DialogueSpeaker;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 ChoicesAmount;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FGameplayTagContainer DialogueTags;
 };
-
-USTRUCT()
-struct FNextDialogueRes {
-  GENERATED_BODY()
-
-  TOptional<FDialogueData> DialogueData;
-  EDialogueState State;
-};
-
 USTRUCT()
 struct FDialogueDataTable : public FTableRowBase {
   GENERATED_BODY()
@@ -93,6 +96,17 @@ struct FDialogueDataTable : public FTableRowBase {
   int32 ChoicesAmount;  // Note: To know number of children in a preorder tree traversal.
   UPROPERTY(EditAnywhere)
   int32 ChoiceIndex;  // Note: This is really just for nicer understanding in the data table.
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer DialogueTags;
+};
+
+USTRUCT()
+struct FNextDialogueRes {
+  GENERATED_BODY()
+
+  TOptional<FDialogueData> DialogueData;
+  EDialogueState State;
 };
 
 UENUM()
@@ -151,6 +165,9 @@ struct FNegotiationDialoguesDataTable : public FTableRowBase {
   int32 ChoicesAmount;  // Note: To know number of children in a preorder tree traversal.
   UPROPERTY(EditAnywhere)
   int32 ChoiceIndex;  // Note: This is really just for nicer understanding in the data table.
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer DialogueTags;
 };
 
 // * This enables using a list in a map.

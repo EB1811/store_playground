@@ -10,12 +10,18 @@
 
 // * Quests.
 UENUM()
+enum class EQuestChainType : uint8 {
+  Dialogue UMETA(DisplayName = "Dialogue"),
+  Branch UMETA(DisplayName = "Branch"),
+};
+UENUM()
 enum class EQuestAction : uint8 {
   Continue UMETA(DisplayName = "Continue"),
+  SplitBranch UMETA(DisplayName = "Split Branch"),
   End UMETA(DisplayName = "End"),
 };
 UENUM()
-enum class EQuestChainType : uint8 {
+enum class EQuestOutcomeType : uint8 {
   DialogueChain UMETA(DisplayName = "Dialogue"),
   DialogueChoice UMETA(DisplayName = "Dialogue Choice"),  // * Save choices made.
   Negotiation UMETA(DisplayName = "Negotiation"),         // * Save negotiation outcomes.
@@ -69,35 +75,38 @@ USTRUCT()
 struct FQuestChainData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName QuestID;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName ID;  // * For tracking quest chains.
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   EQuestChainType QuestChainType;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName DialogueChainID;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   ECustomerAction CustomerAction;  // * What a customer does as part of the quest, if any.
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName PostDialogueChainID;  // * Dialogue after the quest chain dialogue.
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.
                                   // * e.g., "Money > 1000 AND contains(Inventory, ["item_id"]).
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float StartChance;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   bool bIsRepeatable;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
+  EQuestOutcomeType QuestOutcomeType;  // * The relevant outcome saved.
+
+  UPROPERTY(EditAnywhere, SaveGame)
   EQuestAction QuestAction;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 BranchesAmount;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> BranchRequiredChoiceIDs;
 };
 
@@ -128,6 +137,9 @@ struct FQuestChainDataRow : public FTableRowBase {
   float StartChance;
   UPROPERTY(EditAnywhere)
   bool bIsRepeatable;
+
+  UPROPERTY(EditAnywhere)
+  EQuestOutcomeType QuestOutcomeType;  // * The relevant outcome saved.
 
   UPROPERTY(EditAnywhere)
   EQuestAction QuestAction;

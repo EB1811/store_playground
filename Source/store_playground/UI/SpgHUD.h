@@ -44,8 +44,18 @@ public:
   TSubclassOf<class UUserWidget> NewspaperWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UpgradeSelectWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UAbilityWidget> AbilityWidgetClass;
 
-  UPROPERTY() EHUDState HUDState;
+  UPROPERTY()
+  EHUDState HUDState;
+
+  std::function<void()> SetPlayerFocussedFunc;  // * Set player state to menu (in control of the player).
+  std::function<void()> SetPlayerCutsceneFunc;  // * Set player state to cutscene (not in control of the player).
+  std::function<void()> SetPlayerNormalFunc;    // * Set player state to normal (not in menu, etc.).
+  void LeaveHUD();                              // * Leave the current HUD state (main menu, etc.).
+
+  void OpenFocusedMenu(class UUserWidget* Widget);  // * Open a menu in the focused state (dialogue, negotiation, etc.).
 
   UPROPERTY()
   class UMainMenuWidget* MainMenuWidget;
@@ -60,6 +70,8 @@ public:
   void CloseAllMenus();
 
   void CloseWidget(class UUserWidget* Widget);
+
+  void AdvanceUI();  // * Advance the topmost open menu (dialogue, negotiation, etc.).
 
   UPROPERTY()
   class UInventoryViewWidget* InventoryViewWidget;
@@ -106,4 +118,15 @@ public:
   UPROPERTY()
   class UUpgradeListWidget* UpgradeSelectWidget;
   void SetAndOpenUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC, class AUpgradeManager* UpgradeManager);
+
+  UPROPERTY()
+  class UAbilityWidget* AbilityWidget;
+  void SetAndOpenAbilitySelect(class AAbilityManager* AbilityManager);
+
+  void SetAndOpenMiniGame(class AMiniGameManager* MiniGameManager,
+                          class UMiniGameComponent* MiniGameC,
+                          class AStore* Store,
+                          class UInventoryComponent* PlayerInventory);
+
+  void SetAndOpenDialogueCutscene(class UDialogueSystem* Dialogue);
 };

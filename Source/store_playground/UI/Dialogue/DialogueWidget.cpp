@@ -14,12 +14,17 @@ void UDialogueWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnNext);
+
+  UIActionable.AdvanceUI = [this]() { OnNext(); };
 }
 
 void UDialogueWidget::InitDialogueUI(UDialogueSystem* DialogueSystem) {
   check(DialogueSystem && CloseDialogueUI);
-  DialogueSystemRef = DialogueSystem;
 
+  DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
+  ChoicesPanelWrapBox->ClearChildren();
+
+  DialogueSystemRef = DialogueSystem;
   if (DialogueSystemRef->DialogueState == EDialogueState::End) return CloseDialogueUI();
 
   DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));

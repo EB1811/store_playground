@@ -1,4 +1,5 @@
 #include "SpgHUD.h"
+#include "GameFramework/PlayerController.h"
 #include "store_playground/UI/MainMenu/MainMenuWidget.h"
 #include "store_playground/UI/Inventory/PlayerAndContainerWidget.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -13,11 +14,14 @@
 #include "store_playground/UI/Store/StockDisplayWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayWidget.h"
 #include "store_playground/UI/Newspaper/NewspaperWidget.h"
+#include "store_playground/UI/Ability/AbilityWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/UI/Upgrade/UpgradeListWidget.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
+#include "store_playground/Minigame/MiniGameComponent.h"
+#include "store_playground/Minigame/MiniGameManager.h"
 #include "Components/TextBlock.h"
 
 ASpgHUD::ASpgHUD() { HUDState = EHUDState::InGame; }
@@ -37,6 +41,7 @@ void ASpgHUD::BeginPlay() {
   check(StockDisplayWidgetClass);
   check(NewspaperWidgetClass);
   check(UpgradeSelectWidgetClass);
+  check(AbilityWidgetClass);
 
   MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
   MainMenuWidget->AddToViewport(20);
@@ -78,12 +83,38 @@ void ASpgHUD::BeginPlay() {
   UpgradeSelectWidget->AddToViewport(10);
   UpgradeSelectWidget->SetVisibility(ESlateVisibility::Collapsed);
 
+  AbilityWidget = CreateWidget<UAbilityWidget>(GetWorld(), AbilityWidgetClass);
+  AbilityWidget->AddToViewport(10);
+  AbilityWidget->SetVisibility(ESlateVisibility::Collapsed);
+
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(false);
 }
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+void ASpgHUD::LeaveHUD() {
+  const FInputModeGameOnly InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(false);
+
+  SetPlayerNormalFunc();
+}
+
+void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
+  for (auto* W : OpenedWidgets) W->SetVisibility(ESlateVisibility::Collapsed);
+  OpenedWidgets.Empty();
+
+  Widget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(Widget);
+
+  SetPlayerFocussedFunc();
+}
 
 void ASpgHUD::OpenMainMenu() {
   if (OpenedWidgets.Contains(MainMenuWidget)) return CloseWidget(MainMenuWidget);
@@ -103,19 +134,14 @@ void ASpgHUD::CloseTopOpenMenu() {
   OpenedWidgets.Pop()->SetVisibility(ESlateVisibility::Collapsed);
 
   if (!OpenedWidgets.IsEmpty()) return;
-  const FInputModeGameOnly InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(false);
+  LeaveHUD();
 }
 
 void ASpgHUD::CloseAllMenus() {
   for (UUserWidget* Widget : OpenedWidgets) Widget->SetVisibility(ESlateVisibility::Collapsed);
 
   OpenedWidgets.Empty();
-
-  const FInputModeGameOnly InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(false);
+  LeaveHUD();
 }
 
 void ASpgHUD::CloseWidget(UUserWidget* Widget) {
@@ -125,10 +151,18 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   OpenedWidgets.RemoveSingle(Widget);
 
   if (!OpenedWidgets.IsEmpty()) return;
+  LeaveHUD();
+}
 
-  const FInputModeGameOnly InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(false);
+void ASpgHUD::AdvanceUI() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FProperty* UIActionableProp = TopWidget->GetClass()->FindPropertyByName("UIActionable");
+  if (!UIActionableProp) return;
+
+  FUIActionable* ActionableWidget = UIActionableProp->ContainerPtrToValuePtr<FUIActionable>(TopWidget);
+  ActionableWidget->AdvanceUI();
 }
 
 // todo-low: Update.
@@ -255,12 +289,7 @@ void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
         if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
       };
 
-  NpcStoreWidget->SetVisibility(ESlateVisibility::Visible);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(NpcStoreWidget);
+  OpenFocusedMenu(NpcStoreWidget);
 }
 
 void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc) {
@@ -273,12 +302,7 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue, std::function<void()
   };
   DialogueWidget->InitDialogueUI(Dialogue);
 
-  DialogueWidget->SetVisibility(ESlateVisibility::Visible);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(DialogueWidget);
+  OpenFocusedMenu(DialogueWidget);
 }
 
 void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInventoryComponent* PlayerInventoryC) {
@@ -293,11 +317,7 @@ void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInve
   NegotiationWidget->InitNegotiationUI();
   NegotiationWidget->SetVisibility(ESlateVisibility::Visible);
 
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(NegotiationWidget);
+  OpenFocusedMenu(NegotiationWidget);
 }
 
 void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
@@ -328,10 +348,35 @@ void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, A
   UpgradeSelectWidget->SetUpgradeClass(UpgradeSelectC->UpgradeClass, UpgradeSelectC->Title,
                                        UpgradeSelectC->Description);
 
-  UpgradeSelectWidget->SetVisibility(ESlateVisibility::Visible);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
+  OpenFocusedMenu(UpgradeSelectWidget);
+}
 
-  OpenedWidgets.Add(UpgradeSelectWidget);
+void ASpgHUD::SetAndOpenAbilitySelect(class AAbilityManager* AbilityManager) {
+  check(AbilityWidget);
+
+  AbilityWidget->AbilityManagerRef = AbilityManager;
+  AbilityWidget->RefreshUI();
+
+  OpenFocusedMenu(AbilityWidget);
+}
+
+void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
+                                 UMiniGameComponent* MiniGameC,
+                                 AStore* Store,
+                                 UInventoryComponent* PlayerInventory) {
+  UUserWidget* MiniGameWidget = MiniGameManager->GetMiniGameWidget(
+      MiniGameC->MiniGameType, Store, PlayerInventory, [this](UUserWidget* Widget) { CloseWidget(Widget); });
+
+  MiniGameWidget->AddToViewport(10);
+  OpenFocusedMenu(MiniGameWidget);
+}
+
+void ASpgHUD::SetAndOpenDialogueCutscene(UDialogueSystem* Dialogue) {
+  check(UDialogueWidgetClass);
+
+  DialogueWidget->CloseDialogueUI = [this] { CloseWidget(DialogueWidget); };
+  DialogueWidget->InitDialogueUI(Dialogue);
+
+  OpenFocusedMenu(DialogueWidget);
+  SetPlayerCutsceneFunc();
 }

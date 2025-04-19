@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "store_playground/UI/UIStructs.h"
 #include "DialogueWidget.generated.h"
 
 UCLASS()
@@ -31,6 +32,9 @@ public:
   void OnNext();
   UFUNCTION()
   void OnChoiceSelect(int32 ChoiceIndex);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
 
   std::function<void()> CloseDialogueUI;
 };

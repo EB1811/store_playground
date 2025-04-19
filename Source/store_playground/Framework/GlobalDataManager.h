@@ -40,21 +40,26 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  // * To retrieve game's state for evaluating requirements.
+  // TODO: Change to use actual classes themselves.
   UPROPERTY(EditAnywhere, Category = "PlayerData")
   const class APlayerZDCharacter* PlayerCharacter;
   const TMap<EReqFilterOperand, std::any> GetGameDataMap() const;
 
+  // ? Separate static data into different data manager?
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> GenericCustomersDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> WantedItemTypesDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> PlayerMiscDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UniqueNpcDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> QuestDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> CustomerDialoguesTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> MarketNpcDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   struct FDataTableCategoryHandle FriendlyNegDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
@@ -79,6 +84,8 @@ public:
   TObjectPtr<const class UDataTable> UpgradesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UpgradeEffectsTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> EconEventAbilitiesTable;
 
   UPROPERTY(EditAnywhere, Category = "GenericCustomer")
   TArray<struct FGenericCustomerData> GenericCustomersArray;
@@ -86,11 +93,15 @@ public:
   TArray<struct FWantedItemType> WantedItemTypesArray;
 
   UPROPERTY(EditAnywhere, Category = "Dialogues")
+  TArray<struct FDialogueData> PlayerMiscDialogues;
+  UPROPERTY(EditAnywhere, Category = "Dialogues")
   TMap<FName, FDialoguesArray> UniqueNpcDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogues")
   TMap<FName, FDialoguesArray> QuestDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogues")
   TArray<struct FDialogueData> CustomerDialogues;
+  UPROPERTY(EditAnywhere, Category = "Dialogues")
+  TArray<struct FDialogueData> MarketNpcDialogues;
   UPROPERTY(EditAnywhere, Category = "Dialogues")
   TMap<ENegotiationDialogueType, FDialoguesArray> FriendlyDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogues")
@@ -118,6 +129,8 @@ public:
   TArray<struct FUpgrade> UpgradesArray;
   UPROPERTY(EditAnywhere, Category = "Upgrades")
   TArray<struct FUpgradeEffect> UpgradeEffectsArray;
+  UPROPERTY(EditAnywhere, Category = "Upgrades")
+  TArray<struct FEconEventAbility> EconEventAbilitiesArray;
 
   TArray<struct FUniqueNpcData> GetEligibleNpcs() const;
   TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs,
@@ -125,13 +138,17 @@ public:
                                                         TMap<FName, FName> PrevChainCompletedMap) const;
   TArray<struct FDialogueData> GetQuestDialogue(const FName& DialogueChainID) const;
 
+  TArray<struct FDialogueData> GetRandomPlayerMiscDialogue(const TArray<FName>& DialogueTags) const;
+
   TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
   TArray<struct FDialogueData> GetRandomCustomerDialogue() const;
+  TArray<struct FDialogueData> GetRandomMarketNpcDialogue() const;
   TArray<struct FDialogueData> GetRandomNpcStoreDialogue() const;
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 
   TArray<struct FEconEvent> GetEligibleEconEvents(const TArray<FName>& OccurredEconEvents) const;
+  TArray<struct FEconEvent> GetEconEventsByIds(const TArray<FName>& EventIDs) const;
   TArray<struct FPriceEffect> GetPriceEffects(const TArray<FName>& PriceEffectIDs) const;
 
   TArray<struct FArticle> GetEligibleArticles(const TArray<FName>& PublishedArticles) const;
@@ -142,6 +159,7 @@ public:
   TArray<struct FUpgradeEffect> GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const;
   TArray<struct FUpgrade> GetAvailableUpgrades(EUpgradeClass UpgradeClass,
                                                const TArray<FName>& SelectedUpgradeIDs) const;
+  auto GetEconEventAbilitiesByIds(const TArray<FName>& AbilityIDs) const -> TArray<struct FEconEventAbility>;
 
   UPROPERTY(EditAnywhere, Category = "GlobalDataManager")
   FUpgradeable Upgradeable;

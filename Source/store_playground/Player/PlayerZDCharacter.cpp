@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "PaperZDCharacter.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
@@ -27,6 +28,9 @@
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/SaveManager/SaveManager.h"
+#include "store_playground/Minigame/MiniGameComponent.h"
+#include "store_playground/Minigame/MiniGameManager.h"
+#include "store_playground/Level/LevelStructs.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -40,7 +44,9 @@ APlayerZDCharacter::APlayerZDCharacter() {
   // Set this character to call Tick() every frame.
   PrimaryActorTick.bCanEverTick = true;
 
-  InteractionCheckDistance = 200.0f;
+  PlayerBehaviourState = EPlayerState::Normal;
+
+  InteractionData.InteractionCheckDistance = 200.0f;
 
   PlayerInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
@@ -49,19 +55,23 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
   Super::SetupPlayerInputComponent(PlayerInputComponent);
 
   if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-    EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Move);
+    EnhancedInputComponent->BindAction(InputActions.MoveAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::Move);
 
-    EnhancedInputComponent->BindAction(CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InputActions.CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::CloseTopOpenMenu);
-    EnhancedInputComponent->BindAction(CloseAllMenusAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InputActions.CloseAllMenusAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::CloseAllMenus);
-    EnhancedInputComponent->BindAction(OpenInventoryViewAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InputActions.OpenInventoryViewAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenInventoryView);
-    EnhancedInputComponent->BindAction(BuildModeAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InputActions.BuildModeAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::EnterBuildMode);
-    EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerZDCharacter::Interact);
-    EnhancedInputComponent->BindAction(OpenNewspaperAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InputActions.OpenNewspaperAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenNewspaper);
+    EnhancedInputComponent->BindAction(InputActions.InteractAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::TryInteract);
+    EnhancedInputComponent->BindAction(InputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::AdvanceUI);
   }
 }
 
@@ -70,17 +80,28 @@ void APlayerZDCharacter::BeginPlay() {
 
   check(SpawnPointClass);
 
-  if (GetWorld()->GetFirstPlayerController()) {
-    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
-            GetWorld()->GetFirstPlayerController()->GetLocalPlayer())) {
-      Subsystem->AddMappingContext(InputMappingContext, 0);
-    }
-  }
+  UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+      GetWorld()->GetFirstPlayerController()->GetLocalPlayer());
+  Subsystem->AddMappingContext(InputContexts[EPlayerState::Normal], 0);
 
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  HUD->SetPlayerFocussedFunc = [this]() { ChangePlayerState(EPlayerState::FocussedMenu); };
+  HUD->SetPlayerNormalFunc = [this]() { ChangePlayerState(EPlayerState::Normal); };
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
+  if (PlayerBehaviourState == NewState) return;
+
+  UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+      GetWorld()->GetFirstPlayerController()->GetLocalPlayer());
+  Subsystem->RemoveMappingContext(InputContexts[PlayerBehaviourState]);
+  Subsystem->AddMappingContext(InputContexts[NewState], 0);
+
+  PlayerBehaviourState = NewState;
+  UE_LOG(LogTemp, Warning, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
+}
 
 void APlayerZDCharacter::Move(const FInputActionValue& Value) {
   const FVector2D MovementVector = Value.Get<FVector2D>();
@@ -127,9 +148,9 @@ void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
   // SaveManager->CreateNewSaveGame();
 }
 
-void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
+void APlayerZDCharacter::TryInteract(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
-  FVector TraceEnd{TraceStart + GetActorRotation().Vector() * InteractionCheckDistance};
+  FVector TraceEnd{TraceStart + GetActorRotation().Vector() * InteractionData.InteractionCheckDistance};
 
   DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.1f, 0, 5.0f);
 
@@ -137,78 +158,85 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   TraceParams.AddIgnoredActor(this);
   FHitResult TraceHit;
 
-  if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, TraceParams)) {
-    if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionCheckDistance) {
-      if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>()) {
-        switch (Interactable->InteractionType) {
-          case EInteractionType::None: {
-            break;
-          }
-          case EInteractionType::LevelChange: {
-            auto LevelChangeC = Interactable->InteractLevelChange();
+  if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
+    if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionData.InteractionCheckDistance)
+      if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>())
+        HandleInteraction(Interactable);
+}
 
-            EnterNewLevel(LevelChangeC);
-            break;
-          }
-          case EInteractionType::StoreNextPhase: {
-            StorePhaseManager->NextPhase();
-            break;
-          }
-          case EInteractionType::UpgradeSelect: {
-            auto UpgradeSelectC = Interactable->InteractUpgradeSelect();
-            EnterUpgradeSelect(UpgradeSelectC);
-            break;
-          }
-          case EInteractionType::Use: {
-            Interactable->InteractUse();
-            break;
-          }
-          case EInteractionType::Buildable: {
-            if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) break;
+void APlayerZDCharacter::AdvanceUI(const FInputActionValue& Value) { HUD->AdvanceUI(); }
 
-            auto Buildable = Interactable->InteractBuildable();
-            EnterBuildableDisplay(Buildable.GetValue());
-            break;
-          }
-          case EInteractionType::StockDisplay: {
-            // if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
+void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interactable) {
+  switch (Interactable->InteractionType) {
+    case EInteractionType::None: {
+      break;
+    }
+    case EInteractionType::LevelChange: {
+      auto LevelChangeC = Interactable->InteractLevelChange();
 
-            auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
-            EnterStockDisplay(DisplayC, DisplayInventoryC);
-            break;
-          }
-          case EInteractionType::NPCDialogue: {
-            auto DialogueData = Interactable->InteractNPCDialogue();
-            EnterDialogue(DialogueData.GetValue());
-            break;
-          }
-          case EInteractionType::WaitingCustomer: {
-            auto [CustomerAI, Item] = Interactable->InteractWaitingCustomer();
-            EnterNegotiation(CustomerAI, Item);
-            break;
-          }
-          case EInteractionType::UniqueNPCQuest: {
-            auto [Dialogue, QuestC, CustomerAI, Item] = Interactable->InteractUniqueNPCQuest();
-            check(!QuestC->QuestChainData.QuestID.IsNone());
+      EnterNewLevel(LevelChangeC);
+      break;
+    }
+    case EInteractionType::StoreNextPhase: {
+      StorePhaseManager->NextPhase();
+      break;
+    }
+    case EInteractionType::UpgradeSelect: {
+      auto UpgradeSelectC = Interactable->InteractUpgradeSelect();
+      EnterUpgradeSelect(UpgradeSelectC);
+      break;
+    }
+    case EInteractionType::AbilitySelect: {
+      EnterAbilitySelect();
+      break;
+    }
+    case EInteractionType::Use: {
+      Interactable->InteractUse();
+      break;
+    }
+    case EInteractionType::Buildable: {
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) break;
 
-            EnterQuest(QuestC, Dialogue, CustomerAI, Item);
-            break;
-          }
-          case EInteractionType::NpcStore: {
-            if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
+      auto Buildable = Interactable->InteractBuildable();
+      EnterBuildableDisplay(Buildable.GetValue());
+      break;
+    }
+    case EInteractionType::StockDisplay: {
+      // if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
 
-            auto [NpcStoreC, StoreInventory, Dialogue] = Interactable->InteractNpcStore();
-            EnterDialogue(Dialogue->DialogueArray,
-                          [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
-            break;
-          }
-          case EInteractionType::Container: {
-            UInventoryComponent* ContainerInventory = Interactable->InteractContainer();
-            HUD->SetAndOpenContainer(PlayerInventoryComponent, ContainerInventory);
-            break;
-          }
-        }
-      }
+      auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
+      EnterStockDisplay(DisplayC, DisplayInventoryC);
+      break;
+    }
+    case EInteractionType::NPCDialogue: {
+      auto DialogueData = Interactable->InteractNPCDialogue();
+      EnterDialogue(DialogueData.GetValue());
+      break;
+    }
+    case EInteractionType::WaitingCustomer: {
+      auto [CustomerAI, Item] = Interactable->InteractWaitingCustomer();
+      EnterNegotiation(CustomerAI, Item);
+      break;
+    }
+    case EInteractionType::UniqueNPCQuest: {
+      auto [Dialogue, QuestC, CustomerAI, Item] = Interactable->InteractUniqueNPCQuest();
+      check(!QuestC->QuestChainData.QuestID.IsNone());
+
+      EnterQuest(QuestC, Dialogue, CustomerAI, Item);
+      break;
+    }
+    case EInteractionType::NpcStore: {
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
+
+      auto [NpcStoreC, StoreInventory, Dialogue] = Interactable->InteractNpcStore();
+      EnterDialogue(Dialogue->DialogueArray,
+                    [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
+      break;
+    }
+    case EInteractionType::MiniGame: {
+      auto [MiniGameC, DialogueC] = Interactable->InteractMiniGame();
+      EnterDialogue(DialogueC->DialogueArray, [this, MiniGameC]() { EnterMiniGame(MiniGameC); });
+      break;
     }
   }
 }
@@ -258,8 +286,38 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
                               DisplayToPlayerFunc);
 }
 
+void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {
+  HUD->SetAndOpenUpgradeSelect(UpgradeSelectC, UpgradeManager);
+}
+
+void APlayerZDCharacter::EnterAbilitySelect() { HUD->SetAndOpenAbilitySelect(AbilityManager); }
+
+void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
+  HUD->SetAndOpenMiniGame(MiniGameManager, MiniGameC, Store, PlayerInventoryComponent);
+}
+
+void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {
+  auto StoreToPlayerFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
+                                                              UInventoryComponent* SourceInventory) {
+    check(SourceInventory == StoreInventoryC);
+    Market->BuyItem(NpcStoreC, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
+  };
+  auto PlayerToStoreFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
+                                                              UInventoryComponent* SourceInventory) {
+    check(SourceInventory == PlayerInventoryComponent);
+    Market->SellItem(NpcStoreC, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
+  };
+
+  HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
+}
+
 void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,
                                        std::function<void()> OnDialogueEndFunc) {
+  if (DialogueDataArr.Num() == 0) {
+    if (OnDialogueEndFunc) return OnDialogueEndFunc();
+    return;
+  }
+
   DialogueSystem->StartDialogue(DialogueDataArr);
   HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueEndFunc);
 }
@@ -277,7 +335,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UDialogueComponent* DialogueC,
                                     UCustomerAIComponent* CustomerAI,
                                     const UItemBase* Item) {
-  // * Differentiate between when quest is from a customer (store open), and when npc (e.g., in market).
+  // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
     return EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
       QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
@@ -288,7 +346,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::StockCheck:
     case ECustomerAction::SellItem:
       check(CustomerAI->NegotiationAI->RelevantItem);
-      if (QuestC->QuestChainData.QuestChainType == EQuestChainType::Negotiation)
+      if (QuestC->QuestChainData.QuestOutcomeType == EQuestOutcomeType::Negotiation)
         EnterDialogue(DialogueC->DialogueArray,
                       [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
@@ -309,19 +367,9 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
   }
 }
 
-void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {
-  auto StoreToPlayerFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
-                                                              UInventoryComponent* SourceInventory) {
-    check(SourceInventory == StoreInventoryC);
-    Market->BuyItem(NpcStoreC, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
-  };
-  auto PlayerToStoreFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
-                                                              UInventoryComponent* SourceInventory) {
-    check(SourceInventory == PlayerInventoryComponent);
-    Market->SellItem(NpcStoreC, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
-  };
-
-  HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
+void APlayerZDCharacter::EnterCutscene(const TArray<FDialogueData> DialogueDataArr) {
+  DialogueSystem->StartDialogue(DialogueDataArr);
+  HUD->SetAndOpenDialogueCutscene(DialogueSystem);
 }
 
 void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
@@ -341,6 +389,7 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
       break;
   }
 
+  // ? Put in level manager?
   auto LevelReadyFunc = [this, LevelChangeC]() {
     ASpawnPoint* SpawnPoint = *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)
                                    .FindByPredicate([LevelChangeC](const ASpawnPoint* SpawnPoint) {
@@ -352,8 +401,4 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   };
 
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
-}
-
-void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {
-  HUD->SetAndOpenUpgradeSelect(UpgradeSelectC, UpgradeManager);
 }

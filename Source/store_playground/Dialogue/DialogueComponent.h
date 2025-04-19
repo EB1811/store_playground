@@ -15,6 +15,6 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "Dialogue")
+  UPROPERTY(EditAnywhere, Category = "Dialogue", SaveGame)
   TArray<struct FDialogueData> DialogueArray;
 };
