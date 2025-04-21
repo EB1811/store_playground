@@ -29,6 +29,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
+  UPROPERTY(EditAnywhere, Category = "NewsGen")
+  const class AMarket* Market;
 
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   FNewsGenParams NewsGenParams;
@@ -41,7 +43,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TArray<FArticle> DaysArticles;
 
-  void GenDaysRandomArticles(TArray<FName> GuaranteedArticles = {});
+  void GenDaysRandomArticles();
 
   void TickDaysTimedVars();
 };

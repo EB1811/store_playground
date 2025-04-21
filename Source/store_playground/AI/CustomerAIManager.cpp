@@ -191,6 +191,13 @@ void ACustomerAIManager::SpawnCustomers() {
 
   if (ManagerParams.UniqueNpcBaseSpawnChance >= FMath::FRand() * 100) SpawnUniqueNpcs();
 
+  TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
+  for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
+    const auto* PopData = MarketEconomy->PopEconDataArray.FindByPredicate(
+        [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
+    WeightedCustomers.Add(MakeTuple(GenericCustomer, PopData->Population));
+  }
+
   int32 CustomersToSpawn = FMath::RandRange(0, BehaviorParams.MaxCustomers - AllCustomers.Num());
   UE_LOG(LogTemp, Warning, TEXT("Spawning %d customers."), CustomersToSpawn);
   for (int32 i = 0; i < CustomersToSpawn; i++) {
@@ -198,13 +205,6 @@ void ACustomerAIManager::SpawnCustomers() {
 
     ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(CustomerClass, SpawnPoint->GetActorLocation(),
                                                             SpawnPoint->GetActorRotation(), SpawnParams);
-
-    TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
-    for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
-      const auto* PopData = MarketEconomy->PopEconDataArray.FindByPredicate(
-          [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
-      WeightedCustomers.Add(MakeTuple(GenericCustomer, PopData->Population));
-    }
 
     const FGenericCustomerData RandomCustomerData =
         GetWeightedRandomItem<TTuple<FGenericCustomerData, float>>(WeightedCustomers, [](const auto& Item) {

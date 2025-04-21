@@ -33,12 +33,8 @@ void ADayManager::StartNewDay() {
 
   StatisticsGen->CalcDayStatistics();
 
-  TArray<struct FEconEvent> EconEvents = Market->ConsiderEconEvents();
-
-  TArray<FName> GuaranteedArticles;
-  for (const FEconEvent& EconEvent : EconEvents)
-    if (!EconEvent.ArticleID.IsNone()) GuaranteedArticles.Add(EconEvent.ArticleID);
-  NewsGen->GenDaysRandomArticles(GuaranteedArticles);
+  Market->ConsiderEconEvents();
+  NewsGen->GenDaysRandomArticles();
 
   MarketLevel->ResetLevelState();
 }

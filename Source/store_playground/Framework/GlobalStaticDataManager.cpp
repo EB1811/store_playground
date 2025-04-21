@@ -1,6 +1,7 @@
 #include "GlobalStaticDataManager.h"
 #include "Containers/Array.h"
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "Misc/AssertionMacros.h"
 #include "Misc/CString.h"
 #include "UObject/Field.h"
@@ -111,6 +112,16 @@ TArray<struct FQuestChainData> AGlobalStaticDataManager::GetEligibleQuestChains(
   });
 }
 
+inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
+  TArray<FGameplayTag> TagsArray;
+  for (const auto& TagString : Tags) {
+    auto Tag = FGameplayTag::RequestGameplayTag(TagString);
+    check(Tag.IsValid());
+    TagsArray.Add(Tag);
+  }
+  return FGameplayTagContainer::CreateFromArray(TagsArray);
+}
+
 inline TArray<struct FDialogueData> GetRandomDialogue(const TArray<struct FDialogueData>& DialogueArray) {
   TArray<struct FDialogueData> RandomDialogue;
 
@@ -134,13 +145,7 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetQuestDialogue(const FN
 }
 TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomPlayerMiscDialogue(
     const TArray<FName>& DialogueTags) const {
-  TArray<FGameplayTag> TagsArray;
-  for (const auto& TagString : DialogueTags) {
-    auto Tag = FGameplayTag::RequestGameplayTag(TagString);
-    check(Tag.IsValid());
-    TagsArray.Add(Tag);
-  }
-  FGameplayTagContainer TagsContainer = FGameplayTagContainer::CreateFromArray(TagsArray);
+  const auto TagsContainer = StringTagsToContainer(DialogueTags);
 
   TArray<FDialogueData> Filtered = PlayerMiscDialogues.FilterByPredicate(
       [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAll(TagsContainer); });
@@ -152,14 +157,32 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcDialogue(
 
   return UniqueNpcDialoguesMap[RandomDialogueChainID].Dialogues;
 }
-TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomCustomerDialogue() const {
-  return GetRandomDialogue(CustomerDialogues);
+TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomCustomerDialogue(
+    std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {
+  TArray<FDialogueData> Filtered =
+      !FilterFunc
+          ? CustomerDialogues
+          : CustomerDialogues.FilterByPredicate([&](const FDialogueData& Dialogue) { return FilterFunc(Dialogue); });
+
+  return GetRandomDialogue(Filtered);
 }
-TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomMarketNpcDialogue() const {
-  return GetRandomDialogue(MarketNpcDialogues);
+TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomMarketNpcDialogue(
+    std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {
+  TArray<FDialogueData> Filtered =
+      !FilterFunc
+          ? MarketNpcDialogues
+          : MarketNpcDialogues.FilterByPredicate([&](const FDialogueData& Dialogue) { return FilterFunc(Dialogue); });
+
+  return GetRandomDialogue(Filtered);
 }
-TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcStoreDialogue() const {
-  return GetRandomDialogue(NpcStoreDialogues);
+TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcStoreDialogue(
+    std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {
+  TArray<FDialogueData> Filtered =
+      !FilterFunc
+          ? NpcStoreDialogues
+          : NpcStoreDialogues.FilterByPredicate([&](const FDialogueData& Dialogue) { return FilterFunc(Dialogue); });
+
+  return GetRandomDialogue(Filtered);
 }
 
 TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalStaticDataManager::GetRandomNegDialogueMap(
@@ -183,11 +206,22 @@ TArray<struct FPriceEffect> AGlobalStaticDataManager::GetPriceEffects(const TArr
       [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.ID); });
 }
 
-TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleArticles(const TArray<FName>& PublishedArticles) const {
+TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleGeneralArticles(
+    const TArray<FName>& PublishedArticles) const {
   const auto GameDataMap = GlobalDataManager->GetGameDataMap();
   return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
-    return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) &&
+    return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) && !Article.bIsSpecial &&
            EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
+  });
+}
+TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleSpecialArticles(
+    const TArray<FName>& PublishedArticles,
+    const FGameplayTagContainer& AnyTagsContainer) const {
+  const auto GameDataMap = GlobalDataManager->GetGameDataMap();
+
+  return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
+    return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) && Article.bIsSpecial &&
+           Article.Tags.HasAny(AnyTagsContainer) && EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
   });
 }
 FArticle AGlobalStaticDataManager::GetArticle(const FName& ArticleID) const {
@@ -411,9 +445,11 @@ void AGlobalStaticDataManager::InitializeNewsData() {
         Row->RequirementsFilter,
         Row->AppearWeight,
         Row->bIsRepeatable,
+        Row->bIsSpecial,
         Row->Size,
         Row->TextData,
         Row->AssetData,
+        Row->Tags,
     });
 
   check(ArticlesArray.Num() > 0);

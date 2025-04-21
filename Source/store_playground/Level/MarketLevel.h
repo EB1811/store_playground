@@ -17,6 +17,9 @@ struct FMarketLevelParams {
   float PlayerMiscDialogueChance;  // * Chance to show a misc dialogue when entering the level.
 
   UPROPERTY(EditAnywhere)
+  float CatastrophicReactionChance;  // * Chance for npcs to have a reaction dialogue to a catastrophic event.
+
+  UPROPERTY(EditAnywhere)
   int32 RecentNpcSpawnedKeepTime;
 
   UPROPERTY(EditAnywhere)

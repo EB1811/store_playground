@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "NewsGenDataStructs.generated.h"
 
 UENUM()
@@ -40,9 +41,11 @@ struct FArticle {
   UPROPERTY(EditAnywhere, SaveGame)
   FName RequirementsFilter;
   UPROPERTY(EditAnywhere, SaveGame)
-  int32 AppearWeight;  // * 0 = never appears
+  int32 AppearWeight;
   UPROPERTY(EditAnywhere, SaveGame)
   bool bIsRepeatable;
+  UPROPERTY(EditAnywhere, SaveGame)
+  bool bIsSpecial;  // * Econ event articles, etc.
 
   UPROPERTY(EditAnywhere, SaveGame)
   EArticleSize Size;
@@ -50,6 +53,9 @@ struct FArticle {
   FArticleTextData TextData;
   UPROPERTY(EditAnywhere, SaveGame)
   FArticleAssetData AssetData;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FGameplayTagContainer Tags;  // * Tags for systems to filter further.
 };
 USTRUCT()
 struct FArticleRow : public FTableRowBase {
@@ -64,6 +70,8 @@ struct FArticleRow : public FTableRowBase {
   int32 AppearWeight;  // * 0 = never appears
   UPROPERTY(EditAnywhere)
   bool bIsRepeatable;
+  UPROPERTY(EditAnywhere)
+  bool bIsSpecial;  // * Econ event articles, etc.
 
   UPROPERTY(EditAnywhere)
   EArticleSize Size;
@@ -71,4 +79,7 @@ struct FArticleRow : public FTableRowBase {
   FArticleTextData TextData;
   UPROPERTY(EditAnywhere)
   FArticleAssetData AssetData;
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer Tags;  // * Tags for systems to filter further.
 };

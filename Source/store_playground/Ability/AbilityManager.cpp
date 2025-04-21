@@ -20,6 +20,8 @@ auto AAbilityManager::GetAvailableEconEventAbilities() const -> TArray<FEconEven
 }
 
 void AAbilityManager::ActivateEconEventAbility(const FName AbilityId) {
+  check(GlobalDataManager && Store && Market);
+
   check(!EconEventAbilityCooldowns.Contains(AbilityId));
   check(!ActiveEconEventAbilities.ContainsByPredicate(
       [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == AbilityId; }));

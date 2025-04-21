@@ -250,9 +250,28 @@ void AMarketLevel::InitMarketNpcs() {
     ANpc* Npc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation(),
                                              SpawnParams);
     Npc->SpawnPointId = SpawnPoint->Id;
-
     Npc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
-    Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue();
+
+    if (Market->TodaysEconEvents.Num() <= 0) {
+      Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue(
+          [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.IsEmpty(); });
+      continue;
+    }
+
+    const TArray<FEconEvent>& CatastrophicEvents = Market->TodaysEconEvents.FilterByPredicate(
+        [](const auto& Event) { return Event.Severity == EEconEventSeverity::Catastrophic; });
+    if (CatastrophicEvents.Num() > 0 && FMath::FRand() * 100 < LevelParams.CatastrophicReactionChance) {
+      Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue(
+          [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAny(CatastrophicEvents[0].Tags); });
+      continue;
+    }
+
+    const FEconEvent& RandomEconEvent = GetWeightedRandomItem<FEconEvent>(
+        Market->TodaysEconEvents, [](const auto& Event) { return Event.StartChance; });
+    Npc->DialogueComponent->DialogueArray =
+        GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
+          return Dialogue.DialogueTags.IsEmpty() || Dialogue.DialogueTags.HasAny(RandomEconEvent.Tags);
+        });
   }
 }
 

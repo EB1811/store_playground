@@ -113,15 +113,20 @@ public:
   TArray<struct FDialogueData> GetQuestDialogue(const FName& DialogueChainID) const;
   TArray<struct FDialogueData> GetRandomPlayerMiscDialogue(const TArray<FName>& DialogueTags) const;
   TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
-  TArray<struct FDialogueData> GetRandomCustomerDialogue() const;
-  TArray<struct FDialogueData> GetRandomMarketNpcDialogue() const;
-  TArray<struct FDialogueData> GetRandomNpcStoreDialogue() const;
+  TArray<struct FDialogueData> GetRandomCustomerDialogue(
+      std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
+  TArray<struct FDialogueData> GetRandomMarketNpcDialogue(
+      std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
+  TArray<struct FDialogueData> GetRandomNpcStoreDialogue(
+      std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 
   TArray<struct FPriceEffect> GetPriceEffects(const TArray<FName>& PriceEffectIDs) const;
 
-  TArray<struct FArticle> GetEligibleArticles(const TArray<FName>& PublishedArticles) const;
+  TArray<struct FArticle> GetEligibleGeneralArticles(const TArray<FName>& PublishedArticles) const;
+  TArray<struct FArticle> GetEligibleSpecialArticles(const TArray<FName>& PublishedArticles,
+                                                     const FGameplayTagContainer& AnyTagsContainer) const;
   FArticle GetArticle(const FName& ArticleID) const;
 
   FUpgrade GetUpgradeById(const FName& UpgradeID) const;

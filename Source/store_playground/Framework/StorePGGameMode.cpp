@@ -136,13 +136,14 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->Market = Market;
   MarketLevel->PlayerCommand = PlayerCommand;
 
-  Store->SaveManager = SaveManager;
-  Store->StatisticsGen = StatisticsGen;
-
   AbilityManager->GlobalDataManager = GlobalDataManager;
+  AbilityManager->Store = Store;
   AbilityManager->Market = Market;
 
   QuestManager->GlobalStaticDataManager = GlobalStaticDataManager;
+
+  Store->SaveManager = SaveManager;
+  Store->StatisticsGen = StatisticsGen;
 
   Market->GlobalDataManager = GlobalDataManager;
   Market->GlobalStaticDataManager = GlobalStaticDataManager;
@@ -161,6 +162,7 @@ void AStorePGGameMode::BeginPlay() {
   StatisticsGen->MarketEconomy = MarketEconomy;
 
   NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;
+  NewsGen->Market = Market;
 
   MiniGameManager->Market = Market;
 
