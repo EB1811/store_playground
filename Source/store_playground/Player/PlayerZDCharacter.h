@@ -32,6 +32,8 @@ struct FInputActions {
   class UInputAction* InteractAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* OpenNewspaperAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* OpenStatisticsAction;
 
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* AdvanceUIAction;  // * Advance UI (dialogue, negotiation, etc.).
@@ -90,6 +92,8 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenNewspaper(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void OpenStatistics(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void TryInteract(const FInputActionValue& Value);
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   FInteractionData InteractionData;
@@ -103,6 +107,8 @@ public:
   const class ACustomerAIManager* CustomerAIManager;
   UPROPERTY(EditAnywhere, Category = "Character | Const")
   const class ANewsGen* NewsGen;
+  UPROPERTY(EditAnywhere, Category = "Character | Const")
+  const class AStatisticsGen* StatisticsGen;
 
   // * Modifiable refs.
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")

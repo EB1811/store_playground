@@ -46,6 +46,8 @@ public:
   TSubclassOf<class UUserWidget> UpgradeSelectWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UAbilityWidget> AbilityWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UStatisticsWidget> StatisticsWidgetClass;
 
   UPROPERTY()
   EHUDState HUDState;
@@ -114,6 +116,10 @@ public:
   UPROPERTY()
   class UNewspaperWidget* NewspaperWidget;
   void SetAndOpenNewspaper(const class ANewsGen* NewsGenRef);
+
+  UPROPERTY()
+  class UStatisticsWidget* StatisticsWidget;
+  void SetAndOpenStatistics(const class AStatisticsGen* StatisticsGenRef);
 
   UPROPERTY()
   class UUpgradeListWidget* UpgradeSelectWidget;

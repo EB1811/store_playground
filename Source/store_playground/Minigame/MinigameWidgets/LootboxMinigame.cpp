@@ -27,7 +27,7 @@ void ULootboxMinigame::OnOpenLootboxButtonClicked() {
   ItemIcon->SetVisibility(ESlateVisibility::Visible);
   ItemGivenText->SetVisibility(ESlateVisibility::Visible);
 
-  Store->Money -= Price;
+  Store->MoneySpent(Price);
 
   float WinChance =
       LootboxMinigameParams.BaseWinChance *

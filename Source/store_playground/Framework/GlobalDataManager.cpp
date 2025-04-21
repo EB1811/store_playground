@@ -302,6 +302,7 @@ void AGlobalDataManager::InitializeMarketData() {
   for (auto* Row : EconEventRows)
     EconEventsArray.Add({
         Row->ID,
+        Row->Severity,
         !Row->bIsUnlockable,  // bIsUnlocked = !bIsUnlockable
         Row->RequirementsFilter,
         Row->StartChance,
@@ -310,6 +311,7 @@ void AGlobalDataManager::InitializeMarketData() {
         Row->ArticleID,
         Row->TextData,
         Row->AssetData,
+        Row->Tags,
     });
   check(EconEventsArray.Num() > 0);
 

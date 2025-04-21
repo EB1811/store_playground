@@ -67,6 +67,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->Market = Market;
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
   PlayerCharacter->NewsGen = NewsGen;
+  PlayerCharacter->StatisticsGen = StatisticsGen;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
   PlayerCharacter->DayManager = DayManager;
@@ -148,6 +149,8 @@ void AStorePGGameMode::BeginPlay() {
   Market->QuestManager = QuestManager;
   Market->MarketEconomy = MarketEconomy;
 
+  MarketEconomy->StatisticsGen = StatisticsGen;
+
   CustomerAIManager->GlobalStaticDataManager = GlobalStaticDataManager;
   CustomerAIManager->Market = Market;
   CustomerAIManager->MarketEconomy = MarketEconomy;
@@ -155,7 +158,6 @@ void AStorePGGameMode::BeginPlay() {
   CustomerAIManager->QuestManager = QuestManager;
 
   StatisticsGen->Store = Store;
-  StatisticsGen->Market = Market;
   StatisticsGen->MarketEconomy = MarketEconomy;
 
   NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;

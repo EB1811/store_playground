@@ -63,6 +63,9 @@ public:
   FEconomyParams EconomyParams;
 
   UPROPERTY(EditAnywhere, Category = "Economy")
+  class AStatisticsGen* StatisticsGen;
+
+  UPROPERTY(EditAnywhere, Category = "Economy")
   int32 TotalPopulation;
   UPROPERTY(EditAnywhere, Category = "Economy")
   float TotalWealth;

@@ -14,6 +14,7 @@
 #include "store_playground/UI/Store/StockDisplayWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayWidget.h"
 #include "store_playground/UI/Newspaper/NewspaperWidget.h"
+#include "store_playground/UI/Statistics/StatisticsWidget.h"
 #include "store_playground/UI/Ability/AbilityWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
@@ -78,6 +79,10 @@ void ASpgHUD::BeginPlay() {
   NewspaperWidget = CreateWidget<UNewspaperWidget>(GetWorld(), NewspaperWidgetClass);
   NewspaperWidget->AddToViewport(10);
   NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  StatisticsWidget = CreateWidget<UStatisticsWidget>(GetWorld(), StatisticsWidgetClass);
+  StatisticsWidget->AddToViewport(10);
+  StatisticsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   UpgradeSelectWidget = CreateWidget<UUpgradeListWidget>(GetWorld(), UpgradeSelectWidgetClass);
   UpgradeSelectWidget->AddToViewport(10);
@@ -335,6 +340,23 @@ void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(NewspaperWidget);
+}
+
+void ASpgHUD::SetAndOpenStatistics(const AStatisticsGen* StatisticsGenRef) {
+  check(StatisticsWidget);
+
+  if (OpenedWidgets.Contains(StatisticsWidget)) return CloseWidget(StatisticsWidget);
+
+  StatisticsWidget->StatisticsGenRef = StatisticsGenRef;
+  StatisticsWidget->RefreshUI();
+
+  StatisticsWidget->SetVisibility(ESlateVisibility::Visible);
+
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(StatisticsWidget);
 }
 
 void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, AUpgradeManager* UpgradeManager) {

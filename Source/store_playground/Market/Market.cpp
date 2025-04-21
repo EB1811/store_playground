@@ -114,7 +114,7 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
 
   if (!TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess) return false;
 
-  PlayerStore->Money -= TotalPrice;
+  PlayerStore->ItemBought(Item, TotalPrice);
   return true;
 }
 
@@ -136,7 +136,7 @@ auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
   if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
 
   float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
-  PlayerStore->Money += EconItem->CurrentPrice * Quantity * (1.0f - StoreMarkup);
+  PlayerStore->MoneyGained(EconItem->CurrentPrice * Quantity * (1.0f - StoreMarkup));
   return true;
 }
 
@@ -164,6 +164,8 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
 
     if (!OccurredEconEvents.Contains(Event.ID)) OccurredEconEvents.Add(Event.ID);  // ? Don't add if repeatable?
     RecentEconEventsMap.Add(Event.ID, MarketParams.RecentEconEventsKeepTime);
+    if (!TodaysEconEvents.ContainsByPredicate([Event](const auto& OtherEvent) { return Event.ID == OtherEvent.ID; }))
+      TodaysEconEvents.Add(Event);
   }
   // ? If no events, add a random one so there's at least one.
   // FEconEvent RandomEvent =
@@ -173,11 +175,12 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
 }
 
 void AMarket::TickDaysTimedVars() {
+  TodaysEconEvents.Empty();
+
   TArray<FName> EconEventsToRemove;
   for (auto& Pair : RecentEconEventsMap)
     if (Pair.Value <= 1) EconEventsToRemove.Add(Pair.Key);
     else Pair.Value--;
-
   for (const auto& EventId : EconEventsToRemove) RecentEconEventsMap.Remove(EventId);
 }
 

@@ -70,6 +70,8 @@ public:
   TArray<FName> OccurredEconEvents;
   UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
   TMap<FName, int32> RecentEconEventsMap;
+  UPROPERTY(EditAnywhere, Category = "Market", SaveGame)
+  TArray<struct FEconEvent> TodaysEconEvents;  // * For world to react.
 
   auto GetNewRandomItems(int32 Amount,
                          TArray<EItemType> ItemTypes = {},

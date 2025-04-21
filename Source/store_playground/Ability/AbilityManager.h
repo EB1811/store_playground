@@ -29,6 +29,8 @@ public:
   const class AGlobalDataManager* GlobalDataManager;
 
   UPROPERTY(EditAnywhere)
+  class AStore* Store;
+  UPROPERTY(EditAnywhere)
   class AMarket* Market;
 
   UPROPERTY(EditAnywhere, SaveGame)

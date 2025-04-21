@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "GameplayTagContainer.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "MarketDataStructs.generated.h"
 
@@ -243,6 +244,13 @@ struct FPriceEffectRow : public FTableRowBase {
   float PriceMultiPercentFalloff;  // * Falloff each day, if any.
 };
 
+UENUM()
+enum class EEconEventSeverity : uint8 {
+  Minor UMETA(DisplayName = "Minor"),
+  Major UMETA(DisplayName = "Major"),
+  Catastrophic UMETA(DisplayName = "Catastrophic"),  // * Doesn't mean bad, just very impactful.
+};
+
 USTRUCT()
 struct FEconEventTextData {
   GENERATED_BODY()
@@ -268,8 +276,10 @@ struct FEconEvent {
   FName ID;
 
   UPROPERTY(EditAnywhere)
-  bool bIsUnlocked;
+  EEconEventSeverity Severity;  // * Determines how the world reacts to the event.
 
+  UPROPERTY(EditAnywhere)
+  bool bIsUnlocked;
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;
   UPROPERTY(EditAnywhere)
@@ -286,6 +296,9 @@ struct FEconEvent {
   FEconEventTextData TextData;
   UPROPERTY(EditAnywhere)
   FEconEventAssetData AssetData;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FGameplayTagContainer Tags;  // * Tags for systems to filter further.
 };
 USTRUCT()
 struct FEconEventRow : public FTableRowBase {
@@ -295,8 +308,10 @@ struct FEconEventRow : public FTableRowBase {
   FName ID;
 
   UPROPERTY(EditAnywhere)
-  bool bIsUnlockable;
+  EEconEventSeverity Severity;  // * Determines how the world reacts to the event.
 
+  UPROPERTY(EditAnywhere)
+  bool bIsUnlockable;
   UPROPERTY(EditAnywhere)
   FName RequirementsFilter;
   UPROPERTY(EditAnywhere)
@@ -313,4 +328,7 @@ struct FEconEventRow : public FTableRowBase {
   FEconEventTextData TextData;
   UPROPERTY(EditAnywhere)
   FEconEventAssetData AssetData;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FGameplayTagContainer Tags;  // * Tags for systems to filter further.
 };

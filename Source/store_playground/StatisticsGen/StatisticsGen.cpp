@@ -43,6 +43,25 @@ auto AStatisticsGen::CalcTotalStoreStockValue() const -> float {
   return TotalValue;
 }
 
+void AStatisticsGen::ItemPriceChange(const FName ItemId, const float NewPrice) {
+  if (!ItemStatisticsMap.Contains(ItemId)) ItemStatisticsMap.Add(ItemId, {});
+
+  ItemStatisticsMap[ItemId].PriceHistory.Add(NewPrice);
+
+  if (ItemStatisticsMap[ItemId].PriceHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
+    ItemStatisticsMap[ItemId].PriceHistory.RemoveAt(0, EAllowShrinking::No);
+}
+
+void AStatisticsGen::PopChange(const FName PopId, const float NewPopulation) {
+  if (!PopStatisticsMap.Contains(PopId)) PopStatisticsMap.Add(PopId, {});
+
+  PopStatisticsMap[PopId].PopulationHistory.Add(NewPopulation);
+  PopStatisticsMap[PopId].TodaysPopulationChange = NewPopulation - PopStatisticsMap[PopId].PopulationHistory.Last();
+
+  if (PopStatisticsMap[PopId].PopulationHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
+    PopStatisticsMap[PopId].PopulationHistory.RemoveAt(0, EAllowShrinking::No);
+}
+
 void AStatisticsGen::CalcDayStatistics() {
   UE_LOG(LogTemp, Warning, TEXT("StatisticsGen: Calculating day statistics."));
   StoreStatistics.ProfitHistory.Add(CalcTodaysStoreProfit());
@@ -59,7 +78,15 @@ void AStatisticsGen::CalcDayStatistics() {
     StoreStatistics.StoreStockValueHistory.RemoveAt(0, EAllowShrinking::No);
   }
 
+  // for (auto& ItemStat : ItemStatisticsMap)
+  //   if (ItemStat.Value.PriceHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
+  //     ItemStat.Value.PriceHistory.RemoveAt(0, EAllowShrinking::No);
+  // for (auto& PopStat : PopStatisticsMap)
+  //   if (PopStat.Value.PopulationHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
+  //     PopStat.Value.PopulationHistory.RemoveAt(0, EAllowShrinking::No);
+
   TodaysItemDeals.Empty();
   TodaysStoreMoneyActivity.AllExpenses = 0.0f;
   TodaysStoreMoneyActivity.AllIncome = 0.0f;
+  for (auto& PopStat : PopStatisticsMap) PopStat.Value.TodaysPopulationChange = 0.0f;
 }

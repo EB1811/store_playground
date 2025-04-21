@@ -3,6 +3,7 @@
 #include "Misc/AssertionMacros.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/Store/Store.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 
 void AAbilityManager::BeginPlay() { Super::BeginPlay(); }
@@ -25,6 +26,8 @@ void AAbilityManager::ActivateEconEventAbility(const FName AbilityId) {
 
   FEconEventAbility Ability = GlobalDataManager->GetEconEventAbilitiesByIds({AbilityId})[0];
   check(!Ability.EconEventId.IsNone());
+
+  Store->MoneySpent(Ability.Cost);
 
   Market->AddGuaranteedEconEvents({Ability.EconEventId});
   ActiveEconEventAbilities.Add(Ability);

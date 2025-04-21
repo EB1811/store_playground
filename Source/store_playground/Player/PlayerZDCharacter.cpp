@@ -23,6 +23,7 @@
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "store_playground/NewsGen/NewsGen.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
@@ -68,6 +69,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                        &APlayerZDCharacter::EnterBuildMode);
     EnhancedInputComponent->BindAction(InputActions.OpenNewspaperAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenNewspaper);
+    EnhancedInputComponent->BindAction(InputActions.OpenStatisticsAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenStatistics);
     EnhancedInputComponent->BindAction(InputActions.InteractAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::TryInteract);
     EnhancedInputComponent->BindAction(InputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
@@ -147,6 +150,8 @@ void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
 
   // SaveManager->CreateNewSaveGame();
 }
+
+void APlayerZDCharacter::OpenStatistics(const FInputActionValue& Value) { HUD->SetAndOpenStatistics(StatisticsGen); }
 
 void APlayerZDCharacter::TryInteract(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
@@ -247,7 +252,7 @@ void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
     Buildable->SetToStockDisplay();
     if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
 
-    Store->Money -= Buildable->BuildingPricesMap[EBuildableType::StockDisplay];
+    Store->MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay]);
     return true;
   };
   auto BuildDecorationFunc = [this](ABuildable* Buildable) {
@@ -256,7 +261,7 @@ void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
     Buildable->SetToDecoration();
     if (Buildable->BuildableType != EBuildableType::Decoration) return false;
 
-    Store->Money -= Buildable->BuildingPricesMap[EBuildableType::Decoration];
+    Store->MoneySpent(Buildable->BuildingPricesMap[EBuildableType::Decoration]);
     return true;
   };
 
@@ -268,17 +273,13 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
   auto PlayerToDisplayFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
     check(SourceInventory == PlayerInventoryComponent);
-    // ? Have a function in the store to refetch all stock?
-    if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess)
-      Store->StoreStockItems.Add({StockDisplayC->DisplayStats, DroppedItem,
-                                  DisplayInventoryC});  // todo-low: Check if the two item instances cause problems.
+    // ? Cache the stock display inventories?
+    if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess) Store->InitStockDisplays();
   };
   auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
     check(SourceInventory == DisplayInventoryC);
-    if (TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem).bSuccess)
-      Store->StoreStockItems.RemoveAll(
-          [DroppedItem](const FStockItem& StockItem) { return StockItem.Item == DroppedItem; });
+    if (TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem).bSuccess) Store->InitStockDisplays();
   };
 
   HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent, PlayerToDisplayFunc,

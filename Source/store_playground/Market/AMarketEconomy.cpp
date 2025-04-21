@@ -9,6 +9,7 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/WorldObject/NPCStore.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -307,6 +308,10 @@ void AMarketEconomy::PerformEconomyTick() {
     UE_LOG(LogTemp, Warning, TEXT("Pop %s cross promoted to %s"), *CustomerPops[Index].PopName.ToString(),
            *CustomerPops[NewPopIndexes[FMath::RandRange(0, NewPopIndexes.Num() - 1)]].PopName.ToString());
   }
+
+  // Update statistics.
+  for (auto& Item : EconItems) StatisticsGen->ItemPriceChange(Item.ItemID, Item.CurrentPrice);
+  for (auto& PopEconData : PopEconDataArray) StatisticsGen->PopChange(PopEconData.PopID, PopEconData.Population);
 }
 
 void AMarketEconomy::TickDaysActivePriceEffects() {

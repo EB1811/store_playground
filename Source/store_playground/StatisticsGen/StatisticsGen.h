@@ -46,8 +46,18 @@ struct FItemStatistics {
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<float> PriceHistory;
+};
+USTRUCT()
+struct FPopStatistics {
+  GENERATED_BODY()
+
   UPROPERTY(EditAnywhere, SaveGame)
-  float InflationFromBase;
+  FName PopId;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<float> PopulationHistory;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float TodaysPopulationChange;
 };
 
 UCLASS(Blueprintable)
@@ -63,8 +73,6 @@ public:
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
   UPROPERTY(EditAnywhere)
-  const class AMarket* Market;
-  UPROPERTY(EditAnywhere)
   const class AMarketEconomy* MarketEconomy;
 
   UPROPERTY(EditAnywhere)
@@ -74,6 +82,8 @@ public:
   FStoreStatistics StoreStatistics;
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<FName, FItemStatistics> ItemStatisticsMap;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<FName, FPopStatistics> PopStatisticsMap;
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FItemDeal> TodaysItemDeals;  // * Items sold at negotiation or market.
@@ -83,9 +93,11 @@ public:
   void ItemDeal(const FItemDeal ItemDeal);
   void StoreMoneyGained(float Amount);
   void StoreMoneySpent(float Amount);
-
   auto CalcTodaysStoreProfit() const -> float;
   auto CalcTotalStoreStockValue() const -> float;
+
+  void ItemPriceChange(const FName ItemId, const float NewPrice);
+  void PopChange(const FName PopId, const float NewPopulation);
 
   void CalcDayStatistics();  // * Call at the end of the day and reset the daily statistics.
 };
