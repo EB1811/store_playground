@@ -1,4 +1,5 @@
 #include "SaveManager.h"
+#include "SaveStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -14,6 +15,7 @@
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/MySaveGame.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "store_playground/Tags/TagsComponent.h"
 #include "Containers/Map.h"
 #include "GameFramework/Actor.h"
 #include "UObject/ObjectMacros.h"
@@ -69,9 +71,9 @@ void ASaveManager::SaveCurrentSlotToDisk() {
   for (auto& Pair : LevelsSaveData.ComponentSaveMap) CurrentSaveGame->ComponentSaveStates.Add(Pair.Value);
   CurrentSaveGame->ObjectSaveStates.Append(LevelsSaveData.ObjectSaveStates);
 
-  auto [PlayerSaveState, PComponentSaveState, PObjectSaveStates] = SavePlayer();
+  auto [PlayerSaveState, PComponentSaveStates, PObjectSaveStates] = SavePlayer();
   CurrentSaveGame->PlayerSaveState = PlayerSaveState;
-  CurrentSaveGame->ComponentSaveStates.Add(PComponentSaveState);
+  CurrentSaveGame->ComponentSaveStates.Append(PComponentSaveStates);
   CurrentSaveGame->ObjectSaveStates.Append(PObjectSaveStates);
 
   UGameplayStatics::SaveGameToSlot(CurrentSaveGame, CurrentSaveGame->SlotName, 0);
@@ -99,15 +101,19 @@ void ASaveManager::LoadLevelsAndPlayerFromDisk() {
   LoadLevels(LevelsSaveData);
 
   FPlayerSavaState PlayerSaveState = CurrentSaveGame->PlayerSaveState;
-  FComponentSaveState PComponentSaveState = *CurrentSaveGame->ComponentSaveStates.FindByPredicate(
+  TArray<FComponentSaveState> PComponentSaveStates = CurrentSaveGame->ComponentSaveStates.FilterByPredicate(
       [PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
-        return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["InventoryComponent"];
+        return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["InventoryComponent"] ||
+               ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["TagsComponent"];
       });
   TArray<FObjectSaveState> PObjectSaveStates = CurrentSaveGame->ObjectSaveStates.FilterByPredicate(
-      [PComponentSaveState](const FObjectSaveState& ObjectSaveState) {
-        return PComponentSaveState.ComponentObjects.Contains(ObjectSaveState.Id);
+      [PComponentSaveStates](const FObjectSaveState& ObjectSaveState) {
+        return PComponentSaveStates.ContainsByPredicate(
+            [ObjectSaveState](const FComponentSaveState& ComponentSaveState) {
+              return ComponentSaveState.ComponentObjects.Contains(ObjectSaveState.Id);
+            });
       });
-  LoadPlayer(PComponentSaveState, PObjectSaveStates);
+  LoadPlayer(PlayerSaveState, PComponentSaveStates, PObjectSaveStates);
 }
 
 auto ASaveManager::SaveAllSystems() -> TArray<FSystemSaveState> {
@@ -209,16 +215,38 @@ void ASaveManager::LoadLevels(FLevelsSaveData LevelsSaveData) {
   Store->LoadStoreLevelState();
 }
 
-// TODO: Save tag component.
-auto ASaveManager::SavePlayer() -> TTuple<FPlayerSavaState, FComponentSaveState, TArray<FObjectSaveState>> {
-  auto [ComponentSaveState, FObjectSaveStates] = SaveInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent);
+auto ASaveManager::SavePlayer() -> TTuple<FPlayerSavaState, TArray<FComponentSaveState>, TArray<FObjectSaveState>> {
   FPlayerSavaState PlayerSaveState;
-  PlayerSaveState.ActorComponentsMap.Add("InventoryComponent", ComponentSaveState.Id);
+  TArray<FComponentSaveState> ComponentSaveStates;
 
-  return {PlayerSaveState, ComponentSaveState, FObjectSaveStates};
+  auto [InvComponentSaveState, FObjectSaveStates] = SaveInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent);
+  PlayerSaveState.ActorComponentsMap.Add("InventoryComponent", InvComponentSaveState.Id);
+  ComponentSaveStates.Add(InvComponentSaveState);
+
+  FComponentSaveState TagComponentSaveState = SaveComponent(PlayerCharacter->PlayerTagsComponent, FGuid::NewGuid());
+  PlayerSaveState.ActorComponentsMap.Add("TagsComponent", TagComponentSaveState.Id);
+  ComponentSaveStates.Add(TagComponentSaveState);
+
+  return {PlayerSaveState, ComponentSaveStates, FObjectSaveStates};
 }
-void ASaveManager::LoadPlayer(FComponentSaveState ComponentSaveState, TArray<FObjectSaveState> ObjectSaveStates) {
-  LoadInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent, ComponentSaveState, ObjectSaveStates);
+void ASaveManager::LoadPlayer(FPlayerSavaState PlayerSaveState,
+                              TArray<FComponentSaveState> ComponentSaveStates,
+                              TArray<FObjectSaveState> ObjectSaveStates) {
+  FComponentSaveState PInventorySaveState =
+      *ComponentSaveStates.FindByPredicate([PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
+        return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["InventoryComponent"];
+      });
+  TArray<FObjectSaveState> InvObjectSaveStates = CurrentSaveGame->ObjectSaveStates.FilterByPredicate(
+      [PInventorySaveState](const FObjectSaveState& ObjectSaveState) {
+        return PInventorySaveState.ComponentObjects.Contains(ObjectSaveState.Id);
+      });
+
+  LoadInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent, PInventorySaveState, InvObjectSaveStates);
+  LoadComponent(PlayerCharacter->PlayerTagsComponent,
+                *CurrentSaveGame->ComponentSaveStates.FindByPredicate(
+                    [PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
+                      return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["TagsComponent"];
+                    }));
 }
 
 void ASaveManager::ApplyLoadedUpgradeEffects() {

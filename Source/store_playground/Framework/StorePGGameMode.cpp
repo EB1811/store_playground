@@ -32,6 +32,7 @@
 #include "store_playground/WorldObject/Level/SpawnPoint.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
+#include "store_playground/UI/SpgHUD.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -143,6 +144,7 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->MarketLevel = MarketLevel;
   DayManager->StatisticsGen = StatisticsGen;
   DayManager->NewsGen = NewsGen;
+  DayManager->Store = Store;
 
   UpgradeManager->CustomerAIManager = CustomerAIManager;
   UpgradeManager->Market = Market;
@@ -211,6 +213,7 @@ void AStorePGGameMode::BeginPlay() {
   check(StorePGGameInstance);
 
   if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadSystemsFromDisk();
+
   LevelManager->InitLoadStore([this, StorePGGameInstance]() {
     // ! Enter level post transition blueprint function is not called.
     if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadLevelsAndPlayerFromDisk();
@@ -232,4 +235,16 @@ void AStorePGGameMode::BeginPlay() {
     // * Clearing datatable refs mostly.
     CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
   });
+}
+
+// TODO: Save and keep upgrades.
+void AStorePGGameMode::GameOverReset() {
+  UE_LOG(LogTemp, Warning, TEXT("Game Over. Resetting game."));
+
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+  check(StorePGGameInstance);
+  StorePGGameInstance->bFromSaveGame = false;
+  StorePGGameInstance->bFromGameOver = true;
+
+  UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
 }

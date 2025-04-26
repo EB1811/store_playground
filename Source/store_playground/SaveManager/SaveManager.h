@@ -50,8 +50,10 @@ public:
   void LoadLevels(FLevelsSaveData LevelsSaveData);
 
   // Only inventory component for now.
-  auto SavePlayer() -> TTuple<FPlayerSavaState, FComponentSaveState, TArray<FObjectSaveState>>;
-  void LoadPlayer(FComponentSaveState ComponentSaveState, TArray<FObjectSaveState> ObjectSaveStates);
+  auto SavePlayer() -> TTuple<FPlayerSavaState, TArray<FComponentSaveState>, TArray<FObjectSaveState>>;
+  void LoadPlayer(FPlayerSavaState PlayerSaveState,
+                  TArray<FComponentSaveState> ComponentSaveState,
+                  TArray<FObjectSaveState> ObjectSaveStates);
 
   void ApplyLoadedUpgradeEffects();  // * Apply ChangeData upgrade effects to the data manager.
 

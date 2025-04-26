@@ -15,8 +15,13 @@ struct FDayManagerParams {
   UPROPERTY(EditAnywhere)
   int32 WeekendDivisor;  // * Divisor for the weekend days, e.g., 5 = 1 weekend day every 5 days.
 
+  // ? Or use a map for specific amounts?
   UPROPERTY(EditAnywhere)
   float BaseDebtAmount;
+  UPROPERTY(EditAnywhere)
+  float DebtIncreaseMulti;
+  UPROPERTY(EditAnywhere)
+  float DifficultyDebtIncreaseMulti;
   UPROPERTY(EditAnywhere)
   int32 DebtPaymentDayDivisor;
 };
@@ -49,10 +54,15 @@ public:
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class ANewsGen* NewsGen;  // * Create new articles.
 
+  UPROPERTY(EditAnywhere, Category = "DayManager")
+  class AStore* Store;
+
   UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
   int32 CurrentDay;  // * Incremental counter.
   UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
   bool bIsWeekend;
 
   void StartNewDay();
+
+  void ManageDebt();  // * Attempt to pay debt. If not enough money, game over.
 };

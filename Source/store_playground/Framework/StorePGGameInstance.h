@@ -25,5 +25,8 @@ public:
   bool bFromSaveGame;  // * Whether the game was loaded from a save game or not.
 
   UPROPERTY(EditAnywhere)
+  bool bFromGameOver;  // * Whether the game was loaded from a game over or not.
+
+  UPROPERTY(EditAnywhere)
   FGameSettings GameSettings;
 };
