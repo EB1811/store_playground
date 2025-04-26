@@ -8,10 +8,18 @@
 
 // * Responsible for tracking the current day, starting new days, tracking times events, etc.
 
-// USTRUCT()
-// struct FDayManagerParams {
-//   GENERATED_BODY()
-// };
+USTRUCT()
+struct FDayManagerParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  int32 WeekendDivisor;  // * Divisor for the weekend days, e.g., 5 = 1 weekend day every 5 days.
+
+  UPROPERTY(EditAnywhere)
+  float BaseDebtAmount;
+  UPROPERTY(EditAnywhere)
+  int32 DebtPaymentDayDivisor;
+};
 
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ADayManager : public AInfo {
@@ -22,6 +30,9 @@ public:
 
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
+
+  UPROPERTY(EditAnywhere, Category = "DayManager")
+  FDayManagerParams DayManagerParams;
 
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AAbilityManager* AbilityManager;  // * Tick active upgrades.
@@ -40,6 +51,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
   int32 CurrentDay;  // * Incremental counter.
+  UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
+  bool bIsWeekend;
 
   void StartNewDay();
 };

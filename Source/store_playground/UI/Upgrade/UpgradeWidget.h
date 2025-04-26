@@ -23,6 +23,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* UpgradeDescText;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* ReqsNotMetText;
+  UPROPERTY(meta = (BindWidget))
   class UButton* UpgradeButton;
 
   void SetUpgradeData(const FUpgrade& Upgrade);

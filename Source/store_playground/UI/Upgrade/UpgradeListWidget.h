@@ -23,7 +23,11 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* UpgradeListDescText;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* AvailableUpgradePointsText;
+  UPROPERTY(meta = (BindWidget))
   class UWrapBox* UpgradeListPanelWrapBox;
+  UPROPERTY(meta = (BindWidget))
+  class UWrapBox* ReqsNotMetPanelWrapBox;
 
   UPROPERTY()
   EUpgradeClass UpgradeClass;

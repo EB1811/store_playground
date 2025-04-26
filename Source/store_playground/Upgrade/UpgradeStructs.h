@@ -51,9 +51,9 @@ struct FEconEventAbility {
   UPROPERTY(EditAnywhere, SaveGame)
   EUpgradeClass UpgradeClass;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FEconEventAbilityTextData TextData;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FEconEventAbilityAssetData AssetData;
 };
 USTRUCT()
@@ -68,9 +68,9 @@ struct FEconEventAbilityRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   float Cost;  // * Cost in money.
-  UPROPERTY(EditAnywhere, SaveGame)
+  UPROPERTY(EditAnywhere)
   int32 Duration;  // * In days.
-  UPROPERTY(EditAnywhere, SaveGame)
+  UPROPERTY(EditAnywhere)
   int32 Cooldown;  // * In days.
 
   UPROPERTY(EditAnywhere)
@@ -199,6 +199,13 @@ struct FUpgrade {
   TArray<FName> UpgradeEffectIDs;
 
   UPROPERTY(EditAnywhere)
+  int32 Level;  // * Arbitrary level for the upgrade. Higher than player levels wont be displayed.
+  UPROPERTY(EditAnywhere)
+  FName Requirements;  // * (RequirementsFilter structure) Won't be filtered out in the UI, just not available.
+  UPROPERTY(EditAnywhere)
+  FName RequirementsFilterDescription;  // * Description for the requirements filter to display in the UI.
+
+  UPROPERTY(EditAnywhere)
   FUpgradeTextData TextData;
   UPROPERTY(EditAnywhere)
   FUpgradeAssetData AssetData;
@@ -215,6 +222,13 @@ struct FUpgradeRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   TArray<FName> UpgradeEffectIDs;
+
+  UPROPERTY(EditAnywhere)
+  int32 Level;  // * Arbitrary level for the upgrade. Higher than player levels wont be displayed.
+  UPROPERTY(EditAnywhere)
+  FName Requirements;  // * (RequirementsFilter structure) Won't be filtered out in the UI, just not available.
+  UPROPERTY(EditAnywhere)
+  FName RequirementsFilterDescription;  // * Description for the requirements filter to display in the UI.
 
   UPROPERTY(EditAnywhere)
   FUpgradeTextData TextData;

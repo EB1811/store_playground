@@ -23,6 +23,7 @@ void ADayManager::StartNewDay() {
   UE_LOG(LogTemp, Warning, TEXT("DayManager: Starting new day."));
 
   CurrentDay++;
+  bIsWeekend = CurrentDay % DayManagerParams.WeekendDivisor == 0;
 
   AbilityManager->TickDaysTimedVars();
   CustomerAIManager->TickDaysTimedVars();

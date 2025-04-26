@@ -9,6 +9,9 @@
 USTRUCT()
 struct FUpgradeManagerParams {
   GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  TMap<int32, float> UpgradeLevelRevenueReq;  // * Revenue required to unlock the next level of upgrades.
 };
 
 UCLASS(Blueprintable)
@@ -22,6 +25,12 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere)
+  FUpgradeManagerParams UpgradeManagerParams;
+
+  UPROPERTY(EditAnywhere)
+  const class AStatisticsGen* StatisticsGen;
+
+  UPROPERTY(EditAnywhere)
   class ACustomerAIManager* CustomerAIManager;
   UPROPERTY(EditAnywhere)
   class AMarket* Market;
@@ -31,6 +40,9 @@ public:
   class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere)
   class AAbilityManager* AbilityManager;
+
+  UPROPERTY(EditAnywhere)
+  int32 AvailableUpgradePoints;
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> SelectedUpgradeIDs;
@@ -44,7 +56,10 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FEconEventAbility> ActiveEconEventAbilities;
 
+  void GainUpgradePoints(int32 Points);
+
   auto GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
+  auto GetUpgradesReqsNotMet(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
   auto GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
   void SelectUpgrade(const FName UpgradeId);
 

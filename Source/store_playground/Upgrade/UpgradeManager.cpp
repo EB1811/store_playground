@@ -6,6 +6,7 @@
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 
 AUpgradeManager::AUpgradeManager() {
   PrimaryActorTick.bCanEverTick = false;
@@ -17,8 +18,24 @@ void AUpgradeManager::BeginPlay() { Super::BeginPlay(); }
 
 void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void AUpgradeManager::GainUpgradePoints(int32 Points) { AvailableUpgradePoints += Points; }
+
 auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
-  return GlobalStaticDataManager->GetAvailableUpgrades(UpgradeClass, SelectedUpgradeIDs);
+  int32 Level = 1;
+  for (const auto& Pair : UpgradeManagerParams.UpgradeLevelRevenueReq)
+    if (StatisticsGen->StoreStatistics.TotalRevenueToDate >= Pair.Value) Level = Pair.Key;
+    else break;
+
+  return GlobalStaticDataManager->GetEligibleUpgrades(UpgradeClass, Level, SelectedUpgradeIDs);
+}
+
+auto AUpgradeManager::GetUpgradesReqsNotMet(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
+  int32 Level = 1;
+  for (const auto& Pair : UpgradeManagerParams.UpgradeLevelRevenueReq)
+    if (StatisticsGen->StoreStatistics.TotalRevenueToDate >= Pair.Value) Level = Pair.Key;
+    else break;
+
+  return GlobalStaticDataManager->GetUpgradesReqsNotMet(UpgradeClass, Level, SelectedUpgradeIDs);
 }
 
 auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
@@ -28,13 +45,14 @@ auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> T
 }
 
 void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
+  if (AvailableUpgradePoints <= 0) return;
+
   const TMap<EUpgradeEffectSystem, FUpgradeable> UpgradeableMap = {
       {EUpgradeEffectSystem::Ability, AbilityManager->Upgradeable},
       {EUpgradeEffectSystem::CustomerAI, CustomerAIManager->Upgradeable},
       {EUpgradeEffectSystem::Market, Market->Upgradeable},
       {EUpgradeEffectSystem::GlobalData, GlobalDataManager->Upgradeable},
   };
-
   UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 
   FUpgrade Upgrade = GlobalStaticDataManager->GetUpgradeById(UpgradeId);
