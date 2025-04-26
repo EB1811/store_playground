@@ -29,7 +29,6 @@ void AStore::BeginPlay() {
 
 void AStore::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-// TODO: change all direct store changes to using this.
 void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
   Money -= Price * Quantity;
   Item->PriceData.BoughtAt = Price;
@@ -50,6 +49,8 @@ void AStore::MoneyGained(float Amount) {
   StatisticsGen->StoreMoneyGained(Amount);
 }
 void AStore::MoneySpent(float Amount) {
+  // TODO: Check if we have enough money before spending. Return bool.
+
   Money -= Amount;
 
   StatisticsGen->StoreMoneySpent(Amount);

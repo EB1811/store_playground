@@ -54,6 +54,8 @@ void ASaveManager::CreateNewSaveGame() {
 
   CurrentSaveGame->Initialize("SaveSlot_Main");
   SaveCurrentSlotToDisk();
+
+  UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new save game."));
 }
 
 void ASaveManager::SaveCurrentSlotToDisk() {
@@ -76,7 +78,7 @@ void ASaveManager::SaveCurrentSlotToDisk() {
   UGameplayStatics::SaveGameToSlot(CurrentSaveGame, "SaveSlot_Backup", 1);
 }
 
-void ASaveManager::LoadCurrentSlotFromDisk() {
+void ASaveManager::LoadSystemsFromDisk() {
   FString SlotName = "SaveSlot_Main";
 
   CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
@@ -85,6 +87,9 @@ void ASaveManager::LoadCurrentSlotFromDisk() {
   LoadAllSystems(CurrentSaveGame->SystemSaveStates);
 
   ApplyLoadedUpgradeEffects();
+}
+void ASaveManager::LoadLevelsAndPlayerFromDisk() {
+  check(CurrentSaveGame);
 
   FLevelsSaveData LevelsSaveData;
   for (auto& Pair : CurrentSaveGame->LevelSaveStates) LevelsSaveData.LevelSaveMap.Add(Pair.Name, Pair);
@@ -204,6 +209,7 @@ void ASaveManager::LoadLevels(FLevelsSaveData LevelsSaveData) {
   Store->LoadStoreLevelState();
 }
 
+// TODO: Save tag component.
 auto ASaveManager::SavePlayer() -> TTuple<FPlayerSavaState, FComponentSaveState, TArray<FObjectSaveState>> {
   auto [ComponentSaveState, FObjectSaveStates] = SaveInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent);
   FPlayerSavaState PlayerSaveState;

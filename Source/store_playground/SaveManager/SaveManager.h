@@ -39,7 +39,9 @@ public:
   void CreateNewSaveGame();
 
   void SaveCurrentSlotToDisk();
-  void LoadCurrentSlotFromDisk();
+  // Need to be separated to load store level info.
+  void LoadSystemsFromDisk();
+  void LoadLevelsAndPlayerFromDisk();
 
   auto SaveAllSystems() -> TArray<FSystemSaveState>;
   void LoadAllSystems(TArray<FSystemSaveState> SystemSaveStates);

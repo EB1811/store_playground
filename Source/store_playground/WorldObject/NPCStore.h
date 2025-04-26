@@ -34,4 +34,7 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   class UNpcStoreComponent* NpcStoreComponent;
+
+  UPROPERTY(EditAnywhere, Category = "Npc", SaveGame)
+  FGuid SpawnPointId;
 };
