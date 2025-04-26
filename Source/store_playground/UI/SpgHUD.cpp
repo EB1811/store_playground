@@ -23,6 +23,11 @@
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
 #include "store_playground/Minigame/MiniGameManager.h"
+#include "store_playground/UI/Store/StoreExpansion/StoreExpansionsListWidget.h"
+#include "store_playground/UI/Transitions/StorePhaseTransitionWidget.h"
+#include "store_playground/UI/Transitions/LevelLoadingTransitionWidget.h"
+#include "store_playground/UI/Cutscene/CutsceneWidget.h"
+#include "store_playground/Cutscene/CutsceneSystem.h"
 #include "Components/TextBlock.h"
 
 ASpgHUD::ASpgHUD() { HUDState = EHUDState::InGame; }
@@ -32,6 +37,13 @@ void ASpgHUD::DrawHUD() { Super::DrawHUD(); }
 void ASpgHUD::BeginPlay() {
   Super::BeginPlay();
 
+  check(StorePhaseTransitionWidgetClass);
+  check(LevelLoadingTransitionWidgetClass);
+
+  StorePhaseTransitionWidget = CreateWidget<UStorePhaseTransitionWidget>(GetWorld(), StorePhaseTransitionWidgetClass);
+  LevelLoadingTransitionWidget =
+      CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
+
   check(MainMenuWidgetClass);
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
@@ -40,6 +52,7 @@ void ASpgHUD::BeginPlay() {
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
   check(StockDisplayWidgetClass);
+  check(StoreExpansionsListWidgetClass);
   check(NewspaperWidgetClass);
   check(UpgradeSelectWidgetClass);
   check(AbilityWidgetClass);
@@ -60,6 +73,10 @@ void ASpgHUD::BeginPlay() {
   StockDisplayWidget->AddToViewport(10);
   StockDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 
+  StoreExpansionsListWidget = CreateWidget<UStoreExpansionsListWidget>(GetWorld(), StoreExpansionsListWidgetClass);
+  StoreExpansionsListWidget->AddToViewport(10);
+  StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Collapsed);
+
   PlayerAndContainerWidget = CreateWidget<UPlayerAndContainerWidget>(GetWorld(), PlayerAndContainerWidgetClass);
   PlayerAndContainerWidget->AddToViewport(10);
   PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -75,6 +92,10 @@ void ASpgHUD::BeginPlay() {
   NegotiationWidget = CreateWidget<UNegotiationWidget>(GetWorld(), UNegotiationWidgetClass);
   NegotiationWidget->AddToViewport(10);
   NegotiationWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  CutsceneWidget = CreateWidget<UCutsceneWidget>(GetWorld(), CutsceneWidgetClass);
+  CutsceneWidget->AddToViewport(10);
+  CutsceneWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   NewspaperWidget = CreateWidget<UNewspaperWidget>(GetWorld(), NewspaperWidgetClass);
   NewspaperWidget->AddToViewport(10);
@@ -213,8 +234,6 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
                                      UInventoryComponent* PlayerInventory,
                                      std::function<void(UItemBase*, UInventoryComponent*)> PlayerToDisplayFunc,
                                      std::function<void(UItemBase*, UInventoryComponent*)> DisplayToPlayerFunc) {
-  check(StockDisplayWidget);
-
   // StockDisplayWidget->StockDisplayRef = StockDisplay;
   StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
   StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryTitleText->SetText(
@@ -241,6 +260,26 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(StockDisplayWidget);
+}
+
+void ASpgHUD::SetAndOpenStoreExpansionsList(const AStoreExpansionManager* StoreExpansionManager,
+                                            std::function<void(EStoreExpansionLevel)> SelectExpansionFunc) {
+  if (OpenedWidgets.Contains(StoreExpansionsListWidget)) return CloseWidget(StoreExpansionsListWidget);
+
+  StoreExpansionsListWidget->StoreExpansionManagerRef = StoreExpansionManager;
+  StoreExpansionsListWidget->SelectExpansionFunc = [this, SelectExpansionFunc](EStoreExpansionLevel ExpansionLevel) {
+    SelectExpansionFunc(ExpansionLevel);
+
+    CloseAllMenus();
+  };
+  StoreExpansionsListWidget->RefreshUI();
+
+  StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  OpenedWidgets.Add(StoreExpansionsListWidget);
 }
 
 void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
@@ -325,6 +364,23 @@ void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInve
   OpenFocusedMenu(NegotiationWidget);
 }
 
+void ASpgHUD::SetAndOpenCutscene(UCutsceneSystem* CutsceneSystem) {
+  check(CutsceneWidget);
+
+  CutsceneWidget->CloseThisUI = [this]() {
+    CloseWidget(CutsceneWidget);
+    SetPlayerNormalFunc();
+  };
+  OpenFocusedMenu(CutsceneWidget);
+  SetPlayerCutsceneFunc();
+
+  CutsceneWidget->InitUI(CutsceneSystem);
+}
+void ASpgHUD::SkipCutscene() {
+  check(CutsceneWidget);
+  CutsceneWidget->SkipCutscene();
+}
+
 void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
   check(NewspaperWidget);
 
@@ -392,13 +448,37 @@ void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
   MiniGameWidget->AddToViewport(10);
   OpenFocusedMenu(MiniGameWidget);
 }
-
-void ASpgHUD::SetAndOpenDialogueCutscene(UDialogueSystem* Dialogue) {
-  check(UDialogueWidgetClass);
-
-  DialogueWidget->CloseDialogueUI = [this] { CloseWidget(DialogueWidget); };
-  DialogueWidget->InitDialogueUI(Dialogue);
-
-  OpenFocusedMenu(DialogueWidget);
+void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
   SetPlayerCutsceneFunc();
+
+  StorePhaseTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
+  StorePhaseTransitionWidget->FadeOutEndFunc = [this]() {
+    SetPlayerNormalFunc();
+
+    StorePhaseTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
+    StorePhaseTransitionWidget->RemoveFromParent();
+  };
+
+  StorePhaseTransitionWidget->AddToViewport(100);
+  StorePhaseTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {
+  SetPlayerCutsceneFunc();
+
+  LevelLoadingTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
+
+  LevelLoadingTransitionWidget->AddToViewport(100);
+  LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+void ASpgHUD::EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc) {
+  LevelLoadingTransitionWidget->FadeOutEndFunc = [this, _FadeOutEndFunc = _FadeOutEndFunc]() {
+    SetPlayerNormalFunc();
+
+    LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
+    LevelLoadingTransitionWidget->RemoveFromParent();
+
+    if (_FadeOutEndFunc) _FadeOutEndFunc();
+  };
+  LevelLoadingTransitionWidget->OnEndLevelLoadingCalled();
 }

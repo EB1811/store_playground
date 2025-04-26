@@ -28,10 +28,14 @@
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
+#include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
 #include "store_playground/Minigame/MiniGameManager.h"
+#include "store_playground/Cutscene/CutsceneSystem.h"
+#include "store_playground/Cutscene/CutsceneStructs.h"
 #include "store_playground/Level/LevelStructs.h"
+#include "store_playground/Tags/TagsComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -50,6 +54,7 @@ APlayerZDCharacter::APlayerZDCharacter() {
   InteractionData.InteractionCheckDistance = 200.0f;
 
   PlayerInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+  PlayerTagsComponent = CreateDefaultSubobject<UTagsComponent>(TEXT("TagsComponent"));
 }
 
 void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -71,10 +76,14 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                        &APlayerZDCharacter::OpenNewspaper);
     EnhancedInputComponent->BindAction(InputActions.OpenStatisticsAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenStatistics);
+    EnhancedInputComponent->BindAction(InputActions.OpenStoreExpansionsAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenStoreExpansions);
     EnhancedInputComponent->BindAction(InputActions.InteractAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::TryInteract);
     EnhancedInputComponent->BindAction(InputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::AdvanceUI);
+    EnhancedInputComponent->BindAction(InputActions.SkipCutsceneAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::SkipCutscene);
   }
 }
 
@@ -90,6 +99,7 @@ void APlayerZDCharacter::BeginPlay() {
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   HUD->SetPlayerFocussedFunc = [this]() { ChangePlayerState(EPlayerState::FocussedMenu); };
   HUD->SetPlayerNormalFunc = [this]() { ChangePlayerState(EPlayerState::Normal); };
+  HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -125,13 +135,23 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
   SetActorRotation(NewRotation);
 }
 
-void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }
+void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) {
+  HUD->CloseTopOpenMenu();
 
-void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) {
-  HUD->CloseAllMenus();
+  // StoreExpansionManager->SelectExpansion(EStoreExpansionLevel::Store1);
+  // auto LevelReadyFunc = [this]() {
+  //   ASpawnPoint* SpawnPoint =
+  //       *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
+  //         return SpawnPoint->Level == ELevel::Store;
+  //       });
+  //   check(SpawnPoint);
 
-  // LevelManager->ReloadCurrentLevel([this]() { SaveManager->LoadCurrentSlotFromDisk(); });
+  //   this->SetActorLocation(SpawnPoint->GetActorLocation());
+  // };
+  // LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
 }
+
+void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) { HUD->CloseAllMenus(); }
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent, Store);
@@ -153,6 +173,25 @@ void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
 
 void APlayerZDCharacter::OpenStatistics(const FInputActionValue& Value) { HUD->SetAndOpenStatistics(StatisticsGen); }
 
+void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
+  auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
+    StoreExpansionManager->SelectExpansion(ExpansionLevel);
+
+    auto LevelReadyFunc = [&]() {
+      ASpawnPoint* SpawnPoint =
+          *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
+            return SpawnPoint->Level == ELevel::Store;
+          });
+      check(SpawnPoint);
+
+      this->SetActorLocation(SpawnPoint->GetActorLocation());
+    };
+    LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
+  };
+
+  HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
+}
+
 void APlayerZDCharacter::TryInteract(const FInputActionValue& Value) {
   FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
   FVector TraceEnd{TraceStart + GetActorRotation().Vector() * InteractionData.InteractionCheckDistance};
@@ -170,6 +209,12 @@ void APlayerZDCharacter::TryInteract(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::AdvanceUI(const FInputActionValue& Value) { HUD->AdvanceUI(); }
+
+void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
+  check(PlayerBehaviourState == EPlayerState::Cutscene);
+
+  HUD->SkipCutscene();
+}
 
 void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interactable) {
   switch (Interactable->InteractionType) {
@@ -297,6 +342,7 @@ void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
 }
 
 void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {
+  // TODO: Add bool on success/failure.
   auto StoreToPlayerFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
                                                               UInventoryComponent* SourceInventory) {
     check(SourceInventory == StoreInventoryC);
@@ -367,9 +413,17 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
   }
 }
 
-void APlayerZDCharacter::EnterCutscene(const TArray<FDialogueData> DialogueDataArr) {
-  DialogueSystem->StartDialogue(DialogueDataArr);
-  HUD->SetAndOpenDialogueCutscene(DialogueSystem);
+void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsceneData) {
+  CutsceneSystem->StartCutscene(ResolvedCutsceneData);
+  HUD->SetAndOpenCutscene(CutsceneSystem);
+}
+
+// TODO: Handle cutscene exit and quests.
+void APlayerZDCharacter::ExitCurrentAction() {
+  if (PlayerBehaviourState == EPlayerState::Normal) return;
+
+  HUD->CloseAllMenus();
+  ChangePlayerState(EPlayerState::Normal);
 }
 
 void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "SPGHUD.generated.h"
 
 // todo Expand as needed.
@@ -33,6 +34,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> StockDisplayWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UStoreExpansionsListWidget> StoreExpansionsListWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> NpcStoreWidgetClass;
@@ -40,6 +43,8 @@ public:
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UNegotiationWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UCutsceneWidget> CutsceneWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> NewspaperWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -94,6 +99,11 @@ public:
                               std::function<void(class UItemBase*, class UInventoryComponent*)> DisplayToPlayerFunc);
 
   UPROPERTY()
+  class UStoreExpansionsListWidget* StoreExpansionsListWidget;
+  void SetAndOpenStoreExpansionsList(const class AStoreExpansionManager* StoreExpansionManager,
+                                     std::function<void(EStoreExpansionLevel)> SelectExpansionFunc);
+
+  UPROPERTY()
   class UPlayerAndContainerWidget* PlayerAndContainerWidget;
   void SetAndOpenContainer(const class UInventoryComponent* PlayerInventory,
                            const class UInventoryComponent* ContainerInventory);
@@ -112,6 +122,11 @@ public:
   UPROPERTY()
   class UNegotiationWidget* NegotiationWidget;
   void SetAndOpenNegotiation(const class UNegotiationSystem* Negotiation, class UInventoryComponent* PlayerInventoryC);
+
+  UPROPERTY()
+  class UCutsceneWidget* CutsceneWidget;
+  void SetAndOpenCutscene(class UCutsceneSystem* CutsceneSystem);
+  void SkipCutscene();  // * Skips to next cutscene chain, not the whole cutscene.
 
   UPROPERTY()
   class UNewspaperWidget* NewspaperWidget;
@@ -134,5 +149,17 @@ public:
                           class AStore* Store,
                           class UInventoryComponent* PlayerInventory);
 
-  void SetAndOpenDialogueCutscene(class UDialogueSystem* Dialogue);
+  // * Transitions
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UStorePhaseTransitionWidget> StorePhaseTransitionWidgetClass;
+  UPROPERTY()
+  class UStorePhaseTransitionWidget* StorePhaseTransitionWidget;
+  void StorePhaseTransition(std::function<void()> _FadeInEndFunc);
+
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class ULevelLoadingTransitionWidget> LevelLoadingTransitionWidgetClass;
+  UPROPERTY()
+  class ULevelLoadingTransitionWidget* LevelLoadingTransitionWidget;
+  void StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc);
+  void EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc = nullptr);
 };

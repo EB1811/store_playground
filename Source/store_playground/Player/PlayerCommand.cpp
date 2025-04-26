@@ -4,6 +4,8 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/Cutscene/CutsceneStructs.h"
+#include "store_playground/Tags/TagsComponent.h"
 
 void APlayerCommand::BeginPlay() { Super::BeginPlay(); }
 
@@ -34,9 +36,17 @@ void APlayerCommand::CommandQuest(UQuestComponent* QuestC,
   PlayerCharacter->EnterQuest(QuestC, DialogueC, CustomerAI, Item);
 }
 
-void APlayerCommand::CommandCutscene(TArray<struct FDialogueData> DialogueArray) {
+void APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData, FGameplayTag CutsceneTag) {
   check(PlayerCharacter);
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
-  PlayerCharacter->EnterCutscene(DialogueArray);
+  if (CutsceneTag.IsValid()) PlayerCharacter->PlayerTagsComponent->CutsceneTags.RemoveTag(CutsceneTag);
+
+  PlayerCharacter->EnterCutscene(ResolvedCutsceneData);
+}
+
+void APlayerCommand::CommandExitCurrentAction() {
+  check(PlayerCharacter);
+
+  PlayerCharacter->ExitCurrentAction();
 }

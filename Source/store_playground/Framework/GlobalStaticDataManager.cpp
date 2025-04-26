@@ -17,6 +17,42 @@
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
 
+inline void AddDialogueTableRows(TArray<struct FDialogueData>& DialogueDataArray, const UDataTable* DialogueDataTable) {
+  DialogueDataArray.Empty();
+  TArray<FDialogueDataTable*> Rows;
+  DialogueDataTable->GetAllRows<FDialogueDataTable>("", Rows);
+  for (auto* Row : Rows) {
+    DialogueDataArray.Add({
+        Row->DialogueChainID,
+        Row->DialogueID,
+        Row->DialogueType,
+        Row->DialogueText,
+        Row->Action,
+        Row->DialogueSpeaker,
+        Row->ChoicesAmount,
+        Row->DialogueTags,
+    });
+  }
+}
+inline void AddDialogueTableRows(TMap<FName, FDialoguesArray>& DialogueDataMap, const UDataTable* DialogueDataTable) {
+  DialogueDataMap.Empty();
+  TArray<FDialogueDataTable*> Rows;
+  DialogueDataTable->GetAllRows<FDialogueDataTable>("", Rows);
+  for (auto* Row : Rows) {
+    DialogueDataMap.FindOrAdd(Row->DialogueChainID, {});
+    DialogueDataMap[Row->DialogueChainID].Dialogues.Add({
+        Row->DialogueChainID,
+        Row->DialogueID,
+        Row->DialogueType,
+        Row->DialogueText,
+        Row->Action,
+        Row->DialogueSpeaker,
+        Row->ChoicesAmount,
+        Row->DialogueTags,
+    });
+  }
+}
+
 AGlobalStaticDataManager::AGlobalStaticDataManager() { PrimaryActorTick.bCanEverTick = false; }
 
 void AGlobalStaticDataManager::BeginPlay() {
@@ -25,13 +61,14 @@ void AGlobalStaticDataManager::BeginPlay() {
   check(GenericCustomersDataTable && WantedItemTypesDataTable && UniqueNpcDataTable && PlayerMiscDialoguesTable &&
         UniqueNpcDialoguesTable && QuestDialoguesTable && CustomerDialoguesTable && MarketNpcDialoguesTable &&
         FriendlyNegDialoguesTable.DataTable && NeutralNegDialoguesTable.DataTable &&
-        HostileNegDialoguesTable.DataTable && QuestChainDataDataTable && NpcStoreDialoguesTable &&
-        PriceEffectsDataTable && ArticlesDataTable && UpgradesTable && UpgradeEffectsTable);
+        HostileNegDialoguesTable.DataTable && QuestChainDataTable && NpcStoreDialoguesTable && PriceEffectsDataTable &&
+        ArticlesDataTable && UpgradesTable && UpgradeEffectsTable && CutsceneChainDataTable && CutsceneDataTable);
 
   InitializeCustomerData();
   InitializeNPCData();
   InitializeDialogueData();
   InitializeQuestChainsData();
+  InitializeCutsceneData();
   InitializeMarketData();
   InitializeNewsData();
   InitializeUpgradesData();
@@ -234,10 +271,22 @@ FUpgrade AGlobalStaticDataManager::GetUpgradeById(const FName& UpgradeID) const 
 TArray<struct FUpgrade> AGlobalStaticDataManager::GetUpgradesByIds(const TArray<FName>& UpgradeIDs) const {
   return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) { return UpgradeIDs.Contains(Upgrade.ID); });
 }
-TArray<struct FUpgrade> AGlobalStaticDataManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass,
-                                                                       const TArray<FName>& SelectedUpgradeIDs) const {
+TArray<struct FUpgrade> AGlobalStaticDataManager::GetEligibleUpgrades(EUpgradeClass UpgradeClass,
+                                                                      int32 Level,
+                                                                      const TArray<FName>& SelectedUpgradeIDs) const {
+  const auto GameDataMap = GlobalDataManager->GetGameDataMap();
   return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) {
-    return Upgrade.UpgradeClass == UpgradeClass && !SelectedUpgradeIDs.Contains(Upgrade.ID);
+    return Upgrade.UpgradeClass == UpgradeClass && Upgrade.Level <= Level && !SelectedUpgradeIDs.Contains(Upgrade.ID) &&
+           EvaluateRequirementsFilter(Upgrade.Requirements, GameDataMap);
+  });
+}
+TArray<struct FUpgrade> AGlobalStaticDataManager::GetUpgradesReqsNotMet(EUpgradeClass UpgradeClass,
+                                                                        int32 Level,
+                                                                        const TArray<FName>& SelectedUpgradeIDs) const {
+  const auto GameDataMap = GlobalDataManager->GetGameDataMap();
+  return UpgradesArray.FilterByPredicate([&](const FUpgrade& Upgrade) {
+    return Upgrade.UpgradeClass == UpgradeClass && Upgrade.Level <= Level && !SelectedUpgradeIDs.Contains(Upgrade.ID) &&
+           !EvaluateRequirementsFilter(Upgrade.Requirements, GameDataMap);
   });
 }
 TArray<struct FUpgradeEffect> AGlobalStaticDataManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const {
@@ -275,46 +324,11 @@ void AGlobalStaticDataManager::InitializeCustomerData() {
   WantedItemTypesDataTable = nullptr;
 }
 
-inline void AddDialogueTableRows(TArray<struct FDialogueData>& DialogueDataArray, const UDataTable* DialogueDataTable) {
-  DialogueDataArray.Empty();
-  TArray<FDialogueDataTable*> Rows;
-  DialogueDataTable->GetAllRows<FDialogueDataTable>("", Rows);
-  for (auto* Row : Rows) {
-    DialogueDataArray.Add({
-        Row->DialogueChainID,
-        Row->DialogueID,
-        Row->DialogueType,
-        Row->DialogueText,
-        Row->Action,
-        Row->DialogueSpeaker,
-        Row->ChoicesAmount,
-        Row->DialogueTags,
-    });
-  }
-}
-inline void AddDialogueTableRows(TMap<FName, FDialoguesArray>& DialogueDataMap, const UDataTable* DialogueDataTable) {
-  DialogueDataMap.Empty();
-  TArray<FDialogueDataTable*> Rows;
-  DialogueDataTable->GetAllRows<FDialogueDataTable>("", Rows);
-  for (auto* Row : Rows) {
-    DialogueDataMap.FindOrAdd(Row->DialogueChainID, {});
-    DialogueDataMap[Row->DialogueChainID].Dialogues.Add({
-        Row->DialogueChainID,
-        Row->DialogueID,
-        Row->DialogueType,
-        Row->DialogueText,
-        Row->Action,
-        Row->DialogueSpeaker,
-        Row->ChoicesAmount,
-        Row->DialogueTags,
-    });
-  }
-}
-
 void AGlobalStaticDataManager::InitializeDialogueData() {
   AddDialogueTableRows(PlayerMiscDialogues, PlayerMiscDialoguesTable);
   AddDialogueTableRows(UniqueNpcDialoguesMap, UniqueNpcDialoguesTable);
   AddDialogueTableRows(QuestDialoguesMap, QuestDialoguesTable);
+  AddDialogueTableRows(CutsceneDialoguesMap, CutsceneDialoguesTable);
   AddDialogueTableRows(CustomerDialogues, CustomerDialoguesTable);
   AddDialogueTableRows(MarketNpcDialogues, MarketNpcDialoguesTable);
   AddDialogueTableRows(NpcStoreDialogues, NpcStoreDialoguesTable);
@@ -368,7 +382,7 @@ void AGlobalStaticDataManager::InitializeDialogueData() {
 void AGlobalStaticDataManager::InitializeQuestChainsData() {
   QuestChainsArray.Empty();
   TArray<FQuestChainDataRow*> QuestChainRows;
-  QuestChainDataDataTable->GetAllRows<FQuestChainDataRow>("", QuestChainRows);
+  QuestChainDataTable->GetAllRows<FQuestChainDataRow>("", QuestChainRows);
 
   for (auto* Row : QuestChainRows) {
     QuestChainsArray.Add({
@@ -391,7 +405,7 @@ void AGlobalStaticDataManager::InitializeQuestChainsData() {
 
   check(QuestChainsArray.Num() > 0);
 
-  QuestChainDataDataTable = nullptr;
+  QuestChainDataTable = nullptr;
 }
 
 void AGlobalStaticDataManager::InitializeNPCData() {
@@ -414,6 +428,37 @@ void AGlobalStaticDataManager::InitializeNPCData() {
   check(UniqueNpcArray.Num() > 0);
 
   UniqueNpcDataTable = nullptr;
+}
+
+void AGlobalStaticDataManager::InitializeCutsceneData() {
+  CutsceneChainsArray.Empty();
+  TArray<FCutsceneChainDataRow*> CutsceneChainRows;
+  CutsceneChainDataTable->GetAllRows<FCutsceneChainDataRow>("", CutsceneChainRows);
+  for (auto* Row : CutsceneChainRows)
+    CutsceneChainsArray.Add({
+        Row->ID,
+        Row->CutsceneID,
+        Row->CutsceneChainType,
+        Row->RelevantId,
+        Row->RelevantLocation,
+    });
+
+  CutscenesArray.Empty();
+  TArray<FCutsceneDataRow*> CutscenesRows;
+  CutsceneDataTable->GetAllRows<FCutsceneDataRow>("", CutscenesRows);
+  for (auto* Row : CutscenesRows)
+    CutscenesArray.Add({
+        Row->ID,
+        Row->CutsceneTags,
+        Row->StartingNpcIDs,
+        Row->StartingNpcLocations,
+    });
+
+  check(CutsceneChainsArray.Num() > 0);
+  check(CutscenesArray.Num() > 0);
+
+  CutsceneChainDataTable = nullptr;
+  CutsceneDataTable = nullptr;
 }
 
 void AGlobalStaticDataManager::InitializeMarketData() {
@@ -465,6 +510,9 @@ void AGlobalStaticDataManager::InitializeUpgradesData() {
         Row->ID,
         Row->UpgradeClass,
         Row->UpgradeEffectIDs,
+        Row->Level,
+        Row->Requirements,
+        Row->RequirementsFilterDescription,
         Row->TextData,
         Row->AssetData,
     });

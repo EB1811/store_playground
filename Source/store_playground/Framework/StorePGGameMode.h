@@ -32,6 +32,10 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ADayManager> DayManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AStoreExpansionManager> StoreExpansionManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class ACutsceneManager> CutsceneManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ACustomerAIManager> CustomerAIManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AQuestManager> QuestManagerClass;
@@ -52,7 +56,12 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStatisticsGen> StatisticsGenClass;
 
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class ASpawnPoint> SpawnPointClass;  // * To spawn the player in the store level.
+
   // * Storing some properties to be used in the post level load init.
   UPROPERTY()
   class ASaveManager* SaveManager;
+  UPROPERTY()
+  class AStorePhaseManager* StorePhaseManager;
 };

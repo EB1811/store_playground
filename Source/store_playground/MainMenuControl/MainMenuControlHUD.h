@@ -32,4 +32,9 @@ public:
   void StartNewGame();
   UFUNCTION(BlueprintCallable, Category = "Widgets")
   void ContinueGame();
+
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class ULevelLoadingTransitionWidget> LevelLoadingTransitionWidgetClass;
+  UPROPERTY()
+  class ULevelLoadingTransitionWidget* LevelLoadingTransitionWidget;
 };

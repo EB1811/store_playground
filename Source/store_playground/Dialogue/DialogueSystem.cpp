@@ -40,6 +40,8 @@ TArray<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr
 FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _DialogueDataArr) {
   check(_DialogueDataArr.Num() > 0);
 
+  ResetDialogue();
+
   DialogueState = GetNextDialogueState(DialogueState, _DialogueDataArr[0].DialogueSpeaker == EDialogueSpeaker::NPC
                                                           ? EDialogueAction::NPCNext
                                                           : EDialogueAction::PlayerNext);

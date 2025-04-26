@@ -8,6 +8,7 @@
 #include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Framework/StorePGGameInstance.h"
 #include "store_playground/AI/CustomerAIManager.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Level/MarketLevel.h"
@@ -27,6 +28,10 @@
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
+#include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
+#include "store_playground/WorldObject/Level/SpawnPoint.h"
+#include "store_playground/Cutscene/CutsceneSystem.h"
+#include "store_playground/Cutscene/CutsceneManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -34,14 +39,17 @@ void AStorePGGameMode::BeginPlay() {
   Super::BeginPlay();
 
   APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-  check(PlayerCharacter && LevelManagerClass && GlobalDataManagerClass && UpgradeManagerClass && SaveManagerClass &&
-        PlayerCommandClass && StorePhaseManagerClass && DayManagerClass && CustomerAIManagerClass &&
-        QuestManagerClass && MarketClass && MarketEconomyClass && NewsGenClass && StoreClass && MiniGameManagerClass &&
-        AbilityManagerClass);
+  check(PlayerCharacter && LevelManagerClass && GlobalDataManagerClass && GlobalStaticDataManagerClass &&
+        UpgradeManagerClass && SaveManagerClass && PlayerCommandClass && StorePhaseManagerClass && DayManagerClass &&
+        CustomerAIManagerClass && QuestManagerClass && MarketLevelClass && MarketClass && MarketEconomyClass &&
+        NewsGenClass && StatisticsGenClass && StoreExpansionManagerClass && StoreClass && MiniGameManagerClass &&
+        AbilityManagerClass && CutsceneManagerClass);
 
   // * Initialize the game world and all systems.
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
   UNegotiationSystem* NegotiationSystem = NewObject<UNegotiationSystem>(this);
+  UCutsceneSystem* CutsceneSystem = NewObject<UCutsceneSystem>(this);
+
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
   APlayerCommand* PlayerCommand = GetWorld()->SpawnActor<APlayerCommand>(PlayerCommandClass);
@@ -49,8 +57,11 @@ void AStorePGGameMode::BeginPlay() {
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AGlobalStaticDataManager* GlobalStaticDataManager =
       GetWorld()->SpawnActor<AGlobalStaticDataManager>(GlobalStaticDataManagerClass);
-  AStorePhaseManager* StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
+  StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
+  ACutsceneManager* CutsceneManager = GetWorld()->SpawnActor<ACutsceneManager>(CutsceneManagerClass);
+  AStoreExpansionManager* StoreExpansionManager =
+      GetWorld()->SpawnActor<AStoreExpansionManager>(StoreExpansionManagerClass);
   AStore* Store = GetWorld()->SpawnActor<AStore>(StoreClass);
   AAbilityManager* AbilityManager = GetWorld()->SpawnActor<AAbilityManager>(AbilityManagerClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
@@ -64,10 +75,12 @@ void AStorePGGameMode::BeginPlay() {
 
   PlayerCharacter->DialogueSystem = DialogueSystem;
   PlayerCharacter->NegotiationSystem = NegotiationSystem;
+  PlayerCharacter->CutsceneSystem = CutsceneSystem;
   PlayerCharacter->Market = Market;
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
   PlayerCharacter->NewsGen = NewsGen;
   PlayerCharacter->StatisticsGen = StatisticsGen;
+  PlayerCharacter->StoreExpansionManager = StoreExpansionManager;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
   PlayerCharacter->DayManager = DayManager;
@@ -83,12 +96,24 @@ void AStorePGGameMode::BeginPlay() {
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
   NegotiationSystem->QuestManager = QuestManager;
 
+  CutsceneSystem->DialogueSystem = DialogueSystem;
+  CutsceneSystem->CutsceneManager = CutsceneManager;
+
   SaveManager->PlayerCharacter = PlayerCharacter;
   SaveManager->SystemsToSave = {
-      {"UpgradeManager", UpgradeManager},       {"DayManager", DayManager},     {"Store", Store},
-      {"CustomerAIManager", CustomerAIManager}, {"QuestManager", QuestManager}, {"Market", Market},
-      {"MarketEconomy", MarketEconomy},         {"NewsGen", NewsGen},
-
+      {"UpgradeManager", UpgradeManager},
+      {"DayManager", DayManager},
+      {"StoreExpansionManager", StoreExpansionManager},
+      {"Store", Store},
+      {"AbilityManager", AbilityManager},
+      {"CustomerAIManager", CustomerAIManager},
+      {"QuestManager", QuestManager},
+      {"MarketLevel", MarketLevel},
+      {"Market", Market},
+      {"MarketEconomy", MarketEconomy},
+      {"StatisticsGen", StatisticsGen},
+      {"NewsGen", NewsGen},
+      {"MiniGameManager", MiniGameManager},
   };
   SaveManager->Market = Market;
   SaveManager->MarketEconomy = MarketEconomy;
@@ -99,9 +124,14 @@ void AStorePGGameMode::BeginPlay() {
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
 
+  LevelManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
+  LevelManager->DayManager = DayManager;
+  LevelManager->StoreExpansionManager = StoreExpansionManager;
+  LevelManager->CutsceneManager = CutsceneManager;
   LevelManager->Store = Store;
   LevelManager->MarketLevel = MarketLevel;
 
+  StorePhaseManager->PlayerCommand = PlayerCommand;
   StorePhaseManager->DayManager = DayManager;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
   StorePhaseManager->SaveManager = SaveManager;
@@ -119,6 +149,7 @@ void AStorePGGameMode::BeginPlay() {
   UpgradeManager->GlobalDataManager = GlobalDataManager;
   UpgradeManager->GlobalStaticDataManager = GlobalStaticDataManager;
   UpgradeManager->AbilityManager = AbilityManager;
+  UpgradeManager->StatisticsGen = StatisticsGen;
 
   GlobalDataManager->PlayerCharacter = PlayerCharacter;
   GlobalDataManager->DayManager = DayManager;
@@ -128,6 +159,9 @@ void AStorePGGameMode::BeginPlay() {
 
   GlobalStaticDataManager->GlobalDataManager = GlobalDataManager;
 
+  CutsceneManager->GlobalStaticDataManager = GlobalStaticDataManager;
+  CutsceneManager->PlayerCommand = PlayerCommand;
+
   MarketLevel->SaveManager = SaveManager;
   MarketLevel->GlobalDataManager = GlobalDataManager;
   MarketLevel->GlobalStaticDataManager = GlobalStaticDataManager;
@@ -135,6 +169,8 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->MiniGameManager = MiniGameManager;
   MarketLevel->Market = Market;
   MarketLevel->PlayerCommand = PlayerCommand;
+
+  StoreExpansionManager->Store = Store;
 
   AbilityManager->GlobalDataManager = GlobalDataManager;
   AbilityManager->Store = Store;
@@ -166,21 +202,34 @@ void AStorePGGameMode::BeginPlay() {
 
   MiniGameManager->Market = Market;
 
+  // TODO: Put loading screen here.
   UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
 
-  LevelManager->LoadLevel(ELevel::Store);
-
-  // ! This runs before level shown callback (blocking = true is bugged).
-  // ? Could put in post load callback.
+  // * Load systems save data, then store level, then load level save data.
+  // No way to do a blocking load so need a callback.
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
-  if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadCurrentSlotFromDisk();
-  // else LevelManager->InitLevel(ELevel::Store);
 
-  StorePhaseManager->Start();
+  if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadSystemsFromDisk();
+  LevelManager->InitLoadStore([this, StorePGGameInstance]() {
+    // ! Enter level post transition blueprint function is not called.
+    if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadLevelsAndPlayerFromDisk();
 
-  UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
+    StorePhaseManager->Start();
 
-  // * Clearing datatable refs mostly.
-  CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+    APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+    ASpawnPoint* SpawnPoint =
+        *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
+          return SpawnPoint->Level == ELevel::Store;
+        });
+    check(PlayerCharacter);
+    check(SpawnPoint);
+
+    PlayerCharacter->SetActorLocation(SpawnPoint->GetActorLocation());
+
+    UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
+
+    // * Clearing datatable refs mostly.
+    CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+  });
 }

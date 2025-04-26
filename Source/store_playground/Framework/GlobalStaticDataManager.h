@@ -11,6 +11,7 @@
 #include "store_playground/Market/MarketDataStructs.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
+#include "store_playground/Cutscene/CutsceneStructs.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "GlobalStaticDataManager.generated.h"
 
@@ -39,6 +40,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> QuestDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> CutsceneDialoguesTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> CustomerDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> MarketNpcDialoguesTable;
@@ -51,7 +54,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UniqueNpcDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
-  TObjectPtr<const class UDataTable> QuestChainDataDataTable;
+  TObjectPtr<const class UDataTable> QuestChainDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> CutsceneChainDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> CutsceneDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> NpcStoreDialoguesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
@@ -76,6 +83,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Dialogues")
   TMap<FName, FDialoguesArray> QuestDialoguesMap;
   UPROPERTY(EditAnywhere, Category = "Dialogues")
+  TMap<FName, FDialoguesArray> CutsceneDialoguesMap;
+  UPROPERTY(EditAnywhere, Category = "Dialogues")
   TArray<struct FDialogueData> CustomerDialogues;
   UPROPERTY(EditAnywhere, Category = "Dialogues")
   TArray<struct FDialogueData> MarketNpcDialogues;
@@ -92,6 +101,11 @@ public:
   TArray<struct FUniqueNpcData> UniqueNpcArray;
   UPROPERTY(EditAnywhere, Category = "UniqueNpc")
   TArray<struct FQuestChainData> QuestChainsArray;
+
+  UPROPERTY(EditAnywhere, Category = "Cutscene")
+  TArray<struct FCutsceneChainData> CutsceneChainsArray;
+  UPROPERTY(EditAnywhere, Category = "Cutscene")
+  TArray<struct FCutsceneData> CutscenesArray;
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TArray<struct FPriceEffect> PriceEffectsArray;
@@ -131,8 +145,12 @@ public:
 
   FUpgrade GetUpgradeById(const FName& UpgradeID) const;
   TArray<struct FUpgrade> GetUpgradesByIds(const TArray<FName>& UpgradeIDs) const;
-  TArray<struct FUpgrade> GetAvailableUpgrades(EUpgradeClass UpgradeClass,
-                                               const TArray<FName>& SelectedUpgradeIDs) const;
+  TArray<struct FUpgrade> GetEligibleUpgrades(EUpgradeClass UpgradeClass,
+                                              int32 Level,
+                                              const TArray<FName>& SelectedUpgradeIDs) const;
+  TArray<struct FUpgrade> GetUpgradesReqsNotMet(EUpgradeClass UpgradeClass,
+                                                int32 Level,
+                                                const TArray<FName>& SelectedUpgradeIDs) const;
   TArray<struct FUpgradeEffect> GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const;
 
   // Data initialization methods
@@ -140,6 +158,7 @@ public:
   void InitializeDialogueData();
   void InitializeQuestChainsData();
   void InitializeNPCData();
+  void InitializeCutsceneData();
   void InitializeMarketData();
   void InitializeNewsData();
   void InitializeUpgradesData();

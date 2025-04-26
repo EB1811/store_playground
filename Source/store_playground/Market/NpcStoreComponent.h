@@ -20,5 +20,8 @@ public:
   FGuid NpcStoreCID;
 
   UPROPERTY(EditAnywhere, Category = "NPC Store")
+  bool bFixedStoreType;  // * If true, the store type will not be randomly generated.
+
+  UPROPERTY(EditAnywhere, Category = "NPC Store")
   FNpcStoreType NpcStoreType;
 };

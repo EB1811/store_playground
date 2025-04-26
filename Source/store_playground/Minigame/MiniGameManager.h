@@ -29,7 +29,7 @@ public:
   UPROPERTY(EditAnywhere)
   TMap<EMiniGame, FMiniGameInfo> MiniGameInfoMap;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<FName, float> PersistentData;  // * Any persistent data for mini-games for stateful mini-games.
 
   auto GetMiniGameWidget(EMiniGame MiniGame,

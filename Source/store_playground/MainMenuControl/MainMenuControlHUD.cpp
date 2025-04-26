@@ -7,6 +7,7 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "Kismet/GameplayStatics.h"
 #include "store_playground/UI/MainMenu/MainMenuWidget.h"
+#include "store_playground/UI/Transitions/LevelLoadingTransitionWidget.h"
 
 AMainMenuControlHUD::AMainMenuControlHUD() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -15,18 +16,20 @@ void AMainMenuControlHUD::DrawHUD() { Super::DrawHUD(); }
 void AMainMenuControlHUD::BeginPlay() {
   Super::BeginPlay();
 
-  check(MainMenuWidgetClass);
+  check(MainMenuWidgetClass && LevelLoadingTransitionWidgetClass);
 
   MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
   MainMenuWidget->AddToViewport(20);
   MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
+  MainMenuWidget->NewGameButton->OnClicked.AddDynamic(this, &AMainMenuControlHUD::StartNewGame);
+  MainMenuWidget->ContinueButton->OnClicked.AddDynamic(this, &AMainMenuControlHUD::ContinueGame);
+
+  LevelLoadingTransitionWidget =
+      CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
 
   const FInputModeUIOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  MainMenuWidget->NewGameButton->OnClicked.AddDynamic(this, &AMainMenuControlHUD::StartNewGame);
-  MainMenuWidget->ContinueButton->OnClicked.AddDynamic(this, &AMainMenuControlHUD::ContinueGame);
 
   LoadSettings();
 }
@@ -63,12 +66,18 @@ void AMainMenuControlHUD::StartNewGame() {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   StorePGGameInstance->bFromSaveGame = false;
 
-  UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
+  LevelLoadingTransitionWidget->FadeInEndFunc = [this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); };
+
+  LevelLoadingTransitionWidget->AddToViewport(100);
+  LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AMainMenuControlHUD::ContinueGame() {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   StorePGGameInstance->bFromSaveGame = true;
 
-  UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
+  LevelLoadingTransitionWidget->FadeInEndFunc = [this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); };
+
+  LevelLoadingTransitionWidget->AddToViewport(100);
+  LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Visible);
 }

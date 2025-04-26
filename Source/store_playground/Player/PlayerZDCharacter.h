@@ -7,6 +7,7 @@
 #include "PaperZDCharacter.h"
 #include "PlayerZDCharacter.generated.h"
 
+// TODO: Add loading state.
 UENUM()
 enum class EPlayerState : uint8 {
   Normal UMETA(DisplayName = "Normal"),              // * Normal state.
@@ -32,11 +33,18 @@ struct FInputActions {
   class UInputAction* InteractAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* OpenNewspaperAction;
+
+  // Will probably turn into a combined "store" view action.
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* OpenStatisticsAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* OpenStoreExpansionsAction;
 
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* AdvanceUIAction;  // * Advance UI (dialogue, negotiation, etc.).
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* SkipCutsceneAction;  // * Skip cutscene.
 };
 
 USTRUCT()
@@ -94,11 +102,15 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenStatistics(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void OpenStoreExpansions(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void TryInteract(const FInputActionValue& Value);
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   FInteractionData InteractionData;
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void AdvanceUI(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void SkipCutscene(const FInputActionValue& Value);
 
   // * Const refs.
   UPROPERTY(EditAnywhere, Category = "Character | Const")
@@ -111,6 +123,8 @@ public:
   const class AStatisticsGen* StatisticsGen;
 
   // * Modifiable refs.
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class AStoreExpansionManager* StoreExpansionManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AStore* Store;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
@@ -133,10 +147,14 @@ public:
   class UDialogueSystem* DialogueSystem;
   UPROPERTY(EditAnywhere, Category = "Character | Systems")
   class UNegotiationSystem* NegotiationSystem;
+  UPROPERTY(EditAnywhere, Category = "Character | Systems")
+  class UCutsceneSystem* CutsceneSystem;
 
   // * Components
   UPROPERTY(EditAnywhere, Category = "Character | Components")
   class UInventoryComponent* PlayerInventoryComponent;
+  UPROPERTY(EditAnywhere, Category = "Character | Components")
+  class UTagsComponent* PlayerTagsComponent;
 
   // * Classes
   UPROPERTY(EditAnywhere, Category = "Character | Classes")
@@ -162,7 +180,8 @@ public:
                   class UDialogueComponent* DialogueC,
                   class UCustomerAIComponent* CustomerAI = nullptr,
                   class UItemBase* Item = nullptr);
-  void EnterCutscene(const TArray<struct FDialogueData> DialogueDataArr);
+  void EnterCutscene(const struct FResolvedCutsceneData ResolvedCutsceneData);
+  void ExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
 
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
 

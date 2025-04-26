@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
+#include "GameplayTagContainer.h"
 #include "PlayerCommand.generated.h"
 
 // * Interface for game systems to send commands to the player character (as opposed to the player controller).
@@ -20,6 +21,7 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  // ? Maybe have ref to HUD.
   UPROPERTY(EditAnywhere)
   class APlayerZDCharacter* PlayerCharacter;
 
@@ -32,5 +34,8 @@ public:
                     class UDialogueComponent* DialogueC,
                     class UCustomerAIComponent* CustomerAI = nullptr,
                     class UItemBase* Item = nullptr);
-  void CommandCutscene(TArray<struct FDialogueData> DialogueArray);
+  void CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData,
+                       FGameplayTag CutsceneTag = FGameplayTag::EmptyTag);
+
+  void CommandExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
 };
