@@ -30,6 +30,9 @@ struct FEconomyBehaviorParams {
   float DemotionChance;  // Demote to a lower wealth type.
   UPROPERTY(EditAnywhere, SaveGame)
   float CrossPromotionChance;  // Change to a different economy type.
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 MaxPopChangeAtOnce;  // Max population change per tick.
 };
 
 USTRUCT()
@@ -82,6 +85,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FPriceEffect> ActivePriceEffects;
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
+  TArray<FPopEffect> ActivePopEffects;
 
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FEconItem> EconItems;  // ? Also need fast lookups?
@@ -89,6 +94,9 @@ public:
   TMap<EItemEconType, FEconTypePrices> EconTypePricesMap;
 
   void PerformEconomyTick();
+
+  auto GetPopWeightingMulti(const FCustomerPop& Pop) const -> float;
+  auto GetPopWeightingMulti(const FPopEconData& PopEconData) const -> float;
 
   void TickDaysActivePriceEffects();
 

@@ -244,6 +244,47 @@ struct FPriceEffectRow : public FTableRowBase {
   float PriceMultiPercentFalloff;  // * Falloff each day, if any.
 };
 
+USTRUCT()
+struct FPopEffect {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName ID;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<EPopType> PopTypes;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<EPopWealthType> PopWealthTypes;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PopChangeMulti;  // * Chance to change pop.
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 DurationLeft;  // * Duration in days.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PopChangeMultiFalloff;  // * Falloff each day, if any.
+};
+USTRUCT()
+struct FPopEffectRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName ID;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<EPopType> PopTypes;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<EPopWealthType> PopWealthTypes;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PopChangeMulti;  // * Chance to change pop.
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 Duration;  // * Duration in days.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PopChangeMultiFalloff;  // * Falloff each day, if any.
+};
+
 UENUM()
 enum class EEconEventSeverity : uint8 {
   Minor UMETA(DisplayName = "Minor"),
@@ -290,6 +331,8 @@ struct FEconEvent {
   UPROPERTY(EditAnywhere)
   TArray<FName> PriceEffectIDs;
   UPROPERTY(EditAnywhere)
+  TArray<FName> PopEffectIDs;
+  UPROPERTY(EditAnywhere)
   FName ArticleID;  // * Linked article that will guarantee appear, if any.
 
   UPROPERTY(EditAnywhere)
@@ -321,6 +364,8 @@ struct FEconEventRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   TArray<FName> PriceEffectIDs;
+  UPROPERTY(EditAnywhere)
+  TArray<FName> PopEffectIDs;
   UPROPERTY(EditAnywhere)
   FName ArticleID;  // * Linked article that will guarantee appear, if any.
 

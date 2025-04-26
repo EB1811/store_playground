@@ -308,6 +308,7 @@ void AGlobalDataManager::InitializeMarketData() {
         Row->StartChance,
         Row->bIsRepeatable,
         Row->PriceEffectIDs,
+        Row->PopEffectIDs,
         Row->ArticleID,
         Row->TextData,
         Row->AssetData,

@@ -62,7 +62,8 @@ void AGlobalStaticDataManager::BeginPlay() {
         UniqueNpcDialoguesTable && QuestDialoguesTable && CustomerDialoguesTable && MarketNpcDialoguesTable &&
         FriendlyNegDialoguesTable.DataTable && NeutralNegDialoguesTable.DataTable &&
         HostileNegDialoguesTable.DataTable && QuestChainDataTable && NpcStoreDialoguesTable && PriceEffectsDataTable &&
-        ArticlesDataTable && UpgradesTable && UpgradeEffectsTable && CutsceneChainDataTable && CutsceneDataTable);
+        ArticlesDataTable && UpgradesTable && UpgradeEffectsTable && CutsceneChainDataTable && CutsceneDataTable &&
+        PopEffectsDataTable);
 
   InitializeCustomerData();
   InitializeNPCData();
@@ -241,6 +242,9 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalStaticDataManager::GetRan
 TArray<struct FPriceEffect> AGlobalStaticDataManager::GetPriceEffects(const TArray<FName>& PriceEffectIDs) const {
   return PriceEffectsArray.FilterByPredicate(
       [&](const FPriceEffect& Effect) { return PriceEffectIDs.Contains(Effect.ID); });
+}
+TArray<struct FPopEffect> AGlobalStaticDataManager::GetPopEffects(const TArray<FName>& PopEffectIDs) const {
+  return PopEffectsArray.FilterByPredicate([&](const FPopEffect& Effect) { return PopEffectIDs.Contains(Effect.ID); });
 }
 
 TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleGeneralArticles(
@@ -475,7 +479,20 @@ void AGlobalStaticDataManager::InitializeMarketData() {
         Row->Duration,
         Row->PriceMultiPercentFalloff,
     });
-  (PriceEffectsArray.Num() > 0);
+  PopEffectsArray.Empty();
+  TArray<FPopEffectRow*> PopEffectRows;
+  PopEffectsDataTable->GetAllRows<FPopEffectRow>("", PopEffectRows);
+  for (auto* Row : PopEffectRows)
+    PopEffectsArray.Add({
+        Row->ID,
+        Row->PopTypes,
+        Row->PopWealthTypes,
+        Row->PopChangeMulti,
+        Row->Duration,
+        Row->PopChangeMultiFalloff,
+    });
+
+  check(PriceEffectsArray.Num() > 0);
 
   PriceEffectsDataTable = nullptr;
 }

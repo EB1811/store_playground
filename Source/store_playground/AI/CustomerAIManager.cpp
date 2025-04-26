@@ -193,9 +193,9 @@ void ACustomerAIManager::SpawnCustomers() {
 
   TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
   for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
-    const auto* PopData = MarketEconomy->PopEconDataArray.FindByPredicate(
+    const auto PopData = *MarketEconomy->PopEconDataArray.FindByPredicate(
         [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
-    WeightedCustomers.Add(MakeTuple(GenericCustomer, PopData->Population));
+    WeightedCustomers.Add({GenericCustomer, PopData.Population * MarketEconomy->GetPopWeightingMulti(PopData)});
   }
 
   int32 CustomersToSpawn = FMath::RandRange(0, BehaviorParams.MaxCustomers - AllCustomers.Num());

@@ -4,6 +4,7 @@
 #include "HAL/Platform.h"
 #include "MarketEconomy.h"
 #include "Misc/AssertionMacros.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
@@ -39,6 +40,15 @@ inline EPopWealthType GetLowerWealthType(EPopWealthType WealthType) {
   if (WealthTypeIndex <= 0) return WealthType;
 
   return static_cast<EPopWealthType>(WealthTypeIndex - 1);
+}
+
+inline void MovePopPopulation(FPopEconData& From, FPopEconData& To, float PopulationPercent, int32 MaxPopChange) {
+  int32 PopulationChange =
+      FMath::Min(FMath::RoundToInt32(FMath::Max(From.Population * PopulationPercent, 1.0f)), MaxPopChange);
+  UE_LOG(LogTemp, Warning, TEXT("PopulationChange num %d"), PopulationChange);
+
+  From.Population -= PopulationChange;
+  To.Population += PopulationChange;
 }
 
 AMarketEconomy::AMarketEconomy() {
@@ -254,17 +264,21 @@ void AMarketEconomy::PerformEconomyTick() {
     auto& PopEconData = PopEconDataArray[Index];
 
     EPopWealthType NewWealthType = GetHigherWealthType(CustomerPops[Index].WealthType);
-    TArray<int32> NewWealthTypePopIndexes = {};
+    TArray<TTuple<int32, float>> NewWealthTypePopIndexes = {};
     for (int32 i = 0; i < CustomerPops.Num(); i++)
       if (CustomerPops[i].WealthType == NewWealthType && CustomerPops[i].PopType == CustomerPop.PopType &&
           PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
-        NewWealthTypePopIndexes.Add(i);
+        NewWealthTypePopIndexes.Add(
+            {i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
     if (NewWealthTypePopIndexes.Num() <= 0) break;
 
-    auto& RandomNewPop =
-        PopEconDataArray[NewWealthTypePopIndexes[FMath::RandRange(0, NewWealthTypePopIndexes.Num() - 1)]];
-    PopEconData.Population -= 1;
-    RandomNewPop.Population += 1;
+    int32 RandomNewPopIndex =
+        GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const auto& Index) {
+          return Index.Get<1>();
+        }).Get<0>();
+    auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
+
+    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Warning, TEXT("Pop %s promoted to %s"), *CustomerPops[Index].PopName.ToString(),
            *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
@@ -275,17 +289,21 @@ void AMarketEconomy::PerformEconomyTick() {
     auto& PopEconData = PopEconDataArray[Index];
 
     EPopWealthType NewWealthType = GetLowerWealthType(CustomerPops[Index].WealthType);
-    TArray<int32> NewWealthTypePopIndexes = {};
+    TArray<TTuple<int32, float>> NewWealthTypePopIndexes = {};
     for (int32 i = 0; i < CustomerPops.Num(); i++)
       if (CustomerPops[i].WealthType == NewWealthType && CustomerPops[i].PopType == CustomerPop.PopType &&
           PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
-        NewWealthTypePopIndexes.Add(i);
+        NewWealthTypePopIndexes.Add(
+            {i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
     if (NewWealthTypePopIndexes.Num() <= 0) break;
 
-    auto& RandomNewPop =
-        PopEconDataArray[NewWealthTypePopIndexes[FMath::RandRange(0, NewWealthTypePopIndexes.Num() - 1)]];
-    PopEconData.Population -= 1;
-    RandomNewPop.Population += 1;
+    int32 RandomNewPopIndex =
+        GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const auto& Index) {
+          return Index.Get<1>();
+        }).Get<0>();
+    auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
+
+    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Warning, TEXT("Pop %s demoted to %s"), *CustomerPops[Index].PopName.ToString(),
            *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
@@ -294,19 +312,21 @@ void AMarketEconomy::PerformEconomyTick() {
     auto& CustomerPop = CustomerPops[Index];
     auto& PopEconData = PopEconDataArray[Index];
 
-    TArray<int32> NewPopIndexes = {};
+    TArray<TTuple<int32, float>> NewPopIndexes = {};
     for (int32 i = 0; i < CustomerPops.Num(); i++)
       if (CustomerPops[i].WealthType == CustomerPop.WealthType && CustomerPops[i].ID != CustomerPop.ID &&
           PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
-        NewPopIndexes.Add(i);
+        NewPopIndexes.Add({i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
     if (NewPopIndexes.Num() <= 0) break;
 
-    auto& RandomNewPop = PopEconDataArray[NewPopIndexes[FMath::RandRange(0, NewPopIndexes.Num() - 1)]];
-    PopEconData.Population -= 1;
-    RandomNewPop.Population += 1;
+    int32 RandomNewPopIndex = GetWeightedRandomItem<TTuple<int32, float>>(NewPopIndexes, [](const auto& Index) {
+                                return Index.Get<1>();
+                              }).Get<0>();
+    auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
+    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Warning, TEXT("Pop %s cross promoted to %s"), *CustomerPops[Index].PopName.ToString(),
-           *CustomerPops[NewPopIndexes[FMath::RandRange(0, NewPopIndexes.Num() - 1)]].PopName.ToString());
+           *CustomerPops[RandomNewPopIndex].PopName.ToString());
   }
 
   // Update statistics.
@@ -314,8 +334,29 @@ void AMarketEconomy::PerformEconomyTick() {
   for (auto& PopEconData : PopEconDataArray) StatisticsGen->PopChange(PopEconData.PopID, PopEconData.Population);
 }
 
+auto AMarketEconomy::GetPopWeightingMulti(const FCustomerPop& Pop) const -> float {
+  float TotalMulti = 1.0f;
+  for (auto& PopEffect : ActivePopEffects)
+    if (PopEffect.PopTypes.Contains(Pop.PopType) && PopEffect.PopWealthTypes.Contains(Pop.WealthType))
+      TotalMulti *= PopEffect.PopChangeMulti;
+
+  return TotalMulti;
+}
+auto AMarketEconomy::GetPopWeightingMulti(const FPopEconData& PopEconData) const -> float {
+  FCustomerPop Pop =
+      *CustomerPops.FindByPredicate([PopEconData](const auto& Pop) { return Pop.ID == PopEconData.PopID; });
+
+  float TotalMulti = 1.0f;
+  for (auto& PopEffect : ActivePopEffects)
+    if (PopEffect.PopTypes.Contains(Pop.PopType) && PopEffect.PopWealthTypes.Contains(Pop.WealthType))
+      TotalMulti *= PopEffect.PopChangeMulti;
+
+  return TotalMulti;
+}
+
 void AMarketEconomy::TickDaysActivePriceEffects() {
   TArray<FPriceEffect> PriceEffectsToRemove;
+  TArray<FPopEffect> PopEffectsToRemove;
 
   for (auto& PriceEffect : ActivePriceEffects) {
     if (PriceEffect.DurationLeft <= 1) {
@@ -326,10 +367,21 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
           std::max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 1.0f);
     }
   }
+  for (auto& PopEffect : ActivePopEffects) {
+    if (PopEffect.DurationLeft <= 1) {
+      PopEffectsToRemove.Add(PopEffect);
+    } else {
+      PopEffect.DurationLeft -= 1;
+      PopEffect.PopChangeMulti = std::max(PopEffect.PopChangeMulti - PopEffect.PopChangeMultiFalloff, 1.0f);
+    }
+  }
 
   for (auto& PriceEffect : PriceEffectsToRemove)
     ActivePriceEffects.RemoveAllSwap(
         [PriceEffect](const auto& OtherPriceEffect) { return PriceEffect.ID == OtherPriceEffect.ID; });
+  for (auto& PopEffect : PopEffectsToRemove)
+    ActivePopEffects.RemoveAllSwap(
+        [PopEffect](const auto& OtherPopEffect) { return PopEffect.ID == OtherPopEffect.ID; });
 }
 
 void AMarketEconomy::InitializeEconomyData() {

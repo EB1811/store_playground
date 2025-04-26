@@ -64,6 +64,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> PriceEffectsDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> PopEffectsDataTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> ArticlesDataTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UpgradesTable;
@@ -109,6 +111,9 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Market")
   TArray<struct FPriceEffect> PriceEffectsArray;
+  UPROPERTY(EditAnywhere, Category = "Market")
+  TArray<struct FPopEffect> PopEffectsArray;
+
   UPROPERTY(EditAnywhere, Category = "News")
   TArray<struct FArticle> ArticlesArray;
   UPROPERTY(EditAnywhere, Category = "Upgrades")
@@ -137,6 +142,7 @@ public:
       ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
 
   TArray<struct FPriceEffect> GetPriceEffects(const TArray<FName>& PriceEffectIDs) const;
+  TArray<struct FPopEffect> GetPopEffects(const TArray<FName>& PopEffectIDs) const;
 
   TArray<struct FArticle> GetEligibleGeneralArticles(const TArray<FName>& PublishedArticles) const;
   TArray<struct FArticle> GetEligibleSpecialArticles(const TArray<FName>& PublishedArticles,
