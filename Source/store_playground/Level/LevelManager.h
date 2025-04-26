@@ -18,8 +18,22 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Level Manager")
-  TMap<ELevel, FName> LevelNames;
+  const class UTagsComponent* PlayerTags;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
+  const class AStoreExpansionManager* StoreExpansionManager;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
+  const class ADayManager* DayManager;
 
+  UPROPERTY()
+  class ASpgHUD* HUD;  // * To show loading screens.
+
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
+  TMap<ELevel, FName> LevelNames;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
+  TMap<EStoreExpansionLevel, FName> StoreExpansionLevelNames;
+
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
+  class ACutsceneManager* CutsceneManager;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   class AStore* Store;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
@@ -30,7 +44,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   ELevel LoadedLevel;
 
-  void LoadLevel(ELevel Level);  // Blocking true.
+  void InitLoadStore(std::function<void()> _LevelReadyFunc);
 
   void BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc = nullptr);
   void BeginUnloadLevel(ELevel Level);
@@ -41,6 +55,8 @@ public:
   void InitLevel(ELevel Level);
   void EnterLevel(ELevel Level);
   void SaveLevelState(ELevel Level);
+
+  void ExpandStoreSwitchLevel(std::function<void()> _LevelReadyFunc = nullptr);
 
   // * Horrible but needed when loading a save while in a level.
   void ReloadCurrentLevel(std::function<void()> _LevelReadyFunc);

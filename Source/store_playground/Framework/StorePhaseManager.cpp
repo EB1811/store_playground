@@ -1,10 +1,14 @@
 
 #include "StorePhaseManager.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/Player/PlayerCommand.h"
+#include "store_playground/UI/SpgHUD.h"
 
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action) {
   switch (CurrentState) {
@@ -74,11 +78,16 @@ void AStorePhaseManager::BuildMode() {
 void AStorePhaseManager::OpenShop() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::OpenShop);
 
+  GetWorld()->GetTimerManager().SetTimer(OpenShopTimerHandle, this, &AStorePhaseManager::OnOpenShopTimerEnd,
+                                         StorePhaseManagerParams.OpenShopDuration, false);
+
   CustomerAIManager->StartCustomerAI();
 }
 
 void AStorePhaseManager::CloseShop() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::CloseShop);
+
+  GetWorld()->GetTimerManager().ClearTimer(OpenShopTimerHandle);
 
   CustomerAIManager->EndCustomerAI();
 }
@@ -92,16 +101,28 @@ void AStorePhaseManager::EndDay() {
 }
 
 void AStorePhaseManager::NextPhase() {
-  switch (StorePhaseState) {
-    case EStorePhaseState::Morning: OpenShop(); break;
-    case EStorePhaseState::MorningBuildMode:
-      BuildMode();
-      OpenShop();
-      break;
-    case EStorePhaseState::ShopOpen: CloseShop(); break;
-    case EStorePhaseState::Night: EndDay(); break;
-    default: break;
-  }
+  ASpgHUD* HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  HUD->StorePhaseTransition([this]() {
+    switch (StorePhaseState) {
+      case EStorePhaseState::Morning: OpenShop(); break;
+      case EStorePhaseState::MorningBuildMode:
+        BuildMode();
+        OpenShop();
+        break;
+      case EStorePhaseState::ShopOpen: CloseShop(); break;
+      case EStorePhaseState::Night: EndDay(); break;
+      default: break;
+    }
 
-  UE_LOG(LogTemp, Warning, TEXT("Next phase: %s"), *UEnum::GetDisplayValueAsText(StorePhaseState).ToString());
+    UE_LOG(LogTemp, Warning, TEXT("Next phase: %s"), *UEnum::GetDisplayValueAsText(StorePhaseState).ToString());
+  });
+}
+
+void AStorePhaseManager::OnOpenShopTimerEnd() {
+  if (StorePhaseState != EStorePhaseState::ShopOpen) return;
+
+  PlayerCommand->CommandExitCurrentAction();
+  NextPhase();
+
+  UE_LOG(LogTemp, Warning, TEXT("Open shop timer ended."));
 }

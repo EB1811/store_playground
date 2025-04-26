@@ -12,6 +12,7 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/WorldObject/Level/NpcStoreSpawnPoint.h"
 #include "store_playground/WorldObject/NPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
@@ -36,7 +37,8 @@ AMarketLevel::AMarketLevel() { PrimaryActorTick.bCanEverTick = false; }
 void AMarketLevel::BeginPlay() {
   Super::BeginPlay();
 
-  check(NPCStoreClass && NpcSpawnPointClass && NpcClass);
+  check(NpcStoreSpawnPointClass && NPCStoreClass && NpcSpawnPointClass && NpcClass && MiniGameSpawnPointClass &&
+        MiniGameClass);
 }
 
 void AMarketLevel::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -109,11 +111,11 @@ void AMarketLevel::SaveLevelState() {
   }
 }
 
-void AMarketLevel::LoadLevelState() {
+void AMarketLevel::LoadLevelState(bool bIsWeekend) {
   if (LevelState.NpcStoreSaveMap.Num() <= 0) {
-    InitNPCStores();
-    InitMarketNpcs();
-    InitMiniGames();
+    InitNPCStores(bIsWeekend);
+    InitMarketNpcs(bIsWeekend);
+    InitMiniGames(bIsWeekend);
     return;
   }
 
@@ -181,24 +183,43 @@ void AMarketLevel::ResetLevelState() {
   LevelState.ObjectSaveStates.Empty();
 }
 
-void AMarketLevel::InitNPCStores() {
+void AMarketLevel::InitNPCStores(bool bIsWeekend) {
   check(GlobalDataManager && Market);
 
-  TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
-  check(FoundStores.Num() > 0);
+  TArray<ANpcStoreSpawnPoint*> SpawnPoints = GetAllActorsOf<ANpcStoreSpawnPoint>(GetWorld(), NpcStoreSpawnPointClass);
+  FActorSpawnParameters SpawnParams;
+  SpawnParams.Owner = this;
+  SpawnParams.bNoFail = true;
+  SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+  for (auto* SpawnPoint : SpawnPoints) {
+    if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance * (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f))
+      continue;
 
+    SpawnParams.OverrideLevel = SpawnPoint->GetLevel();
+    ANPCStore* NPCStore = GetWorld()->SpawnActor<ANPCStore>(NPCStoreClass, SpawnPoint->GetActorLocation(),
+                                                            SpawnPoint->GetActorRotation(), SpawnParams);
+    NPCStore->SpawnPointId = SpawnPoint->Id;
+
+    NPCStore->InteractionComponent->InteractionType = EInteractionType::NpcStore;
+  }
+
+  TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* NPCStore : FoundStores) {
     NPCStore->InventoryComponent->ItemsArray.Empty();
     NPCStore->DialogueComponent->DialogueArray.Empty();
 
     NPCStore->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomNpcStoreDialogue();
 
-    auto NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
-        GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
-    NPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
-    int32 RandomStockCount = FMath::RandRange(NpcStoreType.StockCountRange[0], NpcStoreType.StockCountRange[1]);
+    // Differentiate between fixed and random stores.
+    auto NpcStoreType = NPCStore->NpcStoreComponent->NpcStoreType;
+    if (!NPCStore->NpcStoreComponent->bFixedStoreType) {
+      NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
+          GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
+      NPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
+    }
 
     // Get random joined item + econ types using their weights.
+    int32 RandomStockCount = FMath::RandRange(NpcStoreType.StockCountRange[0], NpcStoreType.StockCountRange[1]);
     TMap<TTuple<EItemType, EItemEconType>, int32> RandomTypesCountMap;
     for (int32 i = 0; i < RandomStockCount; i++) {
       EItemType RandomItemType =
@@ -232,7 +253,7 @@ void AMarketLevel::InitNPCStores() {
   }
 }
 
-void AMarketLevel::InitMarketNpcs() {
+void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
   TArray<ANpcSpawnPoint*> SpawnPoints = GetAllActorsOf<ANpcSpawnPoint>(GetWorld(), NpcSpawnPointClass);
   check(SpawnPoints.Num() > 0);
 
@@ -243,7 +264,8 @@ void AMarketLevel::InitMarketNpcs() {
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
   for (ANpcSpawnPoint* SpawnPoint : SpawnPoints) {
-    if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance) continue;
+    if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance * (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f))
+      continue;
 
     if (TrySpawnUniqueNpc(SpawnPoint, SpawnParams)) continue;
 
@@ -275,8 +297,12 @@ void AMarketLevel::InitMarketNpcs() {
   }
 }
 
-auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) -> bool {
-  if (FMath::FRand() * 100 >= LevelParams.UniqueNpcBaseSpawnChance) return false;
+auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
+                                     const FActorSpawnParameters& SpawnParams,
+                                     bool bIsWeekend) -> bool {
+  if (FMath::FRand() * 100 >=
+      LevelParams.UniqueNpcBaseSpawnChance * (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f))
+    return false;
 
   TArray<struct FUniqueNpcData> EligibleNpcs = GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate(
       [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
@@ -315,7 +341,7 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint, const FActorSpa
   return true;
 }
 
-void AMarketLevel::InitMiniGames() {
+void AMarketLevel::InitMiniGames(bool bIsWeekend) {
   TArray<AMiniGameSpawnPoint*> SpawnPoints = GetAllActorsOf<AMiniGameSpawnPoint>(GetWorld(), MiniGameSpawnPointClass);
   check(SpawnPoints.Num() > 0);
 
@@ -332,7 +358,8 @@ void AMarketLevel::InitMiniGames() {
 
     const FMiniGameInfo* SpawnableMiniGame = nullptr;
     for (const auto& MiniGame : SpawnableMiniGameTypes) {
-      if (FMath::FRand() * 100 < MiniGameManager->MiniGameInfoMap[MiniGame].SpawnChance) {
+      if (FMath::FRand() * 100 < MiniGameManager->MiniGameInfoMap[MiniGame].SpawnChance *
+                                     (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f)) {
         SpawnableMiniGame = &MiniGameManager->MiniGameInfoMap[MiniGame];
         break;
       }

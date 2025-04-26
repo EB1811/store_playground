@@ -24,6 +24,9 @@ struct FMarketLevelParams {
 
   UPROPERTY(EditAnywhere)
   float UniqueNpcBaseSpawnChance;
+
+  UPROPERTY(EditAnywhere)
+  float WeekendSpawnChangeMulti;  // * Multi for spawn chances on weekends.
 };
 
 USTRUCT()
@@ -81,6 +84,8 @@ public:
   const class AMiniGameManager* MiniGameManager;
 
   UPROPERTY(EditAnywhere, Category = "Market Level")
+  class TSubclassOf<class ANpcStoreSpawnPoint> NpcStoreSpawnPointClass;
+  UPROPERTY(EditAnywhere, Category = "Market Level")
   class TSubclassOf<class ANPCStore> NPCStoreClass;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   class TSubclassOf<class ANpcSpawnPoint> NpcSpawnPointClass;
@@ -107,11 +112,13 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market Level")
   FMarketLevelState LevelState;
   void SaveLevelState();
-  void LoadLevelState();
+  void LoadLevelState(bool bIsWeekend = false);
   void ResetLevelState();
 
-  void InitNPCStores();
-  void InitMarketNpcs();
-  auto TrySpawnUniqueNpc(class ANpcSpawnPoint* SpawnPoint, const FActorSpawnParameters& SpawnParams) -> bool;
-  void InitMiniGames();
+  void InitNPCStores(bool bIsWeekend = false);
+  void InitMarketNpcs(bool bIsWeekend = false);
+  auto TrySpawnUniqueNpc(class ANpcSpawnPoint* SpawnPoint,
+                         const FActorSpawnParameters& SpawnParams,
+                         bool bIsWeekend = false) -> bool;
+  void InitMiniGames(bool bIsWeekend = false);
 };

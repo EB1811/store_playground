@@ -24,6 +24,14 @@ enum class EStorePhaseAction : uint8 {
 };
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action);
 
+USTRUCT()
+struct FStorePhaseManagerParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  float OpenShopDuration;  // * Duration for the open shop timer.
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AStorePhaseManager : public AInfo {
   GENERATED_BODY()
@@ -34,18 +42,27 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  UPROPERTY(EditAnywhere, Category = "Store")
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
   class TSubclassOf<class AActor> BuildableClass;
+
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  FStorePhaseManagerParams StorePhaseManagerParams;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   EStorePhaseState StorePhaseState;
 
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class APlayerCommand* PlayerCommand;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ADayManager* DayManager;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ACustomerAIManager* CustomerAIManager;
+
+  FTimerHandle OpenShopTimerHandle;
+  UFUNCTION()
+  void OnOpenShopTimerEnd();
 
   void Start();
   void BuildMode();

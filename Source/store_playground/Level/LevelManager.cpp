@@ -5,8 +5,12 @@
 #include "Components/BoxComponent.h"
 #include "GameFramework/Character.h"
 #include "UObject/Class.h"
+#include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/MarketLevel.h"
+#include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
+#include "store_playground/UI/SpgHUD.h"
+#include "store_playground/Cutscene/CutsceneManager.h"
 
 ALevelManager::ALevelManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -14,15 +18,21 @@ void ALevelManager::BeginPlay() {
   Super::BeginPlay();
 
   for (ELevel Level : TEnumRange<ELevel>()) check(LevelNames.Contains(Level));
+  for (EStoreExpansionLevel Expansion : TEnumRange<EStoreExpansionLevel>())
+    check(StoreExpansionLevelNames.Contains(Expansion));
+
+  HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  check(HUD);
 }
 
 void ALevelManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void ALevelManager::LoadLevel(ELevel Level) {
-  UE_LOG(LogTemp, Warning, TEXT("Loading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
+void ALevelManager::InitLoadStore(std::function<void()> _LevelReadyFunc) {
+  LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];
 
-  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[Level])) {
-    LoadedLevel = Level;
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[ELevel::Store])) {
+    LoadedLevel = ELevel::Store;
+    LevelReadyFunc = _LevelReadyFunc;
 
     Streaming->OnLevelShown.Clear();
     Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
@@ -30,7 +40,7 @@ void ALevelManager::LoadLevel(ELevel Level) {
     FLatentActionInfo LatentInfo;
     LatentInfo.CallbackTarget = this;
     LatentInfo.UUID = 1;
-    UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, true, LatentInfo);
+    UGameplayStatics::LoadStreamLevel(this, LevelNames[ELevel::Store], true, true, LatentInfo);
     // GetWorld()->FlushLevelStreaming();  // ! Breaks component begin play and tick.
   }
 }
@@ -42,13 +52,15 @@ void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelRea
     LoadedLevel = Level;
     LevelReadyFunc = _LevelReadyFunc;
 
-    Streaming->OnLevelShown.Clear();
-    Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
+    HUD->StartLevelLoadingTransition([this, Level = Level, Streaming = Streaming]() {
+      Streaming->OnLevelShown.Clear();
+      Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
 
-    FLatentActionInfo LatentInfo;
-    LatentInfo.CallbackTarget = this;
-    LatentInfo.UUID = 1;
-    UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, false, LatentInfo);
+      FLatentActionInfo LatentInfo;
+      LatentInfo.CallbackTarget = this;
+      LatentInfo.UUID = 1;
+      UGameplayStatics::LoadStreamLevel(this, LevelNames[Level], true, false, LatentInfo);
+    });
   }
 }
 
@@ -65,17 +77,19 @@ void ALevelManager::OnLevelShown() {
   InitLevel(LoadedLevel);
   if (LevelReadyFunc) LevelReadyFunc();
   LevelReadyFunc = nullptr;
-  EnterLevel(LoadedLevel);
 
   if (CurrentLevel != ELevel::None) {
     SaveLevelState(CurrentLevel);
     BeginUnloadLevel(CurrentLevel);
   }
   CurrentLevel = LoadedLevel;
+
+  HUD->EndLevelLoadingTransition([this]() { EnterLevel(CurrentLevel); });
 }
 
 void ALevelManager::ReloadCurrentLevel(std::function<void()> _LevelReadyFunc) {
   UE_LOG(LogTemp, Warning, TEXT("Reloading level"));
+
   if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[CurrentLevel])) {
     LevelReadyFunc = _LevelReadyFunc;
 
@@ -113,18 +127,19 @@ void ALevelManager::InitLevel(ELevel Level) {
       break;
     case ELevel::Market:
       check(MarketLevel);
-      MarketLevel->LoadLevelState();
+      MarketLevel->LoadLevelState(DayManager->bIsWeekend);
       break;
   }
 }
 
 void ALevelManager::EnterLevel(ELevel Level) {
+  check(CutsceneManager && PlayerTags && MarketLevel);
+
+  if (CutsceneManager->PlayPotentialCutscene(PlayerTags)) return;
+
   switch (Level) {
     case ELevel::Store: break;
-    case ELevel::Market:
-      check(MarketLevel);
-      MarketLevel->EnterLevel();
-      break;
+    case ELevel::Market: MarketLevel->EnterLevel(); break;
   }
 }
 
@@ -139,4 +154,14 @@ void ALevelManager::SaveLevelState(ELevel Level) {
       MarketLevel->SaveLevelState();
       break;
   }
+}
+
+// TODO: Start loading screen before unloading the level.
+void ALevelManager::ExpandStoreSwitchLevel(std::function<void()> _LevelReadyFunc) {
+  BeginUnloadLevel(ELevel::Store);
+
+  LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];
+
+  CurrentLevel = ELevel::None;
+  BeginLoadLevel(ELevel::Store, _LevelReadyFunc);
 }
