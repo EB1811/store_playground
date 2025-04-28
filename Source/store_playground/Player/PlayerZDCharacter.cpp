@@ -143,6 +143,8 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
   check(SaveManager);
 
   HUD->OpenPauseMenu(SaveManager);
+
+  UGameplayStatics::SetGamePaused(GetWorld(), PlayerBehaviourState == EPlayerState::Paused);
 }
 
 void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }

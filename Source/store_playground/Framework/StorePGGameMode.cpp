@@ -24,6 +24,7 @@
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/SaveManager/SaveManager.h"
+#include "store_playground/Lighting/StorePhaseLightingManager.h"
 #include "store_playground/Minigame/MiniGameManager.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Ability/AbilityManager.h"
@@ -44,7 +45,7 @@ void AStorePGGameMode::BeginPlay() {
         UpgradeManagerClass && SaveManagerClass && PlayerCommandClass && StorePhaseManagerClass && DayManagerClass &&
         CustomerAIManagerClass && QuestManagerClass && MarketLevelClass && MarketClass && MarketEconomyClass &&
         NewsGenClass && StatisticsGenClass && StoreExpansionManagerClass && StoreClass && MiniGameManagerClass &&
-        AbilityManagerClass && CutsceneManagerClass);
+        AbilityManagerClass && CutsceneManagerClass && StorePhaseLightingManagerClass);
 
   // * Initialize the game world and all systems.
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
@@ -60,6 +61,8 @@ void AStorePGGameMode::BeginPlay() {
       GetWorld()->SpawnActor<AGlobalStaticDataManager>(GlobalStaticDataManagerClass);
   StorePhaseManager = GetWorld()->SpawnActor<AStorePhaseManager>(StorePhaseManagerClass);
   ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
+  AStorePhaseLightingManager* StorePhaseLightingManager =
+      GetWorld()->SpawnActor<AStorePhaseLightingManager>(StorePhaseLightingManagerClass);
   ACutsceneManager* CutsceneManager = GetWorld()->SpawnActor<ACutsceneManager>(CutsceneManagerClass);
   AStoreExpansionManager* StoreExpansionManager =
       GetWorld()->SpawnActor<AStoreExpansionManager>(StoreExpansionManagerClass);
@@ -134,9 +137,10 @@ void AStorePGGameMode::BeginPlay() {
   LevelManager->MarketLevel = MarketLevel;
 
   StorePhaseManager->PlayerCommand = PlayerCommand;
-  StorePhaseManager->DayManager = DayManager;
-  StorePhaseManager->CustomerAIManager = CustomerAIManager;
   StorePhaseManager->SaveManager = SaveManager;
+  StorePhaseManager->DayManager = DayManager;
+  StorePhaseManager->StorePhaseLightingManager = StorePhaseLightingManager;
+  StorePhaseManager->CustomerAIManager = CustomerAIManager;
 
   DayManager->AbilityManager = AbilityManager;
   DayManager->CustomerAIManager = CustomerAIManager;
