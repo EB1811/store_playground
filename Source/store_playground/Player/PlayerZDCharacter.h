@@ -7,12 +7,13 @@
 #include "PaperZDCharacter.h"
 #include "PlayerZDCharacter.generated.h"
 
-// TODO: Add loading state.
+// * Corresponds to different input contexts to control allowed input actions in various states.
 UENUM()
 enum class EPlayerState : uint8 {
   Normal UMETA(DisplayName = "Normal"),              // * Normal state.
   Cutscene UMETA(DisplayName = "Cutscene"),          // * In a cutscene.
   FocussedMenu UMETA(DisplayName = "FocussedMenu"),  // * In a focussed menu (dialogue, negotiation, etc.).
+  Paused UMETA(DisplayName = "Paused"),              // * In a paused state.
 };
 
 USTRUCT()
@@ -21,6 +22,9 @@ struct FInputActions {
 
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* MoveAction;
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  class UInputAction* OpenPauseMenuAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   class UInputAction* CloseTopOpenMenuAction;
   UPROPERTY(EditAnywhere, Category = "Input")
@@ -90,6 +94,8 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Move(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void OpenPauseMenu(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void CloseTopOpenMenu(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void CloseAllMenus(const FInputActionValue& Value);
@@ -123,6 +129,8 @@ public:
   const class AStatisticsGen* StatisticsGen;
 
   // * Modifiable refs.
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AStoreExpansionManager* StoreExpansionManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")

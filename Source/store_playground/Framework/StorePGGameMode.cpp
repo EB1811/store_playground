@@ -81,6 +81,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->CustomerAIManager = CustomerAIManager;
   PlayerCharacter->NewsGen = NewsGen;
   PlayerCharacter->StatisticsGen = StatisticsGen;
+  PlayerCharacter->SaveManager = SaveManager;
   PlayerCharacter->StoreExpansionManager = StoreExpansionManager;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;

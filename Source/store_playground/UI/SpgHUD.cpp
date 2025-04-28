@@ -1,11 +1,12 @@
 #include "SpgHUD.h"
 #include "GameFramework/PlayerController.h"
-#include "store_playground/UI/MainMenu/MainMenuWidget.h"
+#include "store_playground/UI/PauseMenu/PauseMenuWidget.h"
 #include "store_playground/UI/Inventory/PlayerAndContainerWidget.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/UI/Inventory/InventoryWidget.h"
 #include "store_playground/UI/Inventory/InventoryViewWidget.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
@@ -44,7 +45,7 @@ void ASpgHUD::BeginPlay() {
   LevelLoadingTransitionWidget =
       CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
 
-  check(MainMenuWidgetClass);
+  check(PauseMenuWidgetClass);
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
   check(BuildableDisplayWidgetClass);
@@ -57,9 +58,9 @@ void ASpgHUD::BeginPlay() {
   check(UpgradeSelectWidgetClass);
   check(AbilityWidgetClass);
 
-  MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
-  MainMenuWidget->AddToViewport(20);
-  MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+  PauseMenuWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
+  PauseMenuWidget->AddToViewport(20);
+  PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
@@ -142,15 +143,19 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
   SetPlayerFocussedFunc();
 }
 
-void ASpgHUD::OpenMainMenu() {
-  if (OpenedWidgets.Contains(MainMenuWidget)) return CloseWidget(MainMenuWidget);
+void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {
+  if (OpenedWidgets.Contains(PauseMenuWidget)) return CloseWidget(PauseMenuWidget);
 
-  MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
-  const FInputModeUIOnly InputMode;
+  PauseMenuWidget->SaveManagerRef = SaveManager;
+
+  PauseMenuWidget->SetVisibility(ESlateVisibility::Visible);
+  const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
-  OpenedWidgets.Add(MainMenuWidget);
+  OpenedWidgets.Add(PauseMenuWidget);
+
+  SetPlayerPausedFunc();
 }
 
 // ! System state is preserved (e.g., dialogue, negotiation).
@@ -449,7 +454,7 @@ void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
   OpenFocusedMenu(MiniGameWidget);
 }
 void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
-  SetPlayerCutsceneFunc();
+  SetPlayerPausedFunc();
 
   StorePhaseTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
   StorePhaseTransitionWidget->FadeOutEndFunc = [this]() {
@@ -464,7 +469,7 @@ void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
 }
 
 void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {
-  SetPlayerCutsceneFunc();
+  SetPlayerPausedFunc();
 
   LevelLoadingTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
 

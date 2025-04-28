@@ -26,7 +26,7 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> MainMenuWidgetClass;
+  TSubclassOf<class UPauseMenuWidget> PauseMenuWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> InventoryViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -60,14 +60,15 @@ public:
   std::function<void()> SetPlayerFocussedFunc;  // * Set player state to menu (in control of the player).
   std::function<void()> SetPlayerCutsceneFunc;  // * Set player state to cutscene (not in control of the player).
   std::function<void()> SetPlayerNormalFunc;    // * Set player state to normal (not in menu, etc.).
+  std::function<void()> SetPlayerPausedFunc;    // * Set player state to paused (not in menu, etc.).
   void LeaveHUD();                              // * Leave the current HUD state (main menu, etc.).
 
   void OpenFocusedMenu(class UUserWidget* Widget);  // * Open a menu in the focused state (dialogue, negotiation, etc.).
 
   UPROPERTY()
-  class UMainMenuWidget* MainMenuWidget;
+  class UPauseMenuWidget* PauseMenuWidget;
   UFUNCTION(BlueprintCallable, Category = "Widgets")
-  void OpenMainMenu();
+  void OpenPauseMenu(class ASaveManager* SaveManager);
 
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TArray<class UUserWidget*> OpenedWidgets;

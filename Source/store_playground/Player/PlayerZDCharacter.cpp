@@ -64,6 +64,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     EnhancedInputComponent->BindAction(InputActions.MoveAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::Move);
 
+    EnhancedInputComponent->BindAction(InputActions.OpenPauseMenuAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenPauseMenu);
     EnhancedInputComponent->BindAction(InputActions.CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::CloseTopOpenMenu);
     EnhancedInputComponent->BindAction(InputActions.CloseAllMenusAction, ETriggerEvent::Triggered, this,
@@ -100,6 +102,7 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerFocussedFunc = [this]() { ChangePlayerState(EPlayerState::FocussedMenu); };
   HUD->SetPlayerNormalFunc = [this]() { ChangePlayerState(EPlayerState::Normal); };
   HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
+  HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -135,21 +138,14 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
   SetActorRotation(NewRotation);
 }
 
-void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) {
-  HUD->CloseTopOpenMenu();
+void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
+  check(PlayerBehaviourState != EPlayerState::Cutscene);
+  check(SaveManager);
 
-  // StoreExpansionManager->SelectExpansion(EStoreExpansionLevel::Store1);
-  // auto LevelReadyFunc = [this]() {
-  //   ASpawnPoint* SpawnPoint =
-  //       *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
-  //         return SpawnPoint->Level == ELevel::Store;
-  //       });
-  //   check(SpawnPoint);
-
-  //   this->SetActorLocation(SpawnPoint->GetActorLocation());
-  // };
-  // LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
+  HUD->OpenPauseMenu(SaveManager);
 }
+
+void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }
 
 void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) { HUD->CloseAllMenus(); }
 
