@@ -55,11 +55,11 @@ auto UInteractionComponent::InteractStockDisplay() const
   return {OwnerStockDisplayC, OwnerInventoryC};
 }
 
-auto UInteractionComponent::InteractNPCDialogue() const -> TOptional<TArray<FDialogueData>> {
+auto UInteractionComponent::InteractNPCDialogue() const -> TOptional<UDialogueComponent*> {
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
   check(OwnerDialogueC);
 
-  return OwnerDialogueC->DialogueArray;
+  return OwnerDialogueC;
 }
 
 auto UInteractionComponent::InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, class UItemBase*> {

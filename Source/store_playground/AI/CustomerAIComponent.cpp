@@ -8,6 +8,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/WorldObject/Customer.h"
+#include "Components/WidgetComponent.h"
 #include "PaperZDCharacter.h"
 #include "AIController.h"
 
@@ -34,7 +35,13 @@ void UCustomerAIComponent::TickComponent(float DeltaTime,
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UCustomerAIComponent::StartNegotiation() { CustomerState = ECustomerState::Negotiating; }
+void UCustomerAIComponent::StartNegotiation() {
+  CustomerState = ECustomerState::Negotiating;
+
+  UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
+  check(WidgetC);
+  WidgetC->SetVisibility(false, true);
+}
 
 void UCustomerAIComponent::PostNegotiation() {
   CustomerState = ECustomerState::Leaving;

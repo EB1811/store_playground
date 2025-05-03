@@ -34,6 +34,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStorePhaseLightingManager> StorePhaseLightingManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AMusicManager> MusicManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStoreExpansionManager> StoreExpansionManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ACutsceneManager> CutsceneManagerClass;
@@ -69,4 +71,6 @@ public:
 
   UFUNCTION(BlueprintCallable, Category = "GameMode")
   void GameOverReset();
+  UFUNCTION(BlueprintCallable, Category = "GameMode")
+  void LoadGame(int32 SlotIndex);
 };

@@ -1,4 +1,5 @@
 #include "SaveManager.h"
+#include "Misc/AssertionMacros.h"
 #include "SaveStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Market/Market.h"
@@ -13,6 +14,7 @@
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/SaveManager/SaveManager.h"
+#include "store_playground/SaveManager/SaveSlotListSaveGame.h"
 #include "store_playground/SaveManager/MySaveGame.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
 #include "store_playground/Tags/TagsComponent.h"
@@ -44,18 +46,58 @@ void SetStructNonSaveGameProperties(UScriptStruct* StaticStruct, T& Current, T& 
   }
 }
 
-ASaveManager::ASaveManager() { PrimaryActorTick.bCanEverTick = false; }
+ASaveManager::ASaveManager() {
+  PrimaryActorTick.bCanEverTick = false;
+
+  SaveManagerParams.SaveSlotListSaveName = "SaveSlotList";
+  SaveManagerParams.SaveSlotCount = 4;
+  SaveManagerParams.SaveSlotNamePrefix = "SaveSlot_";
+  CurrentSaveGame = nullptr;
+}
 
 void ASaveManager::BeginPlay() { Super::BeginPlay(); }
 
 void ASaveManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void ASaveManager::CreateNewSaveGame() {
+void ASaveManager::LoadSaveGameSlots() {
+  if (!UGameplayStatics::DoesSaveGameExist(SaveManagerParams.SaveSlotListSaveName, 0)) {
+    SaveSlotListSaveGame =
+        Cast<USaveSlotListSaveGame>(UGameplayStatics::CreateSaveGameObject(USaveSlotListSaveGame::StaticClass()));
+    check(SaveSlotListSaveGame);
+
+    SaveSlotListSaveGame->SaveSlotList = {};
+    SaveSlotListSaveGame->MostRecentSaveSlotIndex = -1;
+
+    UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
+    UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new save slot list."));
+
+    return;
+  }
+
+  SaveSlotListSaveGame =
+      Cast<USaveSlotListSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveManagerParams.SaveSlotListSaveName, 0));
+  check(SaveSlotListSaveGame);
+}
+
+void ASaveManager::CreateNewSaveGame(int32 SlotIndex) {
+  check(SaveSlotListSaveGame);
+  check(SlotIndex < SaveManagerParams.SaveSlotCount);
+  check(Store && DayManager);
+
   CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
   check(CurrentSaveGame);
 
-  CurrentSaveGame->Initialize("SaveSlot_Main");
+  CurrentSaveGame->Initialize(SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(SlotIndex), SlotIndex);
   SaveCurrentSlotToDisk();
+
+  if (SlotIndex >= SaveSlotListSaveGame->SaveSlotList.Num()) SaveSlotListSaveGame->SaveSlotList.Add({});
+  SaveSlotListSaveGame->SaveSlotList[SlotIndex].SlotName = CurrentSaveGame->SlotName;
+  SaveSlotListSaveGame->SaveSlotList[SlotIndex].LastModified = FDateTime::Now();
+  SaveSlotListSaveGame->SaveSlotList[SlotIndex].CurrentDay = DayManager->CurrentDay;
+  SaveSlotListSaveGame->SaveSlotList[SlotIndex].StoreMoney = Store->Money;
+  SaveSlotListSaveGame->MostRecentSaveSlotIndex = SlotIndex;
+
+  UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
 
   UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new save game."));
 }
@@ -76,14 +118,14 @@ void ASaveManager::SaveCurrentSlotToDisk() {
   CurrentSaveGame->ComponentSaveStates.Append(PComponentSaveStates);
   CurrentSaveGame->ObjectSaveStates.Append(PObjectSaveStates);
 
-  UGameplayStatics::SaveGameToSlot(CurrentSaveGame, CurrentSaveGame->SlotName, 0);
-  UGameplayStatics::SaveGameToSlot(CurrentSaveGame, "SaveSlot_Backup", 1);
+  UGameplayStatics::SaveGameToSlot(CurrentSaveGame, CurrentSaveGame->SlotName, CurrentSaveGame->SlotIndex);
 }
 
-void ASaveManager::LoadSystemsFromDisk() {
-  FString SlotName = "SaveSlot_Main";
+void ASaveManager::LoadSystemsFromDisk(int32 SlotIndex) {
+  check(SaveSlotListSaveGame && SlotIndex < SaveManagerParams.SaveSlotCount);
 
-  CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+  FString SlotName = SaveSlotListSaveGame->SaveSlotList[SlotIndex].SlotName;
+  CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, SlotIndex));
   check(CurrentSaveGame);
 
   LoadAllSystems(CurrentSaveGame->SystemSaveStates);
@@ -174,6 +216,7 @@ void ASaveManager::MarketEconomyCustomLoad(const FSystemSaveState& SystemSaveSta
 
 auto ASaveManager::SaveLevels() -> FLevelsSaveData {
   // Saving only store for now.
+  // TODO: Save all levels.
   FLevelsSaveData LevelsSaveData;
 
   Store->SaveStoreLevelState();

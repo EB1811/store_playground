@@ -14,6 +14,7 @@ public:
   ACustomer();
 
   virtual void BeginPlay() override;
+  virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UInteractionComponent* InteractionComponent;
@@ -26,4 +27,7 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UCustomerAIComponent* CustomerAIComponent;
+
+  UPROPERTY(EditAnywhere, Category = "Customer")
+  class UWidgetComponent* WidgetComponent;
 };

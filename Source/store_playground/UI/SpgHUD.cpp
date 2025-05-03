@@ -28,6 +28,7 @@
 #include "store_playground/UI/Transitions/StorePhaseTransitionWidget.h"
 #include "store_playground/UI/Transitions/LevelLoadingTransitionWidget.h"
 #include "store_playground/UI/Cutscene/CutsceneWidget.h"
+#include "store_playground/UI/WorldUI/Player/InteractionDisplayWidget.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
 #include "Components/TextBlock.h"
 
@@ -46,6 +47,7 @@ void ASpgHUD::BeginPlay() {
       CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
 
   check(PauseMenuWidgetClass);
+  check(InteractionDisplayWidgetClass);
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
   check(BuildableDisplayWidgetClass);
@@ -61,6 +63,10 @@ void ASpgHUD::BeginPlay() {
   PauseMenuWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
   PauseMenuWidget->AddToViewport(20);
   PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  InteractionPopupWidget = CreateWidget<UInteractionDisplayWidget>(GetWorld(), InteractionDisplayWidgetClass);
+  InteractionPopupWidget->AddToViewport(10);
+  InteractionPopupWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   InventoryViewWidget = CreateWidget<UInventoryViewWidget>(GetWorld(), InventoryViewWidgetClass);
   InventoryViewWidget->AddToViewport(10);
@@ -147,6 +153,7 @@ void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {
   if (OpenedWidgets.Contains(PauseMenuWidget)) return CloseWidget(PauseMenuWidget);
 
   PauseMenuWidget->SaveManagerRef = SaveManager;
+  PauseMenuWidget->RefreshUI();
 
   PauseMenuWidget->SetVisibility(ESlateVisibility::Visible);
   const FInputModeGameAndUI InputMode;
@@ -195,6 +202,12 @@ void ASpgHUD::AdvanceUI() {
   FUIActionable* ActionableWidget = UIActionableProp->ContainerPtrToValuePtr<FUIActionable>(TopWidget);
   ActionableWidget->AdvanceUI();
 }
+
+void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
+  InteractionPopupWidget->InteractionText->SetText(InteractionText);
+  InteractionPopupWidget->SetVisibility(ESlateVisibility::Visible);
+}
+void ASpgHUD::CloseInteractionPopup() { InteractionPopupWidget->SetVisibility(ESlateVisibility::Collapsed); }
 
 // todo-low: Update.
 void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, AStore* Store) {

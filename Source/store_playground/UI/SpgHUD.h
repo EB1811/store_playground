@@ -30,6 +30,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> InventoryViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UInteractionDisplayWidget> InteractionDisplayWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> BuildableDisplayWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> StockDisplayWidgetClass;
@@ -80,6 +82,11 @@ public:
   void CloseWidget(class UUserWidget* Widget);
 
   void AdvanceUI();  // * Advance the topmost open menu (dialogue, negotiation, etc.).
+
+  UPROPERTY()
+  class UInteractionDisplayWidget* InteractionPopupWidget;
+  void OpenInteractionPopup(FText InteractionText);
+  void CloseInteractionPopup();
 
   UPROPERTY()
   class UInventoryViewWidget* InventoryViewWidget;

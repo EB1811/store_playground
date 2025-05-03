@@ -110,14 +110,14 @@ public:
   void PerformCustomerAILoop();
 
   void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
-  void CustomerPerformAction(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void CustomerPerformAction(class ACustomer* Customer);
 
   bool CustomerPickItem(class UCustomerAIComponent* CustomerAI,
                         std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr);
   bool CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
                           std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr);
   void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr);
-  void MakeCustomerNegotiable(class UCustomerAIComponent* CustomerAI, class UInteractionComponent* Interaction);
+  void MakeCustomerNegotiable(class ACustomer* Customer);
 
   void TickDaysTimedVars();
 

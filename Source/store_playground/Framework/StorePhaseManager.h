@@ -60,6 +60,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class AStorePhaseLightingManager* StorePhaseLightingManager;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class AMusicManager* MusicManager;
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ACustomerAIManager* CustomerAIManager;
 
   FTimerHandle OpenShopTimerHandle;

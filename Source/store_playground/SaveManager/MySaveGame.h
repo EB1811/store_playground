@@ -13,6 +13,8 @@ public:
 
   UPROPERTY()
   FString SlotName;
+  UPROPERTY()
+  int32 SlotIndex;
 
   UPROPERTY()
   TArray<FSystemSaveState> SystemSaveStates;
@@ -27,5 +29,5 @@ public:
   UPROPERTY()
   FPlayerSavaState PlayerSaveState;
 
-  void Initialize(const FString& _SlotName);
+  void Initialize(const FString& _SlotName, int32 _SlotIndex);
 };

@@ -27,6 +27,7 @@
 #include "NavigationSystem.h"
 #include "NegotiationAI.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Components/WidgetComponent.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
@@ -113,6 +114,8 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+
+  // ? Use a random dialogue component type?
   UniqueCustomer->DialogueComponent->DialogueArray =
       GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
 
@@ -172,6 +175,9 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
   UniqueCustomer->DialogueComponent->DialogueArray =
       GlobalStaticDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
+
+  UniqueCustomer->WidgetComponent->SetVisibility(true, true);
+  // UniqueCustomer->WidgetComponent->SetDrawSize(FVector2D(100.0f, 100.0f));
 }
 
 void ACustomerAIManager::SpawnCustomers() {
@@ -246,7 +252,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       case (ECustomerState::Browsing): {
         if (PickingItemIdsMap.Num() < ManagerParams.MaxCustomersPickingAtOnce) {
           if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
-            CustomerPerformAction(Customer->CustomerAIComponent, Customer->InteractionComponent);
+            CustomerPerformAction(Customer);
+            // Stop movement.
             break;
           }
         }
@@ -305,8 +312,8 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   // UE_LOG(LogTemp, Warning, TEXT("Customer is moving."));
 }
 
-void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
-  check(CustomerAI && Interaction);
+void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
+  check(Customer);
 
   TMap<ECustomerAction, float> ActionWeights = BehaviorParams.ActionWeights;
   if (Store->StoreStockItems.Num() < 5.0f)
@@ -317,21 +324,22 @@ void ACustomerAIManager::CustomerPerformAction(UCustomerAIComponent* CustomerAI,
         return Action.Value;
       }).Key;
 
-  ECustomerAction Action =
-      CustomerAI->CustomerAction != ECustomerAction::None ? CustomerAI->CustomerAction : RandomAction;
+  ECustomerAction Action = Customer->CustomerAIComponent->CustomerAction != ECustomerAction::None
+                               ? Customer->CustomerAIComponent->CustomerAction
+                               : RandomAction;
   switch (Action) {
     case (ECustomerAction::PickItem):
-      if (CustomerPickItem(CustomerAI)) MakeCustomerNegotiable(CustomerAI, Interaction);
+      if (CustomerPickItem(Customer->CustomerAIComponent)) MakeCustomerNegotiable(Customer);
       break;
     case (ECustomerAction::StockCheck):
-      if (CustomerStockCheck(CustomerAI)) MakeCustomerNegotiable(CustomerAI, Interaction);
+      if (CustomerStockCheck(Customer->CustomerAIComponent)) MakeCustomerNegotiable(Customer);
       break;
     case (ECustomerAction::SellItem):
-      CustomerSellItem(CustomerAI);
-      MakeCustomerNegotiable(CustomerAI, Interaction);
+      CustomerSellItem(Customer->CustomerAIComponent);
+      MakeCustomerNegotiable(Customer);
       break;
     case (ECustomerAction::Leave): {
-      CustomerAI->CustomerState = ECustomerState::Leaving;
+      Customer->CustomerAIComponent->CustomerState = ECustomerState::Leaving;
       break;
     }
     default: break;
@@ -386,9 +394,14 @@ void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UIte
   CustomerAI->NegotiationAI->RelevantItem = Item;
 }
 
-void ACustomerAIManager::MakeCustomerNegotiable(UCustomerAIComponent* CustomerAI, UInteractionComponent* Interaction) {
+void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
+  UCustomerAIComponent* CustomerAI = Customer->CustomerAIComponent;
+
+  Customer->InteractionComponent->InteractionType = EInteractionType::WaitingCustomer;
+  Customer->WidgetComponent->SetVisibility(true, true);
+  // Customer->WidgetComponent->SetDrawSize(FVector2D(100.0f, 100.0f));
+
   CustomerAI->CustomerState = ECustomerState::Requesting;
-  Interaction->InteractionType = EInteractionType::WaitingCustomer;
 
   CustomerAI->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
 

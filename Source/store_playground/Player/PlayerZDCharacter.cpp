@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "Internationalization/Text.h"
 #include "PaperZDCharacter.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -44,6 +45,7 @@
 #include "GameFramework/Pawn.h"
 #include "Engine/HitResult.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/WidgetComponent.h"
 
 APlayerZDCharacter::APlayerZDCharacter() {
   // Set this character to call Tick() every frame.
@@ -51,10 +53,13 @@ APlayerZDCharacter::APlayerZDCharacter() {
 
   PlayerBehaviourState = EPlayerState::Normal;
 
+  InteractionData.InteractionCheckFrequency = 0.35f;
   InteractionData.InteractionCheckDistance = 200.0f;
+  InteractionData.InteractionCheckRadius = 50.0f;
 
   PlayerInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
   PlayerTagsComponent = CreateDefaultSubobject<UTagsComponent>(TEXT("TagsComponent"));
+  PlayerWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerWidgetComponent"));
 }
 
 void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -81,7 +86,7 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     EnhancedInputComponent->BindAction(InputActions.OpenStoreExpansionsAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenStoreExpansions);
     EnhancedInputComponent->BindAction(InputActions.InteractAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::TryInteract);
+                                       &APlayerZDCharacter::Interact);
     EnhancedInputComponent->BindAction(InputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::AdvanceUI);
     EnhancedInputComponent->BindAction(InputActions.SkipCutsceneAction, ETriggerEvent::Triggered, this,
@@ -91,6 +96,10 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void APlayerZDCharacter::BeginPlay() {
   Super::BeginPlay();
+
+  // PlayerWidgetComponent->SetVisibility(true);
+  // PlayerWidgetComponent->SetWorldLocation(GetPawnViewLocation());
+  // PlayerWidgetComponent->SetWorldRotation(FRotator(45, 90, 0));  // y, z, x
 
   check(SpawnPointClass);
 
@@ -105,7 +114,13 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
 }
 
-void APlayerZDCharacter::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+void APlayerZDCharacter::Tick(float DeltaTime) {
+  Super::Tick(DeltaTime);
+
+  if (PlayerBehaviourState == EPlayerState::Normal &&
+      GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionData.InteractionCheckFrequency)
+    CheckForInteraction();
+}
 
 void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
   if (PlayerBehaviourState == NewState) return;
@@ -125,6 +140,9 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
   const FRotator YawRotation(0.0f, Rotation.Yaw, 0.0f);
   const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
   const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+  FacingDirection = ForwardDirection * MovementVector.Y + RightDirection * MovementVector.X;
+  FacingDirection.Normalize();
 
   AddMovementInput(ForwardDirection, MovementVector.Y);
   AddMovementInput(RightDirection, MovementVector.X);
@@ -190,20 +208,9 @@ void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
   HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
 }
 
-void APlayerZDCharacter::TryInteract(const FInputActionValue& Value) {
-  FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
-  FVector TraceEnd{TraceStart + GetActorRotation().Vector() * InteractionData.InteractionCheckDistance};
-
-  DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.1f, 0, 5.0f);
-
-  FCollisionQueryParams TraceParams;
-  TraceParams.AddIgnoredActor(this);
-  FHitResult TraceHit;
-
-  if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
-    if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionData.InteractionCheckDistance)
-      if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>())
-        HandleInteraction(Interactable);
+// Rechecking on input to avoid problems with the interaction frequency not keeping up.
+void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
+  if (CheckForInteraction()) HandleInteraction(CurrentInteractableC);
 }
 
 void APlayerZDCharacter::AdvanceUI(const FInputActionValue& Value) { HUD->AdvanceUI(); }
@@ -214,7 +221,42 @@ void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
   HUD->SkipCutscene();
 }
 
+auto APlayerZDCharacter::CheckForInteraction() -> bool {
+  InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+
+  FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
+  FVector TraceEnd{TraceStart + FacingDirection * InteractionData.InteractionCheckDistance};
+  FCollisionShape Sphere = FCollisionShape::MakeSphere(InteractionData.InteractionCheckRadius);
+
+  // DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.1f, 0, 5.0f);
+
+  FCollisionQueryParams TraceParams;
+  TraceParams.AddIgnoredActor(this);
+  FHitResult TraceHit;
+
+  if (GetWorld()->SweepSingleByChannel(TraceHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Visibility, Sphere,
+                                       TraceParams)) {
+    if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionData.InteractionCheckDistance)
+      if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>()) {
+        CurrentInteractableC = Interactable;
+        // TODO: Check if the interaction is valid (considering the interaction type and the current store phase).
+        HUD->OpenInteractionPopup(FText::FromName("!"));  // Temp
+
+        return true;
+      }
+  }
+
+  if (CurrentInteractableC) {
+    CurrentInteractableC = nullptr;
+    HUD->CloseInteractionPopup();
+  }
+
+  return false;
+}
+
 void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interactable) {
+  HUD->CloseInteractionPopup();
+
   switch (Interactable->InteractionType) {
     case EInteractionType::None: {
       break;
@@ -275,14 +317,13 @@ void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interact
     case EInteractionType::NpcStore: {
       if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
 
-      auto [NpcStoreC, StoreInventory, Dialogue] = Interactable->InteractNpcStore();
-      EnterDialogue(Dialogue->DialogueArray,
-                    [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
+      auto [NpcStoreC, StoreInventory, DialogueC] = Interactable->InteractNpcStore();
+      EnterDialogue(DialogueC, [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
       break;
     }
     case EInteractionType::MiniGame: {
       auto [MiniGameC, DialogueC] = Interactable->InteractMiniGame();
-      EnterDialogue(DialogueC->DialogueArray, [this, MiniGameC]() { EnterMiniGame(MiniGameC); });
+      EnterDialogue(DialogueC, [this, MiniGameC]() { EnterMiniGame(MiniGameC); });
       break;
     }
   }
@@ -355,6 +396,22 @@ void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventory
   HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
 }
 
+void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC, std::function<void()> OnDialogueEndFunc) {
+  if (DialogueC->DialogueArray.Num() == 0) {
+    if (OnDialogueEndFunc) return OnDialogueEndFunc();
+    return;
+  }
+
+  auto CurrentDialogueArr = DialogueC->GetNextDialogueChain();
+  DialogueSystem->StartDialogue(CurrentDialogueArr);
+  HUD->SetAndOpenDialogue(DialogueSystem, [this, DialogueC, OnDialogueEndFunc]() {
+    // ? Call in dialogue system?
+    DialogueC->FinishReadingDialogueChain();
+
+    if (OnDialogueEndFunc) OnDialogueEndFunc();
+  });
+}
+// For dialogue outside of the dialogue component (cutscenes, etc.).
 void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,
                                        std::function<void()> OnDialogueEndFunc) {
   if (DialogueDataArr.Num() == 0) {
@@ -381,7 +438,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UItemBase* Item) {
   // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
-    return EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
+    return EnterDialogue(DialogueC, [this, QuestC, CustomerAI]() {
       QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
     });
 
@@ -391,10 +448,10 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::SellItem:
       check(CustomerAI->NegotiationAI->RelevantItem);
       if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
-        EnterDialogue(DialogueC->DialogueArray,
+        EnterDialogue(DialogueC,
                       [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
-        EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI, Item]() {
+        EnterDialogue(DialogueC, [this, QuestC, CustomerAI, Item]() {
           QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
           EnterNegotiation(CustomerAI, Item);
         });
@@ -402,7 +459,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::Leave:
     case ECustomerAction::None:
       if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
-      EnterDialogue(DialogueC->DialogueArray, [this, QuestC, CustomerAI]() {
+      EnterDialogue(DialogueC, [this, QuestC, CustomerAI]() {
         QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
         CustomerAI->CustomerState = ECustomerState::Leaving;
       });

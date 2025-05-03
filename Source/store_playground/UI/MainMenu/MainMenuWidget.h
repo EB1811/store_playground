@@ -15,4 +15,8 @@ public:
   class UButton* NewGameButton;
   UPROPERTY(meta = (BindWidget))
   class UButton* ContinueButton;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* LoadGameButton;
+  // UPROPERTY(meta = (BindWidget))
+  // class UButton* QuitButton;
 };

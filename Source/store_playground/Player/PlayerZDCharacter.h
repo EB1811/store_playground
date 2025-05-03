@@ -63,6 +63,8 @@ struct FInteractionData {
   float InteractionCheckFrequency;
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")
   float InteractionCheckDistance;
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
+  float InteractionCheckRadius;
 };
 
 UCLASS()
@@ -110,9 +112,7 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenStoreExpansions(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void TryInteract(const FInputActionValue& Value);
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
-  FInteractionData InteractionData;
+  void Interact(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void AdvanceUI(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -163,11 +163,23 @@ public:
   class UInventoryComponent* PlayerInventoryComponent;
   UPROPERTY(EditAnywhere, Category = "Character | Components")
   class UTagsComponent* PlayerTagsComponent;
+  UPROPERTY(EditAnywhere, Category = "Character | Components")
+  class UWidgetComponent* PlayerWidgetComponent;
 
   // * Classes
   UPROPERTY(EditAnywhere, Category = "Character | Classes")
   TSubclassOf<class ASpawnPoint> SpawnPointClass;
 
+  // * Movement
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Movement")
+  FVector FacingDirection;
+
+  // * Interaction
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
+  FInteractionData InteractionData;
+  UPROPERTY(EditAnywhere, Category = "Character | Interaction")
+  class UInteractionComponent* CurrentInteractableC;
+  auto CheckForInteraction() -> bool;  // Ticked for UI.
   void HandleInteraction(const class UInteractionComponent* Interactable);
 
   // * Entries into HUDs and menus.
@@ -178,6 +190,7 @@ public:
   void EnterAbilitySelect();
   void EnterMiniGame(class UMiniGameComponent* MiniGameC);
 
+  void EnterDialogue(class UDialogueComponent* DialogueC, std::function<void()> OnDialogueEndFunc = nullptr);
   void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
                      std::function<void()> OnDialogueEndFunc = nullptr);
   void EnterNegotiation(class UCustomerAIComponent* CustomerAI,

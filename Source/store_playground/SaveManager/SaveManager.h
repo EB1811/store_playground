@@ -5,6 +5,20 @@
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "SaveManager.generated.h"
 
+USTRUCT()
+struct FSaveManagerParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FString SaveSlotListSaveName;
+  UPROPERTY(EditAnywhere)
+  int32 SaveSlotCount;
+  UPROPERTY(EditAnywhere)
+  FString SaveSlotNamePrefix;
+  UPROPERTY(EditAnywhere)
+  FString AutoSaveSlotName;
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ASaveManager : public AInfo {
   GENERATED_BODY()
@@ -14,6 +28,9 @@ public:
 
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
+
+  UPROPERTY(EditAnywhere)
+  FSaveManagerParams SaveManagerParams;
 
   UPROPERTY()
   class APlayerZDCharacter* PlayerCharacter;
@@ -32,15 +49,20 @@ public:
   class AGlobalDataManager* GlobalDataManager;
   UPROPERTY()
   class AGlobalStaticDataManager* GlobalStaticDataManager;
+  UPROPERTY()
+  class ADayManager* DayManager;
 
+  UPROPERTY()
+  class USaveSlotListSaveGame* SaveSlotListSaveGame;
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;
 
-  void CreateNewSaveGame();
+  void LoadSaveGameSlots();
 
+  void CreateNewSaveGame(int32 SlotIndex);
   void SaveCurrentSlotToDisk();
-  // Need to be separated to load store level info.
-  void LoadSystemsFromDisk();
+  // Systems and Levels need to be separated to load store level info.
+  void LoadSystemsFromDisk(int32 SlotIndex);
   void LoadLevelsAndPlayerFromDisk();
 
   auto SaveAllSystems() -> TArray<FSystemSaveState>;

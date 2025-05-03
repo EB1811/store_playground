@@ -9,6 +9,7 @@
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Lighting/StorePhaseLightingManager.h"
 #include "store_playground/Player/PlayerCommand.h"
+#include "store_playground/Sound/MusicManager.h"
 #include "store_playground/UI/SpgHUD.h"
 
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action) {
@@ -80,6 +81,7 @@ void AStorePhaseManager::OpenShop() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::OpenShop);
 
   StorePhaseLightingManager->OnOpenShopLightingCalled();
+  // MusicManager->OnOpenShopMusicCalled();
 
   GetWorld()->GetTimerManager().SetTimer(OpenShopTimerHandle, this, &AStorePhaseManager::OnOpenShopTimerEnd,
                                          StorePhaseManagerParams.OpenShopDuration, false);
@@ -90,6 +92,7 @@ void AStorePhaseManager::CloseShop() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::CloseShop);
 
   StorePhaseLightingManager->OnCloseShopLightingCalled();
+  // MusicManager->OnCloseShopMusicCalled();
 
   GetWorld()->GetTimerManager().ClearTimer(OpenShopTimerHandle);
   CustomerAIManager->EndCustomerAI();
@@ -99,6 +102,7 @@ void AStorePhaseManager::EndDay() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::EndDay);
 
   StorePhaseLightingManager->OnEndDayLightingCalled();
+  // MusicManager->OnEndDayMusicCalled();
 
   DayManager->StartNewDay();
   // SaveManager->CreateNewSaveGame();

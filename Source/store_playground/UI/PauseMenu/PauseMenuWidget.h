@@ -11,7 +11,11 @@ class STORE_PLAYGROUND_API UPauseMenuWidget : public UUserWidget {
   GENERATED_BODY()
 
 public:
-  // Temp
+  virtual void NativeOnInitialized() override;
+
+  UPROPERTY(EditAnywhere, meta = (BindWidget))
+  class USaveSlotsWidget* SaveSlotsWidget;
+
   UPROPERTY(meta = (BindWidget))
   class UButton* SaveButton;
   UPROPERTY(meta = (BindWidget))
@@ -21,4 +25,13 @@ public:
 
   UPROPERTY()
   class ASaveManager* SaveManagerRef;
+
+  UFUNCTION()
+  void OnSaveButtonClicked();
+  UFUNCTION()
+  void OnLoadButtonClicked();
+  // UFUNCTION()
+  // void OnQuitButtonClicked();
+
+  void RefreshUI();
 };

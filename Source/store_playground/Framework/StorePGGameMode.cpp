@@ -25,6 +25,7 @@
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/Lighting/StorePhaseLightingManager.h"
+#include "store_playground/Sound/MusicManager.h"
 #include "store_playground/Minigame/MiniGameManager.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Ability/AbilityManager.h"
@@ -63,6 +64,7 @@ void AStorePGGameMode::BeginPlay() {
   ADayManager* DayManager = GetWorld()->SpawnActor<ADayManager>(DayManagerClass);
   AStorePhaseLightingManager* StorePhaseLightingManager =
       GetWorld()->SpawnActor<AStorePhaseLightingManager>(StorePhaseLightingManagerClass);
+  AMusicManager* MusicManager = GetWorld()->SpawnActor<AMusicManager>(MusicManagerClass);
   ACutsceneManager* CutsceneManager = GetWorld()->SpawnActor<ACutsceneManager>(CutsceneManagerClass);
   AStoreExpansionManager* StoreExpansionManager =
       GetWorld()->SpawnActor<AStoreExpansionManager>(StoreExpansionManagerClass);
@@ -126,6 +128,7 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->UpgradeManager = UpgradeManager;
   SaveManager->GlobalDataManager = GlobalDataManager;
   SaveManager->GlobalStaticDataManager = GlobalStaticDataManager;
+  SaveManager->DayManager = DayManager;
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
 
@@ -140,6 +143,7 @@ void AStorePGGameMode::BeginPlay() {
   StorePhaseManager->SaveManager = SaveManager;
   StorePhaseManager->DayManager = DayManager;
   StorePhaseManager->StorePhaseLightingManager = StorePhaseLightingManager;
+  StorePhaseManager->MusicManager = MusicManager;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
 
   DayManager->AbilityManager = AbilityManager;
@@ -217,7 +221,8 @@ void AStorePGGameMode::BeginPlay() {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
 
-  if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadSystemsFromDisk();
+  SaveManager->LoadSaveGameSlots();
+  if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadSystemsFromDisk(StorePGGameInstance->SaveSlotIndex);
 
   LevelManager->InitLoadStore([this, StorePGGameInstance]() {
     // ! Enter level post transition blueprint function is not called.
@@ -250,6 +255,18 @@ void AStorePGGameMode::GameOverReset() {
   check(StorePGGameInstance);
   StorePGGameInstance->bFromSaveGame = false;
   StorePGGameInstance->bFromGameOver = true;
+
+  UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
+}
+
+// * Reopen the game with the selected save slot.
+void AStorePGGameMode::LoadGame(int32 SlotIndex) {
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+  check(StorePGGameInstance);
+  StorePGGameInstance->bFromSaveGame = true;
+  StorePGGameInstance->SaveSlotIndex = SlotIndex;
+
+  StorePGGameInstance->bFromGameOver = false;
 
   UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
 }

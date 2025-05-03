@@ -94,3 +94,19 @@ struct FLevelsSaveData {
   UPROPERTY()
   TArray<FObjectSaveState> ObjectSaveStates;
 };
+
+USTRUCT()
+struct FSaveSlotData {
+  GENERATED_BODY()
+
+  UPROPERTY()
+  FString SlotName;
+  UPROPERTY()
+  FDateTime LastModified;
+
+  // * Info to display to the user.
+  UPROPERTY()
+  int32 CurrentDay;
+  UPROPERTY()
+  float StoreMoney;
+};

@@ -51,7 +51,7 @@ public:
   auto InteractBuildable() const -> TOptional<class ABuildable*>;
   auto InteractStockDisplay() const -> TTuple<class UStockDisplayComponent*, class UInventoryComponent*>;
 
-  auto InteractNPCDialogue() const -> TOptional<TArray<FDialogueData>>;
+  auto InteractNPCDialogue() const -> TOptional<class UDialogueComponent*>;
   auto InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, class UItemBase*>;
   auto InteractUniqueNPCQuest() const
       -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, class UItemBase*>;

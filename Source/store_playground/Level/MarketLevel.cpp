@@ -290,6 +290,7 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
 
     const FEconEvent& RandomEconEvent = GetWeightedRandomItem<FEconEvent>(
         Market->TodaysEconEvents, [](const auto& Event) { return Event.StartChance; });
+    // ? Use rolling or random dialogue component type?
     Npc->DialogueComponent->DialogueArray =
         GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
           return Dialogue.DialogueTags.IsEmpty() || Dialogue.DialogueTags.HasAny(RandomEconEvent.Tags);

@@ -3,6 +3,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Quest/QuestComponent.h"
+#include "Components/WidgetComponent.h"
 
 ACustomer::ACustomer() {
   PrimaryActorTick.bCanEverTick = true;
@@ -11,6 +12,22 @@ ACustomer::ACustomer() {
   DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));
   QuestComponent = CreateDefaultSubobject<UQuestComponent>(TEXT("QuestComponent"));
   CustomerAIComponent = CreateDefaultSubobject<UCustomerAIComponent>(TEXT("CustomerAIComponent"));
+  WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 }
 
-void ACustomer::BeginPlay() { Super::BeginPlay(); }
+void ACustomer::BeginPlay() {
+  Super::BeginPlay();
+
+  WidgetComponent->SetVisibility(false, true);
+  // WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+  WidgetComponent->SetDrawSize(FVector2D(100.0f, 100.0f));
+  WidgetComponent->SetWorldLocation(GetActorLocation());
+  WidgetComponent->SetWorldRotation(FRotator(45, 90, 0));  // y, z, x
+}
+
+void ACustomer::Tick(float DeltaTime) {
+  Super::Tick(DeltaTime);
+
+  if (WidgetComponent->IsWidgetVisible())
+    WidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -45, 25.0f));
+}
