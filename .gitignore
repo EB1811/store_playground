@@ -84,12 +84,18 @@ DerivedDataCache/*
 # They're tracked by git-lfs, don't forget to track other
 # files if adding them here.
 Content/**/*
+!/Content/*
+!/Content/Blueprints/*
 !/Content/Blueprints/**/*.uasset
+!/Content/Data/*
 !/Content/Data/**/*.uasset
+!/Content/Input/*
 !/Content/Input/**/*.uasset
+!/Content/UserInterface/*
 !/Content/UserInterface/**/*.uasset
 !/Content/Levels/**/*.uasset
 !/Content/Levels/**/*.umap
+!/Content/PostProcess/**
 
 # Ignoring starter content since it can be easily downloaded
 Content/StarterContent/*

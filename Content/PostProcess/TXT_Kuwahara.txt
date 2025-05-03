@@ -1,0 +1,88 @@
+
+float2 UV = GetDefaultSceneTextureUV(Parameters, 1);
+float2 TexelSize = 1.0/VIEWSIZE;
+int Radius = RADIUS;
+float3 Offset = { 0.0f, 0.0f, 0.0f };
+
+float n = float((Radius + 1) * (Radius + 1));
+float3 m0 = Offset; float3 m1 = Offset; float3 m2 = Offset; float3 m3 = Offset;
+float3 s0 = Offset; float3 s1 = Offset; float3 s2 = Offset; float3 s3 = Offset;
+float3 c;
+
+// Quadrant 1 (top-left)
+for (int j = -Radius; j <= 0; ++j) {
+    for (int i = -Radius; i <= 0; ++i) {
+        c = SceneTextureLookup(UV + float2(float(i), float(j)) * TexelSize, PPI_PostProcessInput0, false).rgb;
+        m0 += c;
+        s0 += c * c;
+    }
+}
+
+// Quadrant 2 (top-right)
+for (int j = -Radius; j <= 0; ++j) {
+    for (int i = 0; i <= Radius; ++i) {
+        c = SceneTextureLookup(UV + float2(float(i), float(j)) * TexelSize, PPI_PostProcessInput0, false).rgb;
+        m1 += c;
+        s1 += c * c;
+    }
+}
+
+// Quadrant 3 (bottom-right)
+for (int j = 0; j <= Radius; ++j) {
+    for (int i = 0; i <= Radius; ++i) {
+        c = SceneTextureLookup(UV + float2(float(i), float(j)) * TexelSize, PPI_PostProcessInput0, false).rgb;
+        m2 += c;
+        s2 += c * c;
+    }
+}
+
+// Quadrant 4 (bottom-left)
+for (int j = 0; j <= Radius; ++j) {
+    for (int i = -Radius; i <= 0; ++i) {
+        c = SceneTextureLookup(UV + float2(float(i), float(j)) * TexelSize, PPI_PostProcessInput0, false).rgb;
+        m3 += c;
+        s3 += c * c;
+    }
+}
+
+// Find quadrant with minimum variance
+float3 col;
+float min_sigma2 = 1e+2;
+
+m0 /= n;
+s0 = abs(s0 / n - m0 * m0);
+
+float sigma2 = s0.r + s0.g + s0.b;
+if (sigma2 < min_sigma2) {
+    min_sigma2 = sigma2;
+    col = m0;
+}
+
+m1 /= n;
+s1 = abs(s1 / n - m1 * m1);
+
+sigma2 = s1.r + s1.g + s1.b;
+if (sigma2 < min_sigma2) {
+    min_sigma2 = sigma2;
+    col = m1;
+}
+
+m2 /= n;
+s2 = abs(s2 / n - m2 * m2);
+
+sigma2 = s2.r + s2.g + s2.b;
+if (sigma2 < min_sigma2) {
+    min_sigma2 = sigma2;
+    col = m2;
+}
+
+m3 /= n;
+s3 = abs(s3 / n - m3 * m3);
+
+sigma2 = s3.r + s3.g + s3.b;
+if (sigma2 < min_sigma2) {
+    min_sigma2 = sigma2;
+    col = m3;
+}
+
+return col;
