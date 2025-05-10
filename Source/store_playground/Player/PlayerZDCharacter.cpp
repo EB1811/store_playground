@@ -267,6 +267,10 @@ void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interact
       EnterNewLevel(LevelChangeC);
       break;
     }
+    case EInteractionType::LeaveStore: {
+      LeaveStore();
+      break;
+    }
     case EInteractionType::StoreNextPhase: {
       StorePhaseManager->NextPhase();
       break;
@@ -481,8 +485,8 @@ void APlayerZDCharacter::ExitCurrentAction() {
   ChangePlayerState(EPlayerState::Normal);
 }
 
+// ? Change parameter to ELevel?
 void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
-  // * Allowed level transitions.
   switch (StorePhaseManager->StorePhaseState) {
     case EStorePhaseState::Morning:
     case EStorePhaseState::MorningBuildMode:
@@ -508,6 +512,29 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
   };
-
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
+}
+void APlayerZDCharacter::LeaveStore() {
+  ELevel LevelToLoad = ELevel::Market;
+  switch (StorePhaseManager->StorePhaseState) {
+    case EStorePhaseState::Morning:
+    case EStorePhaseState::MorningBuildMode: {
+      LevelToLoad = ELevel::Market;
+      break;
+    }
+    case EStorePhaseState::ShopOpen: return;
+    case EStorePhaseState::Night: LevelToLoad = ELevel::Church; break;
+  }
+
+  // ? Put in level manager?
+  auto LevelReadyFunc = [this, LevelToLoad]() {
+    ASpawnPoint* SpawnPoint = *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)
+                                   .FindByPredicate([LevelToLoad](const ASpawnPoint* SpawnPoint) {
+                                     return SpawnPoint->Level == LevelToLoad;
+                                   });
+    check(SpawnPoint);
+
+    this->SetActorLocation(SpawnPoint->GetActorLocation());
+  };
+  LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
 }

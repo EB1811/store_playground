@@ -79,6 +79,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "Market Level")
+  const class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AQuestManager* QuestManager;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AMiniGameManager* MiniGameManager;

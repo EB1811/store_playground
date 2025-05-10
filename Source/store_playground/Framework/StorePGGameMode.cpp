@@ -179,6 +179,7 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->QuestManager = QuestManager;
   MarketLevel->MiniGameManager = MiniGameManager;
   MarketLevel->Market = Market;
+  MarketLevel->MarketEconomy = MarketEconomy;
   MarketLevel->PlayerCommand = PlayerCommand;
 
   StoreExpansionManager->Store = Store;

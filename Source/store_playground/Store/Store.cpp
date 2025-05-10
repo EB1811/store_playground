@@ -56,6 +56,7 @@ void AStore::MoneySpent(float Amount) {
   StatisticsGen->StoreMoneySpent(Amount);
 }
 
+// TODO: Save store dynamic lights.
 void AStore::SaveStoreLevelState() {
   StoreLevelState.ActorSaveMap.Empty();
   StoreLevelState.ComponentSaveMap.Empty();

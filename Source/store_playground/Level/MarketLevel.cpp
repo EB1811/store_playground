@@ -17,6 +17,7 @@
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Market/Market.h"
+#include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "store_playground/Framework/UtilFuncs.h"
@@ -30,7 +31,10 @@
 #include "store_playground/Minigame/MiniGameManager.h"
 #include "store_playground/Minigame/MiniGameStructs.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "store_playground/Player/PlayerCommand.h"
+#include "PaperFlipbookComponent.h"
+#include "PaperZDAnimationComponent.h"
 
 AMarketLevel::AMarketLevel() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -263,6 +267,13 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
+  TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
+  for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
+    const auto PopData = *MarketEconomy->PopEconDataArray.FindByPredicate(
+        [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
+    WeightedCustomers.Add({GenericCustomer, PopData.Population});  // * Only looking at population.
+  }
+
   for (ANpcSpawnPoint* SpawnPoint : SpawnPoints) {
     if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance * (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f))
       continue;
@@ -273,6 +284,17 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
                                              SpawnParams);
     Npc->SpawnPointId = SpawnPoint->Id;
     Npc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+
+    const FGenericCustomerData RandomNpcData =
+        GetWeightedRandomItem<TTuple<FGenericCustomerData, float>>(WeightedCustomers, [](const auto& Item) {
+          return Item.Value;
+        }).Key;
+
+    Npc->SimpleSpriteAnimComponent->IdleSprites = RandomNpcData.AssetData.IdleSprites;
+    Npc->SimpleSpriteAnimComponent->WalkSprites = RandomNpcData.AssetData.WalkSprites;
+
+    // TODO: Weighted direction.
+    Npc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
     if (Market->TodaysEconEvents.Num() <= 0) {
       Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue(
@@ -287,7 +309,6 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
           [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAny(CatastrophicEvents[0].Tags); });
       continue;
     }
-
     const FEconEvent& RandomEconEvent = GetWeightedRandomItem<FEconEvent>(
         Market->TodaysEconEvents, [](const auto& Event) { return Event.StartChance; });
     // ? Use rolling or random dialogue component type?
@@ -316,6 +337,11 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
   ANpc* UniqueNpc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(),
                                                  SpawnPoint->GetActorRotation(), SpawnParams);
   UniqueNpc->SpawnPointId = SpawnPoint->Id;
+
+  UniqueNpc->SimpleSpriteAnimComponent->IdleSprites = UniqueNpcData.AssetData.IdleSprites;
+  UniqueNpc->SimpleSpriteAnimComponent->WalkSprites = UniqueNpcData.AssetData.WalkSprites;
+
+  UniqueNpc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
   UniqueNpc->DialogueComponent->DialogueArray =

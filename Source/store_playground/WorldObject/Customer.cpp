@@ -3,6 +3,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "Components/WidgetComponent.h"
 
 ACustomer::ACustomer() {
@@ -12,6 +13,7 @@ ACustomer::ACustomer() {
   DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));
   QuestComponent = CreateDefaultSubobject<UQuestComponent>(TEXT("QuestComponent"));
   CustomerAIComponent = CreateDefaultSubobject<UCustomerAIComponent>(TEXT("CustomerAIComponent"));
+  SimpleSpriteAnimComponent = CreateDefaultSubobject<USimpleSpriteAnimComponent>(TEXT("SimpleSpriteAnimComponent"));
   WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 }
 

@@ -23,11 +23,13 @@
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/NPC/NpcDataStructs.h"
 #include "store_playground/WorldObject/Level/SpawnPoint.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "NegotiationAI.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Components/WidgetComponent.h"
+#include "PaperFlipbookComponent.h"
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
@@ -111,6 +113,10 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.ID.ToString());
   ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(CustomerClass, SpawnPoint->GetActorLocation(),
                                                                 SpawnPoint->GetActorRotation(), SpawnParams);
+
+  UniqueCustomer->SimpleSpriteAnimComponent->IdleSprites = UniqueNpcData.AssetData.IdleSprites;
+  UniqueCustomer->SimpleSpriteAnimComponent->WalkSprites = UniqueNpcData.AssetData.WalkSprites;
+  UniqueCustomer->SimpleSpriteAnimComponent->Idle();
 
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
@@ -217,6 +223,10 @@ void ACustomerAIManager::SpawnCustomers() {
           return Item.Value;
         }).Key;
 
+    Customer->SimpleSpriteAnimComponent->IdleSprites = RandomCustomerData.AssetData.IdleSprites;
+    Customer->SimpleSpriteAnimComponent->WalkSprites = RandomCustomerData.AssetData.WalkSprites;
+    Customer->SimpleSpriteAnimComponent->Idle();
+
     const auto* CustomerPopData = MarketEconomy->CustomerPops.FindByPredicate(
         [RandomCustomerData](const FCustomerPop& Pop) { return Pop.ID == RandomCustomerData.LinkedPopID; });
     const auto* PopMoneySpendData = MarketEconomy->PopEconDataArray.FindByPredicate(
@@ -302,14 +312,22 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   if (OwnerAIController->GetMoveStatus() != EPathFollowingStatus::Idle) return;
 
   FNavLocation RandomLocation;
-  NavSystem->GetRandomPointInNavigableRadius(Customer->GetActorLocation(), float(300.0f), RandomLocation);
-
+  NavSystem->GetRandomReachablePointInRadius(Customer->GetActorLocation(), float(300.0f), RandomLocation);
   Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(50.0f, 250.0f);
 
-  // OwnerAIController->SetFocus(nullptr, EAIFocusPriority::Gameplay);
-  OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, true, false);
+  // ? Do we only need to bind it once?
+  OwnerAIController->GetPathFollowingComponent()->OnRequestFinished.RemoveAll(this);
+  OwnerAIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(
+      Customer->SimpleSpriteAnimComponent, &USimpleSpriteAnimComponent::MoveCompleted);
 
-  // UE_LOG(LogTemp, Warning, TEXT("Customer is moving."));
+  FVector Direction = (RandomLocation.Location - Customer->GetActorLocation()).GetSafeNormal();
+  ESimpleSpriteDirection DirectionEnum = ESimpleSpriteDirection::Down;
+  if (FMath::Abs(Direction.X) > FMath::Abs(Direction.Y))
+    DirectionEnum = Direction.X > 0 ? ESimpleSpriteDirection::Right : ESimpleSpriteDirection::Left;
+  else DirectionEnum = Direction.Y > 0 ? ESimpleSpriteDirection::Down : ESimpleSpriteDirection::Up;
+  Customer->SimpleSpriteAnimComponent->Walk(DirectionEnum);
+
+  OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, true, false);
 }
 
 void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {

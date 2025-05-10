@@ -205,6 +205,7 @@ public:
   void ExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
 
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
+  void LeaveStore();
 
   // // * SaveManager
   // UPROPERTY(EditAnywhere, Category = "Character | SaveManager")

@@ -14,6 +14,7 @@ enum class EInteractionType : uint8 {
   Use UMETA(DisplayName = "Use"),
 
   LevelChange UMETA(DisplayName = "Level Change"),
+  LeaveStore UMETA(DisplayName = "Leave Store"),
   StoreNextPhase UMETA(DisplayName = "Store Next Phase"),
 
   UpgradeSelect UMETA(DisplayName = "Upgrade Select"),

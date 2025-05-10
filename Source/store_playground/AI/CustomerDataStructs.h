@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "PaperFlipbookComponent.h"
+#include "PaperZDAnimInstance.h"
 #include "store_playground/Item/ItemDataStructs.h"
 #include "store_playground/Market/MarketDataStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Sprite/SpriteStructs.h"
 #include "CustomerDataStructs.generated.h"
 
 USTRUCT()
@@ -16,9 +19,9 @@ struct FCustomerAssetData {
   UPROPERTY(EditAnywhere)
   UTexture2D* Avatar;
   UPROPERTY(EditAnywhere)
-  UStaticMesh* Mesh;
-  // UPROPERTY(EditAnywhere)
-  // UMaterialInterface* Material;
+  TMap<ESimpleSpriteDirection, UPaperFlipbook*> IdleSprites;
+  UPROPERTY(EditAnywhere)
+  TMap<ESimpleSpriteDirection, UPaperFlipbook*> WalkSprites;
 };
 
 USTRUCT()

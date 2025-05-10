@@ -26,6 +26,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Npc")
   class UQuestComponent* QuestComponent;
 
+  UPROPERTY(EditAnywhere, Category = "Npc")
+  class USimpleSpriteAnimComponent* SimpleSpriteAnimComponent;
+
   UPROPERTY(EditAnywhere, Category = "Npc", SaveGame)
   FGuid SpawnPointId;  // * Spawn point id (for saving).
 };

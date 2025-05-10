@@ -28,6 +28,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UCustomerAIComponent* CustomerAIComponent;
 
+  UPROPERTY(EditAnywhere, Category = "Npc")
+  class USimpleSpriteAnimComponent* SimpleSpriteAnimComponent;
+
   UPROPERTY(EditAnywhere, Category = "Customer")
   class UWidgetComponent* WidgetComponent;
 };
