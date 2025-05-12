@@ -52,6 +52,20 @@ struct FInputActions {
 };
 
 USTRUCT()
+struct FOcclusionCheckData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  float LastOcclusionCheckTime;
+  UPROPERTY(EditAnywhere)
+  float OcclusionCheckFrequency;
+  UPROPERTY(EditAnywhere)
+  class UMaterialInterface* OcclusionMaterial;
+  UPROPERTY(EditAnywhere)
+  FName OcclusionTag;
+};
+
+USTRUCT()
 struct FInteractionData {
   GENERATED_BODY()
 
@@ -173,6 +187,15 @@ public:
   // * Movement
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Movement")
   FVector FacingDirection;
+
+  // * Occlusion Masking
+  UPROPERTY(EditAnywhere, Category = "Character | Occlusion")
+  FOcclusionCheckData OcclusionCheckData;
+  UPROPERTY(EditAnywhere, Category = "Character | Occlusion")
+  class APlayerCameraManager* CameraManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Occlusion")
+  TArray<AActor*> OccludedActors;
+  void HandleOcclusion();  // Ticked.
 
   // * Interaction
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")

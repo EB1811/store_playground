@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "Engine/StaticMesh.h"
 #include "Internationalization/Text.h"
+#include "Materials/MaterialInstance.h"
 #include "PaperZDCharacter.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -46,6 +48,7 @@
 #include "Engine/HitResult.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 APlayerZDCharacter::APlayerZDCharacter() {
   // Set this character to call Tick() every frame.
@@ -53,7 +56,10 @@ APlayerZDCharacter::APlayerZDCharacter() {
 
   PlayerBehaviourState = EPlayerState::Normal;
 
-  InteractionData.InteractionCheckFrequency = 0.35f;
+  OcclusionCheckData.LastOcclusionCheckTime = 0.0f;
+  OcclusionCheckData.OcclusionCheckFrequency = 200.0f;
+
+  InteractionData.InteractionCheckFrequency = 0.0f;
   InteractionData.InteractionCheckDistance = 200.0f;
   InteractionData.InteractionCheckRadius = 50.0f;
 
@@ -112,6 +118,8 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerNormalFunc = [this]() { ChangePlayerState(EPlayerState::Normal); };
   HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
+
+  CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) {
@@ -120,6 +128,11 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
   if (PlayerBehaviourState == EPlayerState::Normal &&
       GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionData.InteractionCheckFrequency)
     CheckForInteraction();
+
+  if (PlayerBehaviourState == EPlayerState::Normal &&
+      GetWorld()->TimeSince(OcclusionCheckData.LastOcclusionCheckTime) > OcclusionCheckData.OcclusionCheckFrequency) {
+    HandleOcclusion();
+  }
 }
 
 void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
@@ -219,6 +232,57 @@ void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
   check(PlayerBehaviourState == EPlayerState::Cutscene);
 
   HUD->SkipCutscene();
+}
+
+void APlayerZDCharacter::HandleOcclusion() {
+  OcclusionCheckData.LastOcclusionCheckTime = GetWorld()->GetTimeSeconds();
+
+  FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
+  FVector TraceEnd{CameraManager->GetCameraLocation()};
+  FCollisionShape Sphere = FCollisionShape::MakeSphere(25.0f);
+
+  // DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Blue, false, 0.1f, 0, 5.0f);
+
+  FCollisionQueryParams TraceParams;
+  TraceParams.AddIgnoredActor(this);
+  TraceParams.AddIgnoredActor(CameraManager->GetViewTarget());
+  FHitResult TraceHit;
+
+  if (GetWorld()->SweepSingleByChannel(TraceHit, TraceStart, TraceEnd, FQuat::Identity, ECC_Visibility, Sphere,
+                                       TraceParams)) {
+    if (auto* HitActor = TraceHit.GetActor()) {
+      if (!HitActor->ActorHasTag(OcclusionCheckData.OcclusionTag)) return;
+
+      if (OccludedActors.Contains(HitActor)) return;
+      OccludedActors.AddUnique(HitActor);
+
+      // HitActor->SetActorHiddenInGame(true);
+      TArray<UStaticMeshComponent*> Components;
+      HitActor->GetComponents<UStaticMeshComponent>(Components);
+      for (auto* StaticMeshComponent : Components) {
+        StaticMeshComponent->bCastHiddenShadow = true;
+        StaticMeshComponent->bAffectIndirectLightingWhileHidden = true;
+        StaticMeshComponent->SetHiddenInGame(true);
+      }
+
+      // ! Hiding for now.
+      // * Need a way to save each of the original materials.
+      // OccludedActors.AddUnique(HitActor);
+      // TArray<UStaticMeshComponent*> Components;
+      // HitActor->GetComponents<UStaticMeshComponent>(Components);
+      // for (auto* StaticMeshComponent : Components)
+      //   for (int i = 0; i < StaticMeshComponent->GetStaticMesh()->GetStaticMaterials().Num(); i++)
+      //     StaticMeshComponent->SetMaterial(i, OcclusionCheckData.OcclusionMaterial);
+    }
+  } else {
+    for (auto* OccludedActor : OccludedActors)
+      if (OccludedActor) {
+        TArray<UStaticMeshComponent*> Components;
+        OccludedActor->GetComponents<UStaticMeshComponent>(Components);
+        for (auto* StaticMeshComponent : Components) StaticMeshComponent->SetHiddenInGame(false);
+      }
+    OccludedActors.Empty();
+  }
 }
 
 auto APlayerZDCharacter::CheckForInteraction() -> bool {
