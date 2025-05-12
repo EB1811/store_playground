@@ -32,6 +32,7 @@ public:
                           class UQuestComponent* QuestComponent = nullptr);
   void CommandQuest(class UQuestComponent* QuestC,
                     class UDialogueComponent* DialogueC,
+                    class USimpleSpriteAnimComponent* SpriteAnimC,
                     class UCustomerAIComponent* CustomerAI = nullptr,
                     class UItemBase* Item = nullptr);
   void CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData,

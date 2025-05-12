@@ -80,6 +80,7 @@ public:
   void CloseAllMenus();
 
   void CloseWidget(class UUserWidget* Widget);
+  std::function<void()> EarlyCloseWidgetFunc;  // * When leaving a widget early, i.e, before the end of a dialogue, etc.
 
   void AdvanceUI();  // * Advance the topmost open menu (dialogue, negotiation, etc.).
 

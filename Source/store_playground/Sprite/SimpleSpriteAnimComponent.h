@@ -26,13 +26,18 @@ public:
   UPROPERTY(EditAnywhere)
   TMap<ESimpleSpriteDirection, UPaperFlipbook*> WalkSprites;
 
+  UPROPERTY(EditAnywhere)
   ESimpleSpriteAnimState SpriteAnimState;
+  UPROPERTY(EditAnywhere)
   ESimpleSpriteDirection CurrentDirection;
+  UPROPERTY(EditAnywhere)
+  ESimpleSpriteDirection LastDirection;
 
   void Idle(ESimpleSpriteDirection Direction = ESimpleSpriteDirection::Down);
   void Walk(ESimpleSpriteDirection Direction = ESimpleSpriteDirection::Down);
 
   void MoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result);
 
-  // TODO: Turn to player when interacting.
+  void TurnToPlayer(const FVector& PlayerLocation);
+  void ReturnToOgRotation();
 };

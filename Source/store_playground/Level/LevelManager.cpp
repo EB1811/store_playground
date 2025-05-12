@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "UObject/Class.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/MarketLevel.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
@@ -156,12 +157,15 @@ void ALevelManager::SaveLevelState(ELevel Level) {
   }
 }
 
-// TODO: Start loading screen before unloading the level.
 void ALevelManager::ExpandStoreSwitchLevel(std::function<void()> _LevelReadyFunc) {
-  BeginUnloadLevel(ELevel::Store);
+  LevelReadyFunc = _LevelReadyFunc;
+  HUD->StartLevelLoadingTransition([this]() {
+    // TODO: Add on unload callback.
+    BeginUnloadLevel(ELevel::Store);
 
-  LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];
+    LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];
 
-  CurrentLevel = ELevel::None;
-  BeginLoadLevel(ELevel::Store, _LevelReadyFunc);
+    CurrentLevel = ELevel::None;
+    InitLoadStore(LevelReadyFunc);
+  });
 }

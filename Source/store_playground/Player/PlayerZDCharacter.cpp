@@ -4,6 +4,7 @@
 #include "Engine/StaticMesh.h"
 #include "Internationalization/Text.h"
 #include "Materials/MaterialInstance.h"
+#include "Misc/AssertionMacros.h"
 #include "PaperZDCharacter.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -39,6 +40,7 @@
 #include "store_playground/Cutscene/CutsceneStructs.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Tags/TagsComponent.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -214,6 +216,7 @@ void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
       check(SpawnPoint);
 
       this->SetActorLocation(SpawnPoint->GetActorLocation());
+      UE_LOG(LogTemp, Warning, TEXT("Player location set to spawn point: %s"), *SpawnPoint->GetName());
     };
     LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
   };
@@ -302,10 +305,10 @@ auto APlayerZDCharacter::CheckForInteraction() -> bool {
                                        TraceParams)) {
     if ((TraceStart - TraceHit.ImpactPoint).Size() <= InteractionData.InteractionCheckDistance)
       if (UInteractionComponent* Interactable = TraceHit.GetActor()->FindComponentByClass<UInteractionComponent>()) {
-        CurrentInteractableC = Interactable;
-        // TODO: Check if the interaction is valid (considering the interaction type and the current store phase).
-        HUD->OpenInteractionPopup(FText::FromName("!"));  // Temp
+        if (!IsInteractable(Interactable)) return false;
 
+        CurrentInteractableC = Interactable;
+        HUD->OpenInteractionPopup(FText::FromName("!"));
         return true;
       }
   }
@@ -318,13 +321,30 @@ auto APlayerZDCharacter::CheckForInteraction() -> bool {
   return false;
 }
 
-void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interactable) {
+auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactable) const -> bool {
+  switch (Interactable->InteractionType) {
+    case EInteractionType::None: return false; break;
+    case EInteractionType::Buildable:
+      UE_LOG(LogTemp, Warning, TEXT("Buildable"));
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) return false;
+      break;
+    case EInteractionType::StockDisplay:
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) return false;
+      break;
+  }
+
+  return true;
+}
+
+void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) {
   HUD->CloseInteractionPopup();
 
+  // HUD->EarlyCloseWidgetFunc = [this, Interactable]() {
+  //   check(Interactable);
+  //   Interactable->EndInteraction();
+  // };
+
   switch (Interactable->InteractionType) {
-    case EInteractionType::None: {
-      break;
-    }
     case EInteractionType::LevelChange: {
       auto LevelChangeC = Interactable->InteractLevelChange();
 
@@ -353,38 +373,52 @@ void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interact
       break;
     }
     case EInteractionType::Buildable: {
-      if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) break;
-
       auto Buildable = Interactable->InteractBuildable();
       EnterBuildableDisplay(Buildable.GetValue());
       break;
     }
     case EInteractionType::StockDisplay: {
-      // if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
-
       auto [DisplayC, DisplayInventoryC] = Interactable->InteractStockDisplay();
       EnterStockDisplay(DisplayC, DisplayInventoryC);
       break;
     }
     case EInteractionType::NPCDialogue: {
-      auto DialogueData = Interactable->InteractNPCDialogue();
-      EnterDialogue(DialogueData.GetValue());
+      auto [DialogueC, SpriteAnimC] = Interactable->InteractNPCDialogue();
+
+      // ? Move to another function?
+      SetupNpcInteraction(SpriteAnimC);
+      EnterDialogue(DialogueC, [this, SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); });
+      break;
+    }
+    case EInteractionType::Customer: {
+      auto [DialogueC, CustomerAI, SpriteAnimC] = Interactable->InteractCustomer();
+
+      // TODO: Change to browsing in early widget exit.
+      // TODO: Move to function.
+      CustomerAI->CustomerState = ECustomerState::BrowsingTalking;
+      SetupNpcInteraction(SpriteAnimC);
+      EnterDialogue(DialogueC, [this, CustomerAI, SpriteAnimC]() {
+        CustomerAI->CustomerState = ECustomerState::Browsing;
+        SpriteAnimC->ReturnToOgRotation();
+      });
       break;
     }
     case EInteractionType::WaitingCustomer: {
-      auto [CustomerAI, Item] = Interactable->InteractWaitingCustomer();
+      auto [CustomerAI, Item, SpriteAnimC] = Interactable->InteractWaitingCustomer();
+
+      // TODO: Reopen the interaction popup if player closes the menu.
+      SetupNpcInteraction(SpriteAnimC);
       EnterNegotiation(CustomerAI, Item);
       break;
     }
     case EInteractionType::UniqueNPCQuest: {
-      auto [Dialogue, QuestC, CustomerAI, Item] = Interactable->InteractUniqueNPCQuest();
+      auto [Dialogue, QuestC, CustomerAI, Item, SpriteAnimC] = Interactable->InteractUniqueNPCQuest();
 
-      EnterQuest(QuestC, Dialogue, CustomerAI, Item);
+      SetupNpcInteraction(SpriteAnimC);
+      EnterQuest(QuestC, Dialogue, SpriteAnimC, CustomerAI, Item);
       break;
     }
     case EInteractionType::NpcStore: {
-      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) break;
-
       auto [NpcStoreC, StoreInventory, DialogueC] = Interactable->InteractNpcStore();
       EnterDialogue(DialogueC, [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
       break;
@@ -394,7 +428,18 @@ void APlayerZDCharacter::HandleInteraction(const UInteractionComponent* Interact
       EnterDialogue(DialogueC, [this, MiniGameC]() { EnterMiniGame(MiniGameC); });
       break;
     }
+    default: checkNoEntry();
   }
+}
+
+void APlayerZDCharacter::SetupNpcInteraction(USimpleSpriteAnimComponent* SpriteAnimC) {
+  SpriteAnimC->TurnToPlayer(GetActorLocation());
+
+  // ? Move to player?
+  HUD->EarlyCloseWidgetFunc = [this, SpriteAnimC]() {
+    check(SpriteAnimC);
+    SpriteAnimC->ReturnToOgRotation();
+  };
 }
 
 void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
@@ -502,12 +547,14 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
 
 void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UDialogueComponent* DialogueC,
+                                    USimpleSpriteAnimComponent* SpriteAnimC,
                                     UCustomerAIComponent* CustomerAI,
                                     UItemBase* Item) {
   // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
-    return EnterDialogue(DialogueC, [this, QuestC, CustomerAI]() {
+    return EnterDialogue(DialogueC, [this, QuestC, SpriteAnimC, CustomerAI]() {
       QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
+      SpriteAnimC->ReturnToOgRotation();
     });
 
   switch (QuestC->CustomerAction) {
@@ -544,6 +591,10 @@ void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsc
 // TODO: Handle cutscene exit and quests.
 void APlayerZDCharacter::ExitCurrentAction() {
   if (PlayerBehaviourState == EPlayerState::Normal) return;
+
+  // * Should never be called in cutscene state.
+  // ? Implement a queue to exit after cutscene?
+  check(PlayerBehaviourState != EPlayerState::Cutscene);
 
   HUD->CloseAllMenus();
   ChangePlayerState(EPlayerState::Normal);

@@ -248,7 +248,6 @@ void AStorePGGameMode::BeginPlay() {
   });
 }
 
-// TODO: Save and keep upgrades.
 void AStorePGGameMode::GameOverReset() {
   UE_LOG(LogTemp, Warning, TEXT("Game Over. Resetting game."));
 

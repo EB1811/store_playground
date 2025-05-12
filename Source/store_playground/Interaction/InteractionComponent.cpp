@@ -13,6 +13,7 @@
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 
 UInteractionComponent::UInteractionComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -21,6 +22,17 @@ UInteractionComponent::UInteractionComponent() {
 }
 
 void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
+
+void UInteractionComponent::StartInteraction() {
+  if (bIsInteracting) return;
+
+  bIsInteracting = true;
+}
+void UInteractionComponent::EndInteraction() {
+  if (!bIsInteracting) return;
+
+  bIsInteracting = false;
+}
 
 void UInteractionComponent::InteractUse() const {}
 
@@ -55,31 +67,54 @@ auto UInteractionComponent::InteractStockDisplay() const
   return {OwnerStockDisplayC, OwnerInventoryC};
 }
 
-auto UInteractionComponent::InteractNPCDialogue() const -> TOptional<UDialogueComponent*> {
+auto UInteractionComponent::InteractNPCDialogue() const
+    -> TTuple<UDialogueComponent*, class USimpleSpriteAnimComponent*> {
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  USimpleSpriteAnimComponent* OwnerSpriteAnimC = GetOwner()->FindComponentByClass<USimpleSpriteAnimComponent>();
   check(OwnerDialogueC);
+  check(OwnerSpriteAnimC);
 
-  return OwnerDialogueC;
+  return {OwnerDialogueC, OwnerSpriteAnimC};
 }
 
-auto UInteractionComponent::InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, class UItemBase*> {
+auto UInteractionComponent::InteractCustomer() const
+    -> TTuple<class UDialogueComponent*, class UCustomerAIComponent*, class USimpleSpriteAnimComponent*> {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
+  UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  USimpleSpriteAnimComponent* OwnerSpriteAnimC = GetOwner()->FindComponentByClass<USimpleSpriteAnimComponent>();
   check(OwnerCustomerAIC);
+  check(OwnerDialogueC);
+  check(OwnerSpriteAnimC);
 
-  return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAI->RelevantItem};
+  return {OwnerDialogueC, OwnerCustomerAIC, OwnerSpriteAnimC};
 }
 
-auto UInteractionComponent::InteractUniqueNPCQuest() const
-    -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, class UItemBase*> {
+auto UInteractionComponent::InteractWaitingCustomer() const
+    -> TTuple<class UCustomerAIComponent*, class UItemBase*, class USimpleSpriteAnimComponent*> {
+  UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
+  USimpleSpriteAnimComponent* OwnerSpriteAnimC = GetOwner()->FindComponentByClass<USimpleSpriteAnimComponent>();
+  check(OwnerCustomerAIC);
+  check(OwnerSpriteAnimC);
+
+  return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerSpriteAnimC};
+}
+
+auto UInteractionComponent::InteractUniqueNPCQuest() const -> TTuple<class UDialogueComponent*,
+                                                                     class UQuestComponent*,
+                                                                     class UCustomerAIComponent*,
+                                                                     class UItemBase*,
+                                                                     class USimpleSpriteAnimComponent*> {
   UCustomerAIComponent* OwnerCustomerAIC = GetOwner()->FindComponentByClass<UCustomerAIComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
   UQuestComponent* OwnerQuestC = GetOwner()->FindComponentByClass<UQuestComponent>();
+  USimpleSpriteAnimComponent* OwnerSpriteAnimC = GetOwner()->FindComponentByClass<USimpleSpriteAnimComponent>();
   check(OwnerDialogueC);
   check(OwnerQuestC);
+  check(OwnerSpriteAnimC);
 
   class UItemBase* RelevantItem = OwnerCustomerAIC ? OwnerCustomerAIC->NegotiationAI->RelevantItem : nullptr;
 
-  return {OwnerDialogueC, OwnerQuestC, OwnerCustomerAIC, RelevantItem};
+  return {OwnerDialogueC, OwnerQuestC, OwnerCustomerAIC, RelevantItem, OwnerSpriteAnimC};
 }
 
 auto UInteractionComponent::InteractNpcStore() const

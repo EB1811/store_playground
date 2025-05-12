@@ -25,8 +25,10 @@ enum class EInteractionType : uint8 {
   Decoration UMETA(DisplayName = "Decoration"),
 
   NPCDialogue UMETA(DisplayName = "Npc Dialogue"),
+  Customer UMETA(DisplayName = "Customer"),
   WaitingCustomer UMETA(DisplayName = "Waiting Customer"),
   UniqueNPCQuest UMETA(DisplayName = "Unique Npc Quest"),
+
   NpcStore UMETA(DisplayName = "NPC Store"),
   Container UMETA(DisplayName = "Container"),
   MiniGame UMETA(DisplayName = "MiniGame"),
@@ -44,6 +46,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Interaction", SaveGame)
   EInteractionType InteractionType;
 
+  UPROPERTY(EditAnywhere, Category = "Interaction")
+  bool bIsInteracting;  // * For interactions that need tracking.
+  void StartInteraction();
+  void EndInteraction();
+
   void InteractUse() const;
 
   auto InteractLevelChange() const -> class ULevelChangeComponent*;
@@ -52,10 +59,16 @@ public:
   auto InteractBuildable() const -> TOptional<class ABuildable*>;
   auto InteractStockDisplay() const -> TTuple<class UStockDisplayComponent*, class UInventoryComponent*>;
 
-  auto InteractNPCDialogue() const -> TOptional<class UDialogueComponent*>;
-  auto InteractWaitingCustomer() const -> TTuple<class UCustomerAIComponent*, class UItemBase*>;
-  auto InteractUniqueNPCQuest() const
-      -> TTuple<class UDialogueComponent*, class UQuestComponent*, class UCustomerAIComponent*, class UItemBase*>;
+  auto InteractNPCDialogue() const -> TTuple<class UDialogueComponent*, class USimpleSpriteAnimComponent*>;
+  auto InteractCustomer() const
+      -> TTuple<class UDialogueComponent*, class UCustomerAIComponent*, class USimpleSpriteAnimComponent*>;
+  auto InteractWaitingCustomer() const
+      -> TTuple<class UCustomerAIComponent*, class UItemBase*, class USimpleSpriteAnimComponent*>;
+  auto InteractUniqueNPCQuest() const -> TTuple<class UDialogueComponent*,
+                                                class UQuestComponent*,
+                                                class UCustomerAIComponent*,
+                                                class UItemBase*,
+                                                class USimpleSpriteAnimComponent*>;
 
   auto InteractNpcStore() const
       -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;

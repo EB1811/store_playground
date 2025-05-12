@@ -203,7 +203,10 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")
   class UInteractionComponent* CurrentInteractableC;
   auto CheckForInteraction() -> bool;  // Ticked for UI.
-  void HandleInteraction(const class UInteractionComponent* Interactable);
+  auto IsInteractable(const class UInteractionComponent* Interactable) const -> bool;
+  void HandleInteraction(class UInteractionComponent* Interactable);
+
+  void SetupNpcInteraction(class USimpleSpriteAnimComponent* SpriteAnimC);
 
   // * Entries into HUDs and menus.
   void EnterBuildableDisplay(class ABuildable* Buildable);
@@ -222,6 +225,7 @@ public:
                         class UQuestComponent* QuestComponent = nullptr);
   void EnterQuest(class UQuestComponent* QuestC,
                   class UDialogueComponent* DialogueC,
+                  class USimpleSpriteAnimComponent* SpriteAnimC,
                   class UCustomerAIComponent* CustomerAI = nullptr,
                   class UItemBase* Item = nullptr);
   void EnterCutscene(const struct FResolvedCutsceneData ResolvedCutsceneData);

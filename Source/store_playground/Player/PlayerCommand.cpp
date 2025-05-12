@@ -6,6 +6,7 @@
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Cutscene/CutsceneStructs.h"
 #include "store_playground/Tags/TagsComponent.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 
 void APlayerCommand::BeginPlay() { Super::BeginPlay(); }
 
@@ -29,11 +30,12 @@ void APlayerCommand::CommandNegotiation(UCustomerAIComponent* CustomerAI,
 
 void APlayerCommand::CommandQuest(UQuestComponent* QuestC,
                                   UDialogueComponent* DialogueC,
+                                  USimpleSpriteAnimComponent* SpriteAnimC,
                                   UCustomerAIComponent* CustomerAI,
                                   UItemBase* Item) {
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
-  PlayerCharacter->EnterQuest(QuestC, DialogueC, CustomerAI, Item);
+  PlayerCharacter->EnterQuest(QuestC, DialogueC, SpriteAnimC, CustomerAI, Item);
 }
 
 void APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData, FGameplayTag CutsceneTag) {

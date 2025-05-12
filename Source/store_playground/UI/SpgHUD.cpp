@@ -165,23 +165,31 @@ void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {
   SetPlayerPausedFunc();
 }
 
-// ! System state is preserved (e.g., dialogue, negotiation).
 void ASpgHUD::CloseTopOpenMenu() {
   if (OpenedWidgets.IsEmpty()) return;
 
   OpenedWidgets.Pop()->SetVisibility(ESlateVisibility::Collapsed);
 
   if (!OpenedWidgets.IsEmpty()) return;
+
+  // Only relevant for focussed menus.
+  if (EarlyCloseWidgetFunc) EarlyCloseWidgetFunc();
+  EarlyCloseWidgetFunc = nullptr;
+
   LeaveHUD();
 }
 
 void ASpgHUD::CloseAllMenus() {
   for (UUserWidget* Widget : OpenedWidgets) Widget->SetVisibility(ESlateVisibility::Collapsed);
 
+  if (EarlyCloseWidgetFunc) EarlyCloseWidgetFunc();
+  EarlyCloseWidgetFunc = nullptr;
+
   OpenedWidgets.Empty();
   LeaveHUD();
 }
 
+// * Called by the widget themselves.
 void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   if (!Widget) return;
 

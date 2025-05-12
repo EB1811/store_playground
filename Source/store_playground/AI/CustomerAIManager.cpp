@@ -119,7 +119,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->SimpleSpriteAnimComponent->Idle();
 
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
-  UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+  UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
   // ? Use a random dialogue component type?
   UniqueCustomer->DialogueComponent->DialogueArray =
@@ -239,7 +239,7 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->MoneyToSpend = PopMoneySpendData->Money / PopMoneySpendData->Population;
     Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
 
-    Customer->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+    Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
     Customer->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomCustomerDialogue();
 
@@ -269,6 +269,9 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         }
 
         MoveCustomerRandom(NavSystem, Customer);
+        break;
+      }
+      case (ECustomerState::BrowsingTalking): {
         break;
       }
       case (ECustomerState::Requesting): {

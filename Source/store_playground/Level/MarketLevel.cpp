@@ -292,8 +292,6 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
 
     Npc->SimpleSpriteAnimComponent->IdleSprites = RandomNpcData.AssetData.IdleSprites;
     Npc->SimpleSpriteAnimComponent->WalkSprites = RandomNpcData.AssetData.WalkSprites;
-
-    // TODO: Weighted direction.
     Npc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
     if (Market->TodaysEconEvents.Num() <= 0) {
