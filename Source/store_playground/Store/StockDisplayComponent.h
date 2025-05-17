@@ -25,4 +25,7 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Stock Display")
   FDisplayStats DisplayStats;
+
+  void SetDisplaySprite(class UPaperFlipbook* ItemSprite = nullptr);
+  void ClearDisplaySprite();
 };

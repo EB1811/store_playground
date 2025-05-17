@@ -288,6 +288,7 @@ void AGlobalDataManager::InitializeNpcStoreData() {
         Row->StoreMarkup,
         Row->ItemTypeWeightMap,
         Row->ItemEconTypeWeightMap,
+        Row->AssetData,
     });
 
   check(NpcStoreTypesArray.Num() > 0);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include "Components/MeshComponent.h"
 #include "GameFramework/Info.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "SaveManager.generated.h"
@@ -89,9 +90,11 @@ public:
   auto SaveActor(AActor* Actor, FGuid Id) const -> FActorSavaState;
   auto SaveComponent(UActorComponent* Component, FGuid Id) const -> FComponentSaveState;
   auto SaveObject(UObject* Object, FGuid Id) const -> FObjectSaveState;
+  auto SaveMesh(UMeshComponent* Mesh, FGuid Id) const -> FComponentSaveState;
 
   void LoadActor(AActor* Actor, FActorSavaState SaveState) const;
   void LoadComponent(UActorComponent* Component, FComponentSaveState SaveState) const;
+  void LoadMesh(UMeshComponent* Mesh, FComponentSaveState SaveState) const;
 };
 
 // template <typename T>

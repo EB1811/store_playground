@@ -6,6 +6,7 @@
 #include "Misc/Guid.h"
 #include "Serialization/MemoryReader.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Templates/Tuple.h"
 #include "UObject/NameTypes.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
@@ -14,6 +15,7 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/WorldObject/Level/NpcStoreSpawnPoint.h"
 #include "store_playground/WorldObject/NPCStore.h"
+#include "store_playground/WorldObject/MobileNPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Market/Market.h"
@@ -79,6 +81,30 @@ void AMarketLevel::SaveLevelState() {
                                                           Store->NpcStoreComponent->NpcStoreType,
                                                       });
 
+  TArray<AMobileNPCStore*> FoundMobileStores = GetAllActorsOf<AMobileNPCStore>(GetWorld(), MobileNPCStoreClass);
+  for (AMobileNPCStore* MobileStore : FoundMobileStores) {
+    FActorSavaState ActorSaveState = SaveManager->SaveActor(MobileStore, MobileStore->SpawnPointId);
+
+    auto InteractionCSaveState = SaveManager->SaveComponent(MobileStore->InteractionComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("InteractionComponent", InteractionCSaveState.Id);
+    auto DialogueCSaveState = SaveManager->SaveComponent(MobileStore->DialogueComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("DialogueComponent", DialogueCSaveState.Id);
+    auto NpcStoreCSaveState = SaveManager->SaveComponent(MobileStore->NpcStoreComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("NpcStoreComponent", NpcStoreCSaveState.Id);
+
+    auto MeshSaveState = SaveManager->SaveMesh(MobileStore->Mesh, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("Mesh", MeshSaveState.Id);
+    auto SpriteSaveState = SaveManager->SaveMesh(MobileStore->Sprite, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("Sprite", SpriteSaveState.Id);
+
+    LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
+    LevelState.ComponentSaveMap.Add(InteractionCSaveState.Id, InteractionCSaveState);
+    LevelState.ComponentSaveMap.Add(DialogueCSaveState.Id, DialogueCSaveState);
+    LevelState.ComponentSaveMap.Add(NpcStoreCSaveState.Id, NpcStoreCSaveState);
+    LevelState.ComponentSaveMap.Add(MeshSaveState.Id, MeshSaveState);
+    LevelState.ComponentSaveMap.Add(SpriteSaveState.Id, SpriteSaveState);
+  }
+
   TArray<ANpc*> Npcs = GetAllActorsOf<ANpc>(GetWorld(), NpcClass);
   for (auto* Npc : Npcs) {
     FActorSavaState ActorSaveState = SaveManager->SaveActor(Npc, Npc->SpawnPointId);  // Using SpawnPoint's id.
@@ -89,11 +115,14 @@ void AMarketLevel::SaveLevelState() {
     ActorSaveState.ActorComponentsMap.Add("DialogueComponent", DialogueCSaveState.Id);
     auto QuestCSaveState = SaveManager->SaveComponent(Npc->QuestComponent, FGuid::NewGuid());
     ActorSaveState.ActorComponentsMap.Add("QuestComponent", QuestCSaveState.Id);
+    auto SimpleSpriteAnimCSaveState = SaveManager->SaveComponent(Npc->SimpleSpriteAnimComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("SimpleSpriteAnimComponent", SimpleSpriteAnimCSaveState.Id);
 
     LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
     LevelState.ComponentSaveMap.Add(InteractionCSaveState.Id, InteractionCSaveState);
     LevelState.ComponentSaveMap.Add(DialogueCSaveState.Id, DialogueCSaveState);
     LevelState.ComponentSaveMap.Add(QuestCSaveState.Id, QuestCSaveState);
+    LevelState.ComponentSaveMap.Add(SimpleSpriteAnimCSaveState.Id, SimpleSpriteAnimCSaveState);
   }
 
   TArray<AMiniGame*> MiniGameActors = GetAllActorsOf<AMiniGame>(GetWorld(), MiniGameClass);
@@ -108,10 +137,17 @@ void AMarketLevel::SaveLevelState() {
     auto MiniGameCSaveState = SaveManager->SaveComponent(MiniGame->MiniGameComponent, FGuid::NewGuid());
     ActorSaveState.ActorComponentsMap.Add("MiniGameComponent", MiniGameCSaveState.Id);
 
+    auto MeshSaveState = SaveManager->SaveMesh(MiniGame->Mesh, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("Mesh", MeshSaveState.Id);
+    auto SpriteSaveState = SaveManager->SaveMesh(MiniGame->Sprite, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("Sprite", SpriteSaveState.Id);
+
     LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
     LevelState.ComponentSaveMap.Add(InteractionCSaveState.Id, InteractionCSaveState);
     LevelState.ComponentSaveMap.Add(DialogueCSaveState.Id, DialogueCSaveState);
     LevelState.ComponentSaveMap.Add(MiniGameCSaveState.Id, MiniGameCSaveState);
+    LevelState.ComponentSaveMap.Add(MeshSaveState.Id, MeshSaveState);
+    LevelState.ComponentSaveMap.Add(SpriteSaveState.Id, SpriteSaveState);
   }
 }
 
@@ -134,34 +170,74 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
     Store->NpcStoreComponent->NpcStoreType = SaveState.NpcStoreType;
   }
 
-  TArray<ANpcSpawnPoint*> SpawnPoints = GetAllActorsOf<ANpcSpawnPoint>(GetWorld(), NpcSpawnPointClass);
-  check(SpawnPoints.Num() > 0);
+  FActorSpawnParameters NpcStoreSpawnParams;
+  NpcStoreSpawnParams.Owner = this;
+  NpcStoreSpawnParams.bNoFail = true;
+  NpcStoreSpawnParams.SpawnCollisionHandlingOverride =
+      ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  FActorSpawnParameters SpawnParams;
-  SpawnParams.Owner = this;
-  SpawnParams.OverrideLevel = SpawnPoints[0]->GetLevel();
-  SpawnParams.bNoFail = true;
-  SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+  TArray<ANpcStoreSpawnPoint*> MobileStoreSpawnPoints =
+      GetAllActorsOf<ANpcStoreSpawnPoint>(GetWorld(), NpcStoreSpawnPointClass);
+  check(MobileStoreSpawnPoints.Num() > 0);
+  for (ANpcStoreSpawnPoint* SpawnPoint : MobileStoreSpawnPoints) {
+    if (!LevelState.ActorSaveMap.Contains(SpawnPoint->Id)) continue;
+    FActorSavaState NpcStoreSaveState = LevelState.ActorSaveMap[SpawnPoint->Id];
+    auto InteractionCSaveState =
+        LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["InteractionComponent"]];
+    auto DialogueCSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["DialogueComponent"]];
+    auto NpcStoreCSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["NpcStoreComponent"]];
 
-  for (ANpcSpawnPoint* SpawnPoint : SpawnPoints) {
+    auto NpcStoreMeshSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["Mesh"]];
+    auto NpcStoreSpriteSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["Sprite"]];
+
+    NpcStoreSpawnParams.OverrideLevel = SpawnPoint->GetLevel();
+    AMobileNPCStore* SpawnedNpcStore = GetWorld()->SpawnActor<AMobileNPCStore>(
+        MobileNPCStoreClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation(), NpcStoreSpawnParams);
+    SaveManager->LoadActor(SpawnedNpcStore, NpcStoreSaveState);
+    SaveManager->LoadComponent(SpawnedNpcStore->InteractionComponent, InteractionCSaveState);
+    SaveManager->LoadComponent(SpawnedNpcStore->DialogueComponent, DialogueCSaveState);
+    SaveManager->LoadComponent(SpawnedNpcStore->NpcStoreComponent, NpcStoreCSaveState);
+    SaveManager->LoadMesh(SpawnedNpcStore->Mesh, NpcStoreMeshSaveState);
+    SaveManager->LoadMesh(SpawnedNpcStore->Sprite, NpcStoreSpriteSaveState);
+  }
+
+  FActorSpawnParameters NpcSpawnParams;
+  NpcSpawnParams.Owner = this;
+  NpcSpawnParams.bNoFail = true;
+  NpcSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+  TArray<ANpcSpawnPoint*> NpcSpawnPoints = GetAllActorsOf<ANpcSpawnPoint>(GetWorld(), NpcSpawnPointClass);
+  check(NpcSpawnPoints.Num() > 0);
+  for (ANpcSpawnPoint* SpawnPoint : NpcSpawnPoints) {
     if (!LevelState.ActorSaveMap.Contains(SpawnPoint->Id)) continue;
     FActorSavaState NpcSaveState = LevelState.ActorSaveMap[SpawnPoint->Id];
     auto InteractionCSaveState = LevelState.ComponentSaveMap[NpcSaveState.ActorComponentsMap["InteractionComponent"]];
     auto DialogueCSaveState = LevelState.ComponentSaveMap[NpcSaveState.ActorComponentsMap["DialogueComponent"]];
     auto QuestCSaveState = LevelState.ComponentSaveMap[NpcSaveState.ActorComponentsMap["QuestComponent"]];
+    auto SimpleSpriteAnimCSaveState =
+        LevelState.ComponentSaveMap[NpcSaveState.ActorComponentsMap["SimpleSpriteAnimComponent"]];
 
+    NpcSpawnParams.OverrideLevel = SpawnPoint->GetLevel();
     ANpc* SpawnedNpc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(),
-                                                    SpawnPoint->GetActorRotation(), SpawnParams);
+                                                    SpawnPoint->GetActorRotation(), NpcSpawnParams);
     SaveManager->LoadActor(SpawnedNpc, NpcSaveState);
     SaveManager->LoadComponent(SpawnedNpc->InteractionComponent, InteractionCSaveState);
     SaveManager->LoadComponent(SpawnedNpc->DialogueComponent, DialogueCSaveState);
     SaveManager->LoadComponent(SpawnedNpc->QuestComponent, QuestCSaveState);
+    SaveManager->LoadComponent(SpawnedNpc->SimpleSpriteAnimComponent, SimpleSpriteAnimCSaveState);
+
+    SpawnedNpc->SimpleSpriteAnimComponent->Idle(SpawnedNpc->SimpleSpriteAnimComponent->CurrentDirection);
   }
+
+  FActorSpawnParameters MinigameSpawnParams;
+  MinigameSpawnParams.Owner = this;
+  MinigameSpawnParams.bNoFail = true;
+  MinigameSpawnParams.SpawnCollisionHandlingOverride =
+      ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
   TArray<AMiniGameSpawnPoint*> MiniGameSpawnPoints =
       GetAllActorsOf<AMiniGameSpawnPoint>(GetWorld(), MiniGameSpawnPointClass);
   check(MiniGameSpawnPoints.Num() > 0);
-
   for (auto* SpawnPoint : MiniGameSpawnPoints) {
     if (!LevelState.ActorSaveMap.Contains(SpawnPoint->Id)) continue;
 
@@ -170,13 +246,18 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
         LevelState.ComponentSaveMap[MiniGameSaveState.ActorComponentsMap["InteractionComponent"]];
     auto DialogueCSaveState = LevelState.ComponentSaveMap[MiniGameSaveState.ActorComponentsMap["DialogueComponent"]];
     auto MiniGameCSaveState = LevelState.ComponentSaveMap[MiniGameSaveState.ActorComponentsMap["MiniGameComponent"]];
+    auto MiniGameMeshSaveState = LevelState.ComponentSaveMap[MiniGameSaveState.ActorComponentsMap["Mesh"]];
+    auto MiniGameSpriteSaveState = LevelState.ComponentSaveMap[MiniGameSaveState.ActorComponentsMap["Sprite"]];
 
+    MinigameSpawnParams.OverrideLevel = SpawnPoint->GetLevel();
     AMiniGame* SpawnedMiniGame = GetWorld()->SpawnActor<AMiniGame>(MiniGameClass, SpawnPoint->GetActorLocation(),
-                                                                   SpawnPoint->GetActorRotation(), SpawnParams);
+                                                                   SpawnPoint->GetActorRotation(), MinigameSpawnParams);
     SaveManager->LoadActor(SpawnedMiniGame, MiniGameSaveState);
     SaveManager->LoadComponent(SpawnedMiniGame->InteractionComponent, InteractionCSaveState);
     SaveManager->LoadComponent(SpawnedMiniGame->DialogueComponent, DialogueCSaveState);
     SaveManager->LoadComponent(SpawnedMiniGame->MiniGameComponent, MiniGameCSaveState);
+    SaveManager->LoadMesh(SpawnedMiniGame->Mesh, MiniGameMeshSaveState);
+    SaveManager->LoadMesh(SpawnedMiniGame->Sprite, MiniGameSpriteSaveState);
   }
 }
 
@@ -190,6 +271,8 @@ void AMarketLevel::ResetLevelState() {
 void AMarketLevel::InitNPCStores(bool bIsWeekend) {
   check(GlobalDataManager && Market);
 
+  TArray<TTuple<UNpcStoreComponent*, UInventoryComponent*>> NpcStoreComponents;
+
   TArray<ANpcStoreSpawnPoint*> SpawnPoints = GetAllActorsOf<ANpcStoreSpawnPoint>(GetWorld(), NpcStoreSpawnPointClass);
   FActorSpawnParameters SpawnParams;
   SpawnParams.Owner = this;
@@ -200,11 +283,22 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
       continue;
 
     SpawnParams.OverrideLevel = SpawnPoint->GetLevel();
-    ANPCStore* NPCStore = GetWorld()->SpawnActor<ANPCStore>(NPCStoreClass, SpawnPoint->GetActorLocation(),
-                                                            SpawnPoint->GetActorRotation(), SpawnParams);
-    NPCStore->SpawnPointId = SpawnPoint->Id;
+    AMobileNPCStore* MobileNPCStore = GetWorld()->SpawnActor<AMobileNPCStore>(
+        MobileNPCStoreClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation(), SpawnParams);
+    MobileNPCStore->SpawnPointId = SpawnPoint->Id;
 
-    NPCStore->InteractionComponent->InteractionType = EInteractionType::NpcStore;
+    FNpcStoreType NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
+        GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
+    MobileNPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
+
+    // TODO: Direction.
+    MobileNPCStore->Mesh->SetStaticMesh(NpcStoreType.AssetData.Mesh);
+    MobileNPCStore->Sprite->SetFlipbook(NpcStoreType.AssetData.Sprites[ESimpleSpriteDirection::Down]);
+
+    MobileNPCStore->InteractionComponent->InteractionType = EInteractionType::NpcStore;
+    MobileNPCStore->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomNpcStoreDialogue();
+
+    NpcStoreComponents.Add({MobileNPCStore->NpcStoreComponent, MobileNPCStore->InventoryComponent});
   }
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
@@ -212,26 +306,30 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     NPCStore->InventoryComponent->ItemsArray.Empty();
     NPCStore->DialogueComponent->DialogueArray.Empty();
 
+    NPCStore->InteractionComponent->InteractionType = EInteractionType::NpcStore;
     NPCStore->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomNpcStoreDialogue();
 
-    // Differentiate between fixed and random stores.
-    auto NpcStoreType = NPCStore->NpcStoreComponent->NpcStoreType;
-    if (!NPCStore->NpcStoreComponent->bFixedStoreType) {
-      NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
-          GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
-      NPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
-    }
+    NpcStoreComponents.Add({NPCStore->NpcStoreComponent, NPCStore->InventoryComponent});
+  }
 
+  for (TTuple<UNpcStoreComponent*, UInventoryComponent*> StoreComponents : NpcStoreComponents) {
+    UNpcStoreComponent* NpcStoreC = StoreComponents.Key;
+    UInventoryComponent* InventoryC = StoreComponents.Value;
+
+    check(NpcStoreC->NpcStoreType.StockCountRange.Num() > 0);
+
+    // TODO: Get at least 1 item.
     // Get random joined item + econ types using their weights.
-    int32 RandomStockCount = FMath::RandRange(NpcStoreType.StockCountRange[0], NpcStoreType.StockCountRange[1]);
-    TMap<TTuple<EItemType, EItemEconType>, int32> RandomTypesCountMap;
+    int32 RandomStockCount =
+        FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0], NpcStoreC->NpcStoreType.StockCountRange[1]);
+    TMap<TTuple<EItemType, EItemEconType>, int32> RandomTypesCountMap = {};
     for (int32 i = 0; i < RandomStockCount; i++) {
       EItemType RandomItemType =
-          GetWeightedRandomItem<TTuple<EItemType, float>>(NpcStoreType.ItemTypeWeightMap.Array(), [](const auto& Pair) {
-            return Pair.Value;
-          }).Key;
+          GetWeightedRandomItem<TTuple<EItemType, float>>(NpcStoreC->NpcStoreType.ItemTypeWeightMap.Array(),
+                                                          [](const auto& Pair) { return Pair.Value; })
+              .Key;
       EItemEconType RandomItemEconType =
-          GetWeightedRandomItem<TTuple<EItemEconType, float>>(NpcStoreType.ItemEconTypeWeightMap.Array(),
+          GetWeightedRandomItem<TTuple<EItemEconType, float>>(NpcStoreC->NpcStoreType.ItemEconTypeWeightMap.Array(),
                                                               [](const auto& Pair) { return Pair.Value; })
               .Key;
 
@@ -239,7 +337,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     }
     check(RandomTypesCountMap.Num() > 0);
 
-    TMap<TTuple<EItemType, EItemEconType>, TArray<FName>> PossibleItemIdsMap;
+    TMap<TTuple<EItemType, EItemEconType>, TArray<FName>> PossibleItemIdsMap = {};
     for (const auto& Id : Market->EligibleItemIds)
       if (RandomTypesCountMap.Contains(TTuple<EItemType, EItemEconType>(Market->AllItemsMap[Id]->ItemType,
                                                                         Market->AllItemsMap[Id]->ItemEconType)))
@@ -252,7 +350,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
       if (!PossibleItemIdsMap.Contains(Pair.Key)) continue;
 
       TArray<FName> ItemIds = PossibleItemIdsMap[Pair.Key];
-      for (int32 i = 0; i < Pair.Value; i++) NPCStore->InventoryComponent->AddItem(Market->GetRandomItem(ItemIds));
+      for (int32 i = 0; i < Pair.Value; i++) InventoryC->AddItem(Market->GetRandomItem(ItemIds));
     }
   }
 }
@@ -395,7 +493,10 @@ void AMarketLevel::InitMiniGames(bool bIsWeekend) {
                                                             SpawnPoint->GetActorRotation(), SpawnParams);
     MiniGame->SpawnPointId = SpawnPoint->Id;
 
-    MiniGame->Mesh->SetStaticMesh(SpawnableMiniGame->Mesh);
+    // TODO: Direction.
+    MiniGame->Mesh->SetStaticMesh(SpawnableMiniGame->AssetData.Mesh);
+    MiniGame->Sprite->SetFlipbook(SpawnableMiniGame->AssetData.Sprites[ESimpleSpriteDirection::Down]);
+
     MiniGame->InteractionComponent->InteractionType = EInteractionType::MiniGame;
     MiniGame->DialogueComponent->DialogueArray = SpawnableMiniGame->InitDialogues;
     MiniGame->MiniGameComponent->MiniGameType = SpawnableMiniGame->MiniGame;

@@ -65,12 +65,10 @@ void AStorePhaseManager::BuildMode() {
     switch (StorePhaseState) {
       case EStorePhaseState::MorningBuildMode:
         Buildable->Mesh->SetVisibility(true);
-        Buildable->Mesh->SetSimulatePhysics(true);
         Buildable->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
         break;
       case EStorePhaseState::Morning:
         Buildable->Mesh->SetVisibility(false);
-        Buildable->Mesh->SetSimulatePhysics(false);
         Buildable->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         break;
     }

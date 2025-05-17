@@ -165,7 +165,7 @@ void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {
   SetPlayerPausedFunc();
 }
 
-void ASpgHUD::CloseTopOpenMenu() {
+void ASpgHUD::PlayerCloseTopOpenMenu() {
   if (OpenedWidgets.IsEmpty()) return;
 
   OpenedWidgets.Pop()->SetVisibility(ESlateVisibility::Collapsed);
@@ -179,7 +179,7 @@ void ASpgHUD::CloseTopOpenMenu() {
   LeaveHUD();
 }
 
-void ASpgHUD::CloseAllMenus() {
+void ASpgHUD::PlayerCloseAllMenus() {
   for (UUserWidget* Widget : OpenedWidgets) Widget->SetVisibility(ESlateVisibility::Collapsed);
 
   if (EarlyCloseWidgetFunc) EarlyCloseWidgetFunc();
@@ -195,6 +195,8 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
 
   Widget->SetVisibility(ESlateVisibility::Collapsed);
   OpenedWidgets.RemoveSingle(Widget);
+
+  EarlyCloseWidgetFunc = nullptr;
 
   if (!OpenedWidgets.IsEmpty()) return;
   LeaveHUD();
@@ -258,8 +260,8 @@ void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable,
 void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
                                      UInventoryComponent* DisplayInventory,
                                      UInventoryComponent* PlayerInventory,
-                                     std::function<void(UItemBase*, UInventoryComponent*)> PlayerToDisplayFunc,
-                                     std::function<void(UItemBase*, UInventoryComponent*)> DisplayToPlayerFunc) {
+                                     std::function<bool(UItemBase*, UInventoryComponent*)> PlayerToDisplayFunc,
+                                     std::function<bool(UItemBase*, UInventoryComponent*)> DisplayToPlayerFunc) {
   // StockDisplayWidget->StockDisplayRef = StockDisplay;
   StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
   StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryTitleText->SetText(
@@ -296,7 +298,7 @@ void ASpgHUD::SetAndOpenStoreExpansionsList(const AStoreExpansionManager* StoreE
   StoreExpansionsListWidget->SelectExpansionFunc = [this, SelectExpansionFunc](EStoreExpansionLevel ExpansionLevel) {
     SelectExpansionFunc(ExpansionLevel);
 
-    CloseAllMenus();
+    PlayerCloseAllMenus();
   };
   StoreExpansionsListWidget->RefreshUI();
 
@@ -332,8 +334,8 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
 // todo-low: Check for refresh of open widgets.
 void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
                                  UInventoryComponent* PlayerInventory,
-                                 std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
-                                 std::function<void(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc) {
+                                 std::function<bool(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
+                                 std::function<bool(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc) {
   check(NpcStoreWidget);
 
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
@@ -348,15 +350,13 @@ void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
 
   NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->OnDropItemFunc =
       [this, StoreToPlayerFunc, NPCStoreInventory](UItemBase* Item, int32 Quantity) {
-        StoreToPlayerFunc(Item, NPCStoreInventory);
-
-        if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
+        if (StoreToPlayerFunc(Item, NPCStoreInventory))
+          if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
       };
   NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->OnDropItemFunc =
       [this, PlayerToStoreFunc, PlayerInventory](UItemBase* Item, int32 Quantity) {
-        PlayerToStoreFunc(Item, PlayerInventory);
-
-        if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
+        if (PlayerToStoreFunc(Item, PlayerInventory))
+          if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
       };
 
   OpenFocusedMenu(NpcStoreWidget);

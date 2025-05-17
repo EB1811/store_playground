@@ -394,6 +394,17 @@ auto ASaveManager::SaveObject(UObject* Object, FGuid Id) const -> FObjectSaveSta
 
   return SaveState;
 }
+auto ASaveManager::SaveMesh(UMeshComponent* Mesh, FGuid Id) const -> FComponentSaveState {
+  FComponentSaveState SaveState;
+  SaveState.Id = Id;
+
+  FMemoryWriter MemWriter(SaveState.ByteData);
+  FObjectAndNameAsStringProxyArchive Ar(MemWriter, true);
+  Ar.ArIsSaveGame = false;
+  Mesh->Serialize(Ar);
+
+  return SaveState;
+}
 void ASaveManager::LoadActor(AActor* Actor, FActorSavaState SaveState) const {
   FMemoryReader MemReader(SaveState.ByteData);
   FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
@@ -405,4 +416,14 @@ void ASaveManager::LoadComponent(UActorComponent* Component, FComponentSaveState
   FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
   Ar.ArIsSaveGame = true;
   Component->Serialize(Ar);
+}
+void ASaveManager::LoadMesh(UMeshComponent* Mesh, FComponentSaveState SaveState) const {
+  FMemoryReader MemReader(SaveState.ByteData);
+  FObjectAndNameAsStringProxyArchive Ar(MemReader, true);
+  Ar.ArIsSaveGame = false;
+  Mesh->Serialize(Ar);
+
+  // ! Need to force update its static mesh.
+  Mesh->SetVisibility(false);
+  Mesh->SetVisibility(true);
 }

@@ -1,15 +1,23 @@
 #include "Buildable.h"
+#include "Components/StaticMeshComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "PaperFlipbookComponent.h"
 
 ABuildable::ABuildable() {
   PrimaryActorTick.bCanEverTick = true;
 
   if (!BuildableId.IsValid()) BuildableId = FGuid::NewGuid();
 
+  SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+  SetRootComponent(SceneRoot);
+
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-  SetRootComponent(Mesh);
+  Mesh->SetupAttachment(SceneRoot);
+
+  Sprite = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Sprite"));
+  Sprite->SetupAttachment(SceneRoot);
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   StockInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("StockInventory"));

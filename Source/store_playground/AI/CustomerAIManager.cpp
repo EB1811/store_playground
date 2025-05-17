@@ -315,8 +315,8 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   if (OwnerAIController->GetMoveStatus() != EPathFollowingStatus::Idle) return;
 
   FNavLocation RandomLocation;
-  NavSystem->GetRandomReachablePointInRadius(Customer->GetActorLocation(), float(300.0f), RandomLocation);
-  Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(50.0f, 250.0f);
+  NavSystem->GetRandomReachablePointInRadius(Customer->GetActorLocation(), float(500.0f), RandomLocation);
+  Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(50.0f, 350.0f);
 
   // ? Do we only need to bind it once?
   OwnerAIController->GetPathFollowingComponent()->OnRequestFinished.RemoveAll(this);
@@ -381,8 +381,9 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
                                     });
   if (RelevantItems.Num() <= 0) return false;
 
-  const FStockItem& StockItem = GetWeightedRandomItem<FStockItem>(
-      RelevantItems, [](const auto& StockItem) { return StockItem.DisplayStats.PickRateWeightModifier; });
+  const FStockItem& StockItem = GetWeightedRandomItem<FStockItem>(RelevantItems, [](const auto& StockItem) {
+    return StockItem.StockDisplayComponent->DisplayStats.PickRateWeightModifier;
+  });
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::BuyStockItem;
   CustomerAI->NegotiationAI->RelevantItem = StockItem.Item;
   CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;

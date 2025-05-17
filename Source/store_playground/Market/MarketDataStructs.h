@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
+#include "PaperFlipbook.h"
 #include "store_playground/Item/ItemDataStructs.h"
+#include "store_playground/Sprite/SpriteStructs.h"
 #include "MarketDataStructs.generated.h"
 
 UENUM()
@@ -154,6 +156,18 @@ struct FEconItem {
 
 // * Store types.
 USTRUCT()
+struct FNpcStoreAssetData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  UTexture2D* Avatar;
+  UPROPERTY(EditAnywhere)
+  UStaticMesh* Mesh;
+  UPROPERTY(EditAnywhere)
+  TMap<ESimpleSpriteDirection, UPaperFlipbook*> Sprites;
+};
+
+USTRUCT()
 struct FNpcStoreType {
   GENERATED_BODY()
 
@@ -174,6 +188,9 @@ struct FNpcStoreType {
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
   UPROPERTY(EditAnywhere)
   TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
+
+  UPROPERTY(EditAnywhere)
+  FNpcStoreAssetData AssetData;
 };
 USTRUCT()
 struct FNpcStoreTypeRow : public FTableRowBase {
@@ -196,6 +213,9 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
   UPROPERTY(EditAnywhere)
   TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
+
+  UPROPERTY(EditAnywhere)
+  FNpcStoreAssetData AssetData;
 };
 
 // * Economic events.

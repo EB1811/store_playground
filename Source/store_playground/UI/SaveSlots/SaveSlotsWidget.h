@@ -26,7 +26,7 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* ExitMenuButton;
 
-  // TODO: Use load slots widget instead.
+  // todo-low: Use load slots widget instead.
   UPROPERTY(EditAnywhere)
   bool bIsSaving;  // * True if saving, false if loading.
 

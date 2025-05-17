@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "store_playground/SaveManager/SaveStructs.h"
-#include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "GameFramework/Info.h"
 #include "Store.generated.h"
@@ -14,9 +13,12 @@ struct FStockItem {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  struct FDisplayStats DisplayStats;
+  FName ItemId;  // * To identify items when outside the store.
+
   UPROPERTY(EditAnywhere)
-  class UItemBase* Item;  // ? Change to item id?
+  class UStockDisplayComponent* StockDisplayComponent;
+  UPROPERTY(EditAnywhere)
+  class UItemBase* Item;
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* BelongingStockInventoryC;
 };
@@ -68,6 +70,11 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<FStockItem> StoreStockItems;
+
+  auto BuildStockDisplay(ABuildable* Buildable) -> bool;
+  auto BuildDecoration(ABuildable* Buildable) -> bool;
+
+  auto TrySpendMoney(float Amount) -> bool;
 
   void ItemBought(UItemBase* Item, float Price, int32 Quantity = 1);
   void ItemSold(const UItemBase* Item, float Price, int32 Quantity = 1);

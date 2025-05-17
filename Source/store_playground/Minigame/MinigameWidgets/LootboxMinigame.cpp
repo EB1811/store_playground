@@ -27,7 +27,10 @@ void ULootboxMinigame::OnOpenLootboxButtonClicked() {
   ItemIcon->SetVisibility(ESlateVisibility::Visible);
   ItemGivenText->SetVisibility(ESlateVisibility::Visible);
 
-  Store->MoneySpent(Price);
+  if (!Store->TrySpendMoney(Price)) {
+    ResultText->SetText(FText::FromString("Not enough money!"));
+    return;
+  }
 
   float WinChance =
       LootboxMinigameParams.BaseWinChance *

@@ -86,9 +86,11 @@ public:
   const class AMiniGameManager* MiniGameManager;
 
   UPROPERTY(EditAnywhere, Category = "Market Level")
+  class TSubclassOf<class ANPCStore> NPCStoreClass;
+  UPROPERTY(EditAnywhere, Category = "Market Level")
   class TSubclassOf<class ANpcStoreSpawnPoint> NpcStoreSpawnPointClass;
   UPROPERTY(EditAnywhere, Category = "Market Level")
-  class TSubclassOf<class ANPCStore> NPCStoreClass;
+  class TSubclassOf<class AMobileNPCStore> MobileNPCStoreClass;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   class TSubclassOf<class ANpcSpawnPoint> NpcSpawnPointClass;
   UPROPERTY(EditAnywhere, Category = "Market Level")

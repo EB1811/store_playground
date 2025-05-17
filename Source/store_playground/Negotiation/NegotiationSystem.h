@@ -89,7 +89,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   TArray<class UItemBase*> NegotiatedItems;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class UInventoryComponent* FromInventory;
+  class UInventoryComponent* FromInventory;  // ? Remove from here?
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   NegotiationType Type;
   UPROPERTY(EditAnywhere, Category = "Negotiation")

@@ -24,12 +24,11 @@ bool UInventoryWidget::NativeOnDrop(const FGeometry& InGeometry,
 
   if (SourceInventoryRef == InventoryRef) return false;
 
-  // todo-low: Add success/failure return struct.
+  // todo-low: show success/failure message.
   if (OnDropItemFunc)
     // todo-low: Add source inventory parameter.
     OnDropItemFunc(DroppedItem, 1);
-  else
-    TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
+  else TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
 
   RefreshInventory();
   SourceInventoryWidgetRef->RefreshInventory();

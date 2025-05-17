@@ -26,11 +26,16 @@ public:
   UPROPERTY(EditAnywhere, Category = "Buildable")
   FGuid BuildableId;
 
-  // ? Buildable component?
+  UPROPERTY(EditAnywhere)
+  USceneComponent* SceneRoot;
+
   UPROPERTY(EditAnywhere, Category = "Buildable")
   TMap<EBuildableType, UStaticMesh*> MeshesMap;
   UPROPERTY(EditAnywhere, Category = "Buildable")
   UStaticMeshComponent* Mesh;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class UPaperFlipbookComponent* Sprite;
 
   UPROPERTY(EditAnywhere, Category = "Buildable")
   TMap<EBuildableType, bool> IsBuildableMap;

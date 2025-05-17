@@ -34,7 +34,7 @@ auto AStatisticsGen::CalcTotalStoreStockValue() const -> float {
   float TotalValue = 0.0f;
   for (const FStockItem& StockItem : Store->StoreStockItems) {
     const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-        [StockItem](const FEconItem& EconItem) { return EconItem.ItemID == StockItem.Item->ItemID; });
+        [StockItem](const FEconItem& EconItem) { return EconItem.ItemID == StockItem.ItemId; });
     check(EconItem);
 
     TotalValue += EconItem->CurrentPrice;

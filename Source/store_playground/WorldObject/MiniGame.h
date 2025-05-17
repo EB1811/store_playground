@@ -15,18 +15,24 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "MiniGame")
-  UStaticMeshComponent* Mesh;
+  UPROPERTY(EditAnywhere)
+  USceneComponent* SceneRoot;
 
-  UPROPERTY(EditAnywhere, Category = "MiniGame")
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class UStaticMeshComponent* Mesh;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class UPaperFlipbookComponent* Sprite;
+
+  UPROPERTY(EditAnywhere)
   class UInteractionComponent* InteractionComponent;
 
-  UPROPERTY(EditAnywhere, Category = "MiniGame")
+  UPROPERTY(EditAnywhere)
   class UDialogueComponent* DialogueComponent;
 
-  UPROPERTY(EditAnywhere, Category = "MiniGame")
+  UPROPERTY(EditAnywhere)
   class UMiniGameComponent* MiniGameComponent;
 
-  UPROPERTY(EditAnywhere, Category = "MiniGame", SaveGame)
+  UPROPERTY(EditAnywhere, SaveGame)
   FGuid SpawnPointId;  // * Spawn point id (for saving).
 };

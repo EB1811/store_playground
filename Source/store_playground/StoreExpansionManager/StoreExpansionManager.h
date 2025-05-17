@@ -39,5 +39,5 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   EStoreExpansionLevel CurrentStoreExpansionLevel;
 
-  void SelectExpansion(EStoreExpansionLevel StoreExpansionLevel);
+  auto SelectExpansion(EStoreExpansionLevel StoreExpansionLevel) -> bool;
 };

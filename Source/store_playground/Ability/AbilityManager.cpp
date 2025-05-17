@@ -29,7 +29,8 @@ void AAbilityManager::ActivateEconEventAbility(const FName AbilityId) {
   FEconEventAbility Ability = GlobalDataManager->GetEconEventAbilitiesByIds({AbilityId})[0];
   check(!Ability.EconEventId.IsNone());
 
-  Store->MoneySpent(Ability.Cost);
+  // todo-low: Return bool to inform the player.
+  if (!Store->TrySpendMoney(Ability.Cost)) return;
 
   Market->AddGuaranteedEconEvents({Ability.EconEventId});
   ActiveEconEventAbilities.Add(Ability);

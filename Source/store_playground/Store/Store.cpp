@@ -13,6 +13,7 @@
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
+#include "store_playground/Store/StockDisplayComponent.h"
 
 AStore::AStore() {
   PrimaryActorTick.bCanEverTick = false;
@@ -29,16 +30,50 @@ void AStore::BeginPlay() {
 
 void AStore::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+auto AStore::BuildStockDisplay(ABuildable* Buildable) -> bool {
+  if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Money) return false;
+
+  Buildable->SetToStockDisplay();
+  if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
+
+  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay]);
+  return true;
+}
+auto AStore::BuildDecoration(ABuildable* Buildable) -> bool {
+  if (Buildable->BuildingPricesMap[EBuildableType::Decoration] > Money) return false;
+
+  Buildable->SetToDecoration();
+  if (Buildable->BuildableType != EBuildableType::Decoration) return false;
+
+  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::Decoration]);
+  return true;
+}
+
+auto AStore::TrySpendMoney(float Amount) -> bool {
+  if (Amount > Money) return false;
+
+  MoneySpent(Amount);
+  return true;
+}
+
 void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
-  Money -= Price * Quantity;
   Item->PriceData.BoughtAt = Price;
+
+  Money -= Price * Quantity;
 
   StatisticsGen->StoreMoneySpent(Price * Quantity);
 }
 void AStore::ItemSold(const UItemBase* Item, float Price, int32 Quantity) {
-  Money += Price * Quantity;
-  StoreStockItems.RemoveAllSwap(
+  auto* StockItem = StoreStockItems.FindByPredicate(
       [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
+  if (StockItem) {
+    StockItem->StockDisplayComponent->ClearDisplaySprite();
+    StockItem->BelongingStockInventoryC->RemoveItem(Item);
+    StoreStockItems.RemoveAllSwap(
+        [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
+  }
+
+  Money += Price * Quantity;
 
   StatisticsGen->ItemDeal({Item->ItemID, Item->PriceData.BoughtAt, Price, Quantity});
   StatisticsGen->StoreMoneyGained(Price * Quantity);
@@ -49,14 +84,12 @@ void AStore::MoneyGained(float Amount) {
   StatisticsGen->StoreMoneyGained(Amount);
 }
 void AStore::MoneySpent(float Amount) {
-  // TODO: Check if we have enough money before spending. Return bool.
-
   Money -= Amount;
 
   StatisticsGen->StoreMoneySpent(Amount);
 }
 
-// TODO: Save store dynamic lights.
+// todo-low: Save store dynamic lights.
 void AStore::SaveStoreLevelState() {
   StoreLevelState.ActorSaveMap.Empty();
   StoreLevelState.ComponentSaveMap.Empty();
@@ -132,7 +165,9 @@ void AStore::InitStockDisplays() {
     if (Buildable->BuildableType != EBuildableType::StockDisplay) continue;
 
     auto* StockInventory = Buildable->StockInventory;
-    for (UItemBase* Item : StockInventory->ItemsArray)
-      StoreStockItems.Add({Buildable->StockDisplay->DisplayStats, Item, StockInventory});
+    for (UItemBase* Item : StockInventory->ItemsArray) {
+      StoreStockItems.Add({Item->ItemID, Buildable->StockDisplay, Item, StockInventory});
+      Buildable->StockDisplay->SetDisplaySprite(Item->AssetData.Sprite);
+    }
   }
 }

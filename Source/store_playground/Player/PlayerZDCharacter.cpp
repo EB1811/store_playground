@@ -80,9 +80,9 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     EnhancedInputComponent->BindAction(InputActions.OpenPauseMenuAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenPauseMenu);
     EnhancedInputComponent->BindAction(InputActions.CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::CloseTopOpenMenu);
+                                       &APlayerZDCharacter::PlayerCloseTopOpenMenu);
     EnhancedInputComponent->BindAction(InputActions.CloseAllMenusAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::CloseAllMenus);
+                                       &APlayerZDCharacter::PlayerCloseAllMenus);
     EnhancedInputComponent->BindAction(InputActions.OpenInventoryViewAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenInventoryView);
     EnhancedInputComponent->BindAction(InputActions.BuildModeAction, ETriggerEvent::Triggered, this,
@@ -180,9 +180,9 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
   UGameplayStatics::SetGamePaused(GetWorld(), PlayerBehaviourState == EPlayerState::Paused);
 }
 
-void APlayerZDCharacter::CloseTopOpenMenu(const FInputActionValue& Value) { HUD->CloseTopOpenMenu(); }
+void APlayerZDCharacter::PlayerCloseTopOpenMenu(const FInputActionValue& Value) { HUD->PlayerCloseTopOpenMenu(); }
 
-void APlayerZDCharacter::CloseAllMenus(const FInputActionValue& Value) { HUD->CloseAllMenus(); }
+void APlayerZDCharacter::PlayerCloseAllMenus(const FInputActionValue& Value) { HUD->PlayerCloseAllMenus(); }
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent, Store);
@@ -206,7 +206,7 @@ void APlayerZDCharacter::OpenStatistics(const FInputActionValue& Value) { HUD->S
 
 void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
   auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
-    StoreExpansionManager->SelectExpansion(ExpansionLevel);
+    if (!StoreExpansionManager->SelectExpansion(ExpansionLevel)) return;
 
     auto LevelReadyFunc = [&]() {
       ASpawnPoint* SpawnPoint =
@@ -385,7 +385,7 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     case EInteractionType::NPCDialogue: {
       auto [DialogueC, SpriteAnimC] = Interactable->InteractNPCDialogue();
 
-      // ? Move to another function?
+      // ? Move to function?
       SetupNpcInteraction(SpriteAnimC);
       EnterDialogue(DialogueC, [this, SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); });
       break;
@@ -393,10 +393,9 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     case EInteractionType::Customer: {
       auto [DialogueC, CustomerAI, SpriteAnimC] = Interactable->InteractCustomer();
 
-      // TODO: Change to browsing in early widget exit.
-      // TODO: Move to function.
+      // ? Move to function?
       CustomerAI->CustomerState = ECustomerState::BrowsingTalking;
-      SetupNpcInteraction(SpriteAnimC);
+      SetupCustomerInteraction(CustomerAI, SpriteAnimC);
       EnterDialogue(DialogueC, [this, CustomerAI, SpriteAnimC]() {
         CustomerAI->CustomerState = ECustomerState::Browsing;
         SpriteAnimC->ReturnToOgRotation();
@@ -406,8 +405,7 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     case EInteractionType::WaitingCustomer: {
       auto [CustomerAI, Item, SpriteAnimC] = Interactable->InteractWaitingCustomer();
 
-      // TODO: Reopen the interaction popup if player closes the menu.
-      SetupNpcInteraction(SpriteAnimC);
+      SetupCustomerInteraction(CustomerAI, SpriteAnimC);
       EnterNegotiation(CustomerAI, Item);
       break;
     }
@@ -441,26 +439,35 @@ void APlayerZDCharacter::SetupNpcInteraction(USimpleSpriteAnimComponent* SpriteA
     SpriteAnimC->ReturnToOgRotation();
   };
 }
+void APlayerZDCharacter::SetupCustomerInteraction(UCustomerAIComponent* CustomerAI,
+                                                  USimpleSpriteAnimComponent* SpriteAnimC) {
+  SpriteAnimC->TurnToPlayer(GetActorLocation());
+
+  // ? Move to player?
+  switch (CustomerAI->CustomerState) {
+    case ECustomerState::BrowsingTalking:
+      HUD->EarlyCloseWidgetFunc = [this, CustomerAI, SpriteAnimC]() {
+        check(CustomerAI);
+        check(SpriteAnimC);
+        CustomerAI->CustomerState = ECustomerState::Browsing;
+        SpriteAnimC->ReturnToOgRotation();
+      };
+      break;
+    case ECustomerState::Requesting:
+      HUD->EarlyCloseWidgetFunc = [this, CustomerAI, SpriteAnimC]() {
+        check(CustomerAI);
+        check(SpriteAnimC);
+        CustomerAI->LeaveRequestDialogue();
+        SpriteAnimC->ReturnToOgRotation();
+      };
+      break;
+    default: break;
+  }
+}
 
 void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
-  auto BuildStockDisplayFunc = [this](ABuildable* Buildable) {
-    if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Store->Money) return false;
-
-    Buildable->SetToStockDisplay();
-    if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
-
-    Store->MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay]);
-    return true;
-  };
-  auto BuildDecorationFunc = [this](ABuildable* Buildable) {
-    if (Buildable->BuildingPricesMap[EBuildableType::Decoration] > Store->Money) return false;
-
-    Buildable->SetToDecoration();
-    if (Buildable->BuildableType != EBuildableType::Decoration) return false;
-
-    Store->MoneySpent(Buildable->BuildingPricesMap[EBuildableType::Decoration]);
-    return true;
-  };
+  auto BuildStockDisplayFunc = [this](ABuildable* Buildable) { return Store->BuildStockDisplay(Buildable); };
+  auto BuildDecorationFunc = [this](ABuildable* Buildable) { return Store->BuildDecoration(Buildable); };
 
   HUD->SetAndOpenBuildableDisplay(Buildable, BuildStockDisplayFunc, BuildDecorationFunc);
 }
@@ -471,12 +478,25 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
                                                                       UInventoryComponent* SourceInventory) {
     check(SourceInventory == PlayerInventoryComponent);
     // ? Cache the stock display inventories?
-    if (TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess) Store->InitStockDisplays();
+    bool bSuccess = TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess;
+    if (bSuccess) {
+      StockDisplayC->SetDisplaySprite(DroppedItem->AssetData.Sprite);
+      Store->InitStockDisplays();
+    }
+
+    return bSuccess;
   };
   auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
                                                                       UInventoryComponent* SourceInventory) {
     check(SourceInventory == DisplayInventoryC);
-    if (TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem).bSuccess) Store->InitStockDisplays();
+
+    bool bSuccess = TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem).bSuccess;
+    if (bSuccess) {
+      StockDisplayC->ClearDisplaySprite();
+      Store->InitStockDisplays();
+    }
+
+    return bSuccess;
   };
 
   HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent, PlayerToDisplayFunc,
@@ -494,16 +514,15 @@ void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
 }
 
 void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {
-  // TODO: Add bool on success/failure.
   auto StoreToPlayerFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
                                                               UInventoryComponent* SourceInventory) {
     check(SourceInventory == StoreInventoryC);
-    Market->BuyItem(NpcStoreC, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
+    return Market->BuyItem(NpcStoreC, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
   };
   auto PlayerToStoreFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
                                                               UInventoryComponent* SourceInventory) {
     check(SourceInventory == PlayerInventoryComponent);
-    Market->SellItem(NpcStoreC, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
+    return Market->SellItem(NpcStoreC, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
   };
 
   HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
@@ -588,7 +607,7 @@ void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsc
   HUD->SetAndOpenCutscene(CutsceneSystem);
 }
 
-// TODO: Handle cutscene exit and quests.
+// ? All player states handled?
 void APlayerZDCharacter::ExitCurrentAction() {
   if (PlayerBehaviourState == EPlayerState::Normal) return;
 
@@ -596,7 +615,7 @@ void APlayerZDCharacter::ExitCurrentAction() {
   // ? Implement a queue to exit after cutscene?
   check(PlayerBehaviourState != EPlayerState::Cutscene);
 
-  HUD->CloseAllMenus();
+  HUD->PlayerCloseAllMenus();
   ChangePlayerState(EPlayerState::Normal);
 }
 

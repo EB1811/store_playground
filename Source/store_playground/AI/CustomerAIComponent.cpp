@@ -35,6 +35,14 @@ void UCustomerAIComponent::TickComponent(float DeltaTime,
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+void UCustomerAIComponent::LeaveRequestDialogue() {
+  CustomerState = ECustomerState::Requesting;
+
+  UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
+  check(WidgetC);
+  WidgetC->SetVisibility(true, true);
+}
+
 void UCustomerAIComponent::StartNegotiation() {
   CustomerState = ECustomerState::Negotiating;
 

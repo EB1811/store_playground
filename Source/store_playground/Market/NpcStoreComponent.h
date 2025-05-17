@@ -16,12 +16,12 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere, Category = "NPC Store")
+  UPROPERTY(EditAnywhere, SaveGame)
   FGuid NpcStoreCID;
 
-  UPROPERTY(EditAnywhere, Category = "NPC Store")
+  UPROPERTY(EditAnywhere, SaveGame)
   bool bFixedStoreType;  // * If true, the store type will not be randomly generated.
 
-  UPROPERTY(EditAnywhere, Category = "NPC Store")
+  UPROPERTY(EditAnywhere, SaveGame)
   FNpcStoreType NpcStoreType;
 };

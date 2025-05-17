@@ -5,7 +5,9 @@
 #include <functional>
 #include "CoreMinimal.h"
 #include "Misc/EnumRange.h"
+#include "PaperFlipbook.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Sprite/SpriteStructs.h"
 #include "MiniGameStructs.generated.h"
 
 UENUM()
@@ -13,6 +15,18 @@ enum class EMiniGame : uint8 {
   Lootbox UMETA(DisplayName = "Lootbox"),
 };
 ENUM_RANGE_BY_COUNT(EMiniGame, 1);
+
+USTRUCT()
+struct FMiniGameAssetData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  UTexture2D* Avatar;
+  UPROPERTY(EditAnywhere)
+  UStaticMesh* Mesh;
+  UPROPERTY(EditAnywhere)
+  TMap<ESimpleSpriteDirection, UPaperFlipbook*> Sprites;
+};
 
 USTRUCT()
 struct FMiniGameInfo {
@@ -30,7 +44,7 @@ struct FMiniGameInfo {
   TArray<FDialogueData> InitDialogues;  // * Dialogue before starting.
 
   UPROPERTY(EditAnywhere)
-  class UStaticMesh* Mesh;
+  FMiniGameAssetData AssetData;
 };
 
 struct MiniGameT {

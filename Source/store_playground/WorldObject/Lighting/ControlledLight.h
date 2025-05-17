@@ -19,9 +19,6 @@ public:
     LightComponent = CreateDefaultSubobject<ULightComponent>(TEXT("LightComponent"));
   }
 
-  // TODO: Move visibility control to c++.
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   ULightComponent* LightComponent;
-
-  // TODO: Add gameplay tags to control light.
 };

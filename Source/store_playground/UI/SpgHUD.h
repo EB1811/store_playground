@@ -75,9 +75,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TArray<class UUserWidget*> OpenedWidgets;
   UFUNCTION(BlueprintCallable, Category = "Widgets")
-  void CloseTopOpenMenu();
+  void PlayerCloseTopOpenMenu();
   UFUNCTION(BlueprintCallable, Category = "Widgets")
-  void CloseAllMenus();
+  void PlayerCloseAllMenus();
 
   void CloseWidget(class UUserWidget* Widget);
   std::function<void()> EarlyCloseWidgetFunc;  // * When leaving a widget early, i.e, before the end of a dialogue, etc.
@@ -104,8 +104,8 @@ public:
   void SetAndOpenStockDisplay(class UStockDisplayComponent* StockDisplay,
                               class UInventoryComponent* DisplayInventory,
                               class UInventoryComponent* PlayerInventory,
-                              std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToDisplayFunc,
-                              std::function<void(class UItemBase*, class UInventoryComponent*)> DisplayToPlayerFunc);
+                              std::function<bool(class UItemBase*, class UInventoryComponent*)> PlayerToDisplayFunc,
+                              std::function<bool(class UItemBase*, class UInventoryComponent*)> DisplayToPlayerFunc);
 
   UPROPERTY()
   class UStoreExpansionsListWidget* StoreExpansionsListWidget;
@@ -121,8 +121,8 @@ public:
   class UNpcStoreWidget* NpcStoreWidget;
   void SetAndOpenNPCStore(class UInventoryComponent* NPCStoreInventory,
                           class UInventoryComponent* PlayerInventory,
-                          std::function<void(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
-                          std::function<void(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc);
+                          std::function<bool(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
+                          std::function<bool(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc);
 
   UPROPERTY()
   class UDialogueWidget* DialogueWidget;

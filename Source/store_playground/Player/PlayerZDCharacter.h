@@ -112,9 +112,9 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenPauseMenu(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void CloseTopOpenMenu(const FInputActionValue& Value);
+  void PlayerCloseTopOpenMenu(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void CloseAllMenus(const FInputActionValue& Value);
+  void PlayerCloseAllMenus(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenInventoryView(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -207,6 +207,7 @@ public:
   void HandleInteraction(class UInteractionComponent* Interactable);
 
   void SetupNpcInteraction(class USimpleSpriteAnimComponent* SpriteAnimC);
+  void SetupCustomerInteraction(class UCustomerAIComponent* CustomerAI, class USimpleSpriteAnimComponent* SpriteAnimC);
 
   // * Entries into HUDs and menus.
   void EnterBuildableDisplay(class ABuildable* Buildable);

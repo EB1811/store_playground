@@ -9,9 +9,15 @@ ANPCStore::ANPCStore() {
 
   if (!NpcStoreId.IsValid()) NpcStoreId = FGuid::NewGuid();
 
+  SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+  SetRootComponent(SceneRoot);
+
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+  Mesh->SetupAttachment(SceneRoot);
   Mesh->SetSimulatePhysics(true);
-  SetRootComponent(Mesh);
+
+  Sprite = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Sprite"));
+  Sprite->SetupAttachment(SceneRoot);
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   DialogueComponent = CreateDefaultSubobject<UDialogueComponent>(TEXT("DialogueComponent"));

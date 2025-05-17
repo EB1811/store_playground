@@ -60,7 +60,7 @@ struct FItemAssetData {
   UPROPERTY(EditAnywhere)
   class UTexture2D* Icon;
   UPROPERTY(EditAnywhere)
-  class UStaticMesh* Mesh;
+  class UPaperFlipbook* Sprite;
 };
 
 UENUM()

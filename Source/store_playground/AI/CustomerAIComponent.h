@@ -61,6 +61,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerState CustomerState;
 
+  void LeaveRequestDialogue();
+
   void StartNegotiation();
   void PostNegotiation();
 };

@@ -155,6 +155,7 @@ FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
   return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
 }
 
+// todo-low: check player has enough money for all negotiation funcs.
 void UNegotiationSystem::OfferPrice(float Price) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
@@ -183,9 +184,6 @@ void UNegotiationSystem::NegotiationSuccess() {
     check(FromInventory);
 
     for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemSold(NegotiatedItem, OfferedPrice);
-    for (const UItemBase* NegotiatedItem : NegotiatedItems) FromInventory->RemoveItem(NegotiatedItem);
-    // Store->StoreStockItems.RemoveAllSwap(
-    //     [this](const FStockItem& StockItem) { return NegotiatedItems.Contains(StockItem.Item); });
   } else {
     check(PlayerInventory);
 

@@ -9,6 +9,7 @@ void UStoreExpansionsListWidget::RefreshUI() {
 
   ExpansionsListPanelWrapBox->ClearChildren();
 
+  // todo-low: Check player has enough money to buy the expansion.
   for (const auto& Expansion : StoreExpansionManagerRef->StoreExpansions) {
     if (UStoreExpansionSelectWidget* ExpansionWidget =
             CreateWidget<UStoreExpansionSelectWidget>(GetWorld(), StoreExpansionSelectWidgetClass)) {

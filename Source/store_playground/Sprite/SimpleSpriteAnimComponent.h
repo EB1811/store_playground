@@ -21,16 +21,16 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<ESimpleSpriteDirection, UPaperFlipbook*> IdleSprites;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TMap<ESimpleSpriteDirection, UPaperFlipbook*> WalkSprites;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   ESimpleSpriteAnimState SpriteAnimState;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   ESimpleSpriteDirection CurrentDirection;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   ESimpleSpriteDirection LastDirection;
 
   void Idle(ESimpleSpriteDirection Direction = ESimpleSpriteDirection::Down);

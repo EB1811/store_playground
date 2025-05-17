@@ -5,14 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PaperFlipbookComponent.h"
-#include "NPCStore.generated.h"
+#include "MobileNPCStore.generated.h"
 
 UCLASS()
-class STORE_PLAYGROUND_API ANPCStore : public AActor {
+class STORE_PLAYGROUND_API AMobileNPCStore : public AActor {
   GENERATED_BODY()
 
 public:
-  ANPCStore();
+  AMobileNPCStore();
 
   virtual void BeginPlay() override;
 
@@ -22,7 +22,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "NPCStore")
   USceneComponent* SceneRoot;
 
-  UPROPERTY(EditAnywhere, Category = "NPCStore")
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPCStore")
   UStaticMeshComponent* Mesh;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPCStore")
