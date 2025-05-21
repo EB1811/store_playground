@@ -1,0 +1,210 @@
+[
+	{
+		"Name": "merc01",
+		"CustomerID": "c_merc01",
+		"LinkedPopID": "merc",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mercenary\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mercenary\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Idle_Up.FB_Merc_Idle_Up'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Idle_Down.FB_Merc_Idle_Down'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Idle_Left.FB_Merc_Idle_Left'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Idle_Right.FB_Merc_Idle_Right'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Walk_Up.FB_Merc_Walk_Up'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Walk_Down.FB_Merc_Walk_Down'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Walk_Left.FB_Merc_Walk_Left'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Walk_Right.FB_Merc_Walk_Right'"
+			}
+		}
+	},
+	{
+		"Name": "merc02",
+		"CustomerID": "c_merc02",
+		"LinkedPopID": "merc",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mercenary\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mercenary\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Idle_D.FB_C103_Idle_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Idle_A.FB_C103_Idle_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Idle_B.FB_C103_Idle_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Idle_C.FB_C103_Idle_C'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Walk_D.FB_C103_Walk_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Walk_A.FB_C103_Walk_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Walk_B.FB_C103_Walk_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Walk_C.FB_C103_Walk_C'"
+			}
+		}
+	},
+	{
+		"Name": "merc03",
+		"CustomerID": "c_merc03",
+		"LinkedPopID": "merc",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mercenary\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mercenary\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Idle_D.FB_C118_Idle_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Idle_A.FB_C118_Idle_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Idle_B.FB_C118_Idle_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Idle_C.FB_C118_Idle_C'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Walk_D.FB_C118_Walk_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Walk_A.FB_C118_Walk_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Walk_B.FB_C118_Walk_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Walk_C.FB_C118_Walk_C'"
+			}
+		}
+	},
+	{
+		"Name": "aristo01",
+		"CustomerID": "c_aristo01",
+		"LinkedPopID": "nmc1",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"14DBA0F54EABEEED35132C81AC6D4E19\", \"Aristocrat\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"7EE86A6C45AD1AC5A6F4409A7DBAFC73\", \"Aristocrat\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Idle_Up.FB_FemAristocrat_Idle_Up'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Idle_Down.FB_FemAristocrat_Idle_Down'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Idle_Left.FB_FemAristocrat_Idle_Left'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Idle_Right.FB_FemAristocrat_Idle_Right'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Walk_Up.FB_FemAristocrat_Walk_Up'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Walk_Down.FB_FemAristocrat_Walk_Down'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Walk_Left.FB_FemAristocrat_Walk_Left'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Walk_Right.FB_FemAristocrat_Walk_Right'"
+			}
+		}
+	},
+	{
+		"Name": "aristo02",
+		"CustomerID": "c_aristo02",
+		"LinkedPopID": "nmc1",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"14DBA0F54EABEEED35132C81AC6D4E19\", \"Aristocrat\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"7EE86A6C45AD1AC5A6F4409A7DBAFC73\", \"Aristocrat\")",
+		"InitAttitude": "Hostile",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Idle_D.FB_C132_Idle_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Idle_A.FB_C132_Idle_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Idle_B.FB_C132_Idle_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Idle_C.FB_C132_Idle_C'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Walk_D.FB_C132_Walk_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Walk_A.FB_C132_Walk_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Walk_B.FB_C132_Walk_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Walk_C.FB_C132_Walk_C'"
+			}
+		}
+	},
+	{
+		"Name": "mage01",
+		"CustomerID": "c_mage01",
+		"LinkedPopID": "mm1",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mage\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mage\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Idle_D.FB_C140_Idle_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Idle_A.FB_C140_Idle_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Idle_B.FB_C140_Idle_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Idle_C.FB_C140_Idle_C'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Walk_D.FB_C140_Walk_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Walk_A.FB_C140_Walk_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Walk_B.FB_C140_Walk_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Walk_C.FB_C140_Walk_C'"
+			}
+		}
+	},
+	{
+		"Name": "mage02",
+		"CustomerID": "c_mage02",
+		"LinkedPopID": "mm1",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mage\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mage\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Idle_D.FB_C139_Idle_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Idle_A.FB_C139_Idle_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Idle_B.FB_C139_Idle_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Idle_C.FB_C139_Idle_C'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Walk_D.FB_C139_Walk_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Walk_A.FB_C139_Walk_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Walk_B.FB_C139_Walk_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Walk_C.FB_C139_Walk_C'"
+			}
+		}
+	},
+	{
+		"Name": "assassin01",
+		"CustomerID": "c_assassin01",
+		"LinkedPopID": "cm1",
+		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Assassin\")",
+		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Assassin\")",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Idle_D.FB_C121_Idle_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Idle_A.FB_C121_Idle_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Idle_B.FB_C121_Idle_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Idle_C.FB_C121_Idle_C'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Walk_D.FB_C121_Walk_D'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Walk_A.FB_C121_Walk_A'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Walk_B.FB_C121_Walk_B'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Walk_C.FB_C121_Walk_C'"
+			}
+		}
+	}
+]

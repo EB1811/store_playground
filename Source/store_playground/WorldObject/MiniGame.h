@@ -22,6 +22,9 @@ public:
   class UStaticMeshComponent* Mesh;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class AActor* MeshActor;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
   class UPaperFlipbookComponent* Sprite;
 
   UPROPERTY(EditAnywhere)

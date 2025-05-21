@@ -1,4 +1,5 @@
 #include "MiniGame.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -13,7 +14,6 @@ AMiniGame::AMiniGame() {
 
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetupAttachment(SceneRoot);
-  Mesh->SetSimulatePhysics(true);
 
   Sprite = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Sprite"));
   Sprite->SetupAttachment(SceneRoot);

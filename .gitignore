@@ -87,6 +87,8 @@ Content/**/*
 !/Content/*
 !/Content/Blueprints/*
 !/Content/Blueprints/**/*.uasset
+!/Content/Blueprints/WorldObject/*
+!/Content/Blueprints/WorldObject/**/*.uasset
 !/Content/Data/*
 !/Content/Data/**/*.uasset
 !/Content/Input/*

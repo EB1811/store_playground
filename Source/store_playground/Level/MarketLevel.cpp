@@ -475,6 +475,7 @@ void AMarketLevel::InitMiniGames(bool bIsWeekend) {
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
   TArray<EMiniGame> SpawnedMiniGameTypes;
+  UE_LOG(LogTemp, Warning, TEXT("SPAWNING"));
   for (auto* SpawnPoint : SpawnPoints) {
     auto SpawnableMiniGameTypes = SpawnPoint->MiniGameTypes.FilterByPredicate(
         [this, &SpawnedMiniGameTypes](const auto& MiniGame) { return !SpawnedMiniGameTypes.Contains(MiniGame); });
@@ -495,6 +496,7 @@ void AMarketLevel::InitMiniGames(bool bIsWeekend) {
 
     // TODO: Direction.
     MiniGame->Mesh->SetStaticMesh(SpawnableMiniGame->AssetData.Mesh);
+    UE_LOG(LogTemp, Warning, TEXT("Mesh: %s"), *SpawnableMiniGame->AssetData.Mesh->GetName());
     MiniGame->Sprite->SetFlipbook(SpawnableMiniGame->AssetData.Sprites[ESimpleSpriteDirection::Down]);
 
     MiniGame->InteractionComponent->InteractionType = EInteractionType::MiniGame;
