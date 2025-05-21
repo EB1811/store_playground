@@ -215,8 +215,11 @@ void ACustomerAIManager::SpawnCustomers() {
   for (int32 i = 0; i < CustomersToSpawn; i++) {
     if (BehaviorParams.CustomerSpawnChance < FMath::FRand() * 100) continue;
 
-    ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(CustomerClass, SpawnPoint->GetActorLocation(),
-                                                            SpawnPoint->GetActorRotation(), SpawnParams);
+    ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
+        CustomerClass,
+        SpawnPoint->GetActorLocation() +
+            FVector(FMath::FRandRange(-50.0f, 50.0f), FMath::FRandRange(-50.0f, 50.0f), 0.0f),
+        SpawnPoint->GetActorRotation(), SpawnParams);
 
     const FGenericCustomerData RandomCustomerData =
         GetWeightedRandomItem<TTuple<FGenericCustomerData, float>>(WeightedCustomers, [](const auto& Item) {
@@ -268,6 +271,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
           }
         }
 
+        // TODO: Fix customer movement appearing unnatural.
         MoveCustomerRandom(NavSystem, Customer);
         break;
       }

@@ -14,7 +14,6 @@ ANPCStore::ANPCStore() {
 
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetupAttachment(SceneRoot);
-  Mesh->SetSimulatePhysics(true);
 
   Sprite = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Sprite"));
   Sprite->SetupAttachment(SceneRoot);

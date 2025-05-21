@@ -106,8 +106,6 @@ void AStore::SaveStoreLevelState() {
     StoreLevelState.ActorSaveMap.Add(Buildable->BuildableId, SaveState);
     StoreLevelState.ComponentSaveMap.Add(ComponentSaveState.Id, ComponentSaveState);
     for (FObjectSaveState& ObjectSaveState : FObjectSaveStates) StoreLevelState.ObjectSaveStates.Add(ObjectSaveState);
-    UE_LOG(LogTemp, Warning, TEXT("ComponentSaveState.ComponentObjects number: %d"),
-           ComponentSaveState.ComponentObjects.Num());
   }
 
   // StoreLevelState.BinaryMap.Empty();
