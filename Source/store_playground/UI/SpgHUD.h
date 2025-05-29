@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "store_playground/Player/InputStructs.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "SPGHUD.generated.h"
 
@@ -25,6 +26,8 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UInGameHudWidget> InGameHudWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UPauseMenuWidget> PauseMenuWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -63,20 +66,30 @@ public:
   std::function<void()> SetPlayerCutsceneFunc;  // * Set player state to cutscene (not in control of the player).
   std::function<void()> SetPlayerNormalFunc;    // * Set player state to normal (not in menu, etc.).
   std::function<void()> SetPlayerPausedFunc;    // * Set player state to paused (not in menu, etc.).
-  void LeaveHUD();                              // * Leave the current HUD state (main menu, etc.).
 
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  FInputActions PlayerInputActions;
+
+  void LeaveHUD();                                  // * Leave the current HUD state (main menu, etc.).
   void OpenFocusedMenu(class UUserWidget* Widget);  // * Open a menu in the focused state (dialogue, negotiation, etc.).
+
+  UPROPERTY(EditAnywhere)
+  class UInGameHudWidget* InGameHudWidget;
+  UPROPERTY(EditAnywhere)
+  bool bShowingHud;
+  void ShowInGameHudWidget();
+  void HideInGameHudWidget();
 
   UPROPERTY()
   class UPauseMenuWidget* PauseMenuWidget;
-  UFUNCTION(BlueprintCallable, Category = "Widgets")
+  UFUNCTION(BlueprintCallable)
   void OpenPauseMenu(class ASaveManager* SaveManager);
 
-  UPROPERTY(EditAnywhere, Category = "Widgets")
+  UPROPERTY(EditAnywhere)
   TArray<class UUserWidget*> OpenedWidgets;
-  UFUNCTION(BlueprintCallable, Category = "Widgets")
+  UFUNCTION(BlueprintCallable)
   void PlayerCloseTopOpenMenu();
-  UFUNCTION(BlueprintCallable, Category = "Widgets")
+  UFUNCTION(BlueprintCallable)
   void PlayerCloseAllMenus();
 
   void CloseWidget(class UUserWidget* Widget);

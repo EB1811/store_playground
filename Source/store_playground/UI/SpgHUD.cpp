@@ -17,6 +17,7 @@
 #include "store_playground/UI/Newspaper/NewspaperWidget.h"
 #include "store_playground/UI/Statistics/StatisticsWidget.h"
 #include "store_playground/UI/Ability/AbilityWidget.h"
+#include "store_playground/UI/InGameHud/InGameHudWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/UI/Upgrade/UpgradeListWidget.h"
@@ -46,6 +47,7 @@ void ASpgHUD::BeginPlay() {
   LevelLoadingTransitionWidget =
       CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
 
+  check(InGameHudWidgetClass);
   check(PauseMenuWidgetClass);
   check(InteractionDisplayWidgetClass);
   check(InventoryViewWidgetClass);
@@ -59,6 +61,10 @@ void ASpgHUD::BeginPlay() {
   check(NewspaperWidgetClass);
   check(UpgradeSelectWidgetClass);
   check(AbilityWidgetClass);
+
+  InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
+  InGameHudWidget->AddToViewport(100);
+  InGameHudWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   PauseMenuWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
   PauseMenuWidget->AddToViewport(20);
@@ -147,6 +153,18 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
   OpenedWidgets.Add(Widget);
 
   SetPlayerFocussedFunc();
+}
+
+void ASpgHUD::ShowInGameHudWidget() {
+  InGameHudWidget->SetVisibility(ESlateVisibility::Visible);
+  InGameHudWidget->InitUI(PlayerInputActions);
+
+  bShowingHud = true;
+}
+void ASpgHUD::HideInGameHudWidget() {
+  InGameHudWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  bShowingHud = false;
 }
 
 void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {

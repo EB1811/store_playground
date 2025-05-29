@@ -5,6 +5,7 @@
 #include <functional>
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
+#include "store_playground/Player/InputStructs.h"
 #include "PlayerZDCharacter.generated.h"
 
 // * Corresponds to different input contexts to control allowed input actions in various states.
@@ -14,41 +15,6 @@ enum class EPlayerState : uint8 {
   Cutscene UMETA(DisplayName = "Cutscene"),          // * In a cutscene.
   FocussedMenu UMETA(DisplayName = "FocussedMenu"),  // * In a focussed menu (dialogue, negotiation, etc.).
   Paused UMETA(DisplayName = "Paused"),              // * In a paused state.
-};
-
-USTRUCT()
-struct FInputActions {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* MoveAction;
-
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* OpenPauseMenuAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* CloseTopOpenMenuAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* CloseAllMenusAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* OpenInventoryViewAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* BuildModeAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* InteractAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* OpenNewspaperAction;
-
-  // Will probably turn into a combined "store" view action.
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* OpenStatisticsAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* OpenStoreExpansionsAction;
-
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* AdvanceUIAction;  // * Advance UI (dialogue, negotiation, etc.).
-
-  UPROPERTY(EditAnywhere, Category = "Input")
-  class UInputAction* SkipCutsceneAction;  // * Skip cutscene.
 };
 
 USTRUCT()

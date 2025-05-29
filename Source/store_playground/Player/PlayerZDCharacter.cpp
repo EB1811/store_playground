@@ -121,6 +121,9 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
 
+  HUD->PlayerInputActions = InputActions;
+  HUD->ShowInGameHudWidget();
+
   CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 }
 
@@ -325,7 +328,6 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
   switch (Interactable->InteractionType) {
     case EInteractionType::None: return false; break;
     case EInteractionType::Buildable:
-      UE_LOG(LogTemp, Warning, TEXT("Buildable"));
       if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) return false;
       break;
     case EInteractionType::StockDisplay:
