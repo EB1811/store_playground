@@ -6,6 +6,7 @@
 #include "ItemDataStructs.h"
 #include "ItemBase.generated.h"
 
+// TODO: Consider BoughtAt price when calculating quantity stacks.
 USTRUCT()
 struct FItemPriceData {
   GENERATED_BODY()
