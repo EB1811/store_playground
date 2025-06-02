@@ -16,6 +16,25 @@ public:
   class UNewsHudSlideWidget* NewsHudSlideWidget;
   UPROPERTY(meta = (BindWidget))
   class UControlsHelpersWidget* ControlsHelpersWidget;
+  UPROPERTY(meta = (BindWidget))
+  class URightSlideWidget* DaySlideWidget;
+  UPROPERTY(meta = (BindWidget))
+  class URightSlideSecondaryWidget* OwnedSlideWidget;
+  UPROPERTY(meta = (BindWidget))
+  class URightSlideSecondaryWidget* MoneySlideWidget;
+  UPROPERTY(meta = (BindWidget))
+  class URightSlideInvertedWidget* LocationSlideWidget;
+
+  UPROPERTY(EditAnywhere)
+  const class ANewsGen* NewsGen;
+  UPROPERTY(EditAnywhere)
+  const class ADayManager* DayManager;
+  UPROPERTY(EditAnywhere)
+  const class AStorePhaseManager* StorePhaseManager;
+  UPROPERTY(EditAnywhere)
+  const class AStore* Store;
+  UPROPERTY(EditAnywhere)
+  const class ALevelManager* LevelManager;
 
   void InitUI(FInputActions InputActions);
   void RefreshUI();

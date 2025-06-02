@@ -42,7 +42,8 @@ void AStorePGGameMode::BeginPlay() {
   Super::BeginPlay();
 
   APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-  check(PlayerCharacter && LevelManagerClass && GlobalDataManagerClass && GlobalStaticDataManagerClass &&
+  HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  check(PlayerCharacter && HUD && LevelManagerClass && GlobalDataManagerClass && GlobalStaticDataManagerClass &&
         UpgradeManagerClass && SaveManagerClass && PlayerCommandClass && StorePhaseManagerClass && DayManagerClass &&
         CustomerAIManagerClass && QuestManagerClass && MarketLevelClass && MarketClass && MarketEconomyClass &&
         NewsGenClass && StatisticsGenClass && StoreExpansionManagerClass && StoreClass && MiniGameManagerClass &&
@@ -96,6 +97,12 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->UpgradeManager = UpgradeManager;
   PlayerCharacter->AbilityManager = AbilityManager;
   PlayerCharacter->MiniGameManager = MiniGameManager;
+
+  HUD->NewsGen = NewsGen;
+  HUD->DayManager = DayManager;
+  HUD->StorePhaseManager = StorePhaseManager;
+  HUD->Store = Store;
+  HUD->LevelManager = LevelManager;
 
   NegotiationSystem->MarketEconomy = MarketEconomy;
   NegotiationSystem->DialogueSystem = DialogueSystem;
@@ -230,6 +237,9 @@ void AStorePGGameMode::BeginPlay() {
     if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadLevelsAndPlayerFromDisk();
 
     StorePhaseManager->Start();
+
+    HUD->SetupInitUIStates();
+    HUD->ShowInGameHudWidget();
 
     APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
     ASpawnPoint* SpawnPoint =

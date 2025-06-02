@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "store_playground/Player/InputStructs.h"
 #include "UIStructs.generated.h"
 
 // * Common UI actions.
@@ -11,4 +12,13 @@ struct FUIActionable {
   GENERATED_BODY()
 
   std::function<void()> AdvanceUI;
+};
+
+// * UI Flavor like animations and sounds.
+USTRUCT()
+struct FUIBehaviour {
+  GENERATED_BODY()
+
+  std::function<void()> ShowUI;
+  std::function<void()> HideUI;
 };

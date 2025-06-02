@@ -59,6 +59,17 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UStatisticsWidget> StatisticsWidgetClass;
 
+  UPROPERTY(EditAnywhere)
+  const class ANewsGen* NewsGen;
+  UPROPERTY(EditAnywhere)
+  const class ADayManager* DayManager;
+  UPROPERTY(EditAnywhere)
+  const class AStorePhaseManager* StorePhaseManager;
+  UPROPERTY(EditAnywhere)
+  const class AStore* Store;
+  UPROPERTY(EditAnywhere)
+  const class ALevelManager* LevelManager;
+
   UPROPERTY()
   EHUDState HUDState;
 
@@ -67,8 +78,10 @@ public:
   std::function<void()> SetPlayerNormalFunc;    // * Set player state to normal (not in menu, etc.).
   std::function<void()> SetPlayerPausedFunc;    // * Set player state to paused (not in menu, etc.).
 
-  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  UPROPERTY(EditAnywhere)
   FInputActions PlayerInputActions;
+
+  void SetupInitUIStates();  // * Some stuff needs to be set up after all unreal funcs are called.
 
   void LeaveHUD();                                  // * Leave the current HUD state (main menu, etc.).
   void OpenFocusedMenu(class UUserWidget* Widget);  // * Open a menu in the focused state (dialogue, negotiation, etc.).
@@ -104,7 +117,7 @@ public:
 
   UPROPERTY()
   class UInventoryViewWidget* InventoryViewWidget;
-  void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory, class AStore* Store);
+  void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory, class AStore* _Store);
 
   UPROPERTY()
   class UBuildableDisplayWidget* BuildableDisplayWidget;
@@ -168,7 +181,7 @@ public:
 
   void SetAndOpenMiniGame(class AMiniGameManager* MiniGameManager,
                           class UMiniGameComponent* MiniGameC,
-                          class AStore* Store,
+                          class AStore* _Store,
                           class UInventoryComponent* PlayerInventory);
 
   // * Transitions

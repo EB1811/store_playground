@@ -41,6 +41,7 @@
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Tags/TagsComponent.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
+#include "store_playground/UI/InGameHud/InGameHudWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "EnhancedInputComponent.h"
@@ -122,7 +123,6 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
 
   HUD->PlayerInputActions = InputActions;
-  HUD->ShowInGameHudWidget();
 
   CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 }
@@ -640,6 +640,8 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
 
   // ? Put in level manager?
   auto LevelReadyFunc = [this, LevelChangeC]() {
+    HUD->ShowInGameHudWidget();
+
     ASpawnPoint* SpawnPoint = *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)
                                    .FindByPredicate([LevelChangeC](const ASpawnPoint* SpawnPoint) {
                                      return SpawnPoint->Level == LevelChangeC->LevelToLoad;
@@ -648,6 +650,7 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
   };
+  HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
 }
 void APlayerZDCharacter::LeaveStore() {
@@ -664,6 +667,8 @@ void APlayerZDCharacter::LeaveStore() {
 
   // ? Put in level manager?
   auto LevelReadyFunc = [this, LevelToLoad]() {
+    HUD->ShowInGameHudWidget();
+
     ASpawnPoint* SpawnPoint = *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)
                                    .FindByPredicate([LevelToLoad](const ASpawnPoint* SpawnPoint) {
                                      return SpawnPoint->Level == LevelToLoad;
@@ -672,5 +677,6 @@ void APlayerZDCharacter::LeaveStore() {
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
   };
+  HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
 }

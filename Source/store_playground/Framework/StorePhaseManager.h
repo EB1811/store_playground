@@ -10,7 +10,7 @@ UENUM()
 enum class EStorePhaseState : uint8 {
   None UMETA(DisplayName = "NONE"),
   Morning UMETA(DisplayName = "Morning"),
-  MorningBuildMode UMETA(DisplayName = "Morning Build Mode"),  // * Toggle for when the player wants to build.
+  MorningBuildMode UMETA(DisplayName = "Morning"),  // * Toggle for when the player wants to build.
   ShopOpen UMETA(DisplayName = "Shop Open"),
   Night UMETA(DisplayName = "Night"),
 };

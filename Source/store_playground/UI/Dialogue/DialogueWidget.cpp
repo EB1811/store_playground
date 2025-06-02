@@ -5,6 +5,7 @@
 #include "Logging/LogMacros.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
+#include "store_playground/UI/Components/ControlsHelpersWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -16,11 +17,13 @@ void UDialogueWidget::NativeOnInitialized() {
   DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnNext);
 
   UIActionable.AdvanceUI = [this]() { OnNext(); };
+
+  UIBehaviour.ShowUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Visible); };
+  UIBehaviour.HideUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Collapsed); };
 }
 
 void UDialogueWidget::InitDialogueUI(UDialogueSystem* DialogueSystem) {
   check(DialogueSystem && CloseDialogueUI);
-
   DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
   ChoicesPanelWrapBox->ClearChildren();
 
@@ -93,4 +96,11 @@ void UDialogueWidget::OnChoiceSelect(int32 ChoiceIndex) {
   FString SpeakerName = NextDialogue.State == EDialogueState::PlayerTalk ? "Player" : "NPC";
   UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                      NextDialogue.DialogueData->Action == EDialogueAction::End);
+}
+
+void UDialogueWidget::InitUI(FInputActions InputActions) {
+  ControlsHelpersWidget->SetComponentUI({
+      {FText::FromString("Leave"), InputActions.CloseTopOpenMenuAction},
+      {FText::FromString("Next"), InputActions.AdvanceUIAction},
+  });
 }

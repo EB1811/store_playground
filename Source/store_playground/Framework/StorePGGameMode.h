@@ -65,6 +65,8 @@ public:
 
   // * Storing some properties to be used in the post level load init.
   UPROPERTY()
+  class ASpgHUD* HUD;
+  UPROPERTY()
   class ASaveManager* SaveManager;
   UPROPERTY()
   class AStorePhaseManager* StorePhaseManager;

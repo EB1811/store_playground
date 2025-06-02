@@ -8,6 +8,7 @@
 
 // * Responsible for tracking the current day, starting new days, tracking times events, etc.
 
+// TODO: Store debt owned day and amount.
 USTRUCT()
 struct FDayManagerParams {
   GENERATED_BODY()

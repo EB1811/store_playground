@@ -18,6 +18,8 @@ public:
   class UDialogueBoxWidget* DialogueBoxWidget;
   UPROPERTY(meta = (BindWidget))
   class UWrapBox* ChoicesPanelWrapBox;
+  UPROPERTY(meta = (BindWidget))
+  class UControlsHelpersWidget* ControlsHelpersWidget;
 
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UDialogueChoiceWidget> DialogueChoiceWidgetClass;
@@ -33,8 +35,15 @@ public:
   UFUNCTION()
   void OnChoiceSelect(int32 ChoiceIndex);
 
+  UFUNCTION(BlueprintImplementableEvent)
+  void OnVisibilityChangeRequested(ESlateVisibility NewVisibility);
+
+  void InitUI(FInputActions InputActions);
+
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
+  UPROPERTY(EditAnywhere)
+  FUIBehaviour UIBehaviour;
 
   std::function<void()> CloseDialogueUI;
 };

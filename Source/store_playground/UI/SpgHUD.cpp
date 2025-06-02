@@ -63,8 +63,13 @@ void ASpgHUD::BeginPlay() {
   check(AbilityWidgetClass);
 
   InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
-  InGameHudWidget->AddToViewport(100);
+  InGameHudWidget->AddToViewport(0);
   InGameHudWidget->SetVisibility(ESlateVisibility::Collapsed);
+  InGameHudWidget->NewsGen = NewsGen;
+  InGameHudWidget->DayManager = DayManager;
+  InGameHudWidget->StorePhaseManager = StorePhaseManager;
+  InGameHudWidget->Store = Store;
+  InGameHudWidget->LevelManager = LevelManager;
 
   PauseMenuWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
   PauseMenuWidget->AddToViewport(20);
@@ -99,6 +104,7 @@ void ASpgHUD::BeginPlay() {
   NpcStoreWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   DialogueWidget = CreateWidget<UDialogueWidget>(GetWorld(), UDialogueWidgetClass);
+  DialogueWidget->InitUI(PlayerInputActions);
   DialogueWidget->AddToViewport(10);
   DialogueWidget->SetVisibility(ESlateVisibility::Collapsed);
 
@@ -133,31 +139,63 @@ void ASpgHUD::BeginPlay() {
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void ASpgHUD::SetupInitUIStates() {
+  // * Input actions are created in SetupPlayerInputComponent, but it runs after BeginPlay, so we need to set them here.
+  InGameHudWidget->InitUI(PlayerInputActions);
+  DialogueWidget->InitUI(PlayerInputActions);
+}
+
+// * For when animations / sounds are used.
+inline void ShowWidget(UUserWidget* Widget) {
+  if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
+    FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
+    check(UIBehaviour->ShowUI);
+    return UIBehaviour->ShowUI();
+  }
+
+  Widget->SetVisibility(ESlateVisibility::Visible);
+}
+inline void HideWidget(UUserWidget* Widget) {
+  if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
+    FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
+    check(UIBehaviour->HideUI);
+    return UIBehaviour->HideUI();
+  }
+
+  Widget->SetVisibility(ESlateVisibility::Collapsed);
+}
+
 void ASpgHUD::LeaveHUD() {
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(false);
 
+  ShowInGameHudWidget();
   SetPlayerNormalFunc();
 }
 
+// TODO: Change to use FUIBehaviour and FUIActionable structs.
 void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
-  for (auto* W : OpenedWidgets) W->SetVisibility(ESlateVisibility::Collapsed);
+  for (auto* OpenedWidget : OpenedWidgets) HideWidget(OpenedWidget);
   OpenedWidgets.Empty();
 
-  Widget->SetVisibility(ESlateVisibility::Visible);
+  ShowWidget(Widget);
+
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(Widget);
 
+  HideInGameHudWidget();
   SetPlayerFocussedFunc();
 }
 
 void ASpgHUD::ShowInGameHudWidget() {
+  if (bShowingHud) return InGameHudWidget->RefreshUI();
+
   InGameHudWidget->SetVisibility(ESlateVisibility::Visible);
-  InGameHudWidget->InitUI(PlayerInputActions);
+  InGameHudWidget->RefreshUI();
 
   bShowingHud = true;
 }
@@ -186,7 +224,8 @@ void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {
 void ASpgHUD::PlayerCloseTopOpenMenu() {
   if (OpenedWidgets.IsEmpty()) return;
 
-  OpenedWidgets.Pop()->SetVisibility(ESlateVisibility::Collapsed);
+  auto* Widget = OpenedWidgets.Pop();
+  HideWidget(Widget);
 
   if (!OpenedWidgets.IsEmpty()) return;
 
@@ -198,7 +237,7 @@ void ASpgHUD::PlayerCloseTopOpenMenu() {
 }
 
 void ASpgHUD::PlayerCloseAllMenus() {
-  for (UUserWidget* Widget : OpenedWidgets) Widget->SetVisibility(ESlateVisibility::Collapsed);
+  for (UUserWidget* Widget : OpenedWidgets) HideWidget(Widget);
 
   if (EarlyCloseWidgetFunc) EarlyCloseWidgetFunc();
   EarlyCloseWidgetFunc = nullptr;
@@ -209,11 +248,11 @@ void ASpgHUD::PlayerCloseAllMenus() {
 
 // * Called by the widget themselves.
 void ASpgHUD::CloseWidget(UUserWidget* Widget) {
-  if (!Widget) return;
+  check(Widget);
 
-  Widget->SetVisibility(ESlateVisibility::Collapsed);
+  // ? Set visibility in the widget itself?
+  HideWidget(Widget);
   OpenedWidgets.RemoveSingle(Widget);
-
   EarlyCloseWidgetFunc = nullptr;
 
   if (!OpenedWidgets.IsEmpty()) return;
@@ -238,18 +277,18 @@ void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
 void ASpgHUD::CloseInteractionPopup() { InteractionPopupWidget->SetVisibility(ESlateVisibility::Collapsed); }
 
 // todo-low: Update.
-void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, AStore* Store) {
+void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, AStore* _Store) {
   check(InventoryViewWidget);
   if (OpenedWidgets.Contains(InventoryViewWidget)) return CloseWidget(InventoryViewWidget);
 
   InventoryViewWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
   InventoryViewWidget->PlayerInventoryWidget->InventoryTitleText->SetText(FText::FromString("Player"));
 
-  InventoryViewWidget->Store = Store;
+  InventoryViewWidget->Store = _Store;
 
   InventoryViewWidget->RefreshInventoryViewUI();
 
-  InventoryViewWidget->SetVisibility(ESlateVisibility::Visible);
+  ShowWidget(InventoryViewWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -267,7 +306,7 @@ void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable,
   BuildableDisplayWidget->BuildDecorationFunc = BuildDecorationFunc;
   BuildableDisplayWidget->CloseWidgetFunc = [this]() { CloseWidget(BuildableDisplayWidget); };
 
-  BuildableDisplayWidget->SetVisibility(ESlateVisibility::Visible);
+  ShowWidget(BuildableDisplayWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -300,7 +339,7 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
         PlayerToDisplayFunc(Item, PlayerInventory);
       };
 
-  StockDisplayWidget->SetVisibility(ESlateVisibility::Visible);
+  ShowWidget(StockDisplayWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -320,7 +359,7 @@ void ASpgHUD::SetAndOpenStoreExpansionsList(const AStoreExpansionManager* StoreE
   };
   StoreExpansionsListWidget->RefreshUI();
 
-  StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Visible);
+  ShowWidget(StoreExpansionsListWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -341,7 +380,7 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
   PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
   PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
 
-  PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Visible);
+  ShowWidget(PlayerAndContainerWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -403,7 +442,6 @@ void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInve
     if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
   };
   NegotiationWidget->InitNegotiationUI();
-  NegotiationWidget->SetVisibility(ESlateVisibility::Visible);
 
   OpenFocusedMenu(NegotiationWidget);
 }
@@ -433,8 +471,7 @@ void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
   NewspaperWidget->NewsGenRef = NewsGenRef;
   NewspaperWidget->RefreshNewspaperUI();
 
-  NewspaperWidget->SetVisibility(ESlateVisibility::Visible);
-
+  ShowWidget(NewspaperWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -450,8 +487,7 @@ void ASpgHUD::SetAndOpenStatistics(const AStatisticsGen* StatisticsGenRef) {
   StatisticsWidget->StatisticsGenRef = StatisticsGenRef;
   StatisticsWidget->RefreshUI();
 
-  StatisticsWidget->SetVisibility(ESlateVisibility::Visible);
-
+  ShowWidget(StatisticsWidget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -484,10 +520,10 @@ void ASpgHUD::SetAndOpenAbilitySelect(class AAbilityManager* AbilityManager) {
 
 void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
                                  UMiniGameComponent* MiniGameC,
-                                 AStore* Store,
+                                 AStore* _Store,
                                  UInventoryComponent* PlayerInventory) {
   UUserWidget* MiniGameWidget = MiniGameManager->GetMiniGameWidget(
-      MiniGameC->MiniGameType, Store, PlayerInventory, [this](UUserWidget* Widget) { CloseWidget(Widget); });
+      MiniGameC->MiniGameType, _Store, PlayerInventory, [this](UUserWidget* Widget) { CloseWidget(Widget); });
 
   MiniGameWidget->AddToViewport(10);
   OpenFocusedMenu(MiniGameWidget);
@@ -497,6 +533,7 @@ void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
 
   StorePhaseTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
   StorePhaseTransitionWidget->FadeOutEndFunc = [this]() {
+    ShowInGameHudWidget();
     SetPlayerNormalFunc();
 
     StorePhaseTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
