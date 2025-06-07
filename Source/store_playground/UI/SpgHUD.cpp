@@ -11,7 +11,7 @@
 #include "store_playground/UI/Inventory/InventoryViewWidget.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationWidget.h"
-#include "store_playground/UI/NPCStore/NpcStoreWidget.h"
+#include "store_playground/UI/NPCStore/NpcStoreViewWidget.h"
 #include "store_playground/UI/Store/StockDisplayWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayWidget.h"
 #include "store_playground/UI/Newspaper/NewspaperWidget.h"
@@ -30,6 +30,8 @@
 #include "store_playground/UI/Transitions/LevelLoadingTransitionWidget.h"
 #include "store_playground/UI/Cutscene/CutsceneWidget.h"
 #include "store_playground/UI/WorldUI/Player/InteractionDisplayWidget.h"
+#include "store_playground/UI/NpcStore/NpcStoreViewWidget.h"
+#include "store_playground/UI/Store/StoreViewWidget.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
 #include "Components/TextBlock.h"
 
@@ -53,7 +55,7 @@ void ASpgHUD::BeginPlay() {
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
   check(BuildableDisplayWidgetClass);
-  check(NpcStoreWidgetClass);
+  check(NpcStoreViewWidgetClass);
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
   check(StockDisplayWidgetClass);
@@ -99,9 +101,9 @@ void ASpgHUD::BeginPlay() {
   PlayerAndContainerWidget->AddToViewport(10);
   PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  NpcStoreWidget = CreateWidget<UNpcStoreWidget>(GetWorld(), NpcStoreWidgetClass);
-  NpcStoreWidget->AddToViewport(10);
-  NpcStoreWidget->SetVisibility(ESlateVisibility::Collapsed);
+  NpcStoreViewWidget = CreateWidget<UNpcStoreViewWidget>(GetWorld(), NpcStoreViewWidgetClass);
+  NpcStoreViewWidget->AddToViewport(10);
+  NpcStoreViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   DialogueWidget = CreateWidget<UDialogueWidget>(GetWorld(), UDialogueWidgetClass);
   DialogueWidget->InitUI(PlayerInputActions);
@@ -120,9 +122,9 @@ void ASpgHUD::BeginPlay() {
   NewspaperWidget->AddToViewport(10);
   NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  StatisticsWidget = CreateWidget<UStatisticsWidget>(GetWorld(), StatisticsWidgetClass);
-  StatisticsWidget->AddToViewport(10);
-  StatisticsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  StoreViewWidget = CreateWidget<UStoreViewWidget>(GetWorld(), StoreViewWidgetClass);
+  StoreViewWidget->AddToViewport(10);
+  StoreViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   UpgradeSelectWidget = CreateWidget<UUpgradeListWidget>(GetWorld(), UpgradeSelectWidgetClass);
   UpgradeSelectWidget->AddToViewport(10);
@@ -277,23 +279,15 @@ void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
 void ASpgHUD::CloseInteractionPopup() { InteractionPopupWidget->SetVisibility(ESlateVisibility::Collapsed); }
 
 // todo-low: Update.
-void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory, AStore* _Store) {
+void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory) {
   check(InventoryViewWidget);
   if (OpenedWidgets.Contains(InventoryViewWidget)) return CloseWidget(InventoryViewWidget);
 
-  InventoryViewWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
-  InventoryViewWidget->PlayerInventoryWidget->InventoryTitleText->SetText(FText::FromString("Player"));
+  InventoryViewWidget->InitUI(PlayerInputActions, Store, MarketEconomy, PlayerInventory,
+                              [this] { CloseWidget(InventoryViewWidget); });
+  InventoryViewWidget->RefreshUI();
 
-  InventoryViewWidget->Store = _Store;
-
-  InventoryViewWidget->RefreshInventoryViewUI();
-
-  ShowWidget(InventoryViewWidget);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(InventoryViewWidget);
+  OpenFocusedMenu(InventoryViewWidget);
 }
 
 void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable,
@@ -312,6 +306,18 @@ void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable,
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
   OpenedWidgets.Add(BuildableDisplayWidget);
+}
+
+void ASpgHUD::SetAndOpenStoreView(const UInventoryComponent* PlayerInventory) {
+  check(StoreViewWidget);
+  if (OpenedWidgets.Contains(StoreViewWidget)) return CloseWidget(StoreViewWidget);
+
+  StoreViewWidget->InitUI(PlayerInputActions, DayManager, StorePhaseManager, MarketEconomy, Market, StatisticsGen,
+                          UpgradeManager, AbilityManager, PlayerInventory, Store, StoreExpansionManager,
+                          [this] { CloseWidget(StoreViewWidget); });
+  StoreViewWidget->RefreshUI();
+
+  OpenFocusedMenu(StoreViewWidget);
 }
 
 void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
@@ -347,8 +353,7 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
   OpenedWidgets.Add(StockDisplayWidget);
 }
 
-void ASpgHUD::SetAndOpenStoreExpansionsList(const AStoreExpansionManager* StoreExpansionManager,
-                                            std::function<void(EStoreExpansionLevel)> SelectExpansionFunc) {
+void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLevel)> SelectExpansionFunc) {
   if (OpenedWidgets.Contains(StoreExpansionsListWidget)) return CloseWidget(StoreExpansionsListWidget);
 
   StoreExpansionsListWidget->StoreExpansionManagerRef = StoreExpansionManager;
@@ -388,35 +393,16 @@ void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
   OpenedWidgets.Add(PlayerAndContainerWidget);
 }
 
-// todo-low: Check for refresh of open widgets.
-void ASpgHUD::SetAndOpenNPCStore(UInventoryComponent* NPCStoreInventory,
-                                 UInventoryComponent* PlayerInventory,
-                                 std::function<bool(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
-                                 std::function<bool(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc) {
-  check(NpcStoreWidget);
+void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
+                                 UInventoryComponent* NPCStoreInventory,
+                                 UInventoryComponent* PlayerInventory) {
+  check(NpcStoreC && NPCStoreInventory && PlayerInventory);
 
-  NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
-  NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryTitleText->SetText(
-      FText::FromString("Player"));
-  NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->InventoryRef = NPCStoreInventory;
-  NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->InventoryTitleText->SetText(
-      FText::FromString("NPC Store"));
+  NpcStoreViewWidget->InitUI(PlayerInputActions, MarketEconomy, Market, Store, NpcStoreC, NPCStoreInventory,
+                             PlayerInventory, [this] { CloseWidget(NpcStoreViewWidget); });
+  NpcStoreViewWidget->RefreshUI();
 
-  NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
-  NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
-
-  NpcStoreWidget->PlayerAndContainerWidget->PlayerInventoryWidget->OnDropItemFunc =
-      [this, StoreToPlayerFunc, NPCStoreInventory](UItemBase* Item, int32 Quantity) {
-        if (StoreToPlayerFunc(Item, NPCStoreInventory))
-          if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
-      };
-  NpcStoreWidget->PlayerAndContainerWidget->ContainerInventoryWidget->OnDropItemFunc =
-      [this, PlayerToStoreFunc, PlayerInventory](UItemBase* Item, int32 Quantity) {
-        if (PlayerToStoreFunc(Item, PlayerInventory))
-          if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
-      };
-
-  OpenFocusedMenu(NpcStoreWidget);
+  OpenFocusedMenu(NpcStoreViewWidget);
 }
 
 void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc) {
@@ -439,7 +425,7 @@ void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInve
   NegotiationWidget->PlayerInventoryRef = PlayerInventoryC;
   NegotiationWidget->CloseNegotiationUI = [this] { CloseWidget(NegotiationWidget); };
   NegotiationWidget->RefreshInventoryUI = [this] {
-    if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
+    // if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
   };
   NegotiationWidget->InitNegotiationUI();
 
@@ -479,29 +465,13 @@ void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
   OpenedWidgets.Add(NewspaperWidget);
 }
 
-void ASpgHUD::SetAndOpenStatistics(const AStatisticsGen* StatisticsGenRef) {
-  check(StatisticsWidget);
-
-  if (OpenedWidgets.Contains(StatisticsWidget)) return CloseWidget(StatisticsWidget);
-
-  StatisticsWidget->StatisticsGenRef = StatisticsGenRef;
-  StatisticsWidget->RefreshUI();
-
-  ShowWidget(StatisticsWidget);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(StatisticsWidget);
-}
-
-void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, AUpgradeManager* UpgradeManager) {
+void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, AUpgradeManager* _UpgradeManager) {
   check(UpgradeSelectWidget);
 
-  UpgradeSelectWidget->UpgradeManagerRef = UpgradeManager;
+  UpgradeSelectWidget->UpgradeManagerRef = _UpgradeManager;
 
-  UpgradeSelectWidget->SelectUpgradeFunc = [this, UpgradeManager](FName UpgradeID) {
-    UpgradeManager->SelectUpgrade(UpgradeID);
+  UpgradeSelectWidget->SelectUpgradeFunc = [this, _UpgradeManager](FName UpgradeID) {
+    _UpgradeManager->SelectUpgrade(UpgradeID);
   };
   UpgradeSelectWidget->SetUpgradeClass(UpgradeSelectC->UpgradeClass, UpgradeSelectC->Title,
                                        UpgradeSelectC->Description);
@@ -509,10 +479,10 @@ void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, A
   OpenFocusedMenu(UpgradeSelectWidget);
 }
 
-void ASpgHUD::SetAndOpenAbilitySelect(class AAbilityManager* AbilityManager) {
+void ASpgHUD::SetAndOpenAbilitySelect(class AAbilityManager* _AbilityManager) {
   check(AbilityWidget);
 
-  AbilityWidget->AbilityManagerRef = AbilityManager;
+  AbilityWidget->AbilityManagerRef = _AbilityManager;
   AbilityWidget->RefreshUI();
 
   OpenFocusedMenu(AbilityWidget);

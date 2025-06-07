@@ -30,16 +30,19 @@ void UInventoryComponent::BeginPlay() {
   }
 }
 
-void UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) {
+// TODO: Check for bought price.
+auto UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) -> UItemBase* {
   if (TObjectPtr<UItemBase>* ArrayItem =
           ItemsArray.FindByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; })) {
     if (InventoryType == EInventoryType::Container) (*ArrayItem)->Quantity += Quantity;
-    return;
+    return (*ArrayItem);
   }
 
   UItemBase* ItemCopy = Item->CreateItemCopy();
   ItemCopy->Quantity = Quantity;
   ItemsArray.Add(ItemCopy);
+
+  return ItemCopy;  // Return the new item reference if needed.
 }
 
 void UInventoryComponent::RemoveItem(const UItemBase* Item, int32 Quantity) {

@@ -29,14 +29,15 @@ auto TransferItem(UInventoryComponent* From,
     }
   }
 
+  UItemBase* ItemCopy = nullptr;
   switch (From->InventoryType) {
     case EInventoryType::Container:
     case EInventoryType::StockDisplay:
       From->RemoveItem(Item, Quantity);
-      To->AddItem(Item, Quantity);
+      ItemCopy = To->AddItem(Item, Quantity);
       break;
-    case EInventoryType::Store: To->AddItem(Item, Quantity); break;
+    case EInventoryType::Store: ItemCopy = To->AddItem(Item, Quantity); break;
   }
 
-  return FInventoryTransferRes{true};
+  return FInventoryTransferRes{true, ItemCopy};
 }

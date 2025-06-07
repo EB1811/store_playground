@@ -338,9 +338,9 @@ void ASaveManager::LoadInventoryCSaveState(UInventoryComponent* InventoryC,
     Item->Serialize(OAr);
     Item->UniqueItemID = FGuid::NewGuid();
 
-    for (const auto& Id : Market->EligibleItemIds) {
-      if (Id == Item->ItemID) {
-        Item->SetItemFromBase(Market->AllItemsMap[Id]);
+    for (const auto& MappedItem : Market->AllItemsMap) {
+      if (MappedItem.Key == Item->ItemID) {
+        Item->SetItemFromBase(Market->AllItemsMap[MappedItem.Key]);
         break;
       }
     }

@@ -31,9 +31,7 @@ struct FInputActions {
 
   // Will probably turn into a combined "store" view action.
   UPROPERTY(EditAnywhere, Category = "Input")
-  UInputAction* OpenStatisticsAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  UInputAction* OpenStoreExpansionsAction;
+  UInputAction* OpenStoreViewAction;
 
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* AdvanceUIAction;  // * Advance UI (dialogue, negotiation, etc.).

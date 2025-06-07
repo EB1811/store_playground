@@ -17,6 +17,7 @@ struct FStatisticsGenParams {
   int32 MaxHistoryCount;  // * In days.
 };
 
+// TODO: Store total spending.
 USTRUCT()
 struct FStoreStatistics {
   GENERATED_BODY()
@@ -33,6 +34,11 @@ struct FStoreStatistics {
   TArray<float> RevenueHistory;
   UPROPERTY(EditAnywhere, SaveGame)
   float TotalRevenueToDate;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<float> ExpensesHistory;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float TotalExpensesToDate;
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<float> StoreStockValueHistory;
@@ -93,6 +99,8 @@ public:
   void ItemDeal(const FItemDeal ItemDeal);
   void StoreMoneyGained(float Amount);
   void StoreMoneySpent(float Amount);
+
+  // TODO: Calc net worth.
   auto CalcTodaysStoreProfit() const -> float;
   auto CalcTotalStoreStockValue() const -> float;
 

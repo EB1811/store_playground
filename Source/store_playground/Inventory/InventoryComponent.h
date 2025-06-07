@@ -34,7 +34,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Inventory TESTING | Init State")
   TArray<FDataTableRowHandle> InitItemIds;
 
-  void AddItem(const UItemBase* Item, int32 Quantity = 1);
+  auto AddItem(const UItemBase* Item, int32 Quantity = 1) -> UItemBase*;
   void RemoveItem(const UItemBase* Item, int32 Quantity = 1);
 };
 
@@ -43,6 +43,7 @@ struct FInventoryTransferRes {
   GENERATED_BODY()
 
   bool bSuccess;
+  UItemBase* ItemCopy;  // Since a new copy is created, this is the new item reference.
 };
 auto TransferItem(UInventoryComponent* From,
                   UInventoryComponent* To,

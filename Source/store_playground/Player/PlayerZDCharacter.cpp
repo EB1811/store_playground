@@ -90,10 +90,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                        &APlayerZDCharacter::EnterBuildMode);
     EnhancedInputComponent->BindAction(InputActions.OpenNewspaperAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenNewspaper);
-    EnhancedInputComponent->BindAction(InputActions.OpenStatisticsAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::OpenStatistics);
-    EnhancedInputComponent->BindAction(InputActions.OpenStoreExpansionsAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::OpenStoreExpansions);
+    EnhancedInputComponent->BindAction(InputActions.OpenStoreViewAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::OpenStoreView);
     EnhancedInputComponent->BindAction(InputActions.InteractAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::Interact);
     EnhancedInputComponent->BindAction(InputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
@@ -188,7 +186,7 @@ void APlayerZDCharacter::PlayerCloseTopOpenMenu(const FInputActionValue& Value) 
 void APlayerZDCharacter::PlayerCloseAllMenus(const FInputActionValue& Value) { HUD->PlayerCloseAllMenus(); }
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
-  HUD->SetAndOpenInventoryView(PlayerInventoryComponent, Store);
+  HUD->SetAndOpenInventoryView(PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
@@ -205,27 +203,29 @@ void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
   // SaveManager->CreateNewSaveGame();
 }
 
-void APlayerZDCharacter::OpenStatistics(const FInputActionValue& Value) { HUD->SetAndOpenStatistics(StatisticsGen); }
-
-void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
-  auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
-    if (!StoreExpansionManager->SelectExpansion(ExpansionLevel)) return;
-
-    auto LevelReadyFunc = [&]() {
-      ASpawnPoint* SpawnPoint =
-          *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
-            return SpawnPoint->Level == ELevel::Store;
-          });
-      check(SpawnPoint);
-
-      this->SetActorLocation(SpawnPoint->GetActorLocation());
-      UE_LOG(LogTemp, Warning, TEXT("Player location set to spawn point: %s"), *SpawnPoint->GetName());
-    };
-    LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
-  };
-
-  HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
+void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
+  HUD->SetAndOpenStoreView(PlayerInventoryComponent);
 }
+
+// void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
+//   auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
+//     if (!StoreExpansionManager->SelectExpansion(ExpansionLevel)) return;
+
+//     auto LevelReadyFunc = [&]() {
+//       ASpawnPoint* SpawnPoint =
+//           *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
+//             return SpawnPoint->Level == ELevel::Store;
+//           });
+//       check(SpawnPoint);
+
+//       this->SetActorLocation(SpawnPoint->GetActorLocation());
+//       UE_LOG(LogTemp, Warning, TEXT("Player location set to spawn point: %s"), *SpawnPoint->GetName());
+//     };
+//     LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
+//   };
+
+//   HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
+// }
 
 // Rechecking on input to avoid problems with the interaction frequency not keeping up.
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
@@ -516,18 +516,7 @@ void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
 }
 
 void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventoryComponent* StoreInventoryC) {
-  auto StoreToPlayerFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
-                                                              UInventoryComponent* SourceInventory) {
-    check(SourceInventory == StoreInventoryC);
-    return Market->BuyItem(NpcStoreC, SourceInventory, PlayerInventoryComponent, Store, DroppedItem, 1);
-  };
-  auto PlayerToStoreFunc = [this, NpcStoreC, StoreInventoryC](UItemBase* DroppedItem,
-                                                              UInventoryComponent* SourceInventory) {
-    check(SourceInventory == PlayerInventoryComponent);
-    return Market->SellItem(NpcStoreC, StoreInventoryC, SourceInventory, Store, DroppedItem, 1);
-  };
-
-  HUD->SetAndOpenNPCStore(StoreInventoryC, PlayerInventoryComponent, PlayerToStoreFunc, StoreToPlayerFunc);
+  HUD->SetAndOpenNPCStore(NpcStoreC, StoreInventoryC, PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC, std::function<void()> OnDialogueEndFunc) {

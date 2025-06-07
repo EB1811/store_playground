@@ -91,6 +91,29 @@ UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
   return AllItemsMap[RandomId]->CreateItemCopy();
 }
 
+auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float {
+  check(NpcStoreC);
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [ItemID](const FEconItem& EconItem) { return EconItem.ItemID == ItemID; });
+  check(EconItem);
+
+  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
+  float TotalPrice = EconItem->CurrentPrice * (1.0f + StoreMarkup);
+  return TotalPrice;
+}
+auto AMarket::GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float {
+  check(NpcStoreC);
+
+  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
+      [ItemID](const FEconItem& EconItem) { return EconItem.ItemID == ItemID; });
+  check(EconItem);
+
+  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
+  float TotalPrice = EconItem->CurrentPrice * (1.0f - StoreMarkup);
+  return TotalPrice;
+}
+
 auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
                       UInventoryComponent* NPCStoreInventory,
                       UInventoryComponent* PlayerInventory,
@@ -109,12 +132,18 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
   float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
   float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + StoreMarkup);
   UE_LOG(LogTemp, Warning, TEXT("StoreMarkup: %f"), StoreMarkup);
-  UE_LOG(LogTemp, Warning, TEXT("TotalPrice: %f"), TotalPrice);
-  if (PlayerStore->Money < TotalPrice) return false;
 
-  if (!TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity).bSuccess) return false;
+  if (PlayerStore->Money < TotalPrice) {
+    UE_LOG(LogTemp, Warning, TEXT("Not enough money to buy item: %s, TotalPrice: %.0f, Money: %.0f"),
+           *Item->TextData.Name.ToString(), TotalPrice, PlayerStore->Money);
+    return false;
+  }
 
-  PlayerStore->ItemBought(Item, TotalPrice);
+  auto TransferItemRes = TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity);
+  if (!TransferItemRes.bSuccess) return false;
+
+  check(TransferItemRes.ItemCopy);
+  PlayerStore->ItemBought(TransferItemRes.ItemCopy, TotalPrice);
   return true;
 }
 

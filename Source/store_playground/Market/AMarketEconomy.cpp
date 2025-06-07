@@ -53,7 +53,7 @@ inline void MovePopPopulation(FPopEconData& From, FPopEconData& To, float Popula
 
 AMarketEconomy::AMarketEconomy() {
   PrimaryActorTick.bCanEverTick = true;
-  PrimaryActorTick.TickInterval = 1;
+  PrimaryActorTick.TickInterval = 10.0f;
 
   EconomyParams.bRunSimulation = true;
   EconomyParams.NeedsfulfilledPercent = 0.6f;
@@ -73,6 +73,14 @@ void AMarketEconomy::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
 
   if (EconomyParams.bRunSimulation) PerformEconomyTick();
+}
+
+auto AMarketEconomy::GetMarketPrice(const FName ItemId) const -> float {
+  const FEconItem* EconItem =
+      EconItems.FindByPredicate([ItemId](const FEconItem& Item) { return Item.ItemID == ItemId; });
+  check(EconItem);
+
+  return EconItem->CurrentPrice;
 }
 
 void AMarketEconomy::PerformEconomyTick() {

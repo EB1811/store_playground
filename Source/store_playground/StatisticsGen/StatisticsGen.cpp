@@ -68,6 +68,8 @@ void AStatisticsGen::CalcDayStatistics() {
   StoreStatistics.TotalProfitToDate += CalcTodaysStoreProfit();
   StoreStatistics.RevenueHistory.Add(TodaysStoreMoneyActivity.AllIncome);
   StoreStatistics.TotalRevenueToDate += TodaysStoreMoneyActivity.AllIncome;
+  StoreStatistics.ExpensesHistory.Add(TodaysStoreMoneyActivity.AllExpenses);
+  StoreStatistics.TotalExpensesToDate += TodaysStoreMoneyActivity.AllExpenses;
   StoreStatistics.StoreStockValueHistory.Add(CalcTotalStoreStockValue());
 
   if (StoreStatistics.CurrentHistoryCount < StatisticsGenParams.MaxHistoryCount) {

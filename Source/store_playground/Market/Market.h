@@ -79,6 +79,8 @@ public:
                          TArray<EItemEconType> ItemEconType = {}) const -> TArray<class UItemBase*>;
   auto GetRandomItem(const TArray<FName> ItemIds) const -> class UItemBase*;
 
+  auto GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float;
+  auto GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float;
   auto BuyItem(class UNpcStoreComponent* NpcStoreC,
                class UInventoryComponent* NPCStoreInventory,
                class UInventoryComponent* PlayerInventory,

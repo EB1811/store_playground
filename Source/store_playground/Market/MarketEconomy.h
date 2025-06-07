@@ -93,6 +93,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TMap<EItemEconType, FEconTypePrices> EconTypePricesMap;
 
+  auto GetMarketPrice(const FName ItemId) const -> float;
+
   void PerformEconomyTick();
 
   auto GetPopWeightingMulti(const FCustomerPop& Pop) const -> float;

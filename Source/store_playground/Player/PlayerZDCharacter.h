@@ -88,9 +88,7 @@ public:
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenNewspaper(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void OpenStatistics(const FInputActionValue& Value);
-  UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void OpenStoreExpansions(const FInputActionValue& Value);
+  void OpenStoreView(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Interact(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
