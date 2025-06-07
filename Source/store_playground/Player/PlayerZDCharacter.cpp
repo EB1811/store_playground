@@ -476,33 +476,7 @@ void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
 
 void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC,
                                            UInventoryComponent* DisplayInventoryC) {
-  auto PlayerToDisplayFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
-                                                                      UInventoryComponent* SourceInventory) {
-    check(SourceInventory == PlayerInventoryComponent);
-    // ? Cache the stock display inventories?
-    bool bSuccess = TransferItem(SourceInventory, DisplayInventoryC, DroppedItem).bSuccess;
-    if (bSuccess) {
-      StockDisplayC->SetDisplaySprite(DroppedItem->AssetData.Sprite);
-      Store->InitStockDisplays();
-    }
-
-    return bSuccess;
-  };
-  auto DisplayToPlayerFunc = [this, StockDisplayC, DisplayInventoryC](UItemBase* DroppedItem,
-                                                                      UInventoryComponent* SourceInventory) {
-    check(SourceInventory == DisplayInventoryC);
-
-    bool bSuccess = TransferItem(SourceInventory, PlayerInventoryComponent, DroppedItem).bSuccess;
-    if (bSuccess) {
-      StockDisplayC->ClearDisplaySprite();
-      Store->InitStockDisplays();
-    }
-
-    return bSuccess;
-  };
-
-  HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent, PlayerToDisplayFunc,
-                              DisplayToPlayerFunc);
+  HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {

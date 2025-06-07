@@ -29,24 +29,26 @@ void UNpcStoreViewWidget::NativeOnInitialized() {
 void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
   check(bIsConfirming);
 
-  bool Success = false;
+  bool bSuccess = false;
   switch (TradeType) {
     case ETradeType::Buy: {
+      if (!ItemsWidget->SelectedItem) return;
       auto ItemToBuy = StoreInventory->ItemsArray.FindByPredicate(
           [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
       check(ItemToBuy);
 
-      Success = Market->BuyItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToBuy, Quantity);
-      UE_LOG(LogTemp, Warning, TEXT("Success: %s"), Success ? TEXT("true") : TEXT("false"));
+      bSuccess = Market->BuyItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToBuy, Quantity);
+      UE_LOG(LogTemp, Warning, TEXT("Success: %s"), bSuccess ? TEXT("true") : TEXT("false"));
       break;
     }
     case ETradeType::Sell: {
+      if (!ItemsWidget->SelectedItem) return;
       auto ItemToSell = PlayerInventory->ItemsArray.FindByPredicate(
           [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
       check(ItemToSell);
 
-      Success = Market->SellItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToSell, Quantity);
-      UE_LOG(LogTemp, Warning, TEXT("Success: %s"), Success ? TEXT("true") : TEXT("false"));
+      bSuccess = Market->SellItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToSell, Quantity);
+      UE_LOG(LogTemp, Warning, TEXT("Success: %s"), bSuccess ? TEXT("true") : TEXT("false"));
       break;
     }
     default: checkNoEntry();

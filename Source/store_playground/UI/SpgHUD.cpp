@@ -12,7 +12,7 @@
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationWidget.h"
 #include "store_playground/UI/NPCStore/NpcStoreViewWidget.h"
-#include "store_playground/UI/Store/StockDisplayWidget.h"
+#include "store_playground/UI/Store/StockDisplayViewWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayWidget.h"
 #include "store_playground/UI/Newspaper/NewspaperWidget.h"
 #include "store_playground/UI/Statistics/StatisticsWidget.h"
@@ -58,7 +58,7 @@ void ASpgHUD::BeginPlay() {
   check(NpcStoreViewWidgetClass);
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
-  check(StockDisplayWidgetClass);
+  check(StockDisplayViewWidgetClass);
   check(StoreExpansionsListWidgetClass);
   check(NewspaperWidgetClass);
   check(UpgradeSelectWidgetClass);
@@ -89,9 +89,9 @@ void ASpgHUD::BeginPlay() {
   BuildableDisplayWidget->AddToViewport(10);
   BuildableDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  StockDisplayWidget = CreateWidget<UStockDisplayWidget>(GetWorld(), StockDisplayWidgetClass);
-  StockDisplayWidget->AddToViewport(10);
-  StockDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
+  StockDisplayViewWidget = CreateWidget<UStockDisplayViewWidget>(GetWorld(), StockDisplayViewWidgetClass);
+  StockDisplayViewWidget->AddToViewport(10);
+  StockDisplayViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   StoreExpansionsListWidget = CreateWidget<UStoreExpansionsListWidget>(GetWorld(), StoreExpansionsListWidgetClass);
   StoreExpansionsListWidget->AddToViewport(10);
@@ -322,35 +322,15 @@ void ASpgHUD::SetAndOpenStoreView(const UInventoryComponent* PlayerInventory) {
 
 void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
                                      UInventoryComponent* DisplayInventory,
-                                     UInventoryComponent* PlayerInventory,
-                                     std::function<bool(UItemBase*, UInventoryComponent*)> PlayerToDisplayFunc,
-                                     std::function<bool(UItemBase*, UInventoryComponent*)> DisplayToPlayerFunc) {
-  // StockDisplayWidget->StockDisplayRef = StockDisplay;
-  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = PlayerInventory;
-  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->InventoryTitleText->SetText(
-      FText::FromString("Player"));
-  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->InventoryRef = DisplayInventory;
-  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->InventoryTitleText->SetText(
-      FText::FromString("Display"));
+                                     UInventoryComponent* PlayerInventory) {
+  check(StockDisplayViewWidget);
+  if (OpenedWidgets.Contains(StockDisplayViewWidget)) return CloseWidget(StockDisplayViewWidget);
 
-  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
-  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
+  StockDisplayViewWidget->InitUI(PlayerInputActions, MarketEconomy, Store, StockDisplay, DisplayInventory,
+                                 PlayerInventory, [this] { CloseWidget(StockDisplayViewWidget); });
+  StockDisplayViewWidget->RefreshUI();
 
-  StockDisplayWidget->PlayerAndContainerWidget->PlayerInventoryWidget->OnDropItemFunc =
-      [DisplayToPlayerFunc, DisplayInventory](UItemBase* Item, int32 Quantity) {
-        DisplayToPlayerFunc(Item, DisplayInventory);
-      };
-  StockDisplayWidget->PlayerAndContainerWidget->ContainerInventoryWidget->OnDropItemFunc =
-      [PlayerToDisplayFunc, PlayerInventory](UItemBase* Item, int32 Quantity) {
-        PlayerToDisplayFunc(Item, PlayerInventory);
-      };
-
-  ShowWidget(StockDisplayWidget);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(StockDisplayWidget);
+  OpenFocusedMenu(StockDisplayViewWidget);
 }
 
 void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLevel)> SelectExpansionFunc) {

@@ -97,7 +97,7 @@ void UInventoryViewWidget::InitUI(FInputActions InputActions,
   ItemsWidget->InitUI(InventoryC, "Bought At",
                       [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
 
-  SortByMarketPriceButton->ActionText->SetText(FText::FromString("Sort - Market Price"));
+  SortByMarketPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
   SortByNameButton->ActionText->SetText(FText::FromString("Sort - Name"));
 
   BackButton->ActionText->SetText(FText::FromString("Back"));
