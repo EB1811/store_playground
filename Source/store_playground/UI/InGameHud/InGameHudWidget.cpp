@@ -16,7 +16,7 @@
 void UInGameHudWidget::InitUI(FInputActions InputActions) {
   ControlsHelpersWidget->SetComponentUI({
       {FText::FromString("News"), InputActions.OpenNewspaperAction},
-      {FText::FromString("Store"), InputActions.OpenStatisticsAction},
+      {FText::FromString("Store"), InputActions.OpenStoreViewAction},
       {FText::FromString("Items"), InputActions.OpenInventoryViewAction},
       {FText::FromString("Build"), InputActions.BuildModeAction},
   });

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "store_playground/Player/InputStructs.h"
 #include "InventoryViewWidget.generated.h"
 
 UCLASS()
@@ -12,15 +13,41 @@ class STORE_PLAYGROUND_API UInventoryViewWidget : public UUserWidget {
 
 public:
   virtual void NativeOnInitialized() override;
-  virtual void NativeConstruct() override;
 
-  UPROPERTY(EditAnywhere, meta = (BindWidget))
-  class UTextBlock* StoreMoneyText;
-  UPROPERTY(EditAnywhere, meta = (BindWidget))
-  class UInventoryWidget* PlayerInventoryWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UMenuHeaderWidget* MenuHeaderWidget;
+  UPROPERTY(meta = (BindWidget))
+  class URightSlideWidget* MoneySlideWidget;
+  UPROPERTY(meta = (BindWidget), EditAnywhere)
+  class ULeftSlideWidget* ItemsValueSlideWidget;
+  UPROPERTY(meta = (BindWidget), EditAnywhere)
+  class UItemsWidget* ItemsWidget;
+
+  UPROPERTY(meta = (BindWidget))
+  class UControlMenuButtonWidget* SortByMarketPriceButton;
+  UPROPERTY(meta = (BindWidget))
+  class UControlMenuButtonWidget* SortByNameButton;
+  UPROPERTY(meta = (BindWidget))
+  class UControlMenuButtonWidget* BackButton;
 
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
+  UPROPERTY(EditAnywhere)
+  const class AMarketEconomy* MarketEconomy;
 
-  void RefreshInventoryViewUI();
+  UFUNCTION()
+  void SortByMarketPrice();
+  UFUNCTION()
+  void SortByName();
+  UFUNCTION()
+  void Back();
+
+  void RefreshUI();
+  void InitUI(FInputActions InputActions,
+              const class AStore* _Store,
+              const class AMarketEconomy* _MarketEconomy,
+              const class UInventoryComponent* InventoryC,
+              std::function<void()> _CloseWidgetFunc);
+
+  std::function<void()> CloseWidgetFunc;
 };

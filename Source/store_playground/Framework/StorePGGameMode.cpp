@@ -98,11 +98,17 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->AbilityManager = AbilityManager;
   PlayerCharacter->MiniGameManager = MiniGameManager;
 
+  HUD->StatisticsGen = StatisticsGen;
+  HUD->UpgradeManager = UpgradeManager;
+  HUD->AbilityManager = AbilityManager;
   HUD->NewsGen = NewsGen;
   HUD->DayManager = DayManager;
   HUD->StorePhaseManager = StorePhaseManager;
-  HUD->Store = Store;
   HUD->LevelManager = LevelManager;
+  HUD->MarketEconomy = MarketEconomy;
+  HUD->Market = Market;
+  HUD->Store = Store;
+  HUD->StoreExpansionManager = StoreExpansionManager;
 
   NegotiationSystem->MarketEconomy = MarketEconomy;
   NegotiationSystem->DialogueSystem = DialogueSystem;

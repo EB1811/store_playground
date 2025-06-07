@@ -43,7 +43,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> NpcStoreWidgetClass;
+  TSubclassOf<class UNpcStoreViewWidget> NpcStoreViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -57,8 +57,14 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UAbilityWidget> AbilityWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UStatisticsWidget> StatisticsWidgetClass;
+  TSubclassOf<class UStoreViewWidget> StoreViewWidgetClass;
 
+  UPROPERTY(EditAnywhere)
+  const class AStatisticsGen* StatisticsGen;
+  UPROPERTY(EditAnywhere)
+  const class AUpgradeManager* UpgradeManager;
+  UPROPERTY(EditAnywhere)
+  const class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere)
   const class ANewsGen* NewsGen;
   UPROPERTY(EditAnywhere)
@@ -66,9 +72,16 @@ public:
   UPROPERTY(EditAnywhere)
   const class AStorePhaseManager* StorePhaseManager;
   UPROPERTY(EditAnywhere)
-  const class AStore* Store;
-  UPROPERTY(EditAnywhere)
   const class ALevelManager* LevelManager;
+  UPROPERTY(EditAnywhere)
+  const class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere)
+  const class AMarket* Market;
+
+  UPROPERTY(EditAnywhere)
+  class AStore* Store;
+  UPROPERTY(EditAnywhere)
+  class AStoreExpansionManager* StoreExpansionManager;
 
   UPROPERTY()
   EHUDState HUDState;
@@ -117,13 +130,17 @@ public:
 
   UPROPERTY()
   class UInventoryViewWidget* InventoryViewWidget;
-  void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory, class AStore* _Store);
+  void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory);
 
   UPROPERTY()
   class UBuildableDisplayWidget* BuildableDisplayWidget;
   void SetAndOpenBuildableDisplay(class ABuildable* Buildable,
                                   std::function<bool(class ABuildable* Buildable)> BuildStockDisplayFunc,
                                   std::function<bool(class ABuildable* Buildable)> BuildDecorationFunc);
+
+  UPROPERTY()
+  class UStoreViewWidget* StoreViewWidget;
+  void SetAndOpenStoreView(const class UInventoryComponent* PlayerInventory);
 
   UPROPERTY()
   class UStockDisplayWidget* StockDisplayWidget;
@@ -135,8 +152,7 @@ public:
 
   UPROPERTY()
   class UStoreExpansionsListWidget* StoreExpansionsListWidget;
-  void SetAndOpenStoreExpansionsList(const class AStoreExpansionManager* StoreExpansionManager,
-                                     std::function<void(EStoreExpansionLevel)> SelectExpansionFunc);
+  void SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLevel)> SelectExpansionFunc);
 
   UPROPERTY()
   class UPlayerAndContainerWidget* PlayerAndContainerWidget;
@@ -144,11 +160,10 @@ public:
                            const class UInventoryComponent* ContainerInventory);
 
   UPROPERTY()
-  class UNpcStoreWidget* NpcStoreWidget;
-  void SetAndOpenNPCStore(class UInventoryComponent* NPCStoreInventory,
-                          class UInventoryComponent* PlayerInventory,
-                          std::function<bool(class UItemBase*, class UInventoryComponent*)> PlayerToStoreFunc,
-                          std::function<bool(class UItemBase*, class UInventoryComponent*)> StoreToPlayerFunc);
+  class UNpcStoreViewWidget* NpcStoreViewWidget;
+  void SetAndOpenNPCStore(class UNpcStoreComponent* NpcStoreC,
+                          class UInventoryComponent* NPCStoreInventory,
+                          class UInventoryComponent* PlayerInventory);
 
   UPROPERTY()
   class UDialogueWidget* DialogueWidget;
@@ -168,16 +183,12 @@ public:
   void SetAndOpenNewspaper(const class ANewsGen* NewsGenRef);
 
   UPROPERTY()
-  class UStatisticsWidget* StatisticsWidget;
-  void SetAndOpenStatistics(const class AStatisticsGen* StatisticsGenRef);
-
-  UPROPERTY()
   class UUpgradeListWidget* UpgradeSelectWidget;
-  void SetAndOpenUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC, class AUpgradeManager* UpgradeManager);
+  void SetAndOpenUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC, class AUpgradeManager* _UpgradeManager);
 
   UPROPERTY()
   class UAbilityWidget* AbilityWidget;
-  void SetAndOpenAbilitySelect(class AAbilityManager* AbilityManager);
+  void SetAndOpenAbilitySelect(class AAbilityManager* _AbilityManager);
 
   void SetAndOpenMiniGame(class AMiniGameManager* MiniGameManager,
                           class UMiniGameComponent* MiniGameC,
