@@ -84,6 +84,13 @@ auto AMarketEconomy::GetMarketPrice(const FName ItemId) const -> float {
 }
 
 void AMarketEconomy::PerformEconomyTick() {
+  for (int32 i = 0; i < CustomerPops.Num(); i++) {
+    const FCustomerPop Pop = CustomerPops[i];
+    const FPopEconData PopEconData = PopEconDataArray[i];
+
+    check(Pop.ID == PopEconData.PopID);
+  }
+
   // * Pop Simulation.
   // Calculate total wealth.
   TotalWealth = 0;
@@ -453,6 +460,7 @@ void AMarketEconomy::InitializeEconomyData() {
         Row->ItemEconTypes,
         PopEconGenDataMap[Row->PopType][Row->WealthType].ItemSpendPercent,
         PopEconGenDataMap[Row->PopType][Row->WealthType].ItemNeeds,
+        Row->AssetData,
     });
     PopEconDataArray.Add({Row->ID, Row->InitPopulation, 0, 0});
 

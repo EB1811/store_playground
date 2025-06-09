@@ -20,6 +20,8 @@ public:
   class UTextBlock* TabText;
   UPROPERTY(meta = (BindWidget))
   class UButton* TabButton;
+  UPROPERTY(meta = (BindWidget))
+  class UBorder* BottomBorder;
 
   UFUNCTION()
   void OnTabClicked();

@@ -14,8 +14,8 @@ enum class EItemType : uint8 {
   Jewellery UMETA(DisplayName = "Jewellery"),
   Clothing UMETA(DisplayName = "Clothing"),
   Consumable UMETA(DisplayName = "Consumable"),
-  Valuables UMETA(DisplayName = "Valuables"),
-  Objects UMETA(DisplayName = "Objects"),
+  Valuables UMETA(DisplayName = "Valuable"),
+  Objects UMETA(DisplayName = "Object"),
   Financial UMETA(DisplayName = "Financial"),
 };
 ENUM_RANGE_BY_COUNT(EItemType, 8);

@@ -67,7 +67,7 @@ void UStoreViewWidget::InitUI(FInputActions InputActions,
     RefreshUI();
   };
   MenuHeaderWidget->SetComponentUI(TopBarTabs, TabSelectedFunc);
-  ActiveTab = EStoreViewTab::Details;
+  SwitchTab(EStoreViewTab::Details);
 
   StoreDetailsWidget->InitUI(DayManager, StorePhaseManager, MarketEconomy, Market, StatisticsGen, UpgradeManager,
                              AbilityManager, PlayerInventoryC, Store);

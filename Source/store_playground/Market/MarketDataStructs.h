@@ -29,6 +29,13 @@ enum class EPopWealthType : uint8 {
 ENUM_RANGE_BY_COUNT(EPopWealthType, 3);
 
 USTRUCT()
+struct FCustomerPopAssetData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  class UTexture2D* Icon;
+};
+USTRUCT()
 struct FCustomerPopDataRow : public FTableRowBase {
   GENERATED_BODY()
 
@@ -46,6 +53,9 @@ struct FCustomerPopDataRow : public FTableRowBase {
   EPopWealthType WealthType;
   UPROPERTY(EditAnywhere)
   TArray<EItemEconType> ItemEconTypes;
+
+  UPROPERTY(EditAnywhere)
+  FCustomerPopAssetData AssetData;
 };
 
 // * Alternative to micro managing each pop's economy.
@@ -107,6 +117,9 @@ struct FCustomerPop {
   TMap<EItemWealthType, float> ItemSpendPercent;
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, int32> ItemNeeds;
+
+  UPROPERTY(EditAnywhere)
+  FCustomerPopAssetData AssetData;
 };
 
 // * Dynamic data for each customer pop.

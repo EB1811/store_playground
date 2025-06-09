@@ -13,8 +13,8 @@
 #include "store_playground/UI/Negotiation/NegotiationWidget.h"
 #include "store_playground/UI/NPCStore/NpcStoreViewWidget.h"
 #include "store_playground/UI/Store/StockDisplayViewWidget.h"
-#include "store_playground/UI/Store/BuildableDisplayWidget.h"
-#include "store_playground/UI/Newspaper/NewspaperWidget.h"
+#include "store_playground/UI/Store/BuildableDisplayViewWidget.h"
+#include "store_playground/UI/Newspaper/NewsAndEconomyViewWidget.h"
 #include "store_playground/UI/Statistics/StatisticsWidget.h"
 #include "store_playground/UI/Ability/AbilityWidget.h"
 #include "store_playground/UI/InGameHud/InGameHudWidget.h"
@@ -54,13 +54,13 @@ void ASpgHUD::BeginPlay() {
   check(InteractionDisplayWidgetClass);
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
-  check(BuildableDisplayWidgetClass);
+  check(BuildableDisplayViewWidgetClass);
   check(NpcStoreViewWidgetClass);
   check(UNegotiationWidgetClass);
   check(UDialogueWidgetClass);
   check(StockDisplayViewWidgetClass);
   check(StoreExpansionsListWidgetClass);
-  check(NewspaperWidgetClass);
+  check(NewsAndEconomyViewWidgetClass);
   check(UpgradeSelectWidgetClass);
   check(AbilityWidgetClass);
 
@@ -85,9 +85,9 @@ void ASpgHUD::BeginPlay() {
   InventoryViewWidget->AddToViewport(10);
   InventoryViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  BuildableDisplayWidget = CreateWidget<UBuildableDisplayWidget>(GetWorld(), BuildableDisplayWidgetClass);
-  BuildableDisplayWidget->AddToViewport(10);
-  BuildableDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
+  BuildableDisplayViewWidget = CreateWidget<UBuildableDisplayViewWidget>(GetWorld(), BuildableDisplayViewWidgetClass);
+  BuildableDisplayViewWidget->AddToViewport(10);
+  BuildableDisplayViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   StockDisplayViewWidget = CreateWidget<UStockDisplayViewWidget>(GetWorld(), StockDisplayViewWidgetClass);
   StockDisplayViewWidget->AddToViewport(10);
@@ -118,9 +118,9 @@ void ASpgHUD::BeginPlay() {
   CutsceneWidget->AddToViewport(10);
   CutsceneWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  NewspaperWidget = CreateWidget<UNewspaperWidget>(GetWorld(), NewspaperWidgetClass);
-  NewspaperWidget->AddToViewport(10);
-  NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
+  NewsAndEconomyViewWidget = CreateWidget<UNewsAndEconomyViewWidget>(GetWorld(), NewsAndEconomyViewWidgetClass);
+  NewsAndEconomyViewWidget->AddToViewport(10);
+  NewsAndEconomyViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   StoreViewWidget = CreateWidget<UStoreViewWidget>(GetWorld(), StoreViewWidgetClass);
   StoreViewWidget->AddToViewport(10);
@@ -290,22 +290,15 @@ void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory) {
   OpenFocusedMenu(InventoryViewWidget);
 }
 
-void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable,
-                                         std::function<bool(class ABuildable* Buildable)> BuildStockDisplayFunc,
-                                         std::function<bool(class ABuildable* Buildable)> BuildDecorationFunc) {
-  check(BuildableDisplayWidget);
+void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable) {
+  check(BuildableDisplayViewWidget);
+  if (OpenedWidgets.Contains(BuildableDisplayViewWidget)) return CloseWidget(BuildableDisplayViewWidget);
 
-  BuildableDisplayWidget->SetBuildable(Buildable);
-  BuildableDisplayWidget->BuildStockDisplayFunc = BuildStockDisplayFunc;
-  BuildableDisplayWidget->BuildDecorationFunc = BuildDecorationFunc;
-  BuildableDisplayWidget->CloseWidgetFunc = [this]() { CloseWidget(BuildableDisplayWidget); };
+  BuildableDisplayViewWidget->InitUI(PlayerInputActions, Buildable, Store,
+                                     [this] { CloseWidget(BuildableDisplayViewWidget); });
+  BuildableDisplayViewWidget->RefreshUI();
 
-  ShowWidget(BuildableDisplayWidget);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(BuildableDisplayWidget);
+  OpenFocusedMenu(BuildableDisplayViewWidget);
 }
 
 void ASpgHUD::SetAndOpenStoreView(const UInventoryComponent* PlayerInventory) {
@@ -429,20 +422,15 @@ void ASpgHUD::SkipCutscene() {
   CutsceneWidget->SkipCutscene();
 }
 
-void ASpgHUD::SetAndOpenNewspaper(const ANewsGen* NewsGenRef) {
-  check(NewspaperWidget);
+void ASpgHUD::SetAndOpenNewsAndEconomyView() {
+  check(NewsAndEconomyViewWidget);
+  if (OpenedWidgets.Contains(NewsAndEconomyViewWidget)) return CloseWidget(NewsAndEconomyViewWidget);
 
-  if (OpenedWidgets.Contains(NewspaperWidget)) return CloseWidget(NewspaperWidget);
+  NewsAndEconomyViewWidget->InitUI(PlayerInputActions, NewsGen, MarketEconomy,
+                                   [this] { CloseWidget(NewsAndEconomyViewWidget); });
+  NewsAndEconomyViewWidget->RefreshUI();
 
-  NewspaperWidget->NewsGenRef = NewsGenRef;
-  NewspaperWidget->RefreshNewspaperUI();
-
-  ShowWidget(NewspaperWidget);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(NewspaperWidget);
+  OpenFocusedMenu(NewsAndEconomyViewWidget);
 }
 
 void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, AUpgradeManager* _UpgradeManager) {

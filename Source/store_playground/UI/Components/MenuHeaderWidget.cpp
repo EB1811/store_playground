@@ -36,17 +36,20 @@ void UMenuHeaderWidget::SetComponentUI(TArray<FTopBarTab>& TopBarTabs,
       MenuHeaderTabWidget->OnTabClickedFunc = [this](UMenuHeaderTabWidget* TabWidget) {
         check(TabWidget);
 
-        ActiveTabWidget->SetIsEnabled(true);
+        // ActiveTabWidget->SetIsEnabled(true);
+        ActiveTabWidget->BottomBorder->SetVisibility(ESlateVisibility::Hidden);
 
         ActiveTabWidget = TabWidget;
-        ActiveTabWidget->SetIsEnabled(false);
+        ActiveTabWidget->BottomBorder->SetVisibility(ESlateVisibility::Visible);
+        // ActiveTabWidget->SetIsEnabled(false);
 
         TabSelectedFunc(TabWidget->TabText->GetText());
       };
 
       if (!ActiveTabWidget) {
         ActiveTabWidget = MenuHeaderTabWidget;
-        ActiveTabWidget->SetIsEnabled(false);
+        ActiveTabWidget->BottomBorder->SetVisibility(ESlateVisibility::Visible);
+        // ActiveTabWidget->SetIsEnabled(false);
       }
 
       TopBarWrapBox->AddChildToWrapBox(MenuHeaderTabWidget);

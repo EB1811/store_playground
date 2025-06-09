@@ -35,7 +35,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UInteractionDisplayWidget> InteractionDisplayWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> BuildableDisplayWidgetClass;
+  TSubclassOf<class UBuildableDisplayViewWidget> BuildableDisplayViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UStockDisplayViewWidget> StockDisplayViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -51,7 +51,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UCutsceneWidget> CutsceneWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> NewspaperWidgetClass;
+  TSubclassOf<class UNewsAndEconomyViewWidget> NewsAndEconomyViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UpgradeSelectWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -133,10 +133,8 @@ public:
   void SetAndOpenInventoryView(class UInventoryComponent* PlayerInventory);
 
   UPROPERTY()
-  class UBuildableDisplayWidget* BuildableDisplayWidget;
-  void SetAndOpenBuildableDisplay(class ABuildable* Buildable,
-                                  std::function<bool(class ABuildable* Buildable)> BuildStockDisplayFunc,
-                                  std::function<bool(class ABuildable* Buildable)> BuildDecorationFunc);
+  class UBuildableDisplayViewWidget* BuildableDisplayViewWidget;
+  void SetAndOpenBuildableDisplay(class ABuildable* Buildable);
 
   UPROPERTY()
   class UStoreViewWidget* StoreViewWidget;
@@ -177,8 +175,8 @@ public:
   void SkipCutscene();  // * Skips to next cutscene chain, not the whole cutscene.
 
   UPROPERTY()
-  class UNewspaperWidget* NewspaperWidget;
-  void SetAndOpenNewspaper(const class ANewsGen* NewsGenRef);
+  class UNewsAndEconomyViewWidget* NewsAndEconomyViewWidget;
+  void SetAndOpenNewsAndEconomyView();
 
   UPROPERTY()
   class UUpgradeListWidget* UpgradeSelectWidget;

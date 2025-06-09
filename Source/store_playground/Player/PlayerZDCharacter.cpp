@@ -198,7 +198,7 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
-  HUD->SetAndOpenNewspaper(NewsGen);
+  HUD->SetAndOpenNewsAndEconomyView();
 
   // SaveManager->CreateNewSaveGame();
 }
@@ -467,12 +467,7 @@ void APlayerZDCharacter::SetupCustomerInteraction(UCustomerAIComponent* Customer
   }
 }
 
-void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) {
-  auto BuildStockDisplayFunc = [this](ABuildable* Buildable) { return Store->BuildStockDisplay(Buildable); };
-  auto BuildDecorationFunc = [this](ABuildable* Buildable) { return Store->BuildDecoration(Buildable); };
-
-  HUD->SetAndOpenBuildableDisplay(Buildable, BuildStockDisplayFunc, BuildDecorationFunc);
-}
+void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) { HUD->SetAndOpenBuildableDisplay(Buildable); }
 
 void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC,
                                            UInventoryComponent* DisplayInventoryC) {

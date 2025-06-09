@@ -13,27 +13,29 @@ class STORE_PLAYGROUND_API UBuildableDisplayWidget : public UUserWidget {
 public:
   virtual void NativeConstruct() override;
 
-  UPROPERTY()
-  const class ABuildable* BuildableRef;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* PriceText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* MoneyNumberText;
+  UPROPERTY(meta = (BindWidget))
+  class UControlMenuButtonWidget* BuildStockDisplayButton;
+  UPROPERTY(meta = (BindWidget))
+  class UControlMenuButtonWidget* BackButton;
 
-  UPROPERTY(meta = (BindWidget))
-  class UButton* BuildStockDisplayButton;
-  UPROPERTY(meta = (BindWidget))
-  class UButton* BuildDecorationButton;
-  UPROPERTY(meta = (BindWidget))
-  class UButton* CancelButton;
+  UPROPERTY()
+  class ABuildable* Buildable;
+  UPROPERTY(EditAnywhere)
+  class AStore* Store;
 
   void SetBuildable(class ABuildable* Buildable);
 
   UFUNCTION()
-  void OnStockDisplayButtonClicked();
+  void BuildStockDisplay();
   UFUNCTION()
-  void OnDecorationButtonClicked();
-  UFUNCTION()
-  void OnCancelButtonClicked();
+  void Back();
 
-  std::function<bool(class ABuildable* Buildable)> BuildStockDisplayFunc;
-  std::function<bool(class ABuildable* Buildable)> BuildDecorationFunc;
+  void RefreshUI();
+  void InitUI(class ABuildable* _Buildable, class AStore* _Store, std::function<void()> _CloseWidgetFunc);
 
   std::function<void()> CloseWidgetFunc;
 };
