@@ -10,10 +10,35 @@ void AAbilityManager::BeginPlay() { Super::BeginPlay(); }
 
 void AAbilityManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+FEconEventAbility AAbilityManager::GetAbilityById(const FName AbilityId) const {
+  const auto& AvailableEconEventAbilities = GlobalDataManager->GetEconEventAbilitiesByIds({AbilityId});
+  check(AvailableEconEventAbilities.Num() == 1);
+  return AvailableEconEventAbilities[0];
+}
+
 auto AAbilityManager::GetAvailableEconEventAbilities() const -> TArray<FEconEventAbility> {
   const auto& AvailableEconEventAbilities = GlobalDataManager->GetEconEventAbilitiesByIds(UnlockedEconEventAbilityIDs);
   return AvailableEconEventAbilities.FilterByPredicate([&](const FEconEventAbility& Ability) {
     return !EconEventAbilityCooldowns.Contains(Ability.ID) &&
+           !ActiveEconEventAbilities.ContainsByPredicate(
+               [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == Ability.ID; }) &&
+           Store->Money >= Ability.Cost;
+  });
+}
+
+auto AAbilityManager::GetCooldownEconEventAbilities() const -> TArray<FEconEventAbility> {
+  const auto& AvailableEconEventAbilities = GlobalDataManager->GetEconEventAbilitiesByIds(UnlockedEconEventAbilityIDs);
+  return AvailableEconEventAbilities.FilterByPredicate([&](const FEconEventAbility& Ability) {
+    return EconEventAbilityCooldowns.Contains(Ability.ID) ||
+           ActiveEconEventAbilities.ContainsByPredicate(
+               [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == Ability.ID; });
+  });
+}
+
+auto AAbilityManager::GetNotEnoughMoneyEconEventAbilities() const -> TArray<FEconEventAbility> {
+  const auto& AvailableEconEventAbilities = GlobalDataManager->GetEconEventAbilitiesByIds(UnlockedEconEventAbilityIDs);
+  return AvailableEconEventAbilities.FilterByPredicate([&](const FEconEventAbility& Ability) {
+    return Store->Money < Ability.Cost && !EconEventAbilityCooldowns.Contains(Ability.ID) &&
            !ActiveEconEventAbilities.ContainsByPredicate(
                [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == Ability.ID; });
   });

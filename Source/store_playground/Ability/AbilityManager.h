@@ -40,7 +40,11 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FEconEventAbility> ActiveEconEventAbilities;
 
+  auto GetAbilityById(const FName AbilityId) const -> FEconEventAbility;
   auto GetAvailableEconEventAbilities() const -> TArray<FEconEventAbility>;
+  auto GetCooldownEconEventAbilities() const -> TArray<FEconEventAbility>;
+  auto GetNotEnoughMoneyEconEventAbilities() const -> TArray<FEconEventAbility>;
+
   void ActivateEconEventAbility(const FName AbilityId);
 
   void TickDaysTimedVars();

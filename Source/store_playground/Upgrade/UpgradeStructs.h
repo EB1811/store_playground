@@ -24,13 +24,6 @@ struct FEconEventAbilityTextData {
   UPROPERTY(EditAnywhere, meta = (MultiLine = true))
   FText Description;
 };
-USTRUCT()
-struct FEconEventAbilityAssetData {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  class UTexture2D* Icon;
-};
 
 USTRUCT()
 struct FEconEventAbility {
@@ -54,8 +47,6 @@ struct FEconEventAbility {
 
   UPROPERTY(EditAnywhere, SaveGame)
   FEconEventAbilityTextData TextData;
-  UPROPERTY(EditAnywhere, SaveGame)
-  FEconEventAbilityAssetData AssetData;
 };
 USTRUCT()
 struct FEconEventAbilityRow : public FTableRowBase {
@@ -79,8 +70,6 @@ struct FEconEventAbilityRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FEconEventAbilityTextData TextData;
-  UPROPERTY(EditAnywhere)
-  FEconEventAbilityAssetData AssetData;
 };
 
 // ! Currently 3 different ways to keep track of unlocked ids.

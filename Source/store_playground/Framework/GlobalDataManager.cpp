@@ -333,7 +333,6 @@ void AGlobalDataManager::InitializeUpgradesData() {
         Row->Cooldown,
         Row->UpgradeClass,
         Row->TextData,
-        Row->AssetData,
     });
   check(EconEventAbilitiesArray.Num() > 0);
 

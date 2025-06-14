@@ -478,7 +478,7 @@ void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSele
   HUD->SetAndOpenUpgradeView(UpgradeSelectC);
 }
 
-void APlayerZDCharacter::EnterAbilitySelect() { HUD->SetAndOpenAbilitySelect(AbilityManager); }
+void APlayerZDCharacter::EnterAbilitySelect() { HUD->SetAndOpenAbilityView(); }
 
 void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
   HUD->SetAndOpenMiniGame(MiniGameManager, MiniGameC, Store, PlayerInventoryComponent);

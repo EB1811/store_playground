@@ -7,7 +7,6 @@ void UAbilityWidget::RefreshUI() {
   check(AbilityManagerRef);
 
   const auto& AvailableEconEventAbilities = AbilityManagerRef->GetAvailableEconEventAbilities();
-  AbilityListWidget->EconEventAbilities = AvailableEconEventAbilities;
 
   AbilityListWidget->SelectAbilityFunc = [this](FName AbilityId) {
     AbilityManagerRef->ActivateEconEventAbility(AbilityId);

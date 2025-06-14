@@ -14,21 +14,23 @@ class STORE_PLAYGROUND_API UAbilityCardWidget : public UUserWidget {
 public:
   virtual void NativeOnInitialized() override;
 
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* NameText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* DescText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* CostText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* CooldownText;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* SelectButton;
+
   UPROPERTY()
   FName AbilityId;
 
-  UPROPERTY(meta = (BindWidget))
-  class UImage* AbilityIconImage;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* AbilityNameText;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* AbilityDescText;
-  UPROPERTY(meta = (BindWidget))
-  class UTextBlock* AbilityCostText;
-  UPROPERTY(meta = (BindWidget))
-  class UButton* ActivateAbilityButton;
+  void InitUI(FEconEventAbility Ability, std::function<void(FName)> _SelectAbilityFunc);
 
   UFUNCTION()
-  void OnActivateAbilityButtonClicked();
+  void OnSelectButtonClicked();
   std::function<void(FName)> SelectAbilityFunc;
 };

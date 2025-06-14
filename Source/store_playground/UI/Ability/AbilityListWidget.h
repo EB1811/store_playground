@@ -16,12 +16,24 @@ public:
   TSubclassOf<class UAbilityCardWidget> AbilityCardWidgetClass;
 
   UPROPERTY(meta = (BindWidget))
-  class UWrapBox* AbilityListPanelWrapBox;
+  class UVerticalBox* AvailableAbilityListBox;
+  UPROPERTY(meta = (BindWidget))
+  class UVerticalBox* NotEnoughMoneyAbilityListBox;
+  UPROPERTY(meta = (BindWidget))
+  class UVerticalBox* UnavailableAbilityListBox;
 
-  UPROPERTY()
-  TArray<FEconEventAbility> EconEventAbilities;
+  UPROPERTY(EditAnywhere)
+  TArray<FEconEventAbility> AvailableAbilities;
+  UPROPERTY(EditAnywhere)
+  TArray<FEconEventAbility> UnavailableAbilities;
+  UPROPERTY(EditAnywhere)
+  TArray<FEconEventAbility> NotEnoughMoneyAbilities;
 
   void RefreshUI();
+  void InitUI(TArray<FEconEventAbility> _AvailableAbilities,
+              TArray<FEconEventAbility> _NotEnoughMoneyAbilities,
+              TArray<FEconEventAbility> _UnavailableAbilities,
+              std::function<void(FName)> _SelectAbilityFunc);
 
   std::function<void(FName)> SelectAbilityFunc;
 };

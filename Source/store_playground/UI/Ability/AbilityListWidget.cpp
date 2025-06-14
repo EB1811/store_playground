@@ -1,39 +1,50 @@
 #include "AbilityListWidget.h"
-#include "Components/Image.h"
-#include "Components/TextBlock.h"
-#include "Components/WrapBox.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
 #include "store_playground/UI/Ability/AbilityCardWidget.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
+#include "Components/Button.h"
 
 void UAbilityListWidget::RefreshUI() {
-  check(AbilityCardWidgetClass);
+  AvailableAbilityListBox->ClearChildren();
+  UnavailableAbilityListBox->ClearChildren();
 
-  AbilityListPanelWrapBox->ClearChildren();
+  for (const FEconEventAbility& Ability : AvailableAbilities) {
+    UAbilityCardWidget* AbilityCardWidget = CreateWidget<UAbilityCardWidget>(this, AbilityCardWidgetClass);
+    check(AbilityCardWidget);
 
-  for (const auto& Ability : EconEventAbilities) {
-    if (UAbilityCardWidget* AbilityCardWidget = CreateWidget<UAbilityCardWidget>(GetWorld(), AbilityCardWidgetClass)) {
-      UE_LOG(LogTemp, Warning, TEXT("Ability ID: %s"), *Ability.TextData.Name.ToString());
-      AbilityCardWidget->SelectAbilityFunc = SelectAbilityFunc;
-
-      AbilityCardWidget->AbilityId = Ability.ID;
-      AbilityCardWidget->AbilityIconImage->SetBrushFromTexture(Ability.AssetData.Icon);
-      AbilityCardWidget->AbilityNameText->SetText(Ability.TextData.Name);
-      AbilityCardWidget->AbilityDescText->SetText(Ability.TextData.Description);
-      AbilityCardWidget->AbilityCostText->SetText(FText::AsNumber(Ability.Cost));
-
-      switch (Ability.UpgradeClass) {
-        case EUpgradeClass::Holy:
-          AbilityCardWidget->AbilityIconImage->SetColorAndOpacity(FLinearColor(0.0f, 1.0f, 0.0f, 1.0f));
-          break;
-        case EUpgradeClass::Demonic:
-          AbilityCardWidget->AbilityIconImage->SetColorAndOpacity(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f));
-          break;
-        case EUpgradeClass::Artisanal:
-          AbilityCardWidget->AbilityIconImage->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 0.0f, 1.0f));
-          break;
-      }
-
-      AbilityListPanelWrapBox->AddChildToWrapBox(AbilityCardWidget);
-    }
+    AbilityCardWidget->InitUI(Ability, SelectAbilityFunc);
+    AvailableAbilityListBox->AddChild(AbilityCardWidget);
   }
+  for (const FEconEventAbility& Ability : NotEnoughMoneyAbilities) {
+    UAbilityCardWidget* AbilityCardWidget = CreateWidget<UAbilityCardWidget>(this, AbilityCardWidgetClass);
+    check(AbilityCardWidget);
+
+    AbilityCardWidget->InitUI(Ability, SelectAbilityFunc);
+    AbilityCardWidget->SelectButton->SetIsEnabled(false);
+    AbilityCardWidget->CostText->SetColorAndOpacity(FColor::FromHex("B4494BFF"));
+    NotEnoughMoneyAbilityListBox->AddChild(AbilityCardWidget);
+  }
+  for (const FEconEventAbility& Ability : UnavailableAbilities) {
+    UAbilityCardWidget* AbilityCardWidget = CreateWidget<UAbilityCardWidget>(this, AbilityCardWidgetClass);
+    check(AbilityCardWidget);
+
+    AbilityCardWidget->InitUI(Ability, SelectAbilityFunc);
+    AbilityCardWidget->SelectButton->SetIsEnabled(false);
+    AbilityCardWidget->CooldownText->SetColorAndOpacity(FColor::FromHex("B4494BFF"));
+    UnavailableAbilityListBox->AddChild(AbilityCardWidget);
+  }
+}
+
+void UAbilityListWidget::InitUI(TArray<FEconEventAbility> _AvailableAbilities,
+                                TArray<FEconEventAbility> _NotEnoughMoneyAbilities,
+                                TArray<FEconEventAbility> _UnavailableAbilities,
+                                std::function<void(FName)> _SelectAbilityFunc) {
+  check(_SelectAbilityFunc && AbilityCardWidgetClass);
+
+  AvailableAbilities = _AvailableAbilities;
+  NotEnoughMoneyAbilities = _NotEnoughMoneyAbilities;
+  UnavailableAbilities = _UnavailableAbilities;
+  SelectAbilityFunc = _SelectAbilityFunc;
 }

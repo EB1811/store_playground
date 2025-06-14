@@ -73,7 +73,7 @@
 		"ID": "intimidation_1",
 		"UpgradeClass": "Demonic",
 		"UpgradeEffectIDs": [
-			"ue_1"
+			"ue_2"
 		],
 		"Cost": 1,
 		"Level": 1,

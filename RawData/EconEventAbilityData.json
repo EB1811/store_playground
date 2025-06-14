@@ -1,0 +1,16 @@
+[
+	{
+		"Name": "a_ee_1",
+		"ID": "a_ee_1",
+		"EconEventId": "ff02",
+		"Cost": 500,
+		"Duration": 1,
+		"Cooldown": 10,
+		"UpgradeClass": "Demonic",
+		"TextData":
+		{
+			"Name": "Farm Failure",
+			"Description": "Trigger the \"Farm Failure\" event."
+		}
+	}
+]

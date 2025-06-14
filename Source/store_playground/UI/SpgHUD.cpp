@@ -16,7 +16,7 @@
 #include "store_playground/UI/Store/BuildableDisplayViewWidget.h"
 #include "store_playground/UI/Newspaper/NewsAndEconomyViewWidget.h"
 #include "store_playground/UI/Statistics/StatisticsWidget.h"
-#include "store_playground/UI/Ability/AbilityWidget.h"
+#include "store_playground/UI/Ability/AbilityViewWidget.h"
 #include "store_playground/UI/InGameHud/InGameHudWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
@@ -62,7 +62,7 @@ void ASpgHUD::BeginPlay() {
   check(StoreExpansionsListWidgetClass);
   check(NewsAndEconomyViewWidgetClass);
   check(UpgradeViewWidgetClass);
-  check(AbilityWidgetClass);
+  check(AbilityViewWidgetClass);
 
   InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
   InGameHudWidget->AddToViewport(0);
@@ -130,9 +130,9 @@ void ASpgHUD::BeginPlay() {
   UpgradeViewWidget->AddToViewport(10);
   UpgradeViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  AbilityWidget = CreateWidget<UAbilityWidget>(GetWorld(), AbilityWidgetClass);
-  AbilityWidget->AddToViewport(10);
-  AbilityWidget->SetVisibility(ESlateVisibility::Collapsed);
+  AbilityViewWidget = CreateWidget<UAbilityViewWidget>(GetWorld(), AbilityViewWidgetClass);
+  AbilityViewWidget->AddToViewport(10);
+  AbilityViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
@@ -445,13 +445,15 @@ void ASpgHUD::SetAndOpenUpgradeView(UUpgradeSelectComponent* UpgradeSelectC) {
   OpenFocusedMenu(UpgradeViewWidget);
 }
 
-void ASpgHUD::SetAndOpenAbilitySelect(class AAbilityManager* _AbilityManager) {
-  check(AbilityWidget);
+void ASpgHUD::SetAndOpenAbilityView() {
+  check(AbilityViewWidget);
 
-  AbilityWidget->AbilityManagerRef = _AbilityManager;
-  AbilityWidget->RefreshUI();
+  if (OpenedWidgets.Contains(AbilityViewWidget)) return CloseWidget(AbilityViewWidget);
 
-  OpenFocusedMenu(AbilityWidget);
+  AbilityViewWidget->InitUI(PlayerInputActions, AbilityManager, [this] { CloseWidget(AbilityViewWidget); });
+  AbilityViewWidget->RefreshUI();
+
+  OpenFocusedMenu(AbilityViewWidget);
 }
 
 void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,

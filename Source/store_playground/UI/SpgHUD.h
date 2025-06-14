@@ -55,7 +55,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUpgradeViewWidget> UpgradeViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UAbilityWidget> AbilityWidgetClass;
+  TSubclassOf<class UAbilityViewWidget> AbilityViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UStoreViewWidget> StoreViewWidgetClass;
 
@@ -183,8 +183,8 @@ public:
   void SetAndOpenUpgradeView(class UUpgradeSelectComponent* UpgradeSelectC);
 
   UPROPERTY()
-  class UAbilityWidget* AbilityWidget;
-  void SetAndOpenAbilitySelect(class AAbilityManager* _AbilityManager);
+  class UAbilityViewWidget* AbilityViewWidget;
+  void SetAndOpenAbilityView();
 
   void SetAndOpenMiniGame(class AMiniGameManager* MiniGameManager,
                           class UMiniGameComponent* MiniGameC,
