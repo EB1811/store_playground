@@ -20,7 +20,7 @@
 #include "store_playground/UI/InGameHud/InGameHudWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
-#include "store_playground/UI/Upgrade/UpgradeListWidget.h"
+#include "store_playground/UI/Upgrade/UpgradeViewWidget.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
@@ -61,7 +61,7 @@ void ASpgHUD::BeginPlay() {
   check(StockDisplayViewWidgetClass);
   check(StoreExpansionsListWidgetClass);
   check(NewsAndEconomyViewWidgetClass);
-  check(UpgradeSelectWidgetClass);
+  check(UpgradeViewWidgetClass);
   check(AbilityWidgetClass);
 
   InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
@@ -126,9 +126,9 @@ void ASpgHUD::BeginPlay() {
   StoreViewWidget->AddToViewport(10);
   StoreViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  UpgradeSelectWidget = CreateWidget<UUpgradeListWidget>(GetWorld(), UpgradeSelectWidgetClass);
-  UpgradeSelectWidget->AddToViewport(10);
-  UpgradeSelectWidget->SetVisibility(ESlateVisibility::Collapsed);
+  UpgradeViewWidget = CreateWidget<UUpgradeViewWidget>(GetWorld(), UpgradeViewWidgetClass);
+  UpgradeViewWidget->AddToViewport(10);
+  UpgradeViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   AbilityWidget = CreateWidget<UAbilityWidget>(GetWorld(), AbilityWidgetClass);
   AbilityWidget->AddToViewport(10);
@@ -426,25 +426,23 @@ void ASpgHUD::SetAndOpenNewsAndEconomyView() {
   check(NewsAndEconomyViewWidget);
   if (OpenedWidgets.Contains(NewsAndEconomyViewWidget)) return CloseWidget(NewsAndEconomyViewWidget);
 
-  NewsAndEconomyViewWidget->InitUI(PlayerInputActions, NewsGen, MarketEconomy,
+  NewsAndEconomyViewWidget->InitUI(PlayerInputActions, DayManager, MarketEconomy, NewsGen,
                                    [this] { CloseWidget(NewsAndEconomyViewWidget); });
   NewsAndEconomyViewWidget->RefreshUI();
 
   OpenFocusedMenu(NewsAndEconomyViewWidget);
 }
 
-void ASpgHUD::SetAndOpenUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC, AUpgradeManager* _UpgradeManager) {
-  check(UpgradeSelectWidget);
+void ASpgHUD::SetAndOpenUpgradeView(UUpgradeSelectComponent* UpgradeSelectC) {
+  check(UpgradeViewWidget);
 
-  UpgradeSelectWidget->UpgradeManagerRef = _UpgradeManager;
+  if (OpenedWidgets.Contains(UpgradeViewWidget)) return CloseWidget(UpgradeViewWidget);
 
-  UpgradeSelectWidget->SelectUpgradeFunc = [this, _UpgradeManager](FName UpgradeID) {
-    _UpgradeManager->SelectUpgrade(UpgradeID);
-  };
-  UpgradeSelectWidget->SetUpgradeClass(UpgradeSelectC->UpgradeClass, UpgradeSelectC->Title,
-                                       UpgradeSelectC->Description);
+  UpgradeViewWidget->InitUI(PlayerInputActions, UpgradeManager, UpgradeSelectC,
+                            [this] { CloseWidget(UpgradeViewWidget); });
+  UpgradeViewWidget->RefreshUI();
 
-  OpenFocusedMenu(UpgradeSelectWidget);
+  OpenFocusedMenu(UpgradeViewWidget);
 }
 
 void ASpgHUD::SetAndOpenAbilitySelect(class AAbilityManager* _AbilityManager) {

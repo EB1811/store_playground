@@ -82,6 +82,7 @@ void UItemsWidget::RefreshUI() {
 
   for (const UItemBase* Item : SortedItems) {
     UItemSlotWidget* ItemSlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
+    check(ItemSlotWidget);
 
     if (Item == SelectedItem) {
       ItemSlotWidget->bIsSelected = true;

@@ -84,6 +84,7 @@ auto AMarketEconomy::GetMarketPrice(const FName ItemId) const -> float {
 }
 
 void AMarketEconomy::PerformEconomyTick() {
+  // TODO: Save file using a different customer data table will crash this.
   for (int32 i = 0; i < CustomerPops.Num(); i++) {
     const FCustomerPop Pop = CustomerPops[i];
     const FPopEconData PopEconData = PopEconDataArray[i];

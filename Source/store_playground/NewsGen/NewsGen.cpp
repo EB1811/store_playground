@@ -1,5 +1,6 @@
 #include "NewsGen.h"
 #include "HAL/Platform.h"
+#include "Logging/LogVerbosity.h"
 #include "NewsGenDataStructs.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
@@ -17,6 +18,7 @@ void ANewsGen::GenDaysRandomArticles() {
   check(GlobalStaticDataManager && Market);
 
   DaysArticles.Empty();
+  bNewArticles = true;
 
   TArray<FArticle> GuaranteedArticles = {};
   TArray<FArticle> PossibleArticles = GlobalStaticDataManager->GetEligibleGeneralArticles(PublishedArticles);
@@ -41,7 +43,7 @@ void ANewsGen::GenDaysRandomArticles() {
 
   // * Create a layout given the article size.
   // e.g, if chosen random article is large, the rest should be smaller to fit.
-  int32 TotalLayoutSpace = FMath::RandRange(6, 8);
+  int32 TotalLayoutSpace = 9;
 
   for (const auto& GuaranteedArticle : GuaranteedArticles) {
     if (TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size] < 0) continue;
@@ -60,15 +62,17 @@ void ANewsGen::GenDaysRandomArticles() {
   });
   if (PossibleArticles.Num() <= 0) return;
 
-  for (TotalLayoutSpace; TotalLayoutSpace > 0; TotalLayoutSpace--) {
+  UE_LOG(LogTemp, Warning, TEXT("Possible articles count: %d"), PossibleArticles.Num());
+  while (TotalLayoutSpace > 0 && PossibleArticles.Num() > 0) {
     TArray<FArticle> SizedArticles =
         PossibleArticles.FilterByPredicate([this, TotalLayoutSpace](const FArticle& Article) {
           return TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[Article.Size] >= 0;
         });
+    UE_LOG(LogTemp, Warning, TEXT("SizedArticles articles count: %d"), SizedArticles.Num());
     if (SizedArticles.Num() <= 0) break;
 
     FArticle SelectedArticle =
-        GetWeightedRandomItem<FArticle>(PossibleArticles, [](const auto& Article) { return Article.AppearWeight; });
+        GetWeightedRandomItem<FArticle>(SizedArticles, [](const auto& Article) { return Article.AppearWeight; });
 
     PublishedArticles.Add(SelectedArticle.ArticleID);
     RecentArticlesMap.Add(SelectedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
@@ -77,7 +81,10 @@ void ANewsGen::GenDaysRandomArticles() {
     PossibleArticles.RemoveAllSwap(
         [&SelectedArticle](const FArticle& Article) { return Article.ArticleID == SelectedArticle.ArticleID; });
 
-    TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size] + 1;
+    TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
+    UE_LOG(LogTemp, Warning, TEXT("Selected article: %s, size: %d, space left: %d"),
+           *SelectedArticle.ArticleID.ToString(), NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size],
+           TotalLayoutSpace);
   }
 }
 

@@ -475,7 +475,7 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
 }
 
 void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {
-  HUD->SetAndOpenUpgradeSelect(UpgradeSelectC, UpgradeManager);
+  HUD->SetAndOpenUpgradeView(UpgradeSelectC);
 }
 
 void APlayerZDCharacter::EnterAbilitySelect() { HUD->SetAndOpenAbilitySelect(AbilityManager); }

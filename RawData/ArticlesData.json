@@ -1,0 +1,243 @@
+[
+	{
+		"Name": "FarmFailure",
+		"ArticleID": "farmf_0",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": false,
+		"bIsSpecial": true,
+		"Size": "Large",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"B8E145AC4C3D542493A3AA82A79DAC39\", \"Farm Failure\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"2650F1BC407504D8B58B0D9B6639C23F\", \"A local farm has collapsed.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "FarmSuccess",
+		"ArticleID": "farmf_1",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": false,
+		"bIsSpecial": true,
+		"Size": "Large",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"922AAEEA40720695D2809894B0DAC45C\", \"Farm Surplus\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"68B141F8461B662A9254CFBAD1AEA21E\", \"A local farm has a crop surplus.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "basicnews_0",
+		"ArticleID": "basicnews",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Small",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"D2734D91486CB6133803C1B73AE8B7B8\", \"News Today\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"CA63A64649F552115D30AFA5AC3B8E68\", \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non congue enim, at imperdiet dui. Quisque quis velit condimentum metus lacinia porttitor. Nullam ultricies sollicitudin velit et suscipit. Integer ut malesuada augue.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "goodnews_0",
+		"ArticleID": "gn_0",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": true,
+		"Size": "Small",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"B139FED2424A57B54BA3AC9BFB81FBBD\", \"Grass Seems Greener\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"C45DC7D84BB54D922E01B1BB7AC69A2D\", \"Grass Seems Greener\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Positive"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	},
+	{
+		"Name": "basicnews_1",
+		"ArticleID": "basicnews2",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Small",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"59B7D1414862694FF4FF7A898C0559DD\", \"New Store Opens\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"7919DD1244003A8B063AE890D0F46F7A\", \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non congue enim, at imperdiet dui. Quisque quis velit condimentum metus lacinia porttitor. Nullam ultricies sollicitudin velit et suscipit. Integer ut malesuada augue.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "basicnews_2",
+		"ArticleID": "basicnews3",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Medium",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"73BE1C8F48E70F3244A6AF8BC3C0418B\", \"Invention\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"E78C469948996FCFDEF0F38A7E017876\", \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non congue enim, at imperdiet dui. Quisque quis velit condimentum metus lacinia porttitor. Nullam ultricies sollicitudin velit et suscipit. Integer ut malesuada augue.Lorem ipsum dolor sit amet, consectetur adipiscing elit.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "basicnews_3",
+		"ArticleID": "basicnews4",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Small",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"4F3DE2C141194A719B759DA0FA463603\", \"Wanted\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"1C3021DE42C168F5DE8C7DB77F8E1BA5\", \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non congue enim, at imperdiet dui. Quisque quis velit condimentum metus lacinia porttitor. Nullam ultricies sollicitudin velit et suscipit. Integer ut malesuada augue.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "basicnews_4",
+		"ArticleID": "basicnews5",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Medium",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"73BE1C8F48E70F3244A6AF8BC3C0418B\", \"Invention\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"E78C469948996FCFDEF0F38A7E017876\", \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non congue enim, at imperdiet dui. Quisque quis velit condimentum metus lacinia porttitor. Nullam ultricies sollicitudin velit et suscipit. Integer ut malesuada augue.Lorem ipsum dolor sit amet, consectetur adipiscing elit.\")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "basicnews_5",
+		"ArticleID": "basicnews6",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Large",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"CEEA957245F0DB35345F0B951FAD481D\", \"DRAGON ATTACK!\")",
+			"Body": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum non congue enim, at imperdiet dui. Quisque quis velit condimentum metus lacinia porttitor. Nullam ultricies sollicitudin velit et suscipit. Integer ut malesuada augue. Integer ante urna, vulputate et sem sed, dapibus consectetur velit. \n\n Sed quis hendrerit sem, sed cursus neque. In iaculis nibh ipsum, in commodo mi varius eu.Integer ante urna, vulputate et sem sed, dapibus consectetur velit. Sed quis hendrerit sem, sed cursus neque. In iaculis nibh ipsum, in commodo mi varius eu. Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "basicnews_6",
+		"ArticleID": "basicnews7",
+		"RequirementsFilter": "None",
+		"AppearWeight": 1,
+		"bIsRepeatable": true,
+		"bIsSpecial": false,
+		"Size": "Small",
+		"TextData":
+		{
+			"Title": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"8BDC0B454AA58958A93A0BA7D2C733EC\", \"Dragon Sighted\")",
+			"Body": "NSLOCTEXT(\"[CE098D2EC0BCA41984493256A8ACD36F]\", \"3B3485E64669E7639B7060AA1897C3FD\", \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. \")"
+		},
+		"AssetData":
+		{
+			"Picture": "/Script/Engine.Texture2D'/Game/Assets/Textures/Experimental/UI/silkpng_01.silkpng_01'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	}
+]

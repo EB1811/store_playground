@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "store_playground/Market/MarketDataStructs.h"
 #include "PopDetailsWidget.generated.h"
 
 UCLASS()

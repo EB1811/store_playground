@@ -24,15 +24,12 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UMenuHeaderWidget* MenuHeaderWidget;
   UPROPERTY(meta = (BindWidget))
+  class UNewspaperWidget* NewspaperWidget;
+  UPROPERTY(meta = (BindWidget))
   class UEconomyDetailsWidget* EconomyDetailsWidget;
 
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
-
-  UPROPERTY(EditAnywhere)
-  const class ANewsGen* NewsGen;
-  UPROPERTY(EditAnywhere)
-  const class AMarketEconomy* MarketEconomy;
 
   UPROPERTY(EditAnywhere)
   ENewsAndEconomyViewTab ActiveTab;
@@ -43,8 +40,9 @@ public:
 
   void RefreshUI();
   void InitUI(FInputActions InputActions,
-              const class ANewsGen* _NewsGen,
+              const class ADayManager* _DayManager,
               const class AMarketEconomy* _MarketEconomy,
+              class ANewsGen* _NewsGen,
               std::function<void()> _CloseWidgetFunc);
 
   std::function<void()> CloseWidgetFunc;

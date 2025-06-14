@@ -33,7 +33,7 @@ struct FCustomerPopAssetData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  class UTexture2D* Icon;
+  class UPaperSprite* Sprite;
 };
 USTRUCT()
 struct FCustomerPopDataRow : public FTableRowBase {
@@ -331,7 +331,7 @@ struct FEconEventTextData {
 
   UPROPERTY(EditAnywhere)
   FText Name;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, meta = (MultiLine = true))
   FText Description;
 };
 USTRUCT()

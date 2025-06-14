@@ -42,6 +42,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TArray<FArticle> DaysArticles;
+  UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
+  bool bNewArticles;
 
   void GenDaysRandomArticles();
 

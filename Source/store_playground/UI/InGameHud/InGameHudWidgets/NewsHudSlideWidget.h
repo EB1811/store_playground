@@ -19,5 +19,9 @@ public:
   // UPROPERTY(meta = (BindWidget))
   // class UImage* NotificationImage;
 
+  UPROPERTY(EditAnywhere)
+  const class ANewsGen* NewsGen;
+
   void RefreshUI();
+  void InitUI(const class ANewsGen* _NewsGen);
 };

@@ -16,7 +16,7 @@ public:
   virtual void NativeOnInitialized() override;
 
   UPROPERTY(meta = (BindWidget))
-  class UWrapBox* PopDetailsWrapBox;
+  class UWrapBox* PopDetailsBox;
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UPopDetailsWidget> PopDetailsWidgetClass;
 

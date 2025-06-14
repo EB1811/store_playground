@@ -12,14 +12,25 @@ class STORE_PLAYGROUND_API UNewspaperWidget : public UUserWidget {
 
 public:
   UPROPERTY(EditAnywhere)
-  TSubclassOf<class UNewspaperArticleWidget> NewspaperArticleClass;
+  TSubclassOf<class UArticleWidget> LargeArticleWidgetClass;
   UPROPERTY(EditAnywhere)
-  const class ANewsGen* NewsGenRef;
+  TSubclassOf<class UArticleWidget> MediumArticleWidgetClass;
+  UPROPERTY(EditAnywhere)
+  TSubclassOf<class UArticleWidget> SmallArticleWidgetClass;
+
+  UPROPERTY(EditAnywhere)
+  const class ADayManager* DayManager;
 
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* NewspaperTitleText;
+  class UTextBlock* TitleText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* DayText;
   UPROPERTY(meta = (BindWidget))
   class UWrapBox* NewspaperPanelWrapBox;
 
-  void RefreshNewspaperUI();
+  UPROPERTY(EditAnywhere)
+  class ANewsGen* NewsGen;
+
+  void RefreshUI();
+  void InitUI(const class ADayManager* _DayManager, class ANewsGen* _NewsGen);
 };

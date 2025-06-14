@@ -8,6 +8,7 @@
 #include "store_playground/UI/Components/ControlTextWidget.h"
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
 #include "store_playground/UI/Newspaper/EconomyDetailsWidget.h"
+#include "store_playground/UI/Newspaper/NewspaperWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
@@ -22,8 +23,14 @@ void UNewsAndEconomyViewWidget::SwitchTab(ENewsAndEconomyViewTab Tab) {
 
   ActiveTab = Tab;
   switch (ActiveTab) {
-    case ENewsAndEconomyViewTab::Articles: EconomyDetailsWidget->SetVisibility(ESlateVisibility::Collapsed); break;
-    case ENewsAndEconomyViewTab::Economy: EconomyDetailsWidget->SetVisibility(ESlateVisibility::Visible); break;
+    case ENewsAndEconomyViewTab::Articles:
+      NewspaperWidget->SetVisibility(ESlateVisibility::Visible);
+      EconomyDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
+      break;
+    case ENewsAndEconomyViewTab::Economy:
+      NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
+      EconomyDetailsWidget->SetVisibility(ESlateVisibility::Visible);
+      break;
     default: checkNoEntry();
   }
 }
@@ -32,19 +39,18 @@ void UNewsAndEconomyViewWidget::Back() { CloseWidgetFunc(); }
 
 void UNewsAndEconomyViewWidget::RefreshUI() {
   switch (ActiveTab) {
-    case ENewsAndEconomyViewTab::Articles: break;
+    case ENewsAndEconomyViewTab::Articles: NewspaperWidget->RefreshUI(); break;
     case ENewsAndEconomyViewTab::Economy: EconomyDetailsWidget->RefreshUI(); break;
     default: checkNoEntry();
   }
 }
 
 void UNewsAndEconomyViewWidget::InitUI(FInputActions InputActions,
-                                       const ANewsGen* _NewsGen,
+                                       const ADayManager* _DayManager,
                                        const AMarketEconomy* _MarketEconomy,
+                                       ANewsGen* _NewsGen,
                                        std::function<void()> _CloseWidgetFunc) {
-  check(_NewsGen && _MarketEconomy && _CloseWidgetFunc);
-  NewsGen = _NewsGen;
-  MarketEconomy = _MarketEconomy;
+  check(_DayManager && _NewsGen && _MarketEconomy && _CloseWidgetFunc);
 
   TArray<FTopBarTab> TopBarTabs = {};
   for (auto Tab : TEnumRange<ENewsAndEconomyViewTab>()) TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Tab)});
@@ -62,7 +68,8 @@ void UNewsAndEconomyViewWidget::InitUI(FInputActions InputActions,
   MenuHeaderWidget->SetComponentUI(TopBarTabs, TabSelectedFunc);
   SwitchTab(ENewsAndEconomyViewTab::Articles);
 
-  EconomyDetailsWidget->InitUI(MarketEconomy);
+  NewspaperWidget->InitUI(_DayManager, _NewsGen);
+  EconomyDetailsWidget->InitUI(_MarketEconomy);
 
   BackButton->ActionText->SetText(FText::FromString("Back"));
 

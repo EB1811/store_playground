@@ -523,31 +523,15 @@ void AGlobalStaticDataManager::InitializeUpgradesData() {
   TArray<FUpgradeRow*> UpgradesRows;
   UpgradesTable->GetAllRows<FUpgradeRow>("", UpgradesRows);
   for (auto Row : UpgradesRows)
-    UpgradesArray.Add({
-        Row->ID,
-        Row->UpgradeClass,
-        Row->UpgradeEffectIDs,
-        Row->Level,
-        Row->Requirements,
-        Row->RequirementsFilterDescription,
-        Row->TextData,
-        Row->AssetData,
-    });
+    UpgradesArray.Add({Row->ID, Row->UpgradeClass, Row->UpgradeEffectIDs, Row->Cost, Row->Level, Row->Requirements,
+                       Row->RequirementsFilterDescription, Row->TextData});
 
   UpgradeEffectsArray.Empty();
   TArray<FUpgradeEffectRow*> UpgradeEffectsRows;
   UpgradeEffectsTable->GetAllRows<FUpgradeEffectRow>("", UpgradeEffectsRows);
   for (auto Row : UpgradeEffectsRows)
-    UpgradeEffectsArray.Add({
-        Row->ID,
-        Row->EffectType,
-        Row->EffectSystem,
-        Row->RelevantName,
-        Row->RelevantIDs,
-        Row->RelevantValues,
-        Row->TextData,
-        Row->AssetData,
-    });
+    UpgradeEffectsArray.Add({Row->ID, Row->EffectType, Row->EffectSystem, Row->RelevantName, Row->RelevantIDs,
+                             Row->RelevantValues, Row->TextData});
 
   check(UpgradesArray.Num() > 0);
   check(UpgradeEffectsArray.Num() > 0);

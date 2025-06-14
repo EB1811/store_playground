@@ -20,7 +20,7 @@ struct FArticleTextData {
 
   UPROPERTY(EditAnywhere, SaveGame)
   FText Title;
-  UPROPERTY(EditAnywhere, SaveGame)
+  UPROPERTY(EditAnywhere, SaveGame, meta = (MultiLine = true))
   FText Body;
 };
 USTRUCT()

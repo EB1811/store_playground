@@ -1,11 +1,17 @@
 #include "EconomyDetailsWidget.h"
+#include "Components/WrapBoxSlot.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/UI/Newspaper/PopDetailsWidget.h"
+#include "store_playground/UI/Newspaper/PopTypeWrapBox.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
+#include "Components/HorizontalBox.h"
+#include "Components/VerticalBox.h"
 #include "Components/Border.h"
+#include "PaperSprite.h"
+#include "Blueprint/WidgetTree.h"
 
 inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconData& GivenPop) -> FString {
   float TotalGoodsBoughtPerCapita = 0.0f;
@@ -22,6 +28,13 @@ inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconD
   if (GivenPopGoodsBoughtPercentage < 40.0f) return "High";
   if (GivenPopGoodsBoughtPercentage < 60.0f) return "Immense";
   return "Immense";
+}
+inline auto GetItemSpendText(TMap<EItemWealthType, float> ItemSpendPercent) -> FString {
+  TArray<FString> SpendStrings;
+  for (const auto& Spend : ItemSpendPercent)
+    if (Spend.Value > 40.0f) SpendStrings.Add(UEnum::GetDisplayValueAsText(Spend.Key).ToString());
+
+  return FString::Join(SpendStrings, TEXT(" & "));
 }
 
 void UEconomyDetailsWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
@@ -45,12 +58,12 @@ void UEconomyDetailsWidget::RefreshUI() {
     });
   }
 
-  PopDetailsWrapBox->ClearChildren();
+  PopDetailsBox->ClearChildren();
   for (auto PopType : TEnumRange<EPopType>()) {
     const TArray<TTuple<FCustomerPop, FPopEconData>>& PopDataArray = PopTypeToDataMap[PopType];
     if (PopDataArray.Num() <= 0) continue;
 
-    UPopDetailsWidget* FirstPopDetailsWidget = nullptr;
+    TTuple<UPopDetailsWidget*, UWrapBoxSlot*> FirstPopDetailsWidget = {nullptr, nullptr};
     for (const TTuple<FCustomerPop, FPopEconData>& PopData : PopDataArray) {
       const FCustomerPop& Pop = PopData.Get<0>();
       const FPopEconData& PopEconData = PopData.Get<1>();
@@ -59,7 +72,7 @@ void UEconomyDetailsWidget::RefreshUI() {
       check(PopDetailsWidget);
 
       // TODO: Add history.
-      PopDetailsWidget->Icon->SetBrushFromTexture(Pop.AssetData.Icon);
+      PopDetailsWidget->Icon->SetBrushFromAtlasInterface(Pop.AssetData.Sprite);
       PopDetailsWidget->Name->SetText(Pop.PopName);
       PopDetailsWidget->WealthText->SetText(
           FText::FromString("Wealth: " + GetWealthText(MarketEconomy->PopEconDataArray, PopEconData)));
@@ -67,21 +80,20 @@ void UEconomyDetailsWidget::RefreshUI() {
           FString::Printf(TEXT("Population: %.0f"),
                           float(PopEconData.Population) / float(MarketEconomy->TotalPopulation) * 100.0f) +
           "%"));
-      PopDetailsWidget->ItemSpendText->SetText(FText::FromString(
-          "Spends On: " +
-          FString::JoinBy(Pop.ItemSpendPercent, TEXT(" & "), [](const TPair<EItemWealthType, float>& Spend) {
-            return Spend.Value > 40.0f ? UEnum::GetDisplayValueAsText(Spend.Key).ToString() : "";
-          })));
+      PopDetailsWidget->ItemSpendText->SetText(
+          FText::FromString("Spends On: " + GetItemSpendText(Pop.ItemSpendPercent)));
       PopDetailsWidget->ItemEconTypesText->SetText(FText::FromString(
           "Goods Type: " + FString::JoinBy(Pop.ItemEconTypes, TEXT(" & "), [](const EItemEconType& EconType) {
             return UEnum::GetDisplayValueAsText(EconType).ToString();
           })));
 
-      if (!FirstPopDetailsWidget) FirstPopDetailsWidget = PopDetailsWidget;
-      PopDetailsWrapBox->AddChildToWrapBox(PopDetailsWidget);
+      if (!FirstPopDetailsWidget.Key)
+        FirstPopDetailsWidget = {PopDetailsWidget, PopDetailsBox->AddChildToWrapBox(PopDetailsWidget)};
+      else PopDetailsBox->AddChildToWrapBox(PopDetailsWidget);
     }
 
-    FirstPopDetailsWidget->BgBorder->SetBrushFromMaterial(PopTypeMaterialMap[PopType]);
+    FirstPopDetailsWidget.Key->BgBorder->SetBrushFromMaterial(PopTypeMaterialMap[PopType]);
+    FirstPopDetailsWidget.Value->SetNewLine(true);  // Force the first pop details widget to start a new line.
   }
 }
 

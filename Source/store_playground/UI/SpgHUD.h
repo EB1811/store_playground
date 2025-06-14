@@ -53,7 +53,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UNewsAndEconomyViewWidget> NewsAndEconomyViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> UpgradeSelectWidgetClass;
+  TSubclassOf<class UUpgradeViewWidget> UpgradeViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UAbilityWidget> AbilityWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -61,12 +61,6 @@ public:
 
   UPROPERTY(EditAnywhere)
   const class AStatisticsGen* StatisticsGen;
-  UPROPERTY(EditAnywhere)
-  const class AUpgradeManager* UpgradeManager;
-  UPROPERTY(EditAnywhere)
-  const class AAbilityManager* AbilityManager;
-  UPROPERTY(EditAnywhere)
-  const class ANewsGen* NewsGen;
   UPROPERTY(EditAnywhere)
   const class ADayManager* DayManager;
   UPROPERTY(EditAnywhere)
@@ -78,6 +72,12 @@ public:
   UPROPERTY(EditAnywhere)
   const class AMarket* Market;
 
+  UPROPERTY(EditAnywhere)
+  class AUpgradeManager* UpgradeManager;
+  UPROPERTY(EditAnywhere)
+  class AAbilityManager* AbilityManager;
+  UPROPERTY(EditAnywhere)
+  class ANewsGen* NewsGen;
   UPROPERTY(EditAnywhere)
   class AStore* Store;
   UPROPERTY(EditAnywhere)
@@ -179,8 +179,8 @@ public:
   void SetAndOpenNewsAndEconomyView();
 
   UPROPERTY()
-  class UUpgradeListWidget* UpgradeSelectWidget;
-  void SetAndOpenUpgradeSelect(class UUpgradeSelectComponent* UpgradeSelectC, class AUpgradeManager* _UpgradeManager);
+  class UUpgradeViewWidget* UpgradeViewWidget;
+  void SetAndOpenUpgradeView(class UUpgradeSelectComponent* UpgradeSelectC);
 
   UPROPERTY()
   class UAbilityWidget* AbilityWidget;

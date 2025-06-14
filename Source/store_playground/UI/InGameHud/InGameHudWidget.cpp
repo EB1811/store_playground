@@ -20,6 +20,8 @@ void UInGameHudWidget::InitUI(FInputActions InputActions) {
       {FText::FromString("Items"), InputActions.OpenInventoryViewAction},
       {FText::FromString("Build"), InputActions.BuildModeAction},
   });
+
+  NewsHudSlideWidget->InitUI(NewsGen);
 }
 
 void UInGameHudWidget::RefreshUI() {
