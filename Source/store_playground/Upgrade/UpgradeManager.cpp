@@ -20,6 +20,10 @@ void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void AUpgradeManager::GainUpgradePoints(int32 Points) { AvailableUpgradePoints += Points; }
 
+auto AUpgradeManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const -> TArray<FUpgradeEffect> {
+  return GlobalStaticDataManager->GetUpgradeEffectsByIds(EffectIDs);
+}
+
 auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
   int32 Level = 1;
   for (const auto& Pair : UpgradeManagerParams.UpgradeLevelRevenueReq)
@@ -56,6 +60,9 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
   UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 
   FUpgrade Upgrade = GlobalStaticDataManager->GetUpgradeById(UpgradeId);
+  check(Upgrade.Cost <= AvailableUpgradePoints);
+
+  AvailableUpgradePoints -= Upgrade.Cost;
 
   TArray<FUpgradeEffect> Effects = GlobalStaticDataManager->GetUpgradeEffectsByIds(Upgrade.UpgradeEffectIDs);
   for (const FUpgradeEffect& Effect : Effects) {

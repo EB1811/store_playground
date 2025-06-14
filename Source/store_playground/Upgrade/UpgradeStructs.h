@@ -12,6 +12,7 @@ enum class EUpgradeClass : uint8 {
   Holy UMETA(DisplayName = "Holy"),
   Demonic UMETA(DisplayName = "Demonic"),
   Artisanal UMETA(DisplayName = "Artisanal"),
+  Eldritch UMETA(DisplayName = "Eldritch"),
 };
 
 USTRUCT()
@@ -20,7 +21,7 @@ struct FEconEventAbilityTextData {
 
   UPROPERTY(EditAnywhere)
   FText Name;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, meta = (MultiLine = true))
   FText Description;
 };
 USTRUCT()
@@ -140,8 +141,6 @@ struct FUpgradeEffect {
 
   UPROPERTY(EditAnywhere)
   FUpgradeEffectTextData TextData;
-  UPROPERTY(EditAnywhere)
-  FUpgradeEffectAssetData AssetData;
 };
 USTRUCT()
 struct FUpgradeEffectRow : public FTableRowBase {
@@ -164,8 +163,6 @@ struct FUpgradeEffectRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FUpgradeEffectTextData TextData;
-  UPROPERTY(EditAnywhere)
-  FUpgradeEffectAssetData AssetData;
 };
 
 USTRUCT()
@@ -174,7 +171,7 @@ struct FUpgradeTextData {
 
   UPROPERTY(EditAnywhere)
   FText Name;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, meta = (MultiLine = true))
   FText Description;
 };
 USTRUCT()
@@ -199,16 +196,16 @@ struct FUpgrade {
   TArray<FName> UpgradeEffectIDs;
 
   UPROPERTY(EditAnywhere)
+  int32 Cost;  // * Cost in upgrade points.
+  UPROPERTY(EditAnywhere)
   int32 Level;  // * Arbitrary level for the upgrade. Higher than player levels wont be displayed.
   UPROPERTY(EditAnywhere)
   FName Requirements;  // * (RequirementsFilter structure) Won't be filtered out in the UI, just not available.
   UPROPERTY(EditAnywhere)
-  FName RequirementsFilterDescription;  // * Description for the requirements filter to display in the UI.
+  FText RequirementsFilterDescription;  // * Description for the requirements filter to display in the UI.
 
   UPROPERTY(EditAnywhere)
   FUpgradeTextData TextData;
-  UPROPERTY(EditAnywhere)
-  FUpgradeAssetData AssetData;
 };
 USTRUCT()
 struct FUpgradeRow : public FTableRowBase {
@@ -224,16 +221,16 @@ struct FUpgradeRow : public FTableRowBase {
   TArray<FName> UpgradeEffectIDs;
 
   UPROPERTY(EditAnywhere)
+  int32 Cost;  // * Cost in upgrade points.
+  UPROPERTY(EditAnywhere)
   int32 Level;  // * Arbitrary level for the upgrade. Higher than player levels wont be displayed.
   UPROPERTY(EditAnywhere)
   FName Requirements;  // * (RequirementsFilter structure) Won't be filtered out in the UI, just not available.
   UPROPERTY(EditAnywhere)
-  FName RequirementsFilterDescription;  // * Description for the requirements filter to display in the UI.
+  FText RequirementsFilterDescription;  // * Description for the requirements filter to display in the UI.
 
   UPROPERTY(EditAnywhere)
   FUpgradeTextData TextData;
-  UPROPERTY(EditAnywhere)
-  FUpgradeAssetData AssetData;
 };
 
 // * This allows a class to have a subset of functions.

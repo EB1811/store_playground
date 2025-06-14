@@ -58,9 +58,11 @@ public:
 
   void GainUpgradePoints(int32 Points);
 
+  auto GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const -> TArray<FUpgradeEffect>;
   auto GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
   auto GetUpgradesReqsNotMet(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
   auto GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
+
   void SelectUpgrade(const FName UpgradeId);
 
   auto GetAvailableEconEventAbilities() const -> TArray<FEconEventAbility>;

@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
 #include "UpgradeWidget.generated.h"
 

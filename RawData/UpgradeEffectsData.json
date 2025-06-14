@@ -1,0 +1,70 @@
+[
+	{
+		"Name": "ue_0",
+		"ID": "ue_0",
+		"EffectType": "ChangeData",
+		"EffectSystem": "GlobalData",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"StartChance": 10
+		},
+		"RelevantName": "EconEventsArray",
+		"TextData":
+		{
+			"Description": "Increased likelihood of customers accepting higher prices."
+		}
+	},
+	{
+		"Name": "ue_1",
+		"ID": "ue_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "Market",
+		"RelevantIDs": [
+			"wla001"
+		],
+		"RelevantValues":
+		{
+			"StoreMarkupMulti": 0.5
+		},
+		"RelevantName": "Items",
+		"TextData":
+		{
+			"Description": "Further increased likelihood of customers accepting higher prices."
+		}
+	},
+	{
+		"Name": "ue_2",
+		"ID": "ue_2",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ee_1"
+		],
+		"RelevantValues":
+		{
+		},
+		"RelevantName": "EconEventAbility",
+		"TextData":
+		{
+			"Description": "Increased likelihood of richer customers."
+		}
+	},
+	{
+		"Name": "ue_3",
+		"ID": "ue_3",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ee_1"
+		],
+		"RelevantValues":
+		{
+		},
+		"RelevantName": "EconEventAbility",
+		"TextData":
+		{
+			"Description": "Unlock econ event."
+		}
+	}
+]

@@ -15,13 +15,6 @@ void UUpgradeWidget::SetUpgradeData(const FUpgrade& Upgrade) {
   UpgradeNameText->SetText(Upgrade.TextData.Name);
   UpgradeDescText->SetText(Upgrade.TextData.Description);
 
-  if (Upgrade.RequirementsFilterDescription.IsNone()) {
-    ReqsNotMetText->SetVisibility(ESlateVisibility::Collapsed);
-  } else {
-    ReqsNotMetText->SetVisibility(ESlateVisibility::Visible);
-    ReqsNotMetText->SetText(FText::FromName(Upgrade.RequirementsFilterDescription));
-  }
-
   // Set image if we have one
   // if (ArticleImage && Upgrade.AssetData.Icon)
   // {

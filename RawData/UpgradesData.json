@@ -1,0 +1,173 @@
+[
+	{
+		"Name": "respect_1",
+		"ID": "respect_1",
+		"UpgradeClass": "Holy",
+		"UpgradeEffectIDs": [
+			"ue_1"
+		],
+		"Cost": 1,
+		"Level": 1,
+		"Requirements": "None",
+		"RequirementsFilterDescription": "None",
+		"TextData":
+		{
+			"Name": "Respect",
+			"Description": "Your reputation precedes you—you are a respected member of the community. Traders appriciate you, commoners admire you, and even the nobles are starting to notice you. Customers' admiration for you is so great that they are willing to pay more for your items. \n<I>\"They didn't come for the deals. They came because they wanted to see me.\"</>"
+		}
+	},
+	{
+		"Name": "respect_2",
+		"ID": "respect_2",
+		"UpgradeClass": "Holy",
+		"UpgradeEffectIDs": [
+			"ue_1",
+      "ue_2"
+		],
+		"Cost": 1,
+		"Level": 1,
+		"Requirements": "Money > 5000",
+		"RequirementsFilterDescription": "Respect I\nHave more than 5000¬",
+		"TextData":
+		{
+			"Name": "Respect II",
+			"Description": "Your reputation precedes you—you are a respected member of the community. Traders appriciate you, commoners admire you, and even the nobles are starting to notice you. Customers' admiration for you is so great that they are willing to pay more for your items."
+		}
+	},
+	{
+		"Name": "honor_1",
+		"ID": "honor_1",
+		"UpgradeClass": "Holy",
+		"UpgradeEffectIDs": [
+			"ue_3"
+		],
+		"Cost": 2,
+		"Level": 1,
+		"Requirements": "None",
+		"RequirementsFilterDescription": "None",
+		"TextData":
+		{
+			"Name": "Honor",
+			"Description": "Your reputation precedes you—you are a respected member of the community. Traders appriciate you, commoners admire you, and even the nobles are starting to notice you. Customers' admiration for you is so great that they are willing to pay more for your items."
+		}
+	},
+	{
+		"Name": "honor_2",
+		"ID": "honor_2",
+		"UpgradeClass": "Holy",
+		"UpgradeEffectIDs": [
+			"ue_3"
+		],
+		"Cost": 5,
+		"Level": 1,
+		"Requirements": "Money > 5000",
+		"RequirementsFilterDescription": "Money > 5000",
+		"TextData":
+		{
+			"Name": "Honor II",
+			"Description": "Your reputation precedes you—you are a respected member of the community. Traders appriciate you, commoners admire you, and even the nobles are starting to notice you. Customers' admiration for you is so great that they are willing to pay more for your items."
+		}
+	},
+	{
+		"Name": "intimidation_1",
+		"ID": "intimidation_1",
+		"UpgradeClass": "Demonic",
+		"UpgradeEffectIDs": [
+			"ue_1"
+		],
+		"Cost": 1,
+		"Level": 1,
+		"Requirements": "None",
+		"RequirementsFilterDescription": "None",
+		"TextData":
+		{
+			"Name": "Intimidation",
+			"Description": "Your reputation precedes you—bargain hunters hesitate, debtors pay promptly, and troublesome adventurers think twice before making demands. Fear becomes a tool of commerce, bending the customer to your will.\n<I>\"They didn't come for the deals. They came because they were afraid not to.\"</>"
+		}
+	},
+	{
+		"Name": "elite_1",
+		"ID": "elite_1",
+		"UpgradeClass": "Demonic",
+		"UpgradeEffectIDs": [
+			"ue_3"
+		],
+		"Cost": 1,
+		"Level": 1,
+		"Requirements": "None",
+		"RequirementsFilterDescription": "None",
+		"TextData":
+		{
+			"Name": "Elite",
+			"Description": "Your reputation precedes you—bargain hunters hesitate, debtors pay promptly, and troublesome adventurers think twice before making demands. Fear becomes a tool of commerce, bending the customer to your will.\n<I>\"They didn't come for the deals. They came because they were afraid not to.\"</>"
+    }
+	},
+	{
+		"Name": "intimidation_2",
+		"ID": "intimidation_2",
+		"UpgradeClass": "Demonic",
+		"UpgradeEffectIDs": [
+			"ue_1"
+		],
+		"Cost": 2,
+		"Level": 1,
+		"Requirements": "Money > 5000",
+		"RequirementsFilterDescription": "Money > 5000",
+		"TextData":
+		{
+			"Name": "Intimidation II",
+			"Description": "Your reputation precedes you—bargain hunters hesitate, debtors pay promptly, and troublesome adventurers think twice before making demands. Fear becomes a tool of commerce, bending the customer to your will.\n<I>\"They didn't come for the deals. They came because they were afraid not to.\"</>"
+    }
+	},
+	{
+		"Name": "artisanal_1",
+		"ID": "artisanal_1",
+		"UpgradeClass": "Artisanal",
+		"UpgradeEffectIDs": [
+			"ue_1"
+		],
+		"Cost": 1,
+		"Level": 1,
+		"Requirements": "None",
+		"RequirementsFilterDescription": "None",
+		"TextData":
+		{
+			"Name": "Artisanal",
+			"Description": "Your reputation precedes you—bargain hunters hesitate, debtors pay promptly, and troublesome adventurers think twice before making demands. Fear becomes a tool of commerce, bending the customer to your will.\n<I>\"They didn't come for the deals. They came because they were afraid not to.\"</>"
+		}
+	},
+	{
+		"Name": "artisanal_2",
+		"ID": "artisanal_2",
+		"UpgradeClass": "Artisanal",
+		"UpgradeEffectIDs": [
+			"ue_1"
+		],
+		"Cost": 2,
+		"Level": 1,
+		"Requirements": "None",
+		"RequirementsFilterDescription": "None",
+		"TextData":
+		{
+			"Name": "Artisanal",
+			"Description": "Your reputation precedes you—bargain hunters hesitate, debtors pay promptly, and troublesome adventurers think twice before making demands. Fear becomes a tool of commerce, bending the customer to your will.\n<I>\"They didn't come for the deals. They came because they were afraid not to.\"</>"
+		}
+	},
+	{
+		"Name": "artisanal_3",
+		"ID": "artisanal_3",
+		"UpgradeClass": "Artisanal",
+		"UpgradeEffectIDs": [
+			"ue_1"
+		],
+		"Cost": 1,
+		"Level": 1,
+		"Requirements": "Money > 5000",
+		"RequirementsFilterDescription": "Money > 5000",
+		"TextData":
+		{
+			"Name": "Artisanal",
+			"Description": "Your reputation precedes you—bargain hunters hesitate, debtors pay promptly, and troublesome adventurers think twice before making demands. Fear becomes a tool of commerce, bending the customer to your will.\n<I>\"They didn't come for the deals. They came because they were afraid not to.\"</>"
+		}
+	}
+]
