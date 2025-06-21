@@ -1,0 +1,50 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Blueprint/UserWidget.h"
+#include "store_playground/Player/InputStructs.h"
+#include "PauseMenuViewWidget.generated.h"
+
+UCLASS()
+class STORE_PLAYGROUND_API UPauseMenuViewWidget : public UUserWidget {
+  GENERATED_BODY()
+
+public:
+  virtual void NativeOnInitialized() override;
+
+  UPROPERTY(EditAnywhere, meta = (BindWidget))
+  class USaveLoadSlotsWidget* SaveLoadSlotsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class USettingsWidget* SettingsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* ResumeButton;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* SaveButton;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* LoadButton;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* SettingsButton;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* QuitButton;
+
+  UPROPERTY()
+  class ASaveManager* SaveManager;
+
+  UFUNCTION()
+  void Resume();
+  UFUNCTION()
+  void SaveMenu();
+  UFUNCTION()
+  void LoadMenu();
+  UFUNCTION()
+  void SettingsMenu();
+  UFUNCTION()
+  void Quit();
+
+  void RefreshUI();
+  void InitUI(FInputActions InputActions, class ASaveManager* _SaveManager, std::function<void()> _CloseWidgetFunc);
+
+  std::function<void()> CloseWidgetFunc;
+};

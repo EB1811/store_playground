@@ -29,7 +29,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UInGameHudWidget> InGameHudWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UPauseMenuWidget> PauseMenuWidgetClass;
+  TSubclassOf<class UPauseMenuViewWidget> PauseMenuViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> InventoryViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -73,6 +73,8 @@ public:
   const class AMarket* Market;
 
   UPROPERTY(EditAnywhere)
+  class ASaveManager* SaveManager;
+  UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;
   UPROPERTY(EditAnywhere)
   class AAbilityManager* AbilityManager;
@@ -107,9 +109,9 @@ public:
   void HideInGameHudWidget();
 
   UPROPERTY()
-  class UPauseMenuWidget* PauseMenuWidget;
+  class UPauseMenuViewWidget* PauseMenuViewWidget;
   UFUNCTION(BlueprintCallable)
-  void OpenPauseMenu(class ASaveManager* SaveManager);
+  void OpenPauseMenuView();
 
   UPROPERTY(EditAnywhere)
   TArray<class UUserWidget*> OpenedWidgets;

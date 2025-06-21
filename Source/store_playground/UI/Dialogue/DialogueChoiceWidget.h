@@ -22,7 +22,9 @@ public:
   int32 ChoiceIndex;
 
   UFUNCTION()
-  void ClickChoiceButton();
+  void ClickChoice();
 
-  std::function<void()> OnChoiceSelected;
+  void InitUI(const FString& ChoiceTextContent, int32 Index, std::function<void(int32)> _ChoiceSelectedFunc);
+
+  std::function<void(int32)> ChoiceSelectedFunc;
 };

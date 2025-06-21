@@ -60,6 +60,8 @@ public:
 
   void LoadSaveGameSlots();
 
+  // TODO: Delete save slot
+
   void CreateNewSaveGame(int32 SlotIndex);
   void SaveCurrentSlotToDisk();
   // Systems and Levels need to be separated to load store level info.

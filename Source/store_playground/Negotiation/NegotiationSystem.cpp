@@ -108,15 +108,18 @@ FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
   if (CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::StockCheck) {
     NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcStockCheckRequest);
     return DialogueSystem->StartDialogue(
-        CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues);
+        CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues,
+        CustomerAI->CustomerName.ToString());
   }
 
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
   return Type == NegotiationType::PlayerSell
              ? DialogueSystem->StartDialogue(
-                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::BuyItemRequest].Dialogues)
+                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::BuyItemRequest].Dialogues,
+                   CustomerAI->CustomerName.ToString())
              : DialogueSystem->StartDialogue(
-                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::SellItemRequest].Dialogues);
+                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::SellItemRequest].Dialogues,
+                   CustomerAI->CustomerName.ToString());
 }
 
 void UNegotiationSystem::PlayerReadRequest() {
@@ -152,7 +155,7 @@ FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
   else if (CustomerOfferResponse.CounterOffer > 0) OfferPrice(CustomerOfferResponse.CounterOffer);
   else RejectOffer();
 
-  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue);
+  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue, CustomerAI->CustomerName.ToString());
 }
 
 // todo-low: check player has enough money for all negotiation funcs.

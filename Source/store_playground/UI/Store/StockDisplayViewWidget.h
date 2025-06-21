@@ -9,7 +9,7 @@
 
 UENUM()
 enum class EStockDisplayViewType : uint8 {
-  Player UMETA(DisplayName = "Player"),
+  Player UMETA(DisplayName = "Items"),
   Display UMETA(DisplayName = "Display"),
 };
 

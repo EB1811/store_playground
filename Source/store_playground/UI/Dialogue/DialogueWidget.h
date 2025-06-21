@@ -17,7 +17,7 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UDialogueBoxWidget* DialogueBoxWidget;
   UPROPERTY(meta = (BindWidget))
-  class UWrapBox* ChoicesPanelWrapBox;
+  class UChoicesBoxWidget* ChoicesBoxWidget;
   UPROPERTY(meta = (BindWidget))
   class UControlsHelpersWidget* ControlsHelpersWidget;
 
@@ -25,9 +25,9 @@ public:
   TSubclassOf<class UDialogueChoiceWidget> DialogueChoiceWidgetClass;
 
   UPROPERTY(EditAnywhere)
-  class UDialogueSystem* DialogueSystemRef;
+  class UDialogueSystem* DialogueSystem;
 
-  void InitDialogueUI(class UDialogueSystem* DialogueSystem);
+  void InitDialogueUI(class UDialogueSystem* _DialogueSystem);
   void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()

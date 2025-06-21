@@ -176,7 +176,7 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
   check(PlayerBehaviourState != EPlayerState::Cutscene);
   check(SaveManager);
 
-  HUD->OpenPauseMenu(SaveManager);
+  HUD->OpenPauseMenuView();
 
   UGameplayStatics::SetGamePaused(GetWorld(), PlayerBehaviourState == EPlayerState::Paused);
 }
@@ -494,8 +494,7 @@ void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC, std::funct
     return;
   }
 
-  auto CurrentDialogueArr = DialogueC->GetNextDialogueChain();
-  DialogueSystem->StartDialogue(CurrentDialogueArr);
+  DialogueSystem->StartDialogue(DialogueC);
   HUD->SetAndOpenDialogue(DialogueSystem, [this, DialogueC, OnDialogueEndFunc]() {
     // ? Call in dialogue system?
     DialogueC->FinishReadingDialogueChain();
@@ -505,13 +504,14 @@ void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC, std::funct
 }
 // For dialogue outside of the dialogue component (cutscenes, etc.).
 void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,
-                                       std::function<void()> OnDialogueEndFunc) {
+                                       std::function<void()> OnDialogueEndFunc,
+                                       const FString& _SpeakerName) {
   if (DialogueDataArr.Num() == 0) {
     if (OnDialogueEndFunc) return OnDialogueEndFunc();
     return;
   }
 
-  DialogueSystem->StartDialogue(DialogueDataArr);
+  DialogueSystem->StartDialogue(DialogueDataArr, _SpeakerName);
   HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueEndFunc);
 }
 

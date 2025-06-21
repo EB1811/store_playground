@@ -183,7 +183,8 @@ public:
 
   void EnterDialogue(class UDialogueComponent* DialogueC, std::function<void()> OnDialogueEndFunc = nullptr);
   void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
-                     std::function<void()> OnDialogueEndFunc = nullptr);
+                     std::function<void()> OnDialogueEndFunc = nullptr,
+                     const FString& _SpeakerName = "NPC");
   void EnterNegotiation(class UCustomerAIComponent* CustomerAI,
                         class UItemBase* Item = nullptr,
                         bool bIsQuestAssociated = false,

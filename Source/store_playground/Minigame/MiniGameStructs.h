@@ -44,6 +44,8 @@ struct FMiniGameInfo {
   TArray<FDialogueData> InitDialogues;  // * Dialogue before starting.
 
   UPROPERTY(EditAnywhere)
+  FText DisplayName;  // * Name of the minigame, displayed in the UI.
+  UPROPERTY(EditAnywhere)
   FMiniGameAssetData AssetData;
 };
 

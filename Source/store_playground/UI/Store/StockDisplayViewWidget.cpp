@@ -1,6 +1,7 @@
 #include "StockDisplayViewWidget.h"
 #include "CoreFwd.h"
 #include "Logging/LogVerbosity.h"
+#include "UObject/Class.h"
 #include "store_playground/UI/NpcStore/TradeConfirmWidget.h"
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Store/Store.h"
@@ -107,6 +108,7 @@ void UStockDisplayViewWidget::SwitchViewType() {
 void UStockDisplayViewWidget::Back() { CloseWidgetFunc(); }
 
 void UStockDisplayViewWidget::RefreshUI() {
+  MenuHeaderWidget->SetTitle(UEnum::GetDisplayValueAsText(StockDisplayViewType));
   AddOrTakeButton->ActionText->SetText(
       FText::FromString(StockDisplayViewType == EStockDisplayViewType::Player ? "Add" : "Take"));
   SwitchViewTypeButton->ActionText->SetText(

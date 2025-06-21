@@ -45,6 +45,8 @@ public:
   UPROPERTY(EditAnywhere)
   class UMenuHeaderTabWidget* ActiveTabWidget;
 
+  void SetTitle(const FText& NewTitle);
+
   void SetComponentUI(TArray<FTopBarTab>& TopBarTabs, std::function<void(FText TabText)> _TabSelectedFunc);
 
   std::function<void(FText TabText)> TabSelectedFunc;

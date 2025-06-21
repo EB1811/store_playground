@@ -1,6 +1,6 @@
 #include "SpgHUD.h"
 #include "GameFramework/PlayerController.h"
-#include "store_playground/UI/PauseMenu/PauseMenuWidget.h"
+#include "store_playground/UI/PauseMenu/PauseMenuViewWidget.h"
 #include "store_playground/UI/Inventory/PlayerAndContainerWidget.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
@@ -50,7 +50,7 @@ void ASpgHUD::BeginPlay() {
       CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
 
   check(InGameHudWidgetClass);
-  check(PauseMenuWidgetClass);
+  check(PauseMenuViewWidgetClass);
   check(InteractionDisplayWidgetClass);
   check(InventoryViewWidgetClass);
   check(PlayerAndContainerWidgetClass);
@@ -73,9 +73,9 @@ void ASpgHUD::BeginPlay() {
   InGameHudWidget->Store = Store;
   InGameHudWidget->LevelManager = LevelManager;
 
-  PauseMenuWidget = CreateWidget<UPauseMenuWidget>(GetWorld(), PauseMenuWidgetClass);
-  PauseMenuWidget->AddToViewport(20);
-  PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+  PauseMenuViewWidget = CreateWidget<UPauseMenuViewWidget>(GetWorld(), PauseMenuViewWidgetClass);
+  PauseMenuViewWidget->AddToViewport(20);
+  PauseMenuViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   InteractionPopupWidget = CreateWidget<UInteractionDisplayWidget>(GetWorld(), InteractionDisplayWidgetClass);
   InteractionPopupWidget->AddToViewport(10);
@@ -207,18 +207,21 @@ void ASpgHUD::HideInGameHudWidget() {
   bShowingHud = false;
 }
 
-void ASpgHUD::OpenPauseMenu(ASaveManager* SaveManager) {
-  if (OpenedWidgets.Contains(PauseMenuWidget)) return CloseWidget(PauseMenuWidget);
+void ASpgHUD::OpenPauseMenuView() {
+  if (OpenedWidgets.Contains(PauseMenuViewWidget)) return CloseWidget(PauseMenuViewWidget);
 
-  PauseMenuWidget->SaveManagerRef = SaveManager;
-  PauseMenuWidget->RefreshUI();
+  PauseMenuViewWidget->InitUI(PlayerInputActions, SaveManager, [this] {
+    CloseWidget(PauseMenuViewWidget);
+    SetPlayerNormalFunc();
+  });
+  PauseMenuViewWidget->RefreshUI();
 
-  PauseMenuWidget->SetVisibility(ESlateVisibility::Visible);
+  PauseMenuViewWidget->SetVisibility(ESlateVisibility::Visible);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
-  OpenedWidgets.Add(PauseMenuWidget);
+  OpenedWidgets.Add(PauseMenuViewWidget);
 
   SetPlayerPausedFunc();
 }

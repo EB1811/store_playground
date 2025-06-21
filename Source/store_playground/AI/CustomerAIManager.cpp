@@ -120,6 +120,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
   UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
   UniqueCustomer->InteractionComponent->InteractionType = EInteractionType::Customer;
+  UniqueCustomer->DialogueComponent->SpeakerName = UniqueNpcData.NpcName;
 
   // ? Use a random dialogue component type?
   UniqueCustomer->DialogueComponent->DialogueArray =
@@ -244,6 +245,7 @@ void ACustomerAIManager::SpawnCustomers() {
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
+    Customer->DialogueComponent->SpeakerName = RandomCustomerData.CustomerName;
     Customer->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomCustomerDialogue();
 
     // ? Maybe have two arrays for customers ai and customer interaction components?

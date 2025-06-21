@@ -1,5 +1,6 @@
 #include "DialogueSystem.h"
 #include "DialogueDataStructs.h"
+#include "DialogueComponent.h"
 #include "HAL/Platform.h"
 
 EDialogueState GetNextDialogueState(EDialogueState CurrentState, EDialogueAction Action) {
@@ -37,7 +38,27 @@ TArray<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr
   return ChoiceDialogueIndexes;
 }
 
-FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _DialogueDataArr) {
+FNextDialogueRes UDialogueSystem::StartDialogue(const class UDialogueComponent* DialogueC) {
+  check(DialogueC && DialogueC->DialogueArray.Num() > 0);
+
+  ResetDialogue();
+
+  DialogueState =
+      GetNextDialogueState(DialogueState, DialogueC->DialogueArray[0].DialogueSpeaker == EDialogueSpeaker::NPC
+                                              ? EDialogueAction::NPCNext
+                                              : EDialogueAction::PlayerNext);
+  SpeakerName = DialogueC->SpeakerName;
+  DialogueDataArr = DialogueC->DialogueArray;
+  CurrentDialogueIndex = 0;
+  ChoiceDialoguesSelectedIDs.Empty();
+
+  UE_LOG(LogTemp, Warning, TEXT("StartDialogue: %d"), CurrentDialogueIndex);
+
+  return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+}
+
+FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _DialogueDataArr,
+                                                const FString& _SpeakerName) {
   check(_DialogueDataArr.Num() > 0);
 
   ResetDialogue();
@@ -45,6 +66,7 @@ FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _Dia
   DialogueState = GetNextDialogueState(DialogueState, _DialogueDataArr[0].DialogueSpeaker == EDialogueSpeaker::NPC
                                                           ? EDialogueAction::NPCNext
                                                           : EDialogueAction::PlayerNext);
+  SpeakerName = FText::FromString(_SpeakerName);
   DialogueDataArr = _DialogueDataArr;
   CurrentDialogueIndex = 0;
   ChoiceDialoguesSelectedIDs.Empty();

@@ -12,9 +12,9 @@ void UPopulatedSaveSlotWidget::NativeOnInitialized() {
 void UPopulatedSaveSlotWidget::SetSlotData(int32 index, const FSaveSlotData& SlotData) {
   SlotIndex = index;
   NameText->SetText(FText::FromString(SlotData.SlotName));
-  LastModifiedText->SetText(FText::FromString(SlotData.LastModified.ToString()));
-  CurrentDayText->SetText(FText::FromString(FString::FromInt(SlotData.CurrentDay)));
-  StoreMoneyText->SetText(FText::FromString(FString::FromInt(SlotData.StoreMoney)));
+  LastModifiedText->SetText(FText::FromString(SlotData.LastModified.ToFormattedString(*FString("%d/%m/%y"))));
+  CurrentDayText->SetText(FText::FromString(FString::Printf(TEXT("Day: %d"), SlotData.CurrentDay)));
+  StoreMoneyText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), SlotData.StoreMoney)));
 }
 
 void UPopulatedSaveSlotWidget::OnSelectButtonClicked() {

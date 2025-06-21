@@ -203,6 +203,8 @@ struct FNpcStoreType {
   TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
 
   UPROPERTY(EditAnywhere)
+  FText DisplayName;  // * Name of the store type, displayed in the UI.
+  UPROPERTY(EditAnywhere)
   FNpcStoreAssetData AssetData;
 };
 USTRUCT()
@@ -227,6 +229,8 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
 
+  UPROPERTY(EditAnywhere)
+  FText DisplayName;  // * Name of the store type, displayed in the UI.
   UPROPERTY(EditAnywhere)
   FNpcStoreAssetData AssetData;
 };

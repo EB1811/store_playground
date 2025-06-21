@@ -6,10 +6,16 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/UI/Components/ControlsHelpersWidget.h"
+#include "store_playground/UI/Dialogue/ChoicesBoxWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/WrapBox.h"
+
+auto GetSpeakerName(const UDialogueSystem* DialogueSystem) -> FString {
+  return DialogueSystem->DialogueState == EDialogueState::PlayerTalk ? "Player"
+                                                                     : DialogueSystem->SpeakerName.ToString();
+}
 
 void UDialogueWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -22,20 +28,20 @@ void UDialogueWidget::NativeOnInitialized() {
   UIBehaviour.HideUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Collapsed); };
 }
 
-void UDialogueWidget::InitDialogueUI(UDialogueSystem* DialogueSystem) {
-  check(DialogueSystem && CloseDialogueUI);
+void UDialogueWidget::InitDialogueUI(UDialogueSystem* _DialogueSystem) {
+  check(_DialogueSystem && CloseDialogueUI);
   DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
-  ChoicesPanelWrapBox->ClearChildren();
+  ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  DialogueSystemRef = DialogueSystem;
-  if (DialogueSystemRef->DialogueState == EDialogueState::End) return CloseDialogueUI();
+  DialogueSystem = _DialogueSystem;
+  if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueUI();
 
   DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
 
-  FString SpeakerName = DialogueSystemRef->DialogueState == EDialogueState::PlayerTalk ? "Player" : "NPC";
+  FString SpeakerName = GetSpeakerName(DialogueSystem);
   UpdateDialogueText(
-      SpeakerName, DialogueSystemRef->DialogueDataArr[DialogueSystemRef->CurrentDialogueIndex].DialogueText,
-      DialogueSystemRef->DialogueDataArr[DialogueSystemRef->CurrentDialogueIndex].Action == EDialogueAction::End);
+      SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
+      DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
 }
 
 // ? Change this to refresh all data?
@@ -47,34 +53,27 @@ void UDialogueWidget::UpdateDialogueText(const FString& SpeakerName, const FStri
 }
 
 void UDialogueWidget::OnNext() {
-  FNextDialogueRes NextDialogue = DialogueSystemRef->NextDialogue();
+  FNextDialogueRes NextDialogue = DialogueSystem->NextDialogue();
   if (NextDialogue.State == EDialogueState::End) return CloseDialogueUI();
 
   check(NextDialogue.DialogueData);
 
   switch (NextDialogue.State) {
     case EDialogueState::PlayerChoice: {
+      FString SpeakerName = GetSpeakerName(DialogueSystem);
+      auto Dialogues = DialogueSystem->GetChoiceDialogues();
+
+      ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 ChoiceIndex) { OnChoiceSelect(ChoiceIndex); });
+      ChoicesBoxWidget->RefreshUI();
+
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
-      ChoicesPanelWrapBox->ClearChildren();
-
-      const TArray<FDialogueData>& DialogueDataArr = DialogueSystemRef->GetChoiceDialogues();
-      for (int32 i = 0; FDialogueData DialogueData : DialogueDataArr) {
-        UDialogueChoiceWidget* DialogueChoiceWidget =
-            CreateWidget<UDialogueChoiceWidget>(this, DialogueChoiceWidgetClass);
-
-        DialogueChoiceWidget->ChoiceIndex = i;
-        DialogueChoiceWidget->ChoiceText->SetText(FText::FromString(DialogueData.DialogueText));
-        DialogueChoiceWidget->OnChoiceSelected = [this, i]() { OnChoiceSelect(i); };
-
-        ChoicesPanelWrapBox->AddChildToWrapBox(DialogueChoiceWidget);
-        i++;
-      }
+      ChoicesBoxWidget->SetVisibility(ESlateVisibility::Visible);
 
       return;
     }
     case EDialogueState::NPCTalk:
     case EDialogueState::PlayerTalk: {
-      FString SpeakerName = NextDialogue.State == EDialogueState::PlayerTalk ? "Player" : "NPC";
+      FString SpeakerName = GetSpeakerName(DialogueSystem);
       UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                          NextDialogue.DialogueData->Action == EDialogueAction::End);
 
@@ -85,15 +84,15 @@ void UDialogueWidget::OnNext() {
 }
 
 void UDialogueWidget::OnChoiceSelect(int32 ChoiceIndex) {
-  FNextDialogueRes NextDialogue = DialogueSystemRef->DialogueChoice(ChoiceIndex);
+  FNextDialogueRes NextDialogue = DialogueSystem->DialogueChoice(ChoiceIndex);
   if (NextDialogue.State == EDialogueState::End) return CloseDialogueUI();
 
   check(NextDialogue.DialogueData);
 
   DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
-  ChoicesPanelWrapBox->ClearChildren();
+  ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  FString SpeakerName = NextDialogue.State == EDialogueState::PlayerTalk ? "Player" : "NPC";
+  FString SpeakerName = GetSpeakerName(DialogueSystem);
   UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                      NextDialogue.DialogueData->Action == EDialogueAction::End);
 }

@@ -38,7 +38,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   FGuid CustomerID;
-
+  UPROPERTY(EditAnywhere, Category = "Dialogue")
+  FText CustomerName;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerType CustomerType;
 

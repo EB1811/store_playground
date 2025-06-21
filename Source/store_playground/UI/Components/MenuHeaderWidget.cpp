@@ -20,6 +20,11 @@ void UMenuHeaderWidget::NativeOnInitialized() {
   TitleText->SetText(Title);
 }
 
+void UMenuHeaderWidget::SetTitle(const FText& NewTitle) {
+  Title = NewTitle;
+  TitleText->SetText(NewTitle);
+}
+
 void UMenuHeaderWidget::SetComponentUI(TArray<FTopBarTab>& TopBarTabs,
                                        std::function<void(FText TabText)> _TabSelectedFunc) {
   check(_TabSelectedFunc);

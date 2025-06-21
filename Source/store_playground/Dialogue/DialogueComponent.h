@@ -29,6 +29,8 @@ public:
   EDialogueComponentType DialogueComponentType;
 
   UPROPERTY(EditAnywhere, Category = "Dialogue", SaveGame)
+  FText SpeakerName;
+  UPROPERTY(EditAnywhere, Category = "Dialogue", SaveGame)
   TArray<struct FDialogueData> DialogueArray;
   UPROPERTY(EditAnywhere, Category = "Dialogue", SaveGame)
   FName CurrentDialogueChainId;

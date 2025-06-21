@@ -296,6 +296,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     MobileNPCStore->Sprite->SetFlipbook(NpcStoreType.AssetData.Sprites[ESimpleSpriteDirection::Down]);
 
     MobileNPCStore->InteractionComponent->InteractionType = EInteractionType::NpcStore;
+    MobileNPCStore->DialogueComponent->SpeakerName = NpcStoreType.DisplayName;
     MobileNPCStore->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomNpcStoreDialogue();
 
     NpcStoreComponents.Add({MobileNPCStore->NpcStoreComponent, MobileNPCStore->InventoryComponent});
@@ -307,6 +308,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     NPCStore->DialogueComponent->DialogueArray.Empty();
 
     NPCStore->InteractionComponent->InteractionType = EInteractionType::NpcStore;
+    NPCStore->DialogueComponent->SpeakerName = NPCStore->NpcStoreComponent->NpcStoreType.DisplayName;
     NPCStore->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomNpcStoreDialogue();
 
     NpcStoreComponents.Add({NPCStore->NpcStoreComponent, NPCStore->InventoryComponent});
@@ -392,6 +394,8 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     Npc->SimpleSpriteAnimComponent->WalkSprites = RandomNpcData.AssetData.WalkSprites;
     Npc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
+    Npc->DialogueComponent->SpeakerName = RandomNpcData.CustomerName;
+
     if (Market->TodaysEconEvents.Num() <= 0) {
       Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue(
           [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.IsEmpty(); });
@@ -458,6 +462,7 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
   UniqueNpc->QuestComponent->CustomerAction = RandomQuestChainData.CustomerAction;
   UniqueNpc->QuestComponent->QuestOutcomeType = RandomQuestChainData.QuestOutcomeType;
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
+  UniqueNpc->DialogueComponent->SpeakerName = UniqueNpcData.NpcName;
   UniqueNpc->DialogueComponent->DialogueArray =
       GlobalStaticDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
 
@@ -500,6 +505,7 @@ void AMarketLevel::InitMiniGames(bool bIsWeekend) {
     MiniGame->Sprite->SetFlipbook(SpawnableMiniGame->AssetData.Sprites[ESimpleSpriteDirection::Down]);
 
     MiniGame->InteractionComponent->InteractionType = EInteractionType::MiniGame;
+    MiniGame->DialogueComponent->SpeakerName = SpawnableMiniGame->DisplayName;
     MiniGame->DialogueComponent->DialogueArray = SpawnableMiniGame->InitDialogues;
     MiniGame->MiniGameComponent->MiniGameType = SpawnableMiniGame->MiniGame;
 

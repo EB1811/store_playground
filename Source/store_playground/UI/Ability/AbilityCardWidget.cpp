@@ -17,7 +17,7 @@ void UAbilityCardWidget::InitUI(FEconEventAbility Ability, std::function<void(FN
 
   NameText->SetText(Ability.TextData.Name);
   DescText->SetText(Ability.TextData.Description);
-  CostText->SetText(FText::FromString(FString::Printf(TEXT("Cost: %d¬"), Ability.Cost)));
+  CostText->SetText(FText::FromString(FString::Printf(TEXT("Cost: %.0f¬"), Ability.Cost)));
   CooldownText->SetText(FText::FromString(FString::Printf(TEXT("Cooldown: %d days"), Ability.Cooldown)));
 }
 
