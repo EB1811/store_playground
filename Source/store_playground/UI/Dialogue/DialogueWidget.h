@@ -7,6 +7,8 @@
 #include "store_playground/UI/UIStructs.h"
 #include "DialogueWidget.generated.h"
 
+// TODO: Separate into view.
+
 UCLASS()
 class STORE_PLAYGROUND_API UDialogueWidget : public UUserWidget {
   GENERATED_BODY()
@@ -27,7 +29,7 @@ public:
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
 
-  void InitDialogueUI(class UDialogueSystem* _DialogueSystem);
+  void InitDialogueUI(class UDialogueSystem* _DialogueSystem, std::function<void()> _CloseDialogueUI);
   void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()

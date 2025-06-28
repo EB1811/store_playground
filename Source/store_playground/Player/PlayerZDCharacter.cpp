@@ -521,7 +521,7 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
                                           UQuestComponent* QuestComponent) {
   NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAI->StockDisplayInventory,
                                       bIsQuestAssociated, QuestComponent);
-  HUD->SetAndOpenNegotiation(NegotiationSystem, PlayerInventoryComponent);
+  HUD->SetAndOpenNegotiation(NegotiationSystem, DialogueSystem, PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,

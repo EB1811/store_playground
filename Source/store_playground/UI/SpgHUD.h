@@ -47,7 +47,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> UNegotiationWidgetClass;
+  TSubclassOf<class UNegotiationViewWidget> NegotiationViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UCutsceneWidget> CutsceneWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -168,8 +168,10 @@ public:
   void SetAndOpenDialogue(class UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc = nullptr);
 
   UPROPERTY()
-  class UNegotiationWidget* NegotiationWidget;
-  void SetAndOpenNegotiation(const class UNegotiationSystem* Negotiation, class UInventoryComponent* PlayerInventoryC);
+  class UNegotiationViewWidget* NegotiationViewWidget;
+  void SetAndOpenNegotiation(class UNegotiationSystem* NegotiationSystem,
+                             class UDialogueSystem* DialogueSystem,
+                             class UInventoryComponent* PlayerInventoryC);
 
   UPROPERTY()
   class UCutsceneWidget* CutsceneWidget;

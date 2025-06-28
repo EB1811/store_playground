@@ -10,7 +10,7 @@
 #include "store_playground/UI/Inventory/InventoryWidget.h"
 #include "store_playground/UI/Inventory/InventoryViewWidget.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
-#include "store_playground/UI/Negotiation/NegotiationWidget.h"
+#include "store_playground/UI/Negotiation/NegotiationViewWidget.h"
 #include "store_playground/UI/NPCStore/NpcStoreViewWidget.h"
 #include "store_playground/UI/Store/StockDisplayViewWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayViewWidget.h"
@@ -18,6 +18,7 @@
 #include "store_playground/UI/Statistics/StatisticsWidget.h"
 #include "store_playground/UI/Ability/AbilityViewWidget.h"
 #include "store_playground/UI/InGameHud/InGameHudWidget.h"
+#include "store_playground/UI/Negotiation/NegotiationViewWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/UI/Upgrade/UpgradeViewWidget.h"
@@ -56,7 +57,7 @@ void ASpgHUD::BeginPlay() {
   check(PlayerAndContainerWidgetClass);
   check(BuildableDisplayViewWidgetClass);
   check(NpcStoreViewWidgetClass);
-  check(UNegotiationWidgetClass);
+  check(NegotiationViewWidgetClass);
   check(UDialogueWidgetClass);
   check(StockDisplayViewWidgetClass);
   check(StoreExpansionsListWidgetClass);
@@ -110,9 +111,9 @@ void ASpgHUD::BeginPlay() {
   DialogueWidget->AddToViewport(10);
   DialogueWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  NegotiationWidget = CreateWidget<UNegotiationWidget>(GetWorld(), UNegotiationWidgetClass);
-  NegotiationWidget->AddToViewport(10);
-  NegotiationWidget->SetVisibility(ESlateVisibility::Collapsed);
+  NegotiationViewWidget = CreateWidget<UNegotiationViewWidget>(GetWorld(), NegotiationViewWidgetClass);
+  NegotiationViewWidget->AddToViewport(10);
+  NegotiationViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   CutsceneWidget = CreateWidget<UCutsceneWidget>(GetWorld(), CutsceneWidgetClass);
   CutsceneWidget->AddToViewport(10);
@@ -382,30 +383,26 @@ void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
 }
 
 void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc) {
-  check(UDialogueWidgetClass);
-
-  DialogueWidget->CloseDialogueUI = [this, OnDialogueEndFunc] {
+  DialogueWidget->InitDialogueUI(Dialogue, [this, OnDialogueEndFunc] {
     CloseWidget(DialogueWidget);
 
     if (OnDialogueEndFunc) OnDialogueEndFunc();
-  };
-  DialogueWidget->InitDialogueUI(Dialogue);
+  });
 
   OpenFocusedMenu(DialogueWidget);
 }
 
-void ASpgHUD::SetAndOpenNegotiation(const UNegotiationSystem* Negotiation, UInventoryComponent* PlayerInventoryC) {
-  check(UNegotiationWidgetClass);
+void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
+                                    UDialogueSystem* DialogueSystem,
+                                    UInventoryComponent* PlayerInventoryC) {
+  check(NegotiationViewWidget);
+  if (OpenedWidgets.Contains(NegotiationViewWidget)) return CloseWidget(NegotiationViewWidget);
 
-  NegotiationWidget->NegotiationSystemRef = const_cast<UNegotiationSystem*>(Negotiation);
-  NegotiationWidget->PlayerInventoryRef = PlayerInventoryC;
-  NegotiationWidget->CloseNegotiationUI = [this] { CloseWidget(NegotiationWidget); };
-  NegotiationWidget->RefreshInventoryUI = [this] {
-    // if (InventoryViewWidget->IsVisible()) InventoryViewWidget->RefreshInventoryViewUI();
-  };
-  NegotiationWidget->InitNegotiationUI();
+  NegotiationViewWidget->InitUI(PlayerInputActions, Store, MarketEconomy, PlayerInventoryC, NegotiationSystem,
+                                DialogueSystem, [this] { CloseWidget(NegotiationViewWidget); });
+  NegotiationViewWidget->RefreshUI();
 
-  OpenFocusedMenu(NegotiationWidget);
+  OpenFocusedMenu(NegotiationViewWidget);
 }
 
 void ASpgHUD::SetAndOpenCutscene(UCutsceneSystem* CutsceneSystem) {

@@ -33,7 +33,7 @@ void UCutsceneWidget::RefreshUI() {
     case ECutsceneState::InDialogue: {
       auto Dialogue = CutsceneSystemRef->PerformCutsceneChainDialogues();
 
-      DialogueWidget->InitDialogueUI(CutsceneSystemRef->DialogueSystem);
+      // DialogueWidget->InitDialogueUI(CutsceneSystemRef->DialogueSystem);
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     }

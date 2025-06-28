@@ -28,12 +28,14 @@ void UDialogueWidget::NativeOnInitialized() {
   UIBehaviour.HideUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Collapsed); };
 }
 
-void UDialogueWidget::InitDialogueUI(UDialogueSystem* _DialogueSystem) {
-  check(_DialogueSystem && CloseDialogueUI);
+void UDialogueWidget::InitDialogueUI(UDialogueSystem* _DialogueSystem, std::function<void()> _CloseDialogueUI) {
+  check(_DialogueSystem && _CloseDialogueUI);
   DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
   ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   DialogueSystem = _DialogueSystem;
+  CloseDialogueUI = _CloseDialogueUI;
+
   if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueUI();
 
   DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));

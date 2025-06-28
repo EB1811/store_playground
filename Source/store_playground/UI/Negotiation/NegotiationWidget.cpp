@@ -62,7 +62,7 @@ void UNegotiationWidget::RefreshNegotiationState() {
     case ENegotiationState::None: {
       auto Dialogue = NegotiationSystemRef->NPCRequestNegotiation();
 
-      DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
+      // DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
       StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -79,7 +79,7 @@ void UNegotiationWidget::RefreshNegotiationState() {
     case ENegotiationState::NpcStockCheckConsider: {
       auto Dialogue = NegotiationSystemRef->NPCNegotiationTurn();
 
-      DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
+      // DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
       StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -98,7 +98,7 @@ void UNegotiationWidget::RefreshNegotiationState() {
     case ENegotiationState::NpcConsider: {
       auto Dialogue = NegotiationSystemRef->NPCNegotiationTurn();
 
-      DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
+      // DialogueWidget->InitDialogueUI(NegotiationSystemRef->DialogueSystem);
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
 
       StockCheckWidget->SetVisibility(ESlateVisibility::Hidden);

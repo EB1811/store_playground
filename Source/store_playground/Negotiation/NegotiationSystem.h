@@ -18,6 +18,7 @@ enum class NegotiationType : uint8 {
   PlayerSell UMETA(DisplayName = "Player Sell"),
 };
 // ? Create a stock check system?
+// ! Lack of dialogue states making this confusing.
 UENUM()
 enum class ENegotiationState : uint8 {
   None UMETA(DisplayName = "NONE"),
@@ -77,14 +78,12 @@ public:
   class AQuestManager* QuestManager;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  float BoughtAtPrice;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  float MarketPrice;
+  class UCustomerAIComponent* CustomerAI;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  ENegotiationState NegotiationState;
+  bool bIsQuestAssociated;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  float OfferedPrice;
+  class UQuestComponent* QuestComponent;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   TArray<class UItemBase*> NegotiatedItems;
@@ -96,13 +95,15 @@ public:
   FWantedItemType WantedItemType;  // ? Move stock check to another system?
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class UCustomerAIComponent* CustomerAI;
+  float BoughtAtPrice;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  float MarketPrice;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
-  bool bIsQuestAssociated;
-  UPROPERTY(EditAnywhere, Category = "Negotiation")
-  class UQuestComponent* QuestComponent;
+  ENegotiationState NegotiationState;
 
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  float OfferedPrice;  // * Both player and npc offered price.
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   FOfferResponse CustomerOfferResponse;
 

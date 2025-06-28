@@ -1,7 +1,11 @@
-#include "InventoryViewWidget.h"
+#include "NegotiationShowItemWidget.h"
+#include "CoreFwd.h"
+#include "Logging/LogVerbosity.h"
+#include "store_playground/UI/NpcStore/TradeConfirmWidget.h"
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
+#include "store_playground/Market/Market.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/UI/Inventory/ItemsWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
@@ -9,63 +13,65 @@
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "store_playground/UI/Components/ControlTextWidget.h"
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
-#include "InventoryWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
-void UInventoryViewWidget::NativeOnInitialized() {
+void UNegotiationShowItemWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
-  SortByMarketPriceButton->ControlButton->OnClicked.AddDynamic(this, &UInventoryViewWidget::SortByMarketPrice);
-  SortByNameButton->ControlButton->OnClicked.AddDynamic(this, &UInventoryViewWidget::SortByName);
-  BackButton->ControlButton->OnClicked.AddDynamic(this, &UInventoryViewWidget::Back);
+  SortByPriceButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::SortByPrice);
+  SortByNameButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::SortByName);
+  ShowButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::Show);
+  RejectButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::Reject);
 }
 
-void UInventoryViewWidget::SortByMarketPrice() {
+void UNegotiationShowItemWidget::SortByPrice() {
   ItemsWidget->SortItems(
       {.SortType = ESortType::Price,
        .bReverse = ItemsWidget->SortData.SortType == ESortType::Price ? !ItemsWidget->SortData.bReverse : false});
 
-  SortByMarketPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
+  SortByPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
   SortByNameButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
 }
-void UInventoryViewWidget::SortByName() {
+void UNegotiationShowItemWidget::SortByName() {
   ItemsWidget->SortItems(
       {.SortType = ESortType::Name,
        .bReverse = ItemsWidget->SortData.SortType == ESortType::Name ? !ItemsWidget->SortData.bReverse : false});
 
   SortByNameButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
-  SortByMarketPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
-}
-void UInventoryViewWidget::Back() {
-  check(CloseWidgetFunc);
-  CloseWidgetFunc();
+  SortByPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
 }
 
-void UInventoryViewWidget::RefreshUI() {
+void UNegotiationShowItemWidget::Show() {
+  if (ItemsWidget->SelectedItem == nullptr) return;
+  auto ItemToShow = InventoryC->ItemsArray.FindByPredicate(
+      [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
+  check(ItemToShow);
+
+  ShowFunc(*ItemToShow);
+}
+void UNegotiationShowItemWidget::Reject() { RejectFunc(); }
+
+void UNegotiationShowItemWidget::RefreshUI() {
   check(Store && MarketEconomy);
 
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
 
   ItemsWidget->RefreshUI();
-
-  float TotalItemsValue = 0.0f;
-  for (const UItemBase* Item : ItemsWidget->SortedItems) {
-    float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
-    TotalItemsValue += Item->Quantity * MarketPrice;
-  }
-  ItemsValueSlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Value: %.0f¬"), TotalItemsValue)));
 }
 
-void UInventoryViewWidget::InitUI(FInputActions InputActions,
-                                  const AStore* _Store,
-                                  const AMarketEconomy* _MarketEconomy,
-                                  const UInventoryComponent* InventoryC,
-                                  std::function<void()> _CloseWidgetFunc) {
-  check(_Store && _MarketEconomy && InventoryC);
+void UNegotiationShowItemWidget::InitUI(const class AStore* _Store,
+                                        const class AMarketEconomy* _MarketEconomy,
+                                        class UInventoryComponent* _InventoryC,
+                                        class UNegotiationSystem* _NegotiationSystem,
+                                        std::function<void(class UItemBase*)> _ShowFunc,
+                                        std::function<void()> _RejectFunc) {
+  check(_Store && _MarketEconomy && _InventoryC && _NegotiationSystem && _ShowFunc && _RejectFunc);
 
-  Store = _Store;
   MarketEconomy = _MarketEconomy;
+  Store = _Store;
+  InventoryC = _InventoryC;
+  NegotiationSystem = _NegotiationSystem;
 
   TArray<FTopBarTab> TopBarTabs = {
       FTopBarTab{FText::FromString("All")},
@@ -92,18 +98,14 @@ void UInventoryViewWidget::InitUI(FInputActions InputActions,
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
-  ItemsValueSlideWidget->RightSlideText->SetText(FText::FromString(""));
-
   ItemsWidget->InitUI(InventoryC,
                       "Bought At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
 
-  SortByMarketPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
+  SortByPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
   SortByNameButton->ActionText->SetText(FText::FromString("Sort - Name"));
+  ShowButton->ActionText->SetText(FText::FromString("Show Item"));
+  RejectButton->ActionText->SetText(FText::FromString("Reject"));
 
-  BackButton->ActionText->SetText(FText::FromString("Back"));
-
-  CloseWidgetFunc = _CloseWidgetFunc;
-
-  // TODO:
-  // SortByMarketPriceButton->ControlTextWidget->CommonActionWidget->SetEnhancedInputAction(InputActions.BuildModeAction);
+  ShowFunc = _ShowFunc;
+  RejectFunc = _RejectFunc;
 }

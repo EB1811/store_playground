@@ -90,7 +90,8 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
             [NegotiatedItem](const FEconItem& EconItem) { return EconItem.ItemID == NegotiatedItem->ItemID; });
         check(EconItem);
 
-        BoughtAtPrice += Item->PriceData.BoughtAt;
+        BoughtAtPrice +=
+            CustomerAI->NegotiationAI->RequestType != ECustomerRequestType::SellItem ? Item->PriceData.BoughtAt : 0;
         MarketPrice += EconItem->CurrentPrice;
         OfferedPrice += MarketPrice;
       }
@@ -128,9 +129,10 @@ void UNegotiationSystem::PlayerReadRequest() {
 
 // todo-low: Support multiple items.
 void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _FromInventory) {
-  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
-
   check(Item && _FromInventory);
+  // * FromInventory can be player inventory or stock display inventory.
+
+  NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
   CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item);
   if (!CustomerOfferResponse.Accepted) return;
