@@ -16,6 +16,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* EconInfo;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* Desc;
+  UPROPERTY(meta = (BindWidget))
   class UImage* Icon;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* Quantity;

@@ -6,11 +6,14 @@ FOfferResponse UNegotiationAI::ConsiderOffer(bool NpcBuying,
                                              float MarketPrice,
                                              float LastOfferedPrice,
                                              float PlayerOfferedPrice) const {
+  if (FMath::IsNearlyEqual(PlayerOfferedPrice, LastOfferedPrice, KINDA_SMALL_NUMBER))
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues, CustomerName};
+
   float OfferedPercent = PlayerOfferedPrice / MarketPrice;
   if (NpcBuying && OfferedPercent <= 1.0 + AcceptancePercentage + 0.01f)
-    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues};
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues, CustomerName};
   if (!NpcBuying && OfferedPercent >= 1.0 - AcceptancePercentage - 0.01f)
-    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues};
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::Accept].Dialogues, CustomerName};
 
   // Leave negotiation if the difference is too high.
   float AcceptanceDiff =
@@ -18,7 +21,8 @@ FOfferResponse UNegotiationAI::ConsiderOffer(bool NpcBuying,
   if (AcceptanceDiff > 0.33f)
     return {false, 0,
             NpcBuying ? DialoguesMap[ENegotiationDialogueType::BuyItemTooHigh].Dialogues
-                      : DialoguesMap[ENegotiationDialogueType::SellItemTooLow].Dialogues};
+                      : DialoguesMap[ENegotiationDialogueType::SellItemTooLow].Dialogues,
+            CustomerName};
 
   float adjustedPercent =
       NpcBuying
@@ -33,12 +37,13 @@ FOfferResponse UNegotiationAI::ConsiderOffer(bool NpcBuying,
           AcceptanceDiff > 0.2 ? (NpcBuying ? DialoguesMap[ENegotiationDialogueType::BuyItemTooHigh].Dialogues
                                             : DialoguesMap[ENegotiationDialogueType::SellItemTooLow].Dialogues)
                                : (NpcBuying ? DialoguesMap[ENegotiationDialogueType::BuyItemClose].Dialogues
-                                            : DialoguesMap[ENegotiationDialogueType::SellItemClose].Dialogues)};
+                                            : DialoguesMap[ENegotiationDialogueType::SellItemClose].Dialogues),
+          CustomerName};
 }
 
 FOfferResponse UNegotiationAI::ConsiderStockCheck(const UItemBase* Item) const {
   if (Item->ItemType == WantedItemType.ItemType && Item->ItemEconType == WantedItemType.ItemEconType)
-    return {true, 0, DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues};
+    return {true, 0, DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues, CustomerName};
 
-  return {false, 0, DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues};
+  return {false, 0, DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues, CustomerName};
 }

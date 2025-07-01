@@ -11,6 +11,7 @@ USTRUCT()
 struct FUIActionable {
   GENERATED_BODY()
 
+  // ? Add quit widget action?
   std::function<void()> AdvanceUI;
 };
 

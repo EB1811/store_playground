@@ -76,6 +76,8 @@ public:
 
   auto TrySpendMoney(float Amount) -> bool;
 
+  void StockItemSold(const UItemBase* Item);
+
   void ItemBought(UItemBase* Item, float Price, int32 Quantity = 1);
   void ItemSold(const UItemBase* Item, float Price, int32 Quantity = 1);
   void MoneyGained(float Amount);

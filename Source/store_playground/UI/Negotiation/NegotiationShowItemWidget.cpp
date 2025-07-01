@@ -7,6 +7,9 @@
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Negotiation/NegotiationSystem.h"
+#include "store_playground/AI/CustomerAIComponent.h"
+#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/UI/Inventory/ItemsWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
 #include "store_playground/UI/Components/LeftSlideWidget.h"
@@ -94,6 +97,9 @@ void UNegotiationShowItemWidget::InitUI(const class AStore* _Store,
     ItemsWidget->RefreshUI();
   };
   MenuHeaderWidget->SetComponentUI(TopBarTabs, TabSelectedFunc);
+
+  FText WantedItemTypeName = NegotiationSystem->WantedItemType.WantedItemTypeName;
+  MenuHeaderWidget->SetTitle(WantedItemTypeName);
 
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));

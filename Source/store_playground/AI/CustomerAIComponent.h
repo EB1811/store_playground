@@ -18,6 +18,7 @@ enum class ECustomerState : uint8 {
   Requesting UMETA(DisplayName = "Requesting"),
   Negotiating UMETA(DisplayName = "Negotiating"),
   Leaving UMETA(DisplayName = "Leaving"),
+  LeavingTalking UMETA(DisplayName = "Leaving Talking"),
   PerformingQuest UMETA(DisplayName = "Performing Quest"),
 };
 
@@ -66,4 +67,5 @@ public:
 
   void StartNegotiation();
   void PostNegotiation();
+  void LeavePostNegotiationDialogue();
 };

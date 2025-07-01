@@ -126,12 +126,14 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->DialogueComponent->DialogueArray =
       GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
 
+  UniqueCustomer->CustomerAIComponent->CustomerName = UniqueNpcData.NpcName;
   UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
   UniqueCustomer->CustomerAIComponent->Attitude = UniqueNpcData.NegotiationData.Attitude;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage =
       FMath::FRandRange(UniqueNpcData.NegotiationData.AcceptancePercentageRange[0],
                         UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
       100.0f;
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->CustomerName = UniqueNpcData.NpcName;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap =
       GlobalStaticDataManager->GetRandomNegDialogueMap(UniqueNpcData.NegotiationData.Attitude);
 
@@ -237,6 +239,7 @@ void ACustomerAIManager::SpawnCustomers() {
         [RandomCustomerData](const auto& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
     check(CustomerPopData && PopMoneySpendData);
 
+    Customer->CustomerAIComponent->CustomerName = RandomCustomerData.CustomerName;
     Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
     Customer->CustomerAIComponent->CustomerType = ECustomerType::Generic;
     Customer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
@@ -289,6 +292,9 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       }
       case (ECustomerState::Leaving): {
         CustomersToRemove.Add(Customer);
+        break;
+      }
+      case (ECustomerState::LeavingTalking): {
         break;
       }
       case (ECustomerState::PerformingQuest): {
@@ -431,6 +437,7 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
 
   CustomerAI->CustomerState = ECustomerState::Requesting;
 
+  CustomerAI->NegotiationAI->CustomerName = CustomerAI->CustomerName;
   CustomerAI->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
 
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;

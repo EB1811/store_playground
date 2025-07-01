@@ -52,9 +52,10 @@ void UCustomerAIComponent::StartNegotiation() {
 }
 
 void UCustomerAIComponent::PostNegotiation() {
-  CustomerState = ECustomerState::Leaving;
+  CustomerState = ECustomerState::LeavingTalking;
 
   UInteractionComponent* OwnerInteraction = GetOwner()->FindComponentByClass<UInteractionComponent>();
   check(OwnerInteraction);
   OwnerInteraction->InteractionType = EInteractionType::None;
 }
+void UCustomerAIComponent::LeavePostNegotiationDialogue() { CustomerState = ECustomerState::Leaving; }

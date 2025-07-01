@@ -69,8 +69,14 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   }
 
   float StepSize = FMath::RoundToInt(MarketPrice * 0.01f);
-  float MaxValue = MarketPrice * ((NpcAcceptance - 1.0f) * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
-  float MinValue = MarketPrice / ((NpcAcceptance - 1.0f) * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+  float MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+  float MinValue = MarketPrice / (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+
+  UE_LOG(LogTemp, Warning,
+         TEXT("PriceSliderWidget::InitUI: Type: %s, NpcAcceptance: %.2f, MarketPrice: %.2f, "
+              "PlayerPrice: %.2f, NpcPrice: %.2f, BoughtAtPrice: %.2f"),
+         *UEnum::GetDisplayValueAsText(Type).ToString(), NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice,
+         BoughtAtPrice);
 
   MarketPriceSlider->SetStepSize(StepSize);
   MarketPriceSlider->SetMaxValue(MaxValue);
@@ -100,7 +106,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
       RedBar->SetPercent(1.0f);
       GreenBar->SetPercent(1.0f - MarketPriceSlider->GetNormalizedValue());
       YellowBar->SetPercent(
-          1.0f - FMath::Max((MarketPrice * (1.0f - (NpcAcceptance - 1.0f)) - MinValue) / (MaxValue - MinValue), 0.0f));
+          1.0f - FMath::Max((MarketPrice * (1.0f - NpcAcceptance) - MinValue) / (MaxValue - MinValue), 0.0f));
       break;
     case NegotiationType::PlayerSell:
       RedBar->SetBarFillType(EProgressBarFillType::BottomToTop);
@@ -109,7 +115,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
 
       RedBar->SetPercent(1.0f);
       GreenBar->SetPercent(MarketPriceSlider->GetNormalizedValue());
-      YellowBar->SetPercent((MarketPrice * NpcAcceptance - MinValue) / (MaxValue - MinValue));
+      YellowBar->SetPercent((MarketPrice * (1.0f + NpcAcceptance) - MinValue) / (MaxValue - MinValue));
       break;
     default: checkNoEntry()
   }

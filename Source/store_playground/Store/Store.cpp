@@ -56,6 +56,17 @@ auto AStore::TrySpendMoney(float Amount) -> bool {
   return true;
 }
 
+void AStore::StockItemSold(const UItemBase* Item) {
+  auto* StockItem = StoreStockItems.FindByPredicate(
+      [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
+  check(StockItem);
+
+  StockItem->StockDisplayComponent->ClearDisplaySprite();
+  StockItem->BelongingStockInventoryC->RemoveItem(Item);
+  StoreStockItems.RemoveAllSwap(
+      [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
+}
+
 void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
   Item->PriceData.BoughtAt = Price;
 
@@ -64,15 +75,6 @@ void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
   StatisticsGen->StoreMoneySpent(Price * Quantity);
 }
 void AStore::ItemSold(const UItemBase* Item, float Price, int32 Quantity) {
-  auto* StockItem = StoreStockItems.FindByPredicate(
-      [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
-  if (StockItem) {
-    StockItem->StockDisplayComponent->ClearDisplaySprite();
-    StockItem->BelongingStockInventoryC->RemoveItem(Item);
-    StoreStockItems.RemoveAllSwap(
-        [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
-  }
-
   Money += Price * Quantity;
 
   StatisticsGen->ItemDeal({Item->ItemID, Item->PriceData.BoughtAt, Price, Quantity});

@@ -39,6 +39,8 @@ void UNegotiationViewWidget::NativeOnInitialized() {
 
 void UNegotiationViewWidget::ShowItem(UItemBase* Item) {
   NegotiationSystem->PlayerShowItem(Item, PlayerInventoryC);
+
+  if (NegotiationSystem->CustomerOfferResponse.Accepted) PriceNegotiationWidget->InitUI(Store, NegotiationSystem);
   RefreshUI();
 }
 
@@ -46,37 +48,38 @@ void UNegotiationViewWidget::OfferAccept() {
   float Price = PriceNegotiationWidget->PriceSliderWidget->PlayerPriceSlider->GetValue();
   check(Price >= 0.0f);
 
-  if (Price == NegotiationSystem->OfferedPrice) NegotiationSystem->AcceptOffer();
-  else NegotiationSystem->OfferPrice(Price);
+  // if (Price == NegotiationSystem->OfferedPrice) NegotiationSystem->AcceptOffer();
+  // else NegotiationSystem->OfferPrice(Price);
+  NegotiationSystem->OfferPrice(Price);
 
   RefreshUI();
 }
 
-void UNegotiationViewWidget::Reject() { CloseWidgetFunc(); }
+void UNegotiationViewWidget::Reject() {
+  NegotiationSystem->RejectOffer();
+  RefreshUI();
+}
 
 // Temp
 void UNegotiationViewWidget::OfferAcceptClicked() { OfferAccept(); }
 void UNegotiationViewWidget::RejectClicked() { Reject(); }
 
 void UNegotiationViewWidget::RefreshUI() {
+  OfferAcceptButton->SetVisibility(ESlateVisibility::Hidden);
+  RejectButton->SetVisibility(ESlateVisibility::Hidden);
+
   // * When on npc consider states, advance the state machine.
   // * But first, show the dialogue.
   switch (NegotiationSystem->NegotiationState) {
-    case ENegotiationState::None: {
-      auto Dialogue = NegotiationSystem->NPCRequestNegotiation();
-      DialogueWidget->InitDialogueUI(DialogueSystem, [this]() {
-        if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
-            NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
-          NegotiationSystem->PlayerReadRequest();
-        RefreshUI();
-      });
-
-      DialogueWidget->SetVisibility(ESlateVisibility::Visible);
-      PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
-      NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
+    case ENegotiationState::None:
+    case ENegotiationState::NpcRequest:
+    case ENegotiationState::NpcStockCheckRequest: {
+      // Handled in InitUI.
       break;
     }
     case ENegotiationState::PlayerStockCheck: {
+      NegotiationShowItemWidget->RefreshUI();
+
       DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Visible);
@@ -94,6 +97,9 @@ void UNegotiationViewWidget::RefreshUI() {
     case ENegotiationState::PlayerConsider: {
       PriceNegotiationWidget->RefreshUI();
 
+      OfferAcceptButton->SetVisibility(ESlateVisibility::Visible);
+      RejectButton->SetVisibility(ESlateVisibility::Visible);
+
       DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Visible);
       NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -109,8 +115,12 @@ void UNegotiationViewWidget::RefreshUI() {
       NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
       break;
     }
+    // ? Call NegotiationSuccess and NegotiationFailure?
     case ENegotiationState::Accepted:
-    case ENegotiationState::Rejected: CloseWidgetFunc(); break;
+    case ENegotiationState::Rejected:
+      NegotiationSystem->NegotiationComplete();
+      CloseWidgetFunc();
+      break;
     default: checkNoEntry();
   }
 }
@@ -124,15 +134,12 @@ void UNegotiationViewWidget::InitUI(FInputActions InputActions,
                                     std::function<void()> _CloseWidgetFunc) {
   check(_Store && _MarketEconomy && _PlayerInventoryC && _NegotiationSystem && _DialogueSystem && _CloseWidgetFunc);
 
+  Store = _Store;
   PlayerInventoryC = _PlayerInventoryC;
   NegotiationSystem = _NegotiationSystem;
   DialogueSystem = _DialogueSystem;
 
   DialogueWidget->InitUI(InputActions);
-  PriceNegotiationWidget->InitUI(_Store, NegotiationSystem);
-  NegotiationShowItemWidget->InitUI(
-      _Store, _MarketEconomy, PlayerInventoryC, NegotiationSystem, [this](UItemBase* Item) { ShowItem(Item); },
-      [this]() { Reject(); });
   ControlsHelpersWidget->SetComponentUI({
       {FText::FromString("Leave / Reject"), InputActions.CloseTopOpenMenuAction},
       {FText::FromString("Offer / Accept"), InputActions.AdvanceUIAction},
@@ -142,4 +149,26 @@ void UNegotiationViewWidget::InitUI(FInputActions InputActions,
   RejectButton->ActionText->SetText(FText::FromString("Reject"));
 
   CloseWidgetFunc = _CloseWidgetFunc;
+
+  // * Set initial state.
+  check(NegotiationSystem->NegotiationState == ENegotiationState::None);
+  auto Dialogue = NegotiationSystem->NPCRequestNegotiation();
+
+  // When starting with a stock check, there is no item to negotiate on.
+  if (NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
+    NegotiationShowItemWidget->InitUI(
+        Store, _MarketEconomy, PlayerInventoryC, NegotiationSystem, [this](UItemBase* Item) { ShowItem(Item); },
+        [this]() { Reject(); });
+  else PriceNegotiationWidget->InitUI(Store, NegotiationSystem);
+
+  DialogueWidget->InitDialogueUI(DialogueSystem, [this]() {
+    if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
+        NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
+      NegotiationSystem->PlayerReadRequest();
+    RefreshUI();
+  });
+
+  DialogueWidget->SetVisibility(ESlateVisibility::Visible);
+  PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
+  NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
 }

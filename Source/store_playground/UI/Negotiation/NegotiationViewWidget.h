@@ -21,12 +21,15 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UNegotiationShowItemWidget* NegotiationShowItemWidget;
   UPROPERTY(meta = (BindWidget))
-  class UControlsHelpersWidget* ControlsHelpersWidget;
+  class UControlsHelpersWidget* ControlsHelpersWidget;  // TODO: Move to each widget or handle visibility.
   // Temp
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* OfferAcceptButton;
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* RejectButton;
+
+  UPROPERTY(EditAnywhere)
+  const class AStore* Store;
 
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* PlayerInventoryC;

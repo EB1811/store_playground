@@ -6,6 +6,7 @@
 #include "Materials/MaterialInstance.h"
 #include "Misc/AssertionMacros.h"
 #include "PaperZDCharacter.h"
+#include "PlayerZDCharacter.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
@@ -146,6 +147,10 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
   Subsystem->RemoveMappingContext(InputContexts[PlayerBehaviourState]);
   Subsystem->AddMappingContext(InputContexts[NewState], 0);
 
+  if (NewState == EPlayerState::Paused) UGameplayStatics::SetGamePaused(GetWorld(), true);
+  if (PlayerBehaviourState == EPlayerState::Paused && NewState != EPlayerState::Paused)
+    UGameplayStatics::SetGamePaused(GetWorld(), false);
+
   PlayerBehaviourState = NewState;
   UE_LOG(LogTemp, Warning, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
 }
@@ -177,8 +182,6 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
   check(SaveManager);
 
   HUD->OpenPauseMenuView();
-
-  UGameplayStatics::SetGamePaused(GetWorld(), PlayerBehaviourState == EPlayerState::Paused);
 }
 
 void APlayerZDCharacter::PlayerCloseTopOpenMenu(const FInputActionValue& Value) { HUD->PlayerCloseTopOpenMenu(); }
@@ -432,6 +435,7 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
   }
 }
 
+// ? Move early returns to widgets themselves?
 void APlayerZDCharacter::SetupNpcInteraction(USimpleSpriteAnimComponent* SpriteAnimC) {
   SpriteAnimC->TurnToPlayer(GetActorLocation());
 
@@ -451,6 +455,7 @@ void APlayerZDCharacter::SetupCustomerInteraction(UCustomerAIComponent* Customer
       HUD->EarlyCloseWidgetFunc = [this, CustomerAI, SpriteAnimC]() {
         check(CustomerAI);
         check(SpriteAnimC);
+
         CustomerAI->CustomerState = ECustomerState::Browsing;
         SpriteAnimC->ReturnToOgRotation();
       };
@@ -459,6 +464,11 @@ void APlayerZDCharacter::SetupCustomerInteraction(UCustomerAIComponent* Customer
       HUD->EarlyCloseWidgetFunc = [this, CustomerAI, SpriteAnimC]() {
         check(CustomerAI);
         check(SpriteAnimC);
+
+        if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
+        if (CustomerAI->CustomerState == ECustomerState::LeavingTalking)
+          return NegotiationSystem->NegotiationComplete();
+
         CustomerAI->LeaveRequestDialogue();
         SpriteAnimC->ReturnToOgRotation();
       };

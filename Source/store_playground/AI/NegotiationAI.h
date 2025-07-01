@@ -23,7 +23,10 @@ struct FOfferResponse {
   bool Accepted;
   UPROPERTY(EditAnywhere)
   float CounterOffer;
+  UPROPERTY(EditAnywhere)
   TArray<struct FDialogueData> ResponseDialogue;
+  UPROPERTY(EditAnywhere)
+  FText CustomerName;
 };
 
 UCLASS()
@@ -32,6 +35,10 @@ class STORE_PLAYGROUND_API UNegotiationAI : public UObject {
 public:
   UNegotiationAI() {}
 
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  FText CustomerName;
+  // TODO: Variables in dialogues.
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   TMap<ENegotiationDialogueType, FDialoguesArray> DialoguesMap;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")

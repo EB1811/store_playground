@@ -111,8 +111,7 @@ public:
                         class UItemBase* NegotiatedItem = nullptr,
                         class UInventoryComponent* _FromInventory = nullptr,
                         bool _bIsQuestAssociated = false,
-                        UQuestComponent* _QuestComponent = nullptr,
-                        ENegotiationState InitState = ENegotiationState::None);
+                        UQuestComponent* _QuestComponent = nullptr);
 
   struct FNextDialogueRes NPCRequestNegotiation();
   void PlayerReadRequest();
@@ -124,4 +123,5 @@ public:
 
   void NegotiationSuccess();
   void NegotiationFailure();
+  void NegotiationComplete();
 };

@@ -26,6 +26,7 @@ void UPriceNegotiationWidget::NativeOnInitialized() { Super::NativeOnInitialized
 
 void UPriceNegotiationWidget::RefreshUI() {
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
+  MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
   float PlayerPrice = NegotiationSystem->OfferedPrice;
   float NpcPrice = NegotiationSystem->CustomerOfferResponse.CounterOffer > 0.0f
@@ -38,8 +39,9 @@ void UPriceNegotiationWidget::InitUI(const AStore* _Store, UNegotiationSystem* _
   check(_Store && _NegotiationSystem);
 
   Store = _Store;
-
   NegotiationSystem = _NegotiationSystem;
+
+  check(NegotiationSystem->NegotiatedItems.Num() > 0);
 
   float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAI->AcceptancePercentage;
   float MarketPrice = NegotiationSystem->MarketPrice;

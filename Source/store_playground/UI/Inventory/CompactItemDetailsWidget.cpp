@@ -13,6 +13,7 @@ void UCompactItemDetailsWidget::InitUI(const UItemBase* Item,
   EconInfo->SetText(
       FText::FromString(FString::Printf(TEXT("%s, %s"), *(UEnum::GetDisplayValueAsText(Item->ItemType)).ToString(),
                                         *(UEnum::GetDisplayValueAsText(Item->ItemWealthType).ToString()))));
+  Desc->SetText(Item->TextData.Description);
   Icon->SetBrushFromTexture(Item->AssetData.Icon);
 
   if (Item->Quantity > 1) {

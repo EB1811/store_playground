@@ -116,6 +116,7 @@ enum class ECustomerAttitude : uint8 {
   Hostile,
 };
 
+// ? Add ending dialogues e.g., thanks?
 UENUM()
 enum class ENegotiationDialogueType : uint8 {
   BuyItemRequest UMETA(DisplayName = "Buy Item Request"),

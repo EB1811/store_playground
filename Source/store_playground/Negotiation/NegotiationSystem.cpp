@@ -13,7 +13,7 @@
 
 UNegotiationSystem::UNegotiationSystem() {
   NStateTransitions = {
-      FNStateAction{ENegotiationState::None, ENegotiationAction::OfferPrice, ENegotiationState::PlayerConsider},
+      // FNStateAction{ENegotiationState::None, ENegotiationAction::OfferPrice, ENegotiationState::PlayerConsider},
       FNStateAction{ENegotiationState::None, ENegotiationAction::NpcRequest, ENegotiationState::NpcRequest},
       FNStateAction{ENegotiationState::None, ENegotiationAction::NpcStockCheckRequest,
                     ENegotiationState::NpcStockCheckRequest},
@@ -63,15 +63,17 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
                                           UItemBase* Item,
                                           UInventoryComponent* _FromInventory,
                                           bool _bIsQuestAssociated,
-                                          UQuestComponent* _QuestComponent,
-                                          ENegotiationState InitState) {
+                                          UQuestComponent* _QuestComponent) {
+  check(_CustomerAI && _CustomerAI->NegotiationAI);
+
+  NegotiationState = ENegotiationState::None;
   NegotiatedItems.Empty();
+
   Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
                                                                                    : NegotiationType::PlayerSell;
   CustomerAI = _CustomerAI;
   bIsQuestAssociated = _bIsQuestAssociated;
   QuestComponent = _QuestComponent;
-  NegotiationState = InitState;
 
   BoughtAtPrice = 0;
   MarketPrice = 0;
@@ -157,7 +159,8 @@ FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
   else if (CustomerOfferResponse.CounterOffer > 0) OfferPrice(CustomerOfferResponse.CounterOffer);
   else RejectOffer();
 
-  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue, CustomerAI->CustomerName.ToString());
+  return DialogueSystem->StartDialogue(CustomerOfferResponse.ResponseDialogue,
+                                       CustomerOfferResponse.CustomerName.ToString());
 }
 
 // todo-low: check player has enough money for all negotiation funcs.
@@ -189,6 +192,10 @@ void UNegotiationSystem::NegotiationSuccess() {
     check(FromInventory);
 
     for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemSold(NegotiatedItem, OfferedPrice);
+    if (FromInventory == PlayerInventory)
+      for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->RemoveItem(NegotiatedItem);
+    else
+      for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->StockItemSold(NegotiatedItem);
   } else {
     check(PlayerInventory);
 
@@ -198,17 +205,17 @@ void UNegotiationSystem::NegotiationSuccess() {
 
   CustomerAI->PostNegotiation();
   if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, true);
-
-  NegotiatedItems.Empty();
-  CustomerAI = nullptr;
-  bIsQuestAssociated = false;
-  QuestComponent = nullptr;
-  FromInventory = nullptr;
 }
 
 void UNegotiationSystem::NegotiationFailure() {
   CustomerAI->PostNegotiation();
   if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, false);
+}
+
+void UNegotiationSystem::NegotiationComplete() {
+  if (CustomerAI->CustomerState == ECustomerState::LeavingTalking) CustomerAI->LeavePostNegotiationDialogue();
+
+  NegotiationState = ENegotiationState::None;
 
   NegotiatedItems.Empty();
   CustomerAI = nullptr;
