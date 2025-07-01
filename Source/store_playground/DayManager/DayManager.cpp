@@ -1,4 +1,5 @@
 #include "DayManager.h"
+#include "Math/UnrealMathUtility.h"
 #include "store_playground/Framework/StorePGGameMode.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Level/MarketLevel.h"
@@ -14,6 +15,8 @@ ADayManager::ADayManager() {
   PrimaryActorTick.bCanEverTick = false;
 
   CurrentDay = 0;
+  NextDayToPayDebt = -1;
+  NextDebtAmount = 0.0f;
 }
 
 void ADayManager::BeginPlay() { Super::BeginPlay(); }
@@ -23,6 +26,9 @@ void ADayManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 void ADayManager::StartNewDay() {
   check(Market && MarketLevel && NewsGen);
   UE_LOG(LogTemp, Warning, TEXT("DayManager: Starting new day."));
+
+  // Manage debt first.
+  ManageDebt();
 
   CurrentDay++;
   bIsWeekend = CurrentDay % DayManagerParams.WeekendDivisor == 0;
@@ -40,22 +46,30 @@ void ADayManager::StartNewDay() {
   NewsGen->GenDaysRandomArticles();
 
   MarketLevel->ResetLevelState();
-
-  if (CurrentDay % DayManagerParams.DebtPaymentDayDivisor == 0) ManageDebt();
 }
 
 void ADayManager::ManageDebt() {
-  UE_LOG(LogTemp, Warning, TEXT("DayManager: Managing debt."));
+  if (CurrentDay < NextDayToPayDebt) return;
+  if (CurrentDay > NextDayToPayDebt) {
+    NextDayToPayDebt = CurrentDay + DayManagerParams.DebtPaymentDayDivisor;
+    NextDebtAmount = DayManagerParams.BaseDebtAmount *
+                     (DayManagerParams.DebtIncreaseMulti *
+                      FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+    return;
+  }
 
-  float DebtAmount = DayManagerParams.BaseDebtAmount *
-                     (DayManagerParams.DebtIncreaseMulti * (CurrentDay / DayManagerParams.DebtPaymentDayDivisor));
+  if (Store->Money > NextDebtAmount) {
+    Store->MoneySpent(NextDebtAmount);
 
-  if (Store->Money > DebtAmount) {
-    StatisticsGen->StoreMoneySpent(DebtAmount);
+    NextDayToPayDebt = CurrentDay + DayManagerParams.DebtPaymentDayDivisor;
+    NextDebtAmount = DayManagerParams.BaseDebtAmount *
+                     (DayManagerParams.DebtIncreaseMulti *
+                      FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
     return;
   }
 
   // Game over.
+  // TODO: Game over screen.
   UE_LOG(LogTemp, Warning, TEXT("DayManager: Game over. Not enough money to pay debt."));
   AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
   check(GameMode);

@@ -29,18 +29,11 @@ void UStoreDetailsWidget::RefreshUI() {
       FText::GetEmpty(), FText::FromString("Normal Day"),
       FText::FromString(FString::Printf(TEXT("Next Weekend: Day: %d"), NextWeekendDay)));
 
-  int32 NextPaymentDay =
-      CurrentDay + (CurrentDay % DayManager->DayManagerParams.DebtPaymentDayDivisor == 0
-                        ? DayManager->DayManagerParams.DebtPaymentDayDivisor
-                        : DayManager->DayManagerParams.DebtPaymentDayDivisor *
-                              (1 - (CurrentDay % DayManager->DayManagerParams.DebtPaymentDayDivisor)));
-  DebtCardWidget->InitUI(
-      FText::FromString("Notices"), FText::GetEmpty(),
-      FText::FromString(FString::Printf(TEXT("Next Payment: Day: %d"), NextPaymentDay)),
-      FText::FromString(FString::Printf(TEXT("Amount: %.0f¬"),
-                                        DayManager->DayManagerParams.BaseDebtAmount *
-                                            (DayManager->DayManagerParams.DebtIncreaseMulti *
-                                             (CurrentDay / DayManager->DayManagerParams.DebtPaymentDayDivisor)))));
+  int32 NextPaymentDay = DayManager->NextDayToPayDebt;
+  float NextDebtAmount = DayManager->NextDebtAmount;
+  DebtCardWidget->InitUI(FText::FromString("Notices"), FText::GetEmpty(),
+                         FText::FromString(FString::Printf(TEXT("Next Payment: Day: %d"), NextPaymentDay)),
+                         FText::FromString(FString::Printf(TEXT("Amount: %.0f¬"), NextDebtAmount)));
 
   float Profit = StatisticsGen->StoreStatistics.TotalProfitToDate + StatisticsGen->CalcTodaysStoreProfit();
   float Revenue = StatisticsGen->StoreStatistics.TotalRevenueToDate + StatisticsGen->TodaysStoreMoneyActivity.AllIncome;

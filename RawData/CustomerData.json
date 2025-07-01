@@ -1,5 +1,31 @@
 [
 	{
+		"Name": "farmer01",
+		"CustomerID": "c_farmer01",
+		"LinkedPopID": "cpc1",
+		"CustomerName": "Farmer",
+		"LinkedPopName": "Farmer",
+		"InitAttitude": "Neutral",
+		"AssetData":
+		{
+			"Avatar": "/Script/Engine.Texture2D'/Engine/EngineResources/AICON-Red.AICON-Red'",
+			"IdleSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Idle_Up.FB_OldMan_Idle_Up'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Idle_Down.FB_OldMan_Idle_Down'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Idle_Left.FB_OldMan_Idle_Left'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Idle_Right.FB_OldMan_Idle_Right'"
+			},
+			"WalkSprites":
+			{
+				"Up": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Walk_Up.FB_OldMan_Walk_Up'",
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Walk_Down.FB_OldMan_Walk_Down'",
+				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Walk_Left.FB_OldMan_Walk_Left'",
+				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Walk_Right.FB_OldMan_Walk_Right'"
+			}
+		}
+	},
+	{
 		"Name": "merc01",
 		"CustomerID": "c_merc01",
 		"LinkedPopID": "merc",

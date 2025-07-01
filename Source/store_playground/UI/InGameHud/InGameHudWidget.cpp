@@ -30,15 +30,16 @@ void UInGameHudWidget::RefreshUI() {
 
   NewsHudSlideWidget->RefreshUI();
 
-  // Temp: Replace all with actual logic.
   FText CurrentPhaseText = UEnum::GetDisplayValueAsText(StorePhaseManager->StorePhaseState);
   int32 CurrentDay = DayManager->CurrentDay;
   DaySlideWidget->SlideText->SetText(
       FText::FromString(FString::Printf(TEXT("%s - Day: %d"), *CurrentPhaseText.ToString(), CurrentDay)));
   DaySlideWidget->RightSlideText->SetText(FText::FromString("Normal Day"));
 
-  OwnedSlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Owned: %.0f¬"), 8000.0f)));
-  OwnedSlideWidget->RightSlideText->SetText(FText::FromString(FString::Printf(TEXT("On Day: %d"), 30)));
+  float NextDebtAmount = DayManager->NextDebtAmount;
+  int32 NextPaymentDay = DayManager->NextDayToPayDebt;
+  OwnedSlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Owned: %.0f¬"), NextDebtAmount)));
+  OwnedSlideWidget->RightSlideText->SetText(FText::FromString(FString::Printf(TEXT("On Day: %d"), NextPaymentDay)));
 
   const float Money = Store->Money;
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Money)));

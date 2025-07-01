@@ -8,7 +8,6 @@
 
 // * Responsible for tracking the current day, starting new days, tracking times events, etc.
 
-// TODO: Store debt owned day and amount.
 USTRUCT()
 struct FDayManagerParams {
   GENERATED_BODY()
@@ -62,6 +61,11 @@ public:
   int32 CurrentDay;  // * Incremental counter.
   UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
   bool bIsWeekend;
+
+  UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
+  int32 NextDayToPayDebt;
+  UPROPERTY(EditAnywhere, Category = "DayManager", SaveGame)
+  float NextDebtAmount;
 
   void StartNewDay();
 
