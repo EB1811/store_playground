@@ -24,6 +24,8 @@ void UNpcStoreViewWidget::NativeOnInitialized() {
   TradeButton->ControlButton->OnClicked.AddDynamic(this, &UNpcStoreViewWidget::Trade);
   SwitchTradeTypeButton->ControlButton->OnClicked.AddDynamic(this, &UNpcStoreViewWidget::SwitchTradeType);
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UNpcStoreViewWidget::Back);
+
+  SetupUIActionable();
 }
 
 void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
@@ -203,6 +205,34 @@ void UNpcStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
 
   CloseWidgetFunc = _CloseWidgetFunc;
 
-  // TODO:
-  // SortByPriceButton->ControlTextWidget->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.BuildModeAction);
+  TradeButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
+  SortByPriceButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton1Action);
+  SortByNameButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton2Action);
+  SwitchTradeTypeButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton4Action);
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
+
+  TradeConfirmWidget->ConfirmTradeButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
+  TradeConfirmWidget->BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
+}
+
+void UNpcStoreViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Trade(); };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    if (bIsConfirming) return TradeConfirmWidget->ChangeQuantity(Direction.Y);
+
+    ItemsWidget->SelectNextItem(Direction);
+  };
+  UIActionable.SideButton1 = [this]() { SortByPrice(); };
+  UIActionable.SideButton2 = [this]() { SortByName(); };
+  UIActionable.SideButton4 = [this]() { SwitchTradeType(); };
+  UIActionable.CycleLeft = [this]() {
+    if (bIsConfirming) return;
+    MenuHeaderWidget->CycleLeft();
+  };
+  UIActionable.CycleRight = [this]() {
+    if (bIsConfirming) return;
+    MenuHeaderWidget->CycleRight();
+  };
+  UIActionable.RetractUI = [this]() { Back(); };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

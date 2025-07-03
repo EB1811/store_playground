@@ -15,6 +15,8 @@ void UStoreViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UStoreViewWidget::Back);
+
+  SetupUIActionable();
 }
 
 void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
@@ -73,6 +75,14 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                              AbilityManager, PlayerInventoryC, Store);
 
   BackButton->ActionText->SetText(FText::FromString("Back"));
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
 
   CloseWidgetFunc = _CloseWidgetFunc;
+}
+
+void UStoreViewWidget::SetupUIActionable() {
+  UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
+  UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
+  UIActionable.RetractUI = [this]() { Back(); };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

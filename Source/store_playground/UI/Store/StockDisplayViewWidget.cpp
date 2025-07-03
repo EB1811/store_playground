@@ -26,6 +26,8 @@ void UStockDisplayViewWidget::NativeOnInitialized() {
   AddOrTakeButton->ControlButton->OnClicked.AddDynamic(this, &UStockDisplayViewWidget::AddOrTake);
   SwitchViewTypeButton->ControlButton->OnClicked.AddDynamic(this, &UStockDisplayViewWidget::SwitchViewType);
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UStockDisplayViewWidget::Back);
+
+  SetupUIActionable();
 }
 
 void UStockDisplayViewWidget::SortByMarketPrice() {
@@ -155,8 +157,14 @@ void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
   MenuHeaderWidget->SetComponentUI(TopBarTabs, TabSelectedFunc);
 
   SortByMarketPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
+  SortByMarketPriceButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton1Action);
   SortByNameButton->ActionText->SetText(FText::FromString("Sort - Name"));
+  SortByNameButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton2Action);
   BackButton->ActionText->SetText(FText::FromString("Back"));
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
+
+  AddOrTakeButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
+  SwitchViewTypeButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton4Action);
 
   CloseWidgetFunc = _CloseWidgetFunc;
 
@@ -169,4 +177,16 @@ void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
     ItemsWidget->InitUI(PlayerInventory, "Bought At",
                         [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
   }
+}
+
+void UStockDisplayViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { AddOrTake(); };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) { ItemsWidget->SelectNextItem(Direction); };
+  UIActionable.SideButton1 = [this]() { SortByMarketPrice(); };
+  UIActionable.SideButton2 = [this]() { SortByName(); };
+  UIActionable.SideButton4 = [this]() { SwitchViewType(); };
+  UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
+  UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
+  UIActionable.RetractUI = [this]() { Back(); };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

@@ -374,7 +374,10 @@ void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
   InteractionPopupWidget->InteractionText->SetText(InteractionText);
   InteractionPopupWidget->SetVisibility(ESlateVisibility::Visible);
 }
-void ASpgHUD::CloseInteractionPopup() { InteractionPopupWidget->SetVisibility(ESlateVisibility::Collapsed); }
+void ASpgHUD::CloseInteractionPopup() {
+  if (InteractionPopupWidget->GetVisibility() == ESlateVisibility::Collapsed) return;
+  InteractionPopupWidget->SetVisibility(ESlateVisibility::Collapsed);
+}
 
 // todo-low: Update.
 void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory) {

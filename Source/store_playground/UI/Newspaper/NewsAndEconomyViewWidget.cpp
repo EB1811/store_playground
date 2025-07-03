@@ -16,6 +16,8 @@ void UNewsAndEconomyViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UNewsAndEconomyViewWidget::Back);
+
+  SetupUIActionable();
 }
 
 void UNewsAndEconomyViewWidget::SwitchTab(ENewsAndEconomyViewTab Tab) {
@@ -72,6 +74,14 @@ void UNewsAndEconomyViewWidget::InitUI(FInUIInputActions InUIInputActions,
   EconomyDetailsWidget->InitUI(_MarketEconomy);
 
   BackButton->ActionText->SetText(FText::FromString("Back"));
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
 
   CloseWidgetFunc = _CloseWidgetFunc;
+}
+
+void UNewsAndEconomyViewWidget::SetupUIActionable() {
+  UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
+  UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
+  UIActionable.RetractUI = [this]() { Back(); };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

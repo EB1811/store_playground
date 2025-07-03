@@ -90,6 +90,10 @@ UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
   FName RandomId = ItemIdsEligible[FMath::RandRange(0, ItemIds.Num() - 1)];
   return AllItemsMap[RandomId]->CreateItemCopy();
 }
+UItemBase* AMarket::GetItem(const FName& ItemID) const {
+  const UItemBase* Item = AllItemsMap[ItemID];
+  return Item->CreateItemCopy();
+}
 
 auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float {
   check(NpcStoreC);

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "NewsAndEconomyViewWidget.generated.h"
 
 UENUM()
@@ -44,6 +45,10 @@ public:
               const class AMarketEconomy* _MarketEconomy,
               class ANewsGen* _NewsGen,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> CloseWidgetFunc;
 };

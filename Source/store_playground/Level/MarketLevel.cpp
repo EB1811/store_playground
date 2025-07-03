@@ -2,6 +2,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Containers/Array.h"
 #include "HAL/Platform.h"
+#include "Logging/LogVerbosity.h"
 #include "Math/UnrealMathUtility.h"
 #include "Misc/Guid.h"
 #include "Serialization/MemoryReader.h"
@@ -320,7 +321,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
 
     check(NpcStoreC->NpcStoreType.StockCountRange.Num() > 0);
 
-    // TODO: Get at least 1 item.
+    // TODO: Get RandomStockCount items.
     // Get random joined item + econ types using their weights.
     int32 RandomStockCount =
         FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0], NpcStoreC->NpcStoreType.StockCountRange[1]);
@@ -353,6 +354,10 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
 
       TArray<FName> ItemIds = PossibleItemIdsMap[Pair.Key];
       for (int32 i = 0; i < Pair.Value; i++) InventoryC->AddItem(Market->GetRandomItem(ItemIds));
+
+      UE_LOG(LogTemp, Log, TEXT("NpcStore %s has %d items for type %s and econ type %s"),
+             *NpcStoreC->NpcStoreType.DisplayName.ToString(), ItemIds.Num(), *UEnum::GetValueAsString(Pair.Key.Key),
+             *UEnum::GetValueAsString(Pair.Key.Value));
     }
   }
 }

@@ -13,6 +13,11 @@ void UTradeConfirmWidget::NativeOnInitialized() {
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UTradeConfirmWidget::Back);
 }
 
+void UTradeConfirmWidget::ChangeQuantity(float Direction) {
+  if (Direction > 0) IncreaseQuantity();
+  else if (Direction < 0) DecreaseQuantity();
+}
+
 void UTradeConfirmWidget::IncreaseQuantity() {
   switch (TradeType) {
     case ETradeType::Buy:

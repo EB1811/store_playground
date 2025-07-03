@@ -49,6 +49,7 @@ public:
 
   std::function<float()> ShowPriceFunc;
 
+  void ChangeQuantity(float Direction);
   UFUNCTION()
   void IncreaseQuantity();
   UFUNCTION()

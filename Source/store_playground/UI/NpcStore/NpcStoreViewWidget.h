@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "NpcStoreViewWidget.generated.h"
 
 UENUM()
@@ -82,6 +83,10 @@ public:
               class UInventoryComponent* StoreInventoryC,
               class UInventoryComponent* PlayerInventoryC,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> CloseWidgetFunc;
 };

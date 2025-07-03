@@ -3,6 +3,7 @@
 #include "store_playground/Player/PlayerZDCharacter.h"
 #include "Engine/StaticMesh.h"
 #include "Internationalization/Text.h"
+#include "Logging/LogVerbosity.h"
 #include "Materials/MaterialInstance.h"
 #include "Misc/AssertionMacros.h"
 #include "PaperZDCharacter.h"
@@ -326,10 +327,8 @@ auto APlayerZDCharacter::CheckForInteraction() -> bool {
       }
   }
 
-  if (CurrentInteractableC) {
-    CurrentInteractableC = nullptr;
-    HUD->CloseInteractionPopup();
-  }
+  if (CurrentInteractableC) CurrentInteractableC = nullptr;
+  HUD->CloseInteractionPopup();
 
   return false;
 }
