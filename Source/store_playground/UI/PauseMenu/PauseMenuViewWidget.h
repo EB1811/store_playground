@@ -44,7 +44,9 @@ public:
   void Quit();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions, class ASaveManager* _SaveManager, std::function<void()> _CloseWidgetFunc);
+  void InitUI(FInUIInputActions InUIInputActions,
+              class ASaveManager* _SaveManager,
+              std::function<void()> _CloseWidgetFunc);
 
   std::function<void()> CloseWidgetFunc;
 };

@@ -19,6 +19,8 @@ void UInventoryViewWidget::NativeOnInitialized() {
   SortByMarketPriceButton->ControlButton->OnClicked.AddDynamic(this, &UInventoryViewWidget::SortByMarketPrice);
   SortByNameButton->ControlButton->OnClicked.AddDynamic(this, &UInventoryViewWidget::SortByName);
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UInventoryViewWidget::Back);
+
+  SetupUIActionable();
 }
 
 void UInventoryViewWidget::SortByMarketPrice() {
@@ -57,7 +59,7 @@ void UInventoryViewWidget::RefreshUI() {
   ItemsValueSlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Value: %.0f¬"), TotalItemsValue)));
 }
 
-void UInventoryViewWidget::InitUI(FInputActions InputActions,
+void UInventoryViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                   const AStore* _Store,
                                   const AMarketEconomy* _MarketEconomy,
                                   const UInventoryComponent* InventoryC,
@@ -104,6 +106,16 @@ void UInventoryViewWidget::InitUI(FInputActions InputActions,
 
   CloseWidgetFunc = _CloseWidgetFunc;
 
-  // TODO:
-  // SortByMarketPriceButton->ControlTextWidget->CommonActionWidget->SetEnhancedInputAction(InputActions.BuildModeAction);
+  SortByMarketPriceButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton1Action);
+  SortByNameButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton2Action);
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
+}
+
+void UInventoryViewWidget::SetupUIActionable() {
+  UIActionable.DirectionalInput = [this](FVector2D Direction) { ItemsWidget->SelectNextItem(Direction); };
+  UIActionable.SideButton1 = [this]() { SortByMarketPrice(); };
+  UIActionable.SideButton2 = [this]() { SortByName(); };
+  UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
+  UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
+  UIActionable.RetractUI = [this]() { Back(); };
 }

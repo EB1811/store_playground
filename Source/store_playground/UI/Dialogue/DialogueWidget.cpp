@@ -20,30 +20,10 @@ auto GetSpeakerName(const UDialogueSystem* DialogueSystem) -> FString {
 void UDialogueWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
-  DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::OnNext);
+  DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::Next);
 
-  UIActionable.AdvanceUI = [this]() { OnNext(); };
-
-  UIBehaviour.ShowUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Visible); };
-  UIBehaviour.HideUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Collapsed); };
-}
-
-void UDialogueWidget::InitDialogueUI(UDialogueSystem* _DialogueSystem, std::function<void()> _CloseDialogueUI) {
-  check(_DialogueSystem && _CloseDialogueUI);
-  DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
-  ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
-
-  DialogueSystem = _DialogueSystem;
-  CloseDialogueUI = _CloseDialogueUI;
-
-  if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueUI();
-
-  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
-
-  FString SpeakerName = GetSpeakerName(DialogueSystem);
-  UpdateDialogueText(
-      SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
-      DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
+  SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 // ? Change this to refresh all data?
@@ -54,9 +34,13 @@ void UDialogueWidget::UpdateDialogueText(const FString& SpeakerName, const FStri
   if (IsLast) DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Close"));
 }
 
-void UDialogueWidget::OnNext() {
+void UDialogueWidget::Next() {
+  if (DialogueSystem->DialogueState != EDialogueState::PlayerTalk &&
+      DialogueSystem->DialogueState != EDialogueState::NPCTalk)
+    return;
+
   FNextDialogueRes NextDialogue = DialogueSystem->NextDialogue();
-  if (NextDialogue.State == EDialogueState::End) return CloseDialogueUI();
+  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc();
 
   check(NextDialogue.DialogueData);
 
@@ -65,7 +49,7 @@ void UDialogueWidget::OnNext() {
       FString SpeakerName = GetSpeakerName(DialogueSystem);
       auto Dialogues = DialogueSystem->GetChoiceDialogues();
 
-      ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 ChoiceIndex) { OnChoiceSelect(ChoiceIndex); });
+      ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 ChoiceIndex) { SelectChoice(ChoiceIndex); });
       ChoicesBoxWidget->RefreshUI();
 
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -85,9 +69,13 @@ void UDialogueWidget::OnNext() {
   }
 }
 
-void UDialogueWidget::OnChoiceSelect(int32 ChoiceIndex) {
+void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
+  if (DialogueSystem->DialogueState != EDialogueState::PlayerChoice || ChoiceIndex < 0 ||
+      ChoiceIndex >= DialogueSystem->GetChoiceDialogues().Num())
+    return;
+
   FNextDialogueRes NextDialogue = DialogueSystem->DialogueChoice(ChoiceIndex);
-  if (NextDialogue.State == EDialogueState::End) return CloseDialogueUI();
+  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc();
 
   check(NextDialogue.DialogueData);
 
@@ -99,9 +87,37 @@ void UDialogueWidget::OnChoiceSelect(int32 ChoiceIndex) {
                      NextDialogue.DialogueData->Action == EDialogueAction::End);
 }
 
-void UDialogueWidget::InitUI(FInputActions InputActions) {
+void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
+                             UDialogueSystem* _DialogueSystem,
+                             std::function<void()> _CloseDialogueFunc) {
+  check(_DialogueSystem && _CloseDialogueFunc);
+
+  DialogueSystem = _DialogueSystem;
+  CloseDialogueFunc = _CloseDialogueFunc;
+
   ControlsHelpersWidget->SetComponentUI({
-      {FText::FromString("Leave"), InputActions.CloseTopOpenMenuAction},
-      {FText::FromString("Next"), InputActions.AdvanceUIAction},
+      {FText::FromString("Leave"), InUIInputActions.RetractUIAction},
+      {FText::FromString("Next"), InUIInputActions.AdvanceUIAction},
   });
+
+  if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueFunc();
+
+  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+
+  FString SpeakerName = GetSpeakerName(DialogueSystem);
+  UpdateDialogueText(
+      SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
+      DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
+
+  DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
+  ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UDialogueWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Next(); };
+  UIActionable.NumericInput = [this](float Value) { SelectChoice(FMath::RoundToInt(Value) - 1); };
+}
+void UDialogueWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Visible); };
+  UIBehaviour.HideUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Collapsed); };
 }

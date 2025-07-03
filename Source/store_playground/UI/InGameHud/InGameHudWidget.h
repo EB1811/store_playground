@@ -36,6 +36,6 @@ public:
   UPROPERTY(EditAnywhere)
   const class ALevelManager* LevelManager;
 
-  void InitUI(FInputActions InputActions);
+  void InitUI(FInGameInputActions InGameInputActions);
   void RefreshUI();
 };

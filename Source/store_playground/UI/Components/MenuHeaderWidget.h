@@ -43,11 +43,18 @@ public:
   FText Title;
 
   UPROPERTY(EditAnywhere)
-  class UMenuHeaderTabWidget* ActiveTabWidget;
+  int32 ActiveTabIndex;
+  UPROPERTY(EditAnywhere)
+  TArray<UMenuHeaderTabWidget*> TabWidgets;
 
   void SetTitle(const FText& NewTitle);
+  void SelectTab(int32 TabIndex);
+  void CycleLeft();
+  void CycleRight();
 
-  void SetComponentUI(TArray<FTopBarTab>& TopBarTabs, std::function<void(FText TabText)> _TabSelectedFunc);
+  void SetComponentUI(TArray<FTopBarTab>& TopBarTabs,
+                      std::function<void(FText TabText)> _TabSelectedFunc,
+                      int32 InitTab = 0);
 
   std::function<void(FText TabText)> TabSelectedFunc;
 };

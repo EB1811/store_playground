@@ -87,7 +87,7 @@ void UNegotiationViewWidget::RefreshUI() {
     }
     case ENegotiationState::NpcStockCheckConsider: {
       auto Dialogue = NegotiationSystem->NPCNegotiationTurn();
-      DialogueWidget->InitDialogueUI(DialogueSystem, [this]() { RefreshUI(); });
+      DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() { RefreshUI(); });
 
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -108,7 +108,7 @@ void UNegotiationViewWidget::RefreshUI() {
 
     case ENegotiationState::NpcConsider: {
       auto Dialogue = NegotiationSystem->NPCNegotiationTurn();
-      DialogueWidget->InitDialogueUI(DialogueSystem, [this]() { RefreshUI(); });
+      DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() { RefreshUI(); });
 
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -125,7 +125,7 @@ void UNegotiationViewWidget::RefreshUI() {
   }
 }
 
-void UNegotiationViewWidget::InitUI(FInputActions InputActions,
+void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
                                     const class AStore* _Store,
                                     const class AMarketEconomy* _MarketEconomy,
                                     class UInventoryComponent* _PlayerInventoryC,
@@ -134,15 +134,15 @@ void UNegotiationViewWidget::InitUI(FInputActions InputActions,
                                     std::function<void()> _CloseWidgetFunc) {
   check(_Store && _MarketEconomy && _PlayerInventoryC && _NegotiationSystem && _DialogueSystem && _CloseWidgetFunc);
 
+  InUIInputActions = _InUIInputActions;
   Store = _Store;
   PlayerInventoryC = _PlayerInventoryC;
   NegotiationSystem = _NegotiationSystem;
   DialogueSystem = _DialogueSystem;
 
-  DialogueWidget->InitUI(InputActions);
   ControlsHelpersWidget->SetComponentUI({
-      {FText::FromString("Leave / Reject"), InputActions.CloseTopOpenMenuAction},
-      {FText::FromString("Offer / Accept"), InputActions.AdvanceUIAction},
+      {FText::FromString("Leave / Reject"), InUIInputActions.RetractUIAction},
+      {FText::FromString("Offer / Accept"), InUIInputActions.AdvanceUIAction},
   });
 
   OfferAcceptButton->ActionText->SetText(FText::FromString("Offer / Accept"));
@@ -161,7 +161,7 @@ void UNegotiationViewWidget::InitUI(FInputActions InputActions,
         [this]() { Reject(); });
   else PriceNegotiationWidget->InitUI(Store, NegotiationSystem);
 
-  DialogueWidget->InitDialogueUI(DialogueSystem, [this]() {
+  DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() {
     if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
         NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
       NegotiationSystem->PlayerReadRequest();

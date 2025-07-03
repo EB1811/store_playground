@@ -21,6 +21,7 @@
 #include "store_playground/UI/Negotiation/NegotiationViewWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
+#include "store_playground/UI/UIStructs.h"
 #include "store_playground/UI/Upgrade/UpgradeViewWidget.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
@@ -107,7 +108,6 @@ void ASpgHUD::BeginPlay() {
   NpcStoreViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   DialogueWidget = CreateWidget<UDialogueWidget>(GetWorld(), UDialogueWidgetClass);
-  DialogueWidget->InitUI(PlayerInputActions);
   DialogueWidget->AddToViewport(10);
   DialogueWidget->SetVisibility(ESlateVisibility::Collapsed);
 
@@ -144,8 +144,7 @@ void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void ASpgHUD::SetupInitUIStates() {
   // * Input actions are created in SetupPlayerInputComponent, but it runs after BeginPlay, so we need to set them here.
-  InGameHudWidget->InitUI(PlayerInputActions);
-  DialogueWidget->InitUI(PlayerInputActions);
+  InGameHudWidget->InitUI(InGameInputActions);
 }
 
 // * For when animations / sounds are used.
@@ -211,7 +210,7 @@ void ASpgHUD::HideInGameHudWidget() {
 void ASpgHUD::OpenPauseMenuView() {
   if (OpenedWidgets.Contains(PauseMenuViewWidget)) return CloseWidget(PauseMenuViewWidget);
 
-  PauseMenuViewWidget->InitUI(PlayerInputActions, SaveManager, [this] {
+  PauseMenuViewWidget->InitUI(InUIInputActions, SaveManager, [this] {
     CloseWidget(PauseMenuViewWidget);
     SetPlayerNormalFunc();
   });
@@ -265,15 +264,110 @@ void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   LeaveHUD();
 }
 
+inline FUIActionable* GetUIActionable(UUserWidget* Widget) {
+  FProperty* UIActionableProp = Widget->GetClass()->FindPropertyByName("UIActionable");
+  if (!UIActionableProp) return nullptr;
+
+  return UIActionableProp->ContainerPtrToValuePtr<FUIActionable>(Widget);
+}
 void ASpgHUD::AdvanceUI() {
   if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
-  FProperty* UIActionableProp = TopWidget->GetClass()->FindPropertyByName("UIActionable");
-  if (!UIActionableProp) return;
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->AdvanceUI) return;
 
-  FUIActionable* ActionableWidget = UIActionableProp->ContainerPtrToValuePtr<FUIActionable>(TopWidget);
   ActionableWidget->AdvanceUI();
+}
+void ASpgHUD::RetractUIAction() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->RetractUI) return PlayerCloseTopOpenMenu();
+
+  ActionableWidget->RetractUI();
+}
+void ASpgHUD::QuitUIAction() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->QuitUI) return PlayerCloseTopOpenMenu();
+
+  ActionableWidget->QuitUI();
+}
+void ASpgHUD::UINumericInputAction(float Value) {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->NumericInput) return;
+
+  ActionableWidget->NumericInput(Value);
+}
+void ASpgHUD::UIDirectionalInputAction(FVector2D Direction) {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->DirectionalInput) return;
+
+  ActionableWidget->DirectionalInput(Direction);
+}
+void ASpgHUD::UISideButton1Action() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->SideButton1) return;
+
+  ActionableWidget->SideButton1();
+}
+void ASpgHUD::UISideButton2Action() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->SideButton2) return;
+
+  ActionableWidget->SideButton2();
+}
+void ASpgHUD::UISideButton3Action() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->SideButton3) return;
+
+  ActionableWidget->SideButton3();
+}
+void ASpgHUD::UISideButton4Action() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->SideButton4) return;
+
+  ActionableWidget->SideButton4();
+}
+void ASpgHUD::UICycleLeftAction() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->CycleLeft) return;
+
+  ActionableWidget->CycleLeft();
+}
+void ASpgHUD::UICycleRightAction() {
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->CycleRight) return;
+
+  ActionableWidget->CycleRight();
 }
 
 void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
@@ -287,7 +381,7 @@ void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory) {
   check(InventoryViewWidget);
   if (OpenedWidgets.Contains(InventoryViewWidget)) return CloseWidget(InventoryViewWidget);
 
-  InventoryViewWidget->InitUI(PlayerInputActions, Store, MarketEconomy, PlayerInventory,
+  InventoryViewWidget->InitUI(InUIInputActions, Store, MarketEconomy, PlayerInventory,
                               [this] { CloseWidget(InventoryViewWidget); });
   InventoryViewWidget->RefreshUI();
 
@@ -298,7 +392,7 @@ void ASpgHUD::SetAndOpenBuildableDisplay(ABuildable* Buildable) {
   check(BuildableDisplayViewWidget);
   if (OpenedWidgets.Contains(BuildableDisplayViewWidget)) return CloseWidget(BuildableDisplayViewWidget);
 
-  BuildableDisplayViewWidget->InitUI(PlayerInputActions, Buildable, Store,
+  BuildableDisplayViewWidget->InitUI(InUIInputActions, Buildable, Store,
                                      [this] { CloseWidget(BuildableDisplayViewWidget); });
   BuildableDisplayViewWidget->RefreshUI();
 
@@ -309,7 +403,7 @@ void ASpgHUD::SetAndOpenStoreView(const UInventoryComponent* PlayerInventory) {
   check(StoreViewWidget);
   if (OpenedWidgets.Contains(StoreViewWidget)) return CloseWidget(StoreViewWidget);
 
-  StoreViewWidget->InitUI(PlayerInputActions, DayManager, StorePhaseManager, MarketEconomy, Market, StatisticsGen,
+  StoreViewWidget->InitUI(InUIInputActions, DayManager, StorePhaseManager, MarketEconomy, Market, StatisticsGen,
                           UpgradeManager, AbilityManager, PlayerInventory, Store, StoreExpansionManager,
                           [this] { CloseWidget(StoreViewWidget); });
   StoreViewWidget->RefreshUI();
@@ -323,7 +417,7 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
   check(StockDisplayViewWidget);
   if (OpenedWidgets.Contains(StockDisplayViewWidget)) return CloseWidget(StockDisplayViewWidget);
 
-  StockDisplayViewWidget->InitUI(PlayerInputActions, MarketEconomy, Store, StockDisplay, DisplayInventory,
+  StockDisplayViewWidget->InitUI(InUIInputActions, MarketEconomy, Store, StockDisplay, DisplayInventory,
                                  PlayerInventory, [this] { CloseWidget(StockDisplayViewWidget); });
   StockDisplayViewWidget->RefreshUI();
 
@@ -375,7 +469,7 @@ void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
                                  UInventoryComponent* PlayerInventory) {
   check(NpcStoreC && NPCStoreInventory && PlayerInventory);
 
-  NpcStoreViewWidget->InitUI(PlayerInputActions, MarketEconomy, Market, Store, NpcStoreC, NPCStoreInventory,
+  NpcStoreViewWidget->InitUI(InUIInputActions, MarketEconomy, Market, Store, NpcStoreC, NPCStoreInventory,
                              PlayerInventory, [this] { CloseWidget(NpcStoreViewWidget); });
   NpcStoreViewWidget->RefreshUI();
 
@@ -383,7 +477,7 @@ void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
 }
 
 void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc) {
-  DialogueWidget->InitDialogueUI(Dialogue, [this, OnDialogueEndFunc] {
+  DialogueWidget->InitUI(InUIInputActions, Dialogue, [this, OnDialogueEndFunc] {
     CloseWidget(DialogueWidget);
 
     if (OnDialogueEndFunc) OnDialogueEndFunc();
@@ -398,7 +492,7 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
   check(NegotiationViewWidget);
   if (OpenedWidgets.Contains(NegotiationViewWidget)) return CloseWidget(NegotiationViewWidget);
 
-  NegotiationViewWidget->InitUI(PlayerInputActions, Store, MarketEconomy, PlayerInventoryC, NegotiationSystem,
+  NegotiationViewWidget->InitUI(InUIInputActions, Store, MarketEconomy, PlayerInventoryC, NegotiationSystem,
                                 DialogueSystem, [this] { CloseWidget(NegotiationViewWidget); });
   NegotiationViewWidget->RefreshUI();
 
@@ -426,7 +520,7 @@ void ASpgHUD::SetAndOpenNewsAndEconomyView() {
   check(NewsAndEconomyViewWidget);
   if (OpenedWidgets.Contains(NewsAndEconomyViewWidget)) return CloseWidget(NewsAndEconomyViewWidget);
 
-  NewsAndEconomyViewWidget->InitUI(PlayerInputActions, DayManager, MarketEconomy, NewsGen,
+  NewsAndEconomyViewWidget->InitUI(InUIInputActions, DayManager, MarketEconomy, NewsGen,
                                    [this] { CloseWidget(NewsAndEconomyViewWidget); });
   NewsAndEconomyViewWidget->RefreshUI();
 
@@ -438,7 +532,7 @@ void ASpgHUD::SetAndOpenUpgradeView(UUpgradeSelectComponent* UpgradeSelectC) {
 
   if (OpenedWidgets.Contains(UpgradeViewWidget)) return CloseWidget(UpgradeViewWidget);
 
-  UpgradeViewWidget->InitUI(PlayerInputActions, UpgradeManager, UpgradeSelectC,
+  UpgradeViewWidget->InitUI(InUIInputActions, UpgradeManager, UpgradeSelectC,
                             [this] { CloseWidget(UpgradeViewWidget); });
   UpgradeViewWidget->RefreshUI();
 
@@ -450,7 +544,7 @@ void ASpgHUD::SetAndOpenAbilityView() {
 
   if (OpenedWidgets.Contains(AbilityViewWidget)) return CloseWidget(AbilityViewWidget);
 
-  AbilityViewWidget->InitUI(PlayerInputActions, AbilityManager, [this] { CloseWidget(AbilityViewWidget); });
+  AbilityViewWidget->InitUI(InUIInputActions, AbilityManager, [this] { CloseWidget(AbilityViewWidget); });
   AbilityViewWidget->RefreshUI();
 
   OpenFocusedMenu(AbilityViewWidget);

@@ -117,7 +117,7 @@ void UStockDisplayViewWidget::RefreshUI() {
   ItemsWidget->RefreshUI();
 }
 
-void UStockDisplayViewWidget::InitUI(FInputActions InputActions,
+void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                      const class AMarketEconomy* _MarketEconomy,
                                      class AStore* _Store,
                                      class UStockDisplayComponent* _StockDisplayC,

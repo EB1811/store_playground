@@ -63,7 +63,7 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions InUIInputActions,
               const class AMarketEconomy* _MarketEconomy,
               class AStore* _Store,
               class UStockDisplayComponent* _StockDisplayC,

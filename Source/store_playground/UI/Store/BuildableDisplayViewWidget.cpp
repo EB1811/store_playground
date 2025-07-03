@@ -16,7 +16,7 @@ void UBuildableDisplayViewWidget::NativeOnInitialized() { Super::NativeOnInitial
 
 void UBuildableDisplayViewWidget::RefreshUI() { BuildableDisplayWidget->RefreshUI(); }
 
-void UBuildableDisplayViewWidget::InitUI(FInputActions InputActions,
+void UBuildableDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                          class ABuildable* Buildable,
                                          class AStore* _Store,
                                          std::function<void()> _CloseWidgetFunc) {

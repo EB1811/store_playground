@@ -47,7 +47,7 @@ void UPauseMenuViewWidget::Quit() {}
 
 void UPauseMenuViewWidget::RefreshUI() {}
 
-void UPauseMenuViewWidget::InitUI(FInputActions InputActions,
+void UPauseMenuViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                   class ASaveManager* _SaveManager,
                                   std::function<void()> _CloseWidgetFunc) {
   check(_SaveManager && _CloseWidgetFunc);

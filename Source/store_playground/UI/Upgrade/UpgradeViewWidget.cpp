@@ -34,7 +34,7 @@ void UUpgradeViewWidget::RefreshUI() {
   RelevantPowerUpgradesWidget->RefreshUI();
 }
 
-void UUpgradeViewWidget::InitUI(FInputActions InputActions,
+void UUpgradeViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                 class AUpgradeManager* _UpgradeManager,
                                 class UUpgradeSelectComponent* UpgradeSelectC,
                                 std::function<void()> _CloseWidgetFunc) {

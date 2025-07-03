@@ -12,5 +12,5 @@ void UMenuHeaderTabWidget::NativeOnInitialized() {
 void UMenuHeaderTabWidget::OnTabClicked() {
   check(OnTabClickedFunc);
 
-  OnTabClickedFunc(this);
+  OnTabClickedFunc(TabIndex);
 }

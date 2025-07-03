@@ -77,7 +77,7 @@ void UAbilityViewWidget::RefreshUI() {
       FText::FromString(FString::Printf(TEXT("Cooldown: %d days"), SelectedAbility.Cooldown)));
 }
 
-void UAbilityViewWidget::InitUI(FInputActions InputActions,
+void UAbilityViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                 class AAbilityManager* _AbilityManager,
                                 std::function<void()> _CloseWidgetFunc) {
   check(_AbilityManager && _CloseWidgetFunc);

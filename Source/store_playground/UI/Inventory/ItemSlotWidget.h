@@ -21,7 +21,7 @@ public:
   class UTextBlock* Quantity;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* ShowPrice;
-  UPROPERTY(meta = (BindWidget))
+  UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
   class UButton* SelectItemButton;
 
   UPROPERTY(EditAnywhere)

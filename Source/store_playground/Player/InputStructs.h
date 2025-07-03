@@ -8,18 +8,14 @@
 #include "InputStructs.generated.h"
 
 USTRUCT()
-struct FInputActions {
+struct FInGameInputActions {
   GENERATED_BODY()
 
+  // * In Game Actions.
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* MoveAction;
-
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* OpenPauseMenuAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  UInputAction* CloseTopOpenMenuAction;
-  UPROPERTY(EditAnywhere, Category = "Input")
-  UInputAction* CloseAllMenusAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* OpenInventoryViewAction;
   UPROPERTY(EditAnywhere, Category = "Input")
@@ -28,14 +24,42 @@ struct FInputActions {
   UInputAction* InteractAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* OpenNewspaperAction;
-
-  // Will probably turn into a combined "store" view action.
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* OpenStoreViewAction;
+};
+
+USTRUCT()
+struct FInUIInputActions {
+  GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, Category = "Input")
-  UInputAction* AdvanceUIAction;  // * Advance UI (dialogue, negotiation, etc.).
+  UInputAction* AdvanceUIAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* RetractUIAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* QuitUIAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UINumericInputAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UIDirectionalInputAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UISideButton1Action;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UISideButton2Action;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UISideButton3Action;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UISideButton4Action;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UICycleLeftAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* UICycleRightAction;
+};
+
+USTRUCT()
+struct FInCutsceneInputActions {
+  GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, Category = "Input")
-  UInputAction* SkipCutsceneAction;  // * Skip cutscene.
+  UInputAction* SkipCutsceneAction;
 };

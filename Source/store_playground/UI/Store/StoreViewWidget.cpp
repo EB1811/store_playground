@@ -38,7 +38,7 @@ void UStoreViewWidget::RefreshUI() {
   }
 }
 
-void UStoreViewWidget::InitUI(FInputActions InputActions,
+void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                               const ADayManager* DayManager,
                               const AStorePhaseManager* StorePhaseManager,
                               const AMarketEconomy* MarketEconomy,

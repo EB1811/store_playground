@@ -45,7 +45,7 @@ void UNewsAndEconomyViewWidget::RefreshUI() {
   }
 }
 
-void UNewsAndEconomyViewWidget::InitUI(FInputActions InputActions,
+void UNewsAndEconomyViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                        const ADayManager* _DayManager,
                                        const AMarketEconomy* _MarketEconomy,
                                        ANewsGen* _NewsGen,

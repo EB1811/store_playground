@@ -29,6 +29,9 @@ public:
   class UControlMenuButtonWidget* RejectButton;
 
   UPROPERTY(EditAnywhere)
+  FInUIInputActions InUIInputActions;
+
+  UPROPERTY(EditAnywhere)
   const class AStore* Store;
 
   UPROPERTY(EditAnywhere)
@@ -49,7 +52,7 @@ public:
   void RejectClicked();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions _InUIInputActions,
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
               class UInventoryComponent* _PlayerInventoryC,

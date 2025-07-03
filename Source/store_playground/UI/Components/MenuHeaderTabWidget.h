@@ -23,7 +23,10 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UBorder* BottomBorder;
 
+  UPROPERTY(EditAnywhere)
+  int32 TabIndex;
+
   UFUNCTION()
   void OnTabClicked();
-  std::function<void(UMenuHeaderTabWidget* TabWidget)> OnTabClickedFunc;
+  std::function<void(int32 TabIndex)> OnTabClickedFunc;
 };

@@ -18,7 +18,7 @@ public:
   class UBuildableDisplayWidget* BuildableDisplayWidget;
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions InUIInputActions,
               class ABuildable* Buildable,
               class AStore* _Store,
               std::function<void()> _CloseWidgetFunc);

@@ -44,7 +44,7 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions InUIInputActions,
               class AUpgradeManager* _UpgradeManager,
               class UUpgradeSelectComponent* UpgradeSelectC,
               std::function<void()> _CloseWidgetFunc);

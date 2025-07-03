@@ -26,7 +26,7 @@ void UNegotiationWidget::NativeOnInitialized() {
 void UNegotiationWidget::InitNegotiationUI() {
   check(PlayerInventoryRef && NegotiationSystemRef);
 
-  DialogueWidget->CloseDialogueUI = [this] { OnReadDialogueButtonClicked(); };
+  // DialogueWidget->CloseDialogueUI = [this] { OnReadDialogueButtonClicked(); };
   StockCheckWidget->ShowItemFunc = [this](UItemBase* Item, UInventoryComponent* FromInventory) {
     ShowItem(Item, FromInventory);
   };

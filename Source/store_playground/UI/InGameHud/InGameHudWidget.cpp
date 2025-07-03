@@ -13,12 +13,12 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void UInGameHudWidget::InitUI(FInputActions InputActions) {
+void UInGameHudWidget::InitUI(FInGameInputActions InGameInputActions) {
   ControlsHelpersWidget->SetComponentUI({
-      {FText::FromString("News"), InputActions.OpenNewspaperAction},
-      {FText::FromString("Store"), InputActions.OpenStoreViewAction},
-      {FText::FromString("Items"), InputActions.OpenInventoryViewAction},
-      {FText::FromString("Build"), InputActions.BuildModeAction},
+      {FText::FromString("News"), InGameInputActions.OpenNewspaperAction},
+      {FText::FromString("Store"), InGameInputActions.OpenStoreViewAction},
+      {FText::FromString("Items"), InGameInputActions.OpenInventoryViewAction},
+      {FText::FromString("Build"), InGameInputActions.BuildModeAction},
   });
 
   NewsHudSlideWidget->InitUI(NewsGen);

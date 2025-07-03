@@ -29,23 +29,26 @@ public:
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
 
-  void InitDialogueUI(class UDialogueSystem* _DialogueSystem, std::function<void()> _CloseDialogueUI);
   void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()
-  void OnNext();
+  void Next();
   UFUNCTION()
-  void OnChoiceSelect(int32 ChoiceIndex);
+  void SelectChoice(int32 ChoiceIndex);
+
+  void InitUI(FInUIInputActions InUIInputActions,
+              class UDialogueSystem* _DialogueSystem,
+              std::function<void()> _CloseDialogueFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
+  UPROPERTY(EditAnywhere)
+  FUIBehaviour UIBehaviour;
+  void SetupUIBehaviour();
 
   UFUNCTION(BlueprintImplementableEvent)
   void OnVisibilityChangeRequested(ESlateVisibility NewVisibility);
 
-  void InitUI(FInputActions InputActions);
-
-  UPROPERTY(EditAnywhere)
-  FUIActionable UIActionable;
-  UPROPERTY(EditAnywhere)
-  FUIBehaviour UIBehaviour;
-
-  std::function<void()> CloseDialogueUI;
+  std::function<void()> CloseDialogueFunc;
 };

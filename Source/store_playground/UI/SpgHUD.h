@@ -94,7 +94,11 @@ public:
   std::function<void()> SetPlayerPausedFunc;    // * Set player state to paused (not in menu, etc.).
 
   UPROPERTY(EditAnywhere)
-  FInputActions PlayerInputActions;
+  FInGameInputActions InGameInputActions;
+  UPROPERTY(EditAnywhere)
+  FInUIInputActions InUIInputActions;
+  UPROPERTY(EditAnywhere)
+  FInCutsceneInputActions InCutsceneInputActions;
 
   void SetupInitUIStates();  // * Some stuff needs to be set up after all unreal funcs are called.
 
@@ -123,7 +127,17 @@ public:
   void CloseWidget(class UUserWidget* Widget);
   std::function<void()> EarlyCloseWidgetFunc;  // * When leaving a widget early, i.e, before the end of a dialogue, etc.
 
-  void AdvanceUI();  // * Advance the topmost open menu (dialogue, negotiation, etc.).
+  void AdvanceUI();
+  void RetractUIAction();
+  void QuitUIAction();
+  void UINumericInputAction(float Value);
+  void UIDirectionalInputAction(FVector2D Direction);
+  void UISideButton1Action();
+  void UISideButton2Action();
+  void UISideButton3Action();
+  void UISideButton4Action();
+  void UICycleLeftAction();
+  void UICycleRightAction();
 
   UPROPERTY()
   class UInteractionDisplayWidget* InteractionPopupWidget;

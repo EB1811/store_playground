@@ -146,7 +146,7 @@ void UNpcStoreViewWidget::RefreshUI() {
   ItemsWidget->RefreshUI();
 }
 
-void UNpcStoreViewWidget::InitUI(FInputActions InputActions,
+void UNpcStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                  const class AMarketEconomy* _MarketEconomy,
                                  const class AMarket* _Market,
                                  class AStore* _Store,
@@ -204,5 +204,5 @@ void UNpcStoreViewWidget::InitUI(FInputActions InputActions,
   CloseWidgetFunc = _CloseWidgetFunc;
 
   // TODO:
-  // SortByPriceButton->ControlTextWidget->CommonActionWidget->SetEnhancedInputAction(InputActions.BuildModeAction);
+  // SortByPriceButton->ControlTextWidget->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.BuildModeAction);
 }

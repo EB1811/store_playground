@@ -76,28 +76,47 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
   Super::SetupPlayerInputComponent(PlayerInputComponent);
 
   if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-    EnhancedInputComponent->BindAction(InputActions.MoveAction, ETriggerEvent::Triggered, this,
+    // In Game
+    EnhancedInputComponent->BindAction(InGameInputActions.MoveAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::Move);
-
-    EnhancedInputComponent->BindAction(InputActions.OpenPauseMenuAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InGameInputActions.OpenPauseMenuAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenPauseMenu);
-    EnhancedInputComponent->BindAction(InputActions.CloseTopOpenMenuAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::PlayerCloseTopOpenMenu);
-    EnhancedInputComponent->BindAction(InputActions.CloseAllMenusAction, ETriggerEvent::Triggered, this,
-                                       &APlayerZDCharacter::PlayerCloseAllMenus);
-    EnhancedInputComponent->BindAction(InputActions.OpenInventoryViewAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InGameInputActions.OpenInventoryViewAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenInventoryView);
-    EnhancedInputComponent->BindAction(InputActions.BuildModeAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InGameInputActions.BuildModeAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::EnterBuildMode);
-    EnhancedInputComponent->BindAction(InputActions.OpenNewspaperAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InGameInputActions.OpenNewspaperAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenNewspaper);
-    EnhancedInputComponent->BindAction(InputActions.OpenStoreViewAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InGameInputActions.OpenStoreViewAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenStoreView);
-    EnhancedInputComponent->BindAction(InputActions.InteractAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InGameInputActions.InteractAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::Interact);
-    EnhancedInputComponent->BindAction(InputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
+    // In UI
+    EnhancedInputComponent->BindAction(InUIInputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::AdvanceUI);
-    EnhancedInputComponent->BindAction(InputActions.SkipCutsceneAction, ETriggerEvent::Triggered, this,
+    EnhancedInputComponent->BindAction(InUIInputActions.RetractUIAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::RetractUIAction);
+    EnhancedInputComponent->BindAction(InUIInputActions.QuitUIAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::QuitUIAction);
+    EnhancedInputComponent->BindAction(InUIInputActions.UINumericInputAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UINumericInputAction);
+    EnhancedInputComponent->BindAction(InUIInputActions.UIDirectionalInputAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UIDirectionalInputAction);
+    EnhancedInputComponent->BindAction(InUIInputActions.UISideButton1Action, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UISideButton1Action);
+    EnhancedInputComponent->BindAction(InUIInputActions.UISideButton2Action, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UISideButton2Action);
+    EnhancedInputComponent->BindAction(InUIInputActions.UISideButton3Action, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UISideButton3Action);
+    EnhancedInputComponent->BindAction(InUIInputActions.UISideButton4Action, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UISideButton4Action);
+    EnhancedInputComponent->BindAction(InUIInputActions.UICycleLeftAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UICycleLeftAction);
+    EnhancedInputComponent->BindAction(InUIInputActions.UICycleRightAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::UICycleRightAction);
+
+    // In Cutscene
+    EnhancedInputComponent->BindAction(InCutsceneInputActions.SkipCutsceneAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::SkipCutscene);
   }
 }
@@ -121,7 +140,9 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
 
-  HUD->PlayerInputActions = InputActions;
+  HUD->InGameInputActions = InGameInputActions;
+  HUD->InUIInputActions = InUIInputActions;
+  HUD->InCutsceneInputActions = InCutsceneInputActions;
 
   CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 }
@@ -183,13 +204,16 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
 
   HUD->OpenPauseMenuView();
 }
-
-void APlayerZDCharacter::PlayerCloseTopOpenMenu(const FInputActionValue& Value) { HUD->PlayerCloseTopOpenMenu(); }
-
-void APlayerZDCharacter::PlayerCloseAllMenus(const FInputActionValue& Value) { HUD->PlayerCloseAllMenus(); }
-
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent);
+}
+void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
+  HUD->SetAndOpenNewsAndEconomyView();
+
+  // SaveManager->CreateNewSaveGame();
+}
+void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
+  HUD->SetAndOpenStoreView(PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
@@ -199,43 +223,26 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 
   StorePhaseManager->BuildMode();
 }
-
-void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
-  HUD->SetAndOpenNewsAndEconomyView();
-
-  // SaveManager->CreateNewSaveGame();
-}
-
-void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
-  HUD->SetAndOpenStoreView(PlayerInventoryComponent);
-}
-
-// void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
-//   auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
-//     if (!StoreExpansionManager->SelectExpansion(ExpansionLevel)) return;
-
-//     auto LevelReadyFunc = [&]() {
-//       ASpawnPoint* SpawnPoint =
-//           *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
-//             return SpawnPoint->Level == ELevel::Store;
-//           });
-//       check(SpawnPoint);
-
-//       this->SetActorLocation(SpawnPoint->GetActorLocation());
-//       UE_LOG(LogTemp, Warning, TEXT("Player location set to spawn point: %s"), *SpawnPoint->GetName());
-//     };
-//     LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
-//   };
-
-//   HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
-// }
-
 // Rechecking on input to avoid problems with the interaction frequency not keeping up.
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
   if (CheckForInteraction()) HandleInteraction(CurrentInteractableC);
 }
 
 void APlayerZDCharacter::AdvanceUI(const FInputActionValue& Value) { HUD->AdvanceUI(); }
+void APlayerZDCharacter::RetractUIAction(const FInputActionValue& Value) { HUD->RetractUIAction(); }
+void APlayerZDCharacter::QuitUIAction(const FInputActionValue& Value) { HUD->QuitUIAction(); }
+void APlayerZDCharacter::UINumericInputAction(const FInputActionValue& Value) {
+  HUD->UINumericInputAction(Value.Get<float>());
+}
+void APlayerZDCharacter::UIDirectionalInputAction(const FInputActionValue& Value) {
+  HUD->UIDirectionalInputAction(Value.Get<FVector2D>());
+}
+void APlayerZDCharacter::UISideButton1Action(const FInputActionValue& Value) { HUD->UISideButton1Action(); }
+void APlayerZDCharacter::UISideButton2Action(const FInputActionValue& Value) { HUD->UISideButton2Action(); }
+void APlayerZDCharacter::UISideButton3Action(const FInputActionValue& Value) { HUD->UISideButton3Action(); }
+void APlayerZDCharacter::UISideButton4Action(const FInputActionValue& Value) { HUD->UISideButton4Action(); }
+void APlayerZDCharacter::UICycleLeftAction(const FInputActionValue& Value) { HUD->UICycleLeftAction(); }
+void APlayerZDCharacter::UICycleRightAction(const FInputActionValue& Value) { HUD->UICycleRightAction(); }
 
 void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
   check(PlayerBehaviourState == EPlayerState::Cutscene);
@@ -648,3 +655,23 @@ void APlayerZDCharacter::LeaveStore() {
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
 }
+
+// void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
+//   auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
+//     if (!StoreExpansionManager->SelectExpansion(ExpansionLevel)) return;
+
+//     auto LevelReadyFunc = [&]() {
+//       ASpawnPoint* SpawnPoint =
+//           *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
+//             return SpawnPoint->Level == ELevel::Store;
+//           });
+//       check(SpawnPoint);
+
+//       this->SetActorLocation(SpawnPoint->GetActorLocation());
+//       UE_LOG(LogTemp, Warning, TEXT("Player location set to spawn point: %s"), *SpawnPoint->GetName());
+//     };
+//     LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
+//   };
+
+//   HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
+// }

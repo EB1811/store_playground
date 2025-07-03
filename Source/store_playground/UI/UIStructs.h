@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include "CoreMinimal.h"
 #include "store_playground/Player/InputStructs.h"
 #include "UIStructs.generated.h"
@@ -11,8 +12,22 @@ USTRUCT()
 struct FUIActionable {
   GENERATED_BODY()
 
-  // ? Add quit widget action?
   std::function<void()> AdvanceUI;
+  std::function<void()> RetractUI;
+  std::function<void()> QuitUI;
+
+  std::function<void(float)> NumericInput;
+  std::function<void(FVector2D)> DirectionalInput;
+
+  // * Side buttons for various actions, e.g., sorting, filtering, etc.
+  std::function<void()> SideButton1;
+  std::function<void()> SideButton2;
+  std::function<void()> SideButton3;
+  std::function<void()> SideButton4;
+
+  // * Cycle buttons.
+  std::function<void()> CycleLeft;
+  std::function<void()> CycleRight;
 };
 
 // * UI Flavor like animations and sounds.

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "InventoryViewWidget.generated.h"
 
 UCLASS()
@@ -43,11 +44,15 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions InUIInputActions,
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
               const class UInventoryComponent* InventoryC,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> CloseWidgetFunc;
 };

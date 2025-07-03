@@ -43,7 +43,7 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions InUIInputActions,
               class AAbilityManager* _AbilityManager,
               std::function<void()> _CloseWidgetFunc);
 

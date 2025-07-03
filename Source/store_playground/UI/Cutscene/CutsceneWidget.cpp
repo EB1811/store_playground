@@ -12,7 +12,7 @@ void UCutsceneWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   UIActionable.AdvanceUI = [this]() {
-    if (CutsceneSystemRef->CutsceneState == ECutsceneState::InDialogue) DialogueWidget->OnNext();
+    if (CutsceneSystemRef->CutsceneState == ECutsceneState::InDialogue) DialogueWidget->Next();
   };
 }
 
@@ -21,7 +21,7 @@ void UCutsceneWidget::InitUI(UCutsceneSystem* _CutsceneSystemRef) {
 
   this->CutsceneSystemRef = _CutsceneSystemRef;
 
-  DialogueWidget->CloseDialogueUI = [this] { RefreshUI(); };
+  // DialogueWidget->CloseDialogueUI = [this] { RefreshUI(); };
 
   RefreshUI();
 }

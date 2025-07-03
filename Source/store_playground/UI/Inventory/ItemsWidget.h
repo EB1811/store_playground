@@ -70,6 +70,7 @@ public:
   std::function<float(FName)> MarketPriceFunc;
 
   void SelectItem(const class UItemBase* Item, UItemSlotWidget* ItemSlotWidget);
+  void SelectNextItem(FVector2D Direction);
 
   void SortItems(FSortData _SortData);
   void FilterItems(FItemsFilterData _FilterData);

@@ -109,6 +109,8 @@ TArray<FDialogueData> UDialogueSystem::GetChoiceDialogues() {
 }
 
 FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
+  check(ChoiceIndex >= 0 && ChoiceIndex < DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
+
   if (DialogueState != EDialogueState::PlayerChoice) return {};
 
   const TArray<int32>& ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,

@@ -70,29 +70,51 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Input")
   TMap<EPlayerState, class UInputMappingContext*> InputContexts;
   UPROPERTY(EditAnywhere, Category = "Character | Input")
-  FInputActions InputActions;
-
+  FInGameInputActions InGameInputActions;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  FInUIInputActions InUIInputActions;
+  UPROPERTY(EditAnywhere, Category = "Character | Input")
+  FInCutsceneInputActions InCutsceneInputActions;
   // * Input functions
+  // In Game
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Move(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenPauseMenu(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void PlayerCloseTopOpenMenu(const FInputActionValue& Value);
-  UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void PlayerCloseAllMenus(const FInputActionValue& Value);
-  UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenInventoryView(const FInputActionValue& Value);
-  UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void EnterBuildMode(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenNewspaper(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenStoreView(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
-  void Interact(const FInputActionValue& Value);
+  void EnterBuildMode(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void Interact(const FInputActionValue& Value);
+  // In UI
+  UFUNCTION(BlueprintCallable)
   void AdvanceUI(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void RetractUIAction(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void QuitUIAction(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UINumericInputAction(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UIDirectionalInputAction(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UISideButton1Action(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UISideButton2Action(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UISideButton3Action(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UISideButton4Action(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UICycleLeftAction(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
+  void UICycleRightAction(const FInputActionValue& Value);
+  // In Cutscene
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void SkipCutscene(const FInputActionValue& Value);
 

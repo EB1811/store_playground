@@ -38,7 +38,7 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(FInputActions InputActions,
+  void InitUI(FInUIInputActions InUIInputActions,
               const class ADayManager* DayManager,
               const class AStorePhaseManager* StorePhaseManager,
               const class AMarketEconomy* MarketEconomy,

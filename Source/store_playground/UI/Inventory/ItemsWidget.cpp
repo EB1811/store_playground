@@ -1,4 +1,6 @@
 #include "ItemsWidget.h"
+#include "Logging/LogVerbosity.h"
+#include "Math/UnrealMathUtility.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/UI/Inventory/ItemSlotWidget.h"
@@ -30,6 +32,36 @@ void UItemsWidget::SelectItem(const UItemBase* Item, UItemSlotWidget* ItemSlotWi
   SelectedItemSlotWidget = ItemSlotWidget;
   ItemSlotWidget->bIsSelected = true;
   ItemSlotWidget->RefreshUI();
+}
+void UItemsWidget::SelectNextItem(FVector2D Direction) {
+  if (SortedItems.IsEmpty()) return;
+
+  if (!SelectedItem) {
+    UItemSlotWidget* ItemSlotWidget = Cast<UItemSlotWidget>(ItemsPanelWrapBox->GetChildAt(0));
+    SelectItem(SortedItems[0], ItemSlotWidget);
+    return;
+  }
+
+  UE_LOG(LogTemp, Verbose, TEXT("1: %s"), *SelectedItemSlotWidget->GetDesiredSize().ToString());
+  UE_LOG(LogTemp, Verbose, TEXT("2: %s"), *ItemsPanelWrapBox->GetDesiredSize().ToString());
+  UE_LOG(LogTemp, Verbose, TEXT("3: %s"), *Direction.ToString());
+  // Note: Don't know how robust this is, but seems solid enough.
+  auto WrapBoxSize = ItemsPanelWrapBox->GetDesiredSize();
+  auto ItemSlotSize = SelectedItemSlotWidget->GetDesiredSize();
+  int32 ItemsPerRow = FMath::FloorToInt(WrapBoxSize.X / ItemSlotSize.X);
+
+  int32 NextIndexDirection = 0;
+  if (Direction.Y > 0) NextIndexDirection = 1;                  // Right
+  else if (Direction.Y < 0) NextIndexDirection = -1;            // Left
+  else if (Direction.X > 0) NextIndexDirection = ItemsPerRow;   // Down
+  else if (Direction.X < 0) NextIndexDirection = -ItemsPerRow;  // Up
+
+  int32 CurrentIndex = SortedItems.IndexOfByKey(SelectedItem);
+  int32 NextIndex = CurrentIndex + NextIndexDirection;
+  if (NextIndex < 0 || NextIndex >= SortedItems.Num()) return;  // No wraping.
+
+  UItemSlotWidget* ItemSlotWidget = Cast<UItemSlotWidget>(ItemsPanelWrapBox->GetChildAt(NextIndex));
+  SelectItem(SortedItems[NextIndex], ItemSlotWidget);
 }
 
 void UItemsWidget::SortItems(FSortData _SortData) {
