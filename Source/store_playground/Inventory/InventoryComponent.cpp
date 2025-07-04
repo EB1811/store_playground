@@ -30,7 +30,6 @@ void UInventoryComponent::BeginPlay() {
   }
 }
 
-// TODO: Check for bought price.
 auto UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) -> UItemBase* {
   if (TObjectPtr<UItemBase>* ArrayItem =
           ItemsArray.FindByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; })) {

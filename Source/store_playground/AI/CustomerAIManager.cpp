@@ -276,7 +276,6 @@ void ACustomerAIManager::PerformCustomerAILoop() {
           }
         }
 
-        // TODO: Fix customer movement appearing unnatural.
         MoveCustomerRandom(NavSystem, Customer);
         break;
       }
@@ -365,8 +364,8 @@ void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
       if (CustomerStockCheck(Customer->CustomerAIComponent)) MakeCustomerNegotiable(Customer);
       break;
     case (ECustomerAction::SellItem):
-      CustomerSellItem(Customer->CustomerAIComponent);  // TODO: Add boolean to check if item price is valid.
-      MakeCustomerNegotiable(Customer);
+      if (CustomerSellItem(Customer->CustomerAIComponent)) MakeCustomerNegotiable(Customer);
+
       break;
     case (ECustomerAction::Leave): {
       Customer->CustomerAIComponent->CustomerState = ECustomerState::Leaving;
@@ -377,8 +376,8 @@ void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
 }
 
 // ? Use item ids to pick items?
-bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
-                                          std::function<bool(const FStockItem& StockItem)> FilterFunc) {
+auto ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
+                                          std::function<bool(const FStockItem& StockItem)> FilterFunc) -> bool {
   if (Store->StoreStockItems.Num() <= 0 || PickingItemIdsMap.Num() >= Store->StoreStockItems.Num()) return false;
 
   TArray<FStockItem> NonPickedItems = Store->StoreStockItems.FilterByPredicate(
@@ -402,8 +401,8 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
 }
 
 // Note: Agnostic about if player has item type or not.
-bool ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
-                                            std::function<bool(const FWantedItemType& ItemType)> FilterFunc) {
+auto ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
+                                            std::function<bool(const FWantedItemType& ItemType)> FilterFunc) -> bool {
   auto ValidItemTypes = FilterFunc ? GlobalStaticDataManager->WantedItemTypesArray.FilterByPredicate(FilterFunc)
                                    : GlobalStaticDataManager->WantedItemTypesArray.FilterByPredicate(
                                          [CustomerAI](const FWantedItemType& ItemType) {
@@ -417,12 +416,25 @@ bool ACustomerAIManager::CustomerStockCheck(UCustomerAIComponent* CustomerAI,
   return true;
 }
 
-void ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UItemBase* HasItem) {
-  UItemBase* Item = HasItem ? HasItem : Market->GetNewRandomItems(1, {}, {}, CustomerAI->ItemEconTypes)[0];
-  check(Item);
+auto ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UItemBase* HasItem) -> bool {
+  if (HasItem) {
+    CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::SellItem;
+    CustomerAI->NegotiationAI->RelevantItem = HasItem;
+    return true;
+  }
+
+  auto RandomItems =
+      Market->GetNewRandomItems(1, {}, {}, CustomerAI->ItemEconTypes, [this, CustomerAI](const FName& ItemId) {
+        return MarketEconomy->GetMarketPrice(Market->GetItem(ItemId)->ItemID) <= CustomerAI->AvailableMoney;
+      });
+  if (RandomItems.Num() <= 0) return false;
+
+  UItemBase* Item = RandomItems[0];
+  // if (MarketEconomy->GetMarketPrice(Item->ItemID) > Store->Money) return false;
 
   CustomerAI->NegotiationAI->RequestType = ECustomerRequestType::SellItem;
   CustomerAI->NegotiationAI->RelevantItem = Item;
+  return true;
 }
 
 void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {

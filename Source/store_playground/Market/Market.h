@@ -76,7 +76,9 @@ public:
   auto GetNewRandomItems(int32 Amount,
                          TArray<EItemType> ItemTypes = {},
                          TArray<EItemWealthType> ItemWealthTypes = {},
-                         TArray<EItemEconType> ItemEconType = {}) const -> TArray<class UItemBase*>;
+                         TArray<EItemEconType> ItemEconType = {},
+                         std::function<bool(const FName& ItemId)> FilterFunc = nullptr) const
+      -> TArray<class UItemBase*>;
   auto GetRandomItem(const TArray<FName> ItemIds) const -> class UItemBase*;
   auto GetItem(const FName& ItemID) const -> class UItemBase*;
 

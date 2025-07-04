@@ -62,8 +62,9 @@ void AMarket::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 auto AMarket::GetNewRandomItems(int32 Amount,
                                 TArray<EItemType> ItemTypes,
                                 TArray<EItemWealthType> ItemWealthTypes,
-                                TArray<EItemEconType> ItemEconType) const -> TArray<UItemBase*> {
-  const TArray<FName> ItemIdsEligible = EligibleItemIds.FilterByPredicate([&](const FName& Id) {
+                                TArray<EItemEconType> ItemEconType,
+                                std::function<bool(const FName& ItemId)> FilterFunc) const -> TArray<UItemBase*> {
+  TArray<FName> ItemIdsEligible = EligibleItemIds.FilterByPredicate([&](const FName& Id) {
     const UItemBase* Item = AllItemsMap[Id];
 
     if (ItemTypes.Num() > 0 && !ItemTypes.Contains(Item->ItemType)) return false;
@@ -71,12 +72,16 @@ auto AMarket::GetNewRandomItems(int32 Amount,
     if (ItemEconType.Num() > 0 && !ItemEconType.Contains(Item->ItemEconType)) return false;
     return true;
   });
-  check(ItemIdsEligible.Num() > 0);
+  if (FilterFunc) ItemIdsEligible = ItemIdsEligible.FilterByPredicate([&](const FName& Id) { return FilterFunc(Id); });
+  if (ItemIdsEligible.Num() <= 0) return {};
 
   TArray<UItemBase*> NewItems;
   for (int32 i = 0; i < Amount; i++) {
+    if (ItemIdsEligible.Num() <= 0) break;
+
     int32 RandomIndex = FMath::RandRange(0, ItemIdsEligible.Num() - 1);
     NewItems.Add(AllItemsMap[ItemIdsEligible[RandomIndex]]->CreateItemCopy());
+    ItemIdsEligible.RemoveAt(RandomIndex);
   }
 
   return NewItems;

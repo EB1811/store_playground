@@ -37,7 +37,6 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   FText CustomerName;
-  // TODO: Variables in dialogues.
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   TMap<ENegotiationDialogueType, FDialoguesArray> DialoguesMap;
 

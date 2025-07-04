@@ -7,8 +7,6 @@
 #include "store_playground/UI/UIStructs.h"
 #include "DialogueWidget.generated.h"
 
-// TODO: Separate into view.
-
 UCLASS()
 class STORE_PLAYGROUND_API UDialogueWidget : public UUserWidget {
   GENERATED_BODY()

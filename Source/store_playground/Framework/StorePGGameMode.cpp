@@ -98,12 +98,12 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->AbilityManager = AbilityManager;
   PlayerCharacter->MiniGameManager = MiniGameManager;
 
-  HUD->StatisticsGen = StatisticsGen;
   HUD->DayManager = DayManager;
   HUD->StorePhaseManager = StorePhaseManager;
   HUD->LevelManager = LevelManager;
   HUD->MarketEconomy = MarketEconomy;
   HUD->Market = Market;
+  HUD->StatisticsGen = StatisticsGen;
   HUD->SaveManager = SaveManager;
   HUD->UpgradeManager = UpgradeManager;
   HUD->AbilityManager = AbilityManager;
@@ -220,6 +220,7 @@ void AStorePGGameMode::BeginPlay() {
   CustomerAIManager->Store = Store;
   CustomerAIManager->QuestManager = QuestManager;
 
+  StatisticsGen->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;
   StatisticsGen->Store = Store;
   StatisticsGen->MarketEconomy = MarketEconomy;
 
@@ -228,7 +229,7 @@ void AStorePGGameMode::BeginPlay() {
 
   MiniGameManager->Market = Market;
 
-  // TODO: Put loading screen here.
+  // todo-low: Put loading screen here.
   UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
 
   // * Load systems save data, then store level, then load level save data.

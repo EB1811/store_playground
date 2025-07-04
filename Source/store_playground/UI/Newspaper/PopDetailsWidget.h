@@ -25,4 +25,13 @@ public:
   class UTextBlock* ItemEconTypesText;
   UPROPERTY(meta = (BindWidget))
   class UBorder* BgBorder;
+
+  UPROPERTY(meta = (BindWidget))
+  class UImage* WealthTrendUpIcon;
+  UPROPERTY(meta = (BindWidget))
+  class UImage* WealthTrendDownIcon;
+  UPROPERTY(meta = (BindWidget))
+  class UImage* PopulationTrendUpIcon;
+  UPROPERTY(meta = (BindWidget))
+  class UImage* PopulationTrendDownIcon;
 };

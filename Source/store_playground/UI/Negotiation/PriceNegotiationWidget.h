@@ -8,7 +8,7 @@
 #include "store_playground/UI/UIStructs.h"
 #include "PriceNegotiationWidget.generated.h"
 
-// TODO: Error handling.
+// todo-low: Error handling.
 
 UCLASS()
 class STORE_PLAYGROUND_API UPriceNegotiationWidget : public UUserWidget {

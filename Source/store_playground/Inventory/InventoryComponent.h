@@ -8,9 +8,6 @@
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "InventoryComponent.generated.h"
 
-// TODO: Adjust item equality to be based on bought price.
-// TODO: Change all instances of item equality to use this.
-
 UENUM()
 enum class EInventoryType : uint8 {
   Container UMETA(DisplayName = "Container"),

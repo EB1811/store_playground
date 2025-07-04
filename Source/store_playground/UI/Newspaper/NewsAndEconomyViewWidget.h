@@ -43,6 +43,7 @@ public:
   void InitUI(FInUIInputActions InUIInputActions,
               const class ADayManager* _DayManager,
               const class AMarketEconomy* _MarketEconomy,
+              const class AStatisticsGen* _StatisticsGen,
               class ANewsGen* _NewsGen,
               std::function<void()> _CloseWidgetFunc);
 

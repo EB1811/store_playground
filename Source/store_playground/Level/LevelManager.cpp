@@ -160,7 +160,7 @@ void ALevelManager::SaveLevelState(ELevel Level) {
 void ALevelManager::ExpandStoreSwitchLevel(std::function<void()> _LevelReadyFunc) {
   LevelReadyFunc = _LevelReadyFunc;
   HUD->StartLevelLoadingTransition([this]() {
-    // TODO: Add on unload callback.
+    // todo-low: Add on unload callback.
     BeginUnloadLevel(ELevel::Store);
 
     LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];

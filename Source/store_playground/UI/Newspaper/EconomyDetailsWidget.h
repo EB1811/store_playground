@@ -22,10 +22,12 @@ public:
 
   UPROPERTY(EditAnywhere)
   const class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere)
+  const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere)
   TMap<EPopType, UMaterialInstance*> PopTypeMaterialMap;
 
   void RefreshUI();
-  void InitUI(const class AMarketEconomy* _MarketEconomy);
+  void InitUI(const class AMarketEconomy* _MarketEconomy, const class AStatisticsGen* _StatisticsGen);
 };

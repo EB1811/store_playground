@@ -17,7 +17,7 @@ void AStatisticsGen::BeginPlay() {
 
   StoreStatistics.ProfitHistory.Reserve(StatisticsGenParams.MaxHistoryCount);
   StoreStatistics.RevenueHistory.Reserve(StatisticsGenParams.MaxHistoryCount);
-  StoreStatistics.StoreStockValueHistory.Reserve(StatisticsGenParams.MaxHistoryCount);
+  StoreStatistics.NetWorthHistory.Reserve(StatisticsGenParams.MaxHistoryCount);
 }
 
 void AStatisticsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -30,15 +30,13 @@ auto AStatisticsGen::CalcTodaysStoreProfit() const -> float {
   return TodaysStoreMoneyActivity.AllIncome - TodaysStoreMoneyActivity.AllExpenses;
 }
 
-auto AStatisticsGen::CalcTotalStoreStockValue() const -> float {
+auto AStatisticsGen::CalcNetWorth() const -> float {
   float TotalValue = 0.0f;
-  for (const FStockItem& StockItem : Store->StoreStockItems) {
-    const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-        [StockItem](const FEconItem& EconItem) { return EconItem.ItemID == StockItem.ItemId; });
-    check(EconItem);
-
-    TotalValue += EconItem->CurrentPrice;
-  }
+  TotalValue += Store->Money;
+  for (const auto& Item : PlayerInventoryC->ItemsArray)
+    TotalValue += Item->Quantity * MarketEconomy->GetMarketPrice(Item->ItemID);
+  for (const FStockItem& StockItem : Store->StoreStockItems)
+    TotalValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
 
   return TotalValue;
 }
@@ -52,11 +50,12 @@ void AStatisticsGen::ItemPriceChange(const FName ItemId, const float NewPrice) {
     ItemStatisticsMap[ItemId].PriceHistory.RemoveAt(0, EAllowShrinking::No);
 }
 
-void AStatisticsGen::PopChange(const FName PopId, const float NewPopulation) {
+void AStatisticsGen::PopChange(const FName PopId, float NewPopulation, float NewGoodsBoughtPerCapita) {
   if (!PopStatisticsMap.Contains(PopId)) PopStatisticsMap.Add(PopId, {});
 
   PopStatisticsMap[PopId].PopulationHistory.Add(NewPopulation);
   PopStatisticsMap[PopId].TodaysPopulationChange = NewPopulation - PopStatisticsMap[PopId].PopulationHistory.Last();
+  PopStatisticsMap[PopId].GoodsBoughtPerCapitaHistory.Add(NewGoodsBoughtPerCapita);
 
   if (PopStatisticsMap[PopId].PopulationHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
     PopStatisticsMap[PopId].PopulationHistory.RemoveAt(0, EAllowShrinking::No);
@@ -70,14 +69,21 @@ void AStatisticsGen::CalcDayStatistics() {
   StoreStatistics.TotalRevenueToDate += TodaysStoreMoneyActivity.AllIncome;
   StoreStatistics.ExpensesHistory.Add(TodaysStoreMoneyActivity.AllExpenses);
   StoreStatistics.TotalExpensesToDate += TodaysStoreMoneyActivity.AllExpenses;
-  StoreStatistics.StoreStockValueHistory.Add(CalcTotalStoreStockValue());
+  StoreStatistics.NetWorthHistory.Add(CalcNetWorth());
 
   if (StoreStatistics.CurrentHistoryCount < StatisticsGenParams.MaxHistoryCount) {
     StoreStatistics.CurrentHistoryCount++;
   } else {
     StoreStatistics.ProfitHistory.RemoveAt(0, EAllowShrinking::No);
     StoreStatistics.RevenueHistory.RemoveAt(0, EAllowShrinking::No);
-    StoreStatistics.StoreStockValueHistory.RemoveAt(0, EAllowShrinking::No);
+    StoreStatistics.NetWorthHistory.RemoveAt(0, EAllowShrinking::No);
+  }
+
+  for (auto& PopStat : PopStatisticsMap) {
+    if (PopStat.Value.PopulationHistory.Num() > StatisticsGenParams.MaxHistoryCount * 5)
+      PopStat.Value.PopulationHistory.RemoveAt(0, EAllowShrinking::No);
+    if (PopStat.Value.GoodsBoughtPerCapitaHistory.Num() > StatisticsGenParams.MaxHistoryCount * 5)
+      PopStat.Value.GoodsBoughtPerCapitaHistory.RemoveAt(0, EAllowShrinking::No);
   }
 
   // for (auto& ItemStat : ItemStatisticsMap)

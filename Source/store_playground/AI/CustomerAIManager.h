@@ -112,11 +112,11 @@ public:
   void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
   void CustomerPerformAction(class ACustomer* Customer);
 
-  bool CustomerPickItem(class UCustomerAIComponent* CustomerAI,
-                        std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr);
-  bool CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
-                          std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr);
-  void CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr);
+  auto CustomerPickItem(class UCustomerAIComponent* CustomerAI,
+                        std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr) -> bool;
+  auto CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
+                          std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr) -> bool;
+  auto CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr) -> bool;
   void MakeCustomerNegotiable(class ACustomer* Customer);
 
   void TickDaysTimedVars();

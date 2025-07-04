@@ -69,7 +69,6 @@ void ADayManager::ManageDebt() {
   }
 
   // Game over.
-  // TODO: Game over screen.
   UE_LOG(LogTemp, Warning, TEXT("DayManager: Game over. Not enough money to pay debt."));
   AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
   check(GameMode);

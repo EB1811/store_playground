@@ -477,12 +477,7 @@ void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC,
   }
 
   DialogueSystem->StartDialogue(DialogueC);
-  HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueCloseFunc, [this, DialogueC, OnDialogueFinishFunc]() {
-    // TODO: Call in dialogue system.
-    DialogueC->FinishReadingDialogueChain();
-
-    if (OnDialogueFinishFunc) OnDialogueFinishFunc();
-  });
+  HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueCloseFunc, OnDialogueFinishFunc);
 }
 // For dialogue outside of the dialogue component (cutscenes, etc.).
 void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,

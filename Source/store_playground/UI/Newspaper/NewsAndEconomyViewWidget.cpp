@@ -50,9 +50,10 @@ void UNewsAndEconomyViewWidget::RefreshUI() {
 void UNewsAndEconomyViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                        const ADayManager* _DayManager,
                                        const AMarketEconomy* _MarketEconomy,
+                                       const class AStatisticsGen* _StatisticsGen,
                                        ANewsGen* _NewsGen,
                                        std::function<void()> _CloseWidgetFunc) {
-  check(_DayManager && _NewsGen && _MarketEconomy && _CloseWidgetFunc);
+  check(_DayManager && _NewsGen && _MarketEconomy && _StatisticsGen && _CloseWidgetFunc);
 
   TArray<FTopBarTab> TopBarTabs = {};
   for (auto Tab : TEnumRange<ENewsAndEconomyViewTab>()) TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Tab)});
@@ -71,7 +72,7 @@ void UNewsAndEconomyViewWidget::InitUI(FInUIInputActions InUIInputActions,
   SwitchTab(ENewsAndEconomyViewTab::Articles);
 
   NewspaperWidget->InitUI(_DayManager, _NewsGen);
-  EconomyDetailsWidget->InitUI(_MarketEconomy);
+  EconomyDetailsWidget->InitUI(_MarketEconomy, _StatisticsGen);
 
   BackButton->ActionText->SetText(FText::FromString("Back"));
   BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);

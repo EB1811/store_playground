@@ -2,6 +2,7 @@
 #include "Containers/Array.h"
 #include "Containers/Set.h"
 #include "HAL/Platform.h"
+#include "Logging/LogVerbosity.h"
 #include "MarketEconomy.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Framework/UtilFuncs.h"
@@ -84,7 +85,7 @@ auto AMarketEconomy::GetMarketPrice(const FName ItemId) const -> float {
 }
 
 void AMarketEconomy::PerformEconomyTick() {
-  // TODO: Save file using a different customer data table will crash this.
+  // Note: Save file using a different customer data table will not satisfy this check.
   for (int32 i = 0; i < CustomerPops.Num(); i++) {
     const FCustomerPop Pop = CustomerPops[i];
     const FPopEconData PopEconData = PopEconDataArray[i];
@@ -296,11 +297,10 @@ void AMarketEconomy::PerformEconomyTick() {
 
     MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
 
-    // UE_LOG(LogTemp, Warning, TEXT("Pop %s promoted to %s"), *CustomerPops[Index].PopName.ToString(),
-    //        *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
+    UE_LOG(LogTemp, Verbose, TEXT("Pop %s promoted to %s"), *CustomerPops[Index].PopName.ToString(),
+           *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
   }
   for (int32 Index : DemotionPopIndexes) {
-    // UE_LOG(LogTemp, Warning, TEXT("Pop %s considering demotion"), *CustomerPops[Index].PopName.ToString());
     auto& CustomerPop = CustomerPops[Index];
     auto& PopEconData = PopEconDataArray[Index];
 
@@ -321,8 +321,8 @@ void AMarketEconomy::PerformEconomyTick() {
 
     MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
 
-    // UE_LOG(LogTemp, Warning, TEXT("Pop %s demoted to %s"), *CustomerPops[Index].PopName.ToString(),
-    //        *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
+    UE_LOG(LogTemp, Verbose, TEXT("Pop %s demoted to %s"), *CustomerPops[Index].PopName.ToString(),
+           *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
   }
   for (int32 Index : CrossPromotionPopIndexes) {
     auto& CustomerPop = CustomerPops[Index];
@@ -341,13 +341,14 @@ void AMarketEconomy::PerformEconomyTick() {
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
     MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
 
-    // UE_LOG(LogTemp, Warning, TEXT("Pop %s cross promoted to %s"), *CustomerPops[Index].PopName.ToString(),
-    //        *CustomerPops[RandomNewPopIndex].PopName.ToString());
+    UE_LOG(LogTemp, Verbose, TEXT("Pop %s cross promoted to %s"), *CustomerPops[Index].PopName.ToString(),
+           *CustomerPops[RandomNewPopIndex].PopName.ToString());
   }
 
   // Update statistics.
   for (auto& Item : EconItems) StatisticsGen->ItemPriceChange(Item.ItemID, Item.CurrentPrice);
-  for (auto& PopEconData : PopEconDataArray) StatisticsGen->PopChange(PopEconData.PopID, PopEconData.Population);
+  for (auto& PopEconData : PopEconDataArray)
+    StatisticsGen->PopChange(PopEconData.PopID, PopEconData.Population, PopEconData.GoodsBoughtPerCapita);
 }
 
 auto AMarketEconomy::GetPopWeightingMulti(const FCustomerPop& Pop) const -> float {

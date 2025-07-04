@@ -292,7 +292,6 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
         GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
     MobileNPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
 
-    // TODO: Direction.
     MobileNPCStore->Mesh->SetStaticMesh(NpcStoreType.AssetData.Mesh);
     MobileNPCStore->Sprite->SetFlipbook(NpcStoreType.AssetData.Sprites[ESimpleSpriteDirection::Down]);
 
@@ -318,10 +317,14 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
   for (TTuple<UNpcStoreComponent*, UInventoryComponent*> StoreComponents : NpcStoreComponents) {
     UNpcStoreComponent* NpcStoreC = StoreComponents.Key;
     UInventoryComponent* InventoryC = StoreComponents.Value;
-
     check(NpcStoreC->NpcStoreType.StockCountRange.Num() > 0);
 
-    // TODO: Get RandomStockCount items.
+    // TArray<EItemType> ItemTypes = {};
+    // NpcStoreC->NpcStoreType.ItemTypeWeightMap.GetKeys(ItemTypes);
+    // TArray<EItemEconType> ItemEconType = {};
+    // NpcStoreC->NpcStoreType.ItemEconTypeWeightMap.GetKeys(ItemEconType);
+    // TArray<UItemBase*> RandomItems = Market->GetNewRandomItems(RandomStockCount, ItemTypes, {}, ItemEconType);
+
     // Get random joined item + econ types using their weights.
     int32 RandomStockCount =
         FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0], NpcStoreC->NpcStoreType.StockCountRange[1]);
@@ -504,7 +507,6 @@ void AMarketLevel::InitMiniGames(bool bIsWeekend) {
                                                             SpawnPoint->GetActorRotation(), SpawnParams);
     MiniGame->SpawnPointId = SpawnPoint->Id;
 
-    // TODO: Direction.
     MiniGame->Mesh->SetStaticMesh(SpawnableMiniGame->AssetData.Mesh);
     UE_LOG(LogTemp, Warning, TEXT("Mesh: %s"), *SpawnableMiniGame->AssetData.Mesh->GetName());
     MiniGame->Sprite->SetFlipbook(SpawnableMiniGame->AssetData.Sprites[ESimpleSpriteDirection::Down]);

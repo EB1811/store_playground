@@ -17,7 +17,6 @@ struct FStatisticsGenParams {
   int32 MaxHistoryCount;  // * In days.
 };
 
-// TODO: Store total spending.
 USTRUCT()
 struct FStoreStatistics {
   GENERATED_BODY()
@@ -41,7 +40,7 @@ struct FStoreStatistics {
   float TotalExpensesToDate;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  TArray<float> StoreStockValueHistory;
+  TArray<float> NetWorthHistory;
 };
 USTRUCT()
 struct FItemStatistics {
@@ -58,12 +57,11 @@ struct FPopStatistics {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, SaveGame)
-  FName PopId;
-
-  UPROPERTY(EditAnywhere, SaveGame)
   TArray<float> PopulationHistory;
   UPROPERTY(EditAnywhere, SaveGame)
   float TodaysPopulationChange;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<float> GoodsBoughtPerCapitaHistory;
 };
 
 UCLASS(Blueprintable)
@@ -76,6 +74,8 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  UPROPERTY(EditAnywhere)
+  const class UInventoryComponent* PlayerInventoryC;
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
   UPROPERTY(EditAnywhere)
@@ -100,12 +100,11 @@ public:
   void StoreMoneyGained(float Amount);
   void StoreMoneySpent(float Amount);
 
-  // TODO: Calc net worth.
   auto CalcTodaysStoreProfit() const -> float;
-  auto CalcTotalStoreStockValue() const -> float;
+  auto CalcNetWorth() const -> float;
 
   void ItemPriceChange(const FName ItemId, const float NewPrice);
-  void PopChange(const FName PopId, const float NewPopulation);
+  void PopChange(const FName PopId, float NewPopulation, float NewGoodsBoughtPerCapita);
 
   void CalcDayStatistics();  // * Call at the end of the day and reset the daily statistics.
 };

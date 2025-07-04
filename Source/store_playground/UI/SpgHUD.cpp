@@ -526,7 +526,7 @@ void ASpgHUD::SetAndOpenNewsAndEconomyView() {
   check(NewsAndEconomyViewWidget);
   if (OpenedWidgets.Contains(NewsAndEconomyViewWidget)) return CloseWidget(NewsAndEconomyViewWidget);
 
-  NewsAndEconomyViewWidget->InitUI(InUIInputActions, DayManager, MarketEconomy, NewsGen,
+  NewsAndEconomyViewWidget->InitUI(InUIInputActions, DayManager, MarketEconomy, StatisticsGen, NewsGen,
                                    [this] { CloseWidget(NewsAndEconomyViewWidget); });
   NewsAndEconomyViewWidget->RefreshUI();
 

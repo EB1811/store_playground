@@ -38,11 +38,12 @@ TArray<int32> GetChildChoiceIndexes(const TArray<FDialogueData>& DialogueDataArr
   return ChoiceDialogueIndexes;
 }
 
-FNextDialogueRes UDialogueSystem::StartDialogue(const class UDialogueComponent* DialogueC) {
-  check(DialogueC && DialogueC->DialogueArray.Num() > 0);
+FNextDialogueRes UDialogueSystem::StartDialogue(class UDialogueComponent* _DialogueC) {
+  check(_DialogueC && _DialogueC->DialogueArray.Num() > 0);
 
   ResetDialogue();
 
+  DialogueC = _DialogueC;
   DialogueState =
       GetNextDialogueState(DialogueState, DialogueC->DialogueArray[0].DialogueSpeaker == EDialogueSpeaker::NPC
                                               ? EDialogueAction::NPCNext
@@ -88,7 +89,10 @@ FNextDialogueRes UDialogueSystem::NextDialogue() {
     case EDialogueState::PlayerChoice: {
       return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
     }
-    case EDialogueState::End: return {{}, DialogueState};
+    case EDialogueState::End: {
+      if (DialogueC) DialogueC->FinishReadingDialogueChain();
+      return {{}, DialogueState};
+    }
     default: {
       checkf(false, TEXT("Invalid Dialogue State"));
       return {{}, EDialogueState::None};
@@ -126,6 +130,7 @@ FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
 }
 
 void UDialogueSystem::ResetDialogue() {
+  DialogueC = nullptr;
   DialogueState = EDialogueState::None;
   DialogueDataArr.Empty();
   CurrentDialogueIndex = 0;

@@ -22,6 +22,9 @@ public:
   UDialogueSystem() : DialogueState(EDialogueState::None), CurrentDialogueIndex(0) {}
 
   UPROPERTY(EditAnywhere, Category = "Dialogue")
+  class UDialogueComponent* DialogueC;
+
+  UPROPERTY(EditAnywhere, Category = "Dialogue")
   EDialogueState DialogueState;
 
   UPROPERTY(EditAnywhere, Category = "Dialogue")
@@ -33,7 +36,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   TArray<FName> ChoiceDialoguesSelectedIDs;
 
-  FNextDialogueRes StartDialogue(const class UDialogueComponent* DialogueC);
+  FNextDialogueRes StartDialogue(class UDialogueComponent* _DialogueC);
   FNextDialogueRes StartDialogue(const TArray<FDialogueData> _DialogueDataArr, const FString& _SpeakerName = "NPC");
   FNextDialogueRes NextDialogue();
   TArray<FDialogueData> GetChoiceDialogues();

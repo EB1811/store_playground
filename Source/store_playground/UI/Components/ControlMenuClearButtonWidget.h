@@ -9,8 +9,6 @@
 
 // * Both buttons and control
 
-// TODO: Replace where needed.
-
 UCLASS()
 class STORE_PLAYGROUND_API UControlMenuClearButtonWidget : public UUserWidget {
   GENERATED_BODY()
