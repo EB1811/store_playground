@@ -7,6 +7,7 @@
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "store_playground/WorldObject/Customer.h"
 #include "Components/WidgetComponent.h"
 #include "PaperZDCharacter.h"
@@ -37,6 +38,10 @@ void UCustomerAIComponent::LeaveRequestDialogue() {
   UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
   check(WidgetC);
   WidgetC->SetVisibility(true, true);
+
+  USimpleSpriteAnimComponent* SpriteAnimC = GetOwner()->FindComponentByClass<USimpleSpriteAnimComponent>();
+  check(SpriteAnimC);
+  SpriteAnimC->ReturnToOgRotation();
 }
 
 void UCustomerAIComponent::StartNegotiation() {
@@ -48,10 +53,9 @@ void UCustomerAIComponent::StartNegotiation() {
 }
 
 void UCustomerAIComponent::PostNegotiation() {
-  CustomerState = ECustomerState::LeavingTalking;
+  CustomerState = ECustomerState::Leaving;
 
   UInteractionComponent* OwnerInteraction = GetOwner()->FindComponentByClass<UInteractionComponent>();
   check(OwnerInteraction);
   OwnerInteraction->InteractionType = EInteractionType::None;
 }
-void UCustomerAIComponent::LeavePostNegotiationDialogue() { CustomerState = ECustomerState::Leaving; }

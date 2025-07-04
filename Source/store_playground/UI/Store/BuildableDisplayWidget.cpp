@@ -13,6 +13,8 @@ void UBuildableDisplayWidget::NativeConstruct() {
 }
 
 void UBuildableDisplayWidget::BuildStockDisplay() {
+  if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Store->Money) return;
+
   bool bBuilt = (Store->BuildStockDisplay(Buildable));
   check(bBuilt);
 
@@ -39,7 +41,10 @@ void UBuildableDisplayWidget::RefreshUI() {
   }
 }
 
-void UBuildableDisplayWidget::InitUI(ABuildable* _Buildable, AStore* _Store, std::function<void()> _CloseWidgetFunc) {
+void UBuildableDisplayWidget::InitUI(FInUIInputActions InUIInputActions,
+                                     ABuildable* _Buildable,
+                                     AStore* _Store,
+                                     std::function<void()> _CloseWidgetFunc) {
   check(_Buildable && _Store && _CloseWidgetFunc);
 
   Buildable = _Buildable;
@@ -47,6 +52,8 @@ void UBuildableDisplayWidget::InitUI(ABuildable* _Buildable, AStore* _Store, std
   CloseWidgetFunc = _CloseWidgetFunc;
 
   BuildStockDisplayButton->ActionText->SetText(FText::FromString("Build"));
+  BuildStockDisplayButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
   BackButton->ActionText->SetText(FText::FromString("Back"));
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
   BackButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
 }

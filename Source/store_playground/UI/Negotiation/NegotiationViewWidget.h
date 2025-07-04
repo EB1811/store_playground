@@ -37,7 +37,7 @@ public:
 
   void ShowItem(class UItemBase* Item);
   void OfferAccept(float Price);
-  void Reject();
+  void RejectLeave();
 
   void RefreshUI();
   void InitUI(FInUIInputActions _InUIInputActions,

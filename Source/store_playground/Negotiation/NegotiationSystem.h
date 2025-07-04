@@ -114,7 +114,8 @@ public:
                         UQuestComponent* _QuestComponent = nullptr);
 
   struct FNextDialogueRes NPCRequestNegotiation();
-  void PlayerReadRequest();
+  void PlayerReadRequest();   // * Start negotiation.
+  void PlayerLeaveRequest();  // * Leave negotiation, allowing it to be reentered later.
   void PlayerShowItem(class UItemBase* Item, class UInventoryComponent* _FromInventory);
   struct FNextDialogueRes NPCNegotiationTurn();
   void OfferPrice(float Price);

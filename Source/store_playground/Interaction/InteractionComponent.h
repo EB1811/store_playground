@@ -8,6 +8,8 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "InteractionComponent.generated.h"
 
+// ? Add start interaction and end interaction events/callbacks.
+
 UENUM()
 enum class EInteractionType : uint8 {
   None UMETA(DisplayName = "None"),

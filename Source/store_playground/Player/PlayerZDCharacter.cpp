@@ -397,16 +397,16 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
       auto [DialogueC, SpriteAnimC] = Interactable->InteractNPCDialogue();
 
       // ? Move to function?
-      SetupNpcInteraction(SpriteAnimC);
+      SpriteAnimC->TurnToPlayer(GetActorLocation());
       EnterDialogue(DialogueC, [this, SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); });
       break;
     }
     case EInteractionType::Customer: {
       auto [DialogueC, CustomerAI, SpriteAnimC] = Interactable->InteractCustomer();
 
+      SpriteAnimC->TurnToPlayer(GetActorLocation());
       // ? Move to function?
       CustomerAI->CustomerState = ECustomerState::BrowsingTalking;
-      SetupCustomerInteraction(CustomerAI, SpriteAnimC);
       EnterDialogue(DialogueC, [this, CustomerAI, SpriteAnimC]() {
         CustomerAI->CustomerState = ECustomerState::Browsing;
         SpriteAnimC->ReturnToOgRotation();
@@ -416,14 +416,14 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     case EInteractionType::WaitingCustomer: {
       auto [CustomerAI, Item, SpriteAnimC] = Interactable->InteractWaitingCustomer();
 
-      SetupCustomerInteraction(CustomerAI, SpriteAnimC);
+      SpriteAnimC->TurnToPlayer(GetActorLocation());
       EnterNegotiation(CustomerAI, Item);
       break;
     }
     case EInteractionType::UniqueNPCQuest: {
       auto [Dialogue, QuestC, CustomerAI, Item, SpriteAnimC] = Interactable->InteractUniqueNPCQuest();
 
-      SetupNpcInteraction(SpriteAnimC);
+      SpriteAnimC->TurnToPlayer(GetActorLocation());
       EnterQuest(QuestC, Dialogue, SpriteAnimC, CustomerAI, Item);
       break;
     }
@@ -441,47 +441,9 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
   }
 }
 
-// ? Move early returns to widgets themselves?
-void APlayerZDCharacter::SetupNpcInteraction(USimpleSpriteAnimComponent* SpriteAnimC) {
-  SpriteAnimC->TurnToPlayer(GetActorLocation());
-
-  // ? Move to player?
-  HUD->EarlyCloseWidgetFunc = [this, SpriteAnimC]() {
-    check(SpriteAnimC);
-    SpriteAnimC->ReturnToOgRotation();
-  };
-}
+void APlayerZDCharacter::SetupNpcInteraction(USimpleSpriteAnimComponent* SpriteAnimC) {}
 void APlayerZDCharacter::SetupCustomerInteraction(UCustomerAIComponent* CustomerAI,
-                                                  USimpleSpriteAnimComponent* SpriteAnimC) {
-  SpriteAnimC->TurnToPlayer(GetActorLocation());
-
-  // ? Move to player?
-  switch (CustomerAI->CustomerState) {
-    case ECustomerState::BrowsingTalking:
-      HUD->EarlyCloseWidgetFunc = [this, CustomerAI, SpriteAnimC]() {
-        check(CustomerAI);
-        check(SpriteAnimC);
-
-        CustomerAI->CustomerState = ECustomerState::Browsing;
-        SpriteAnimC->ReturnToOgRotation();
-      };
-      break;
-    case ECustomerState::Requesting:
-      HUD->EarlyCloseWidgetFunc = [this, CustomerAI, SpriteAnimC]() {
-        check(CustomerAI);
-        check(SpriteAnimC);
-
-        if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
-        if (CustomerAI->CustomerState == ECustomerState::LeavingTalking)
-          return NegotiationSystem->NegotiationComplete();
-
-        CustomerAI->LeaveRequestDialogue();
-        SpriteAnimC->ReturnToOgRotation();
-      };
-      break;
-    default: break;
-  }
-}
+                                                  USimpleSpriteAnimComponent* SpriteAnimC) {}
 
 void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) { HUD->SetAndOpenBuildableDisplay(Buildable); }
 

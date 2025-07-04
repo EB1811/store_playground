@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "BuildableDisplayViewWidget.generated.h"
 
 UCLASS()
@@ -22,4 +23,10 @@ public:
               class ABuildable* Buildable,
               class AStore* _Store,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
+
+  std::function<void()> CloseWidgetFunc;
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "store_playground/Player/InputStructs.h"
 #include "BuildableDisplayWidget.generated.h"
 
 UCLASS()
@@ -35,7 +36,10 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(class ABuildable* _Buildable, class AStore* _Store, std::function<void()> _CloseWidgetFunc);
+  void InitUI(FInUIInputActions InUIInputActions,
+              class ABuildable* _Buildable,
+              class AStore* _Store,
+              std::function<void()> _CloseWidgetFunc);
 
   std::function<void()> CloseWidgetFunc;
 };

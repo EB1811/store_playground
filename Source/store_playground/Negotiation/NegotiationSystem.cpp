@@ -104,7 +104,6 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
     default: checkNoEntry(); break;
   }
 
-  CustomerAI->StartNegotiation();
   DialogueSystem->ResetDialogue();
 }
 
@@ -128,8 +127,11 @@ FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
 }
 
 void UNegotiationSystem::PlayerReadRequest() {
+  CustomerAI->StartNegotiation();
+
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerReadRequest);
 }
+void UNegotiationSystem::PlayerLeaveRequest() { CustomerAI->LeaveRequestDialogue(); }
 
 // todo-low: Support multiple items.
 void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _FromInventory) {
@@ -205,17 +207,15 @@ void UNegotiationSystem::NegotiationSuccess() {
     for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->AddItem(NegotiatedItem);
   }
 
-  CustomerAI->PostNegotiation();
   if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, true);
 }
 
 void UNegotiationSystem::NegotiationFailure() {
-  CustomerAI->PostNegotiation();
   if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, false);
 }
 
 void UNegotiationSystem::NegotiationComplete() {
-  if (CustomerAI->CustomerState == ECustomerState::LeavingTalking) CustomerAI->LeavePostNegotiationDialogue();
+  CustomerAI->PostNegotiation();
 
   NegotiationState = ENegotiationState::None;
 

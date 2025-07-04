@@ -42,7 +42,7 @@ void UNegotiationViewWidget::ShowItem(UItemBase* Item) {
   if (NegotiationSystem->CustomerOfferResponse.Accepted)
     PriceNegotiationWidget->InitUI(
         InUIInputActions, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
-        [this]() { Reject(); });
+        [this]() { RejectLeave(); });
   RefreshUI();
 }
 
@@ -54,7 +54,18 @@ void UNegotiationViewWidget::OfferAccept(float Price) {
   RefreshUI();
 }
 
-void UNegotiationViewWidget::Reject() {
+void UNegotiationViewWidget::RejectLeave() {
+  // Allow closing without rejecting.
+  if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
+      NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest) {
+    NegotiationSystem->PlayerLeaveRequest();
+    return CloseWidgetFunc();
+  }
+
+  if (NegotiationSystem->NegotiationState == ENegotiationState::Accepted ||
+      NegotiationSystem->NegotiationState == ENegotiationState::Rejected)
+    return RefreshUI();
+
   NegotiationSystem->RejectOffer();
   RefreshUI();
 }
@@ -138,11 +149,11 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   if (NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
     NegotiationShowItemWidget->InitUI(
         InUIInputActions, Store, _MarketEconomy, PlayerInventoryC, NegotiationSystem,
-        [this](UItemBase* Item) { ShowItem(Item); }, [this]() { Reject(); });
+        [this](UItemBase* Item) { ShowItem(Item); }, [this]() { RejectLeave(); });
   else
     PriceNegotiationWidget->InitUI(
         InUIInputActions, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
-        [this]() { Reject(); });
+        [this]() { RejectLeave(); });
 
   DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() {
     if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
@@ -185,7 +196,7 @@ void UNegotiationViewWidget::SetupUIActionable() {
     if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.CycleRight();
   };
   UIActionable.RetractUI = [this]() {
-    if (DialogueWidget->IsVisible()) Reject();
+    if (DialogueWidget->IsVisible()) RejectLeave();
     else if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.RetractUI();
     else if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.RetractUI();
   };

@@ -294,9 +294,6 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         CustomersToRemove.Add(Customer);
         break;
       }
-      case (ECustomerState::LeavingTalking): {
-        break;
-      }
       case (ECustomerState::PerformingQuest): {
         break;
       }

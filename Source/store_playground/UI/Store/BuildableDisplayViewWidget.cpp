@@ -12,7 +12,11 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
-void UBuildableDisplayViewWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
+void UBuildableDisplayViewWidget::NativeOnInitialized() {
+  Super::NativeOnInitialized();
+
+  SetupUIActionable();
+}
 
 void UBuildableDisplayViewWidget::RefreshUI() { BuildableDisplayWidget->RefreshUI(); }
 
@@ -22,5 +26,12 @@ void UBuildableDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                          std::function<void()> _CloseWidgetFunc) {
   check(Buildable && _Store && _CloseWidgetFunc);
 
-  BuildableDisplayWidget->InitUI(Buildable, _Store, _CloseWidgetFunc);
+  BuildableDisplayWidget->InitUI(InUIInputActions, Buildable, _Store, _CloseWidgetFunc);
+
+  CloseWidgetFunc = _CloseWidgetFunc;
+}
+
+void UBuildableDisplayViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { BuildableDisplayWidget->BuildStockDisplay(); };
+  UIActionable.RetractUI = [this]() { CloseWidgetFunc(); };
 }
