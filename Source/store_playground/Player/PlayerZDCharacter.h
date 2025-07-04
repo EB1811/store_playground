@@ -203,9 +203,12 @@ public:
   void EnterAbilitySelect();
   void EnterMiniGame(class UMiniGameComponent* MiniGameC);
 
-  void EnterDialogue(class UDialogueComponent* DialogueC, std::function<void()> OnDialogueEndFunc = nullptr);
+  void EnterDialogue(class UDialogueComponent* DialogueC,
+                     std::function<void()> OnDialogueCloseFunc = nullptr,
+                     std::function<void()> OnDialogueFinishFunc = nullptr);
   void EnterDialogue(const TArray<struct FDialogueData> DialogueDataArr,
-                     std::function<void()> OnDialogueEndFunc = nullptr,
+                     std::function<void()> OnDialogueCloseFunc = nullptr,
+                     std::function<void()> OnDialogueFinishFunc = nullptr,
                      const FString& _SpeakerName = "NPC");
   void EnterNegotiation(class UCustomerAIComponent* CustomerAI,
                         class UItemBase* Item = nullptr,

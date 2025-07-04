@@ -40,10 +40,13 @@ void UDialogueWidget::Next() {
     return;
 
   FNextDialogueRes NextDialogue = DialogueSystem->NextDialogue();
-  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc();
+  if (NextDialogue.State == EDialogueState::End) {
+    CloseDialogueFunc();
+    if (FinishDialogueFunc) FinishDialogueFunc();
+    return;
+  }
 
   check(NextDialogue.DialogueData);
-
   switch (NextDialogue.State) {
     case EDialogueState::PlayerChoice: {
       FString SpeakerName = GetSpeakerName(DialogueSystem);
@@ -75,7 +78,11 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
     return;
 
   FNextDialogueRes NextDialogue = DialogueSystem->DialogueChoice(ChoiceIndex);
-  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc();
+  if (NextDialogue.State == EDialogueState::End) {
+    CloseDialogueFunc();
+    if (FinishDialogueFunc) FinishDialogueFunc();
+    return;
+  }
 
   check(NextDialogue.DialogueData);
 
@@ -89,10 +96,12 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
 
 void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
                              UDialogueSystem* _DialogueSystem,
-                             std::function<void()> _CloseDialogueFunc) {
+                             std::function<void()> _CloseDialogueFunc,
+                             std::function<void()> _FinishDialogueFunc) {
   check(_DialogueSystem && _CloseDialogueFunc);
 
   DialogueSystem = _DialogueSystem;
+  FinishDialogueFunc = _FinishDialogueFunc;
   CloseDialogueFunc = _CloseDialogueFunc;
 
   ControlsHelpersWidget->SetComponentUI({
@@ -100,7 +109,11 @@ void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
       {FText::FromString("Next"), InUIInputActions.AdvanceUIAction},
   });
 
-  if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueFunc();
+  if (DialogueSystem->DialogueState == EDialogueState::End) {
+    CloseDialogueFunc();
+    if (FinishDialogueFunc) FinishDialogueFunc();
+    return;
+  }
 
   DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
 
@@ -116,6 +129,8 @@ void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
 void UDialogueWidget::SetupUIActionable() {
   UIActionable.AdvanceUI = [this]() { Next(); };
   UIActionable.NumericInput = [this](float Value) { SelectChoice(FMath::RoundToInt(Value) - 1); };
+  UIActionable.RetractUI = [this]() { CloseDialogueFunc(); };
+  UIActionable.QuitUI = [this]() { CloseDialogueFunc(); };
 }
 void UDialogueWidget::SetupUIBehaviour() {
   UIBehaviour.ShowUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Visible); };

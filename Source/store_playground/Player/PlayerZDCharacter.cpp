@@ -429,12 +429,13 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     }
     case EInteractionType::NpcStore: {
       auto [NpcStoreC, StoreInventory, DialogueC] = Interactable->InteractNpcStore();
-      EnterDialogue(DialogueC, [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
+      EnterDialogue(DialogueC, nullptr,
+                    [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
       break;
     }
     case EInteractionType::MiniGame: {
       auto [MiniGameC, DialogueC] = Interactable->InteractMiniGame();
-      EnterDialogue(DialogueC, [this, MiniGameC]() { EnterMiniGame(MiniGameC); });
+      EnterDialogue(DialogueC, nullptr, [this, MiniGameC]() { EnterMiniGame(MiniGameC); });
       break;
     }
     default: checkNoEntry();
@@ -466,31 +467,36 @@ void APlayerZDCharacter::EnterNpcStore(UNpcStoreComponent* NpcStoreC, UInventory
   HUD->SetAndOpenNPCStore(NpcStoreC, StoreInventoryC, PlayerInventoryComponent);
 }
 
-void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC, std::function<void()> OnDialogueEndFunc) {
+void APlayerZDCharacter::EnterDialogue(UDialogueComponent* DialogueC,
+                                       std::function<void()> OnDialogueCloseFunc,
+                                       std::function<void()> OnDialogueFinishFunc) {
   if (DialogueC->DialogueArray.Num() == 0) {
-    if (OnDialogueEndFunc) return OnDialogueEndFunc();
+    if (OnDialogueCloseFunc) OnDialogueCloseFunc();
+    if (OnDialogueFinishFunc) OnDialogueFinishFunc();
     return;
   }
 
   DialogueSystem->StartDialogue(DialogueC);
-  HUD->SetAndOpenDialogue(DialogueSystem, [this, DialogueC, OnDialogueEndFunc]() {
-    // ? Call in dialogue system?
+  HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueCloseFunc, [this, DialogueC, OnDialogueFinishFunc]() {
+    // TODO: Call in dialogue system.
     DialogueC->FinishReadingDialogueChain();
 
-    if (OnDialogueEndFunc) OnDialogueEndFunc();
+    if (OnDialogueFinishFunc) OnDialogueFinishFunc();
   });
 }
 // For dialogue outside of the dialogue component (cutscenes, etc.).
 void APlayerZDCharacter::EnterDialogue(const TArray<FDialogueData> DialogueDataArr,
-                                       std::function<void()> OnDialogueEndFunc,
+                                       std::function<void()> OnDialogueCloseFunc,
+                                       std::function<void()> OnDialogueFinishFunc,
                                        const FString& _SpeakerName) {
   if (DialogueDataArr.Num() == 0) {
-    if (OnDialogueEndFunc) return OnDialogueEndFunc();
+    if (OnDialogueCloseFunc) OnDialogueCloseFunc();
+    if (OnDialogueFinishFunc) OnDialogueFinishFunc();
     return;
   }
 
   DialogueSystem->StartDialogue(DialogueDataArr, _SpeakerName);
-  HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueEndFunc);
+  HUD->SetAndOpenDialogue(DialogueSystem, OnDialogueCloseFunc, OnDialogueFinishFunc);
 }
 
 void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
@@ -509,7 +515,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UItemBase* Item) {
   // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
-    return EnterDialogue(DialogueC, [this, QuestC, SpriteAnimC, CustomerAI]() {
+    return EnterDialogue(DialogueC, nullptr, [this, QuestC, SpriteAnimC, CustomerAI]() {
       QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
       SpriteAnimC->ReturnToOgRotation();
     });
@@ -520,10 +526,10 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::SellItem:
       check(CustomerAI->NegotiationAI->RelevantItem);
       if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
-        EnterDialogue(DialogueC,
+        EnterDialogue(DialogueC, nullptr,
                       [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
-        EnterDialogue(DialogueC, [this, QuestC, CustomerAI, Item]() {
+        EnterDialogue(DialogueC, nullptr, [this, QuestC, CustomerAI, Item]() {
           QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
           EnterNegotiation(CustomerAI, Item);
         });
@@ -531,7 +537,7 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::Leave:
     case ECustomerAction::None:
       if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
-      EnterDialogue(DialogueC, [this, QuestC, CustomerAI]() {
+      EnterDialogue(DialogueC, nullptr, [this, QuestC, CustomerAI]() {
         QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
         CustomerAI->CustomerState = ECustomerState::Leaving;
       });

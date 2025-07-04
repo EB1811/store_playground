@@ -106,18 +106,6 @@ public:
   void OpenFocusedMenu(class UUserWidget* Widget);  // * Open a menu in the focused state (dialogue, negotiation, etc.).
 
   UPROPERTY(EditAnywhere)
-  class UInGameHudWidget* InGameHudWidget;
-  UPROPERTY(EditAnywhere)
-  bool bShowingHud;
-  void ShowInGameHudWidget();
-  void HideInGameHudWidget();
-
-  UPROPERTY()
-  class UPauseMenuViewWidget* PauseMenuViewWidget;
-  UFUNCTION(BlueprintCallable)
-  void OpenPauseMenuView();
-
-  UPROPERTY(EditAnywhere)
   TArray<class UUserWidget*> OpenedWidgets;
   UFUNCTION(BlueprintCallable)
   void PlayerCloseTopOpenMenu();
@@ -138,6 +126,18 @@ public:
   void UISideButton4Action();
   void UICycleLeftAction();
   void UICycleRightAction();
+
+  UPROPERTY(EditAnywhere)
+  class UInGameHudWidget* InGameHudWidget;
+  UPROPERTY(EditAnywhere)
+  bool bShowingHud;
+  void ShowInGameHudWidget();
+  void HideInGameHudWidget();
+
+  UPROPERTY()
+  class UPauseMenuViewWidget* PauseMenuViewWidget;
+  UFUNCTION(BlueprintCallable)
+  void OpenPauseMenuView();
 
   UPROPERTY()
   class UInteractionDisplayWidget* InteractionPopupWidget;
@@ -179,7 +179,9 @@ public:
 
   UPROPERTY()
   class UDialogueWidget* DialogueWidget;
-  void SetAndOpenDialogue(class UDialogueSystem* Dialogue, std::function<void()> OnDialogueEndFunc = nullptr);
+  void SetAndOpenDialogue(class UDialogueSystem* Dialogue,
+                          std::function<void()> OnDialogueCloseFunc = nullptr,
+                          std::function<void()> OnDialogueFinishFunc = nullptr);
 
   UPROPERTY()
   class UNegotiationViewWidget* NegotiationViewWidget;

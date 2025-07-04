@@ -38,7 +38,8 @@ public:
 
   void InitUI(FInUIInputActions InUIInputActions,
               class UDialogueSystem* _DialogueSystem,
-              std::function<void()> _CloseDialogueFunc);
+              std::function<void()> _CloseDialogueFunc,
+              std::function<void()> _FinishDialogueFunc = nullptr);
 
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
@@ -50,5 +51,6 @@ public:
   UFUNCTION(BlueprintImplementableEvent)
   void OnVisibilityChangeRequested(ESlateVisibility NewVisibility);
 
+  std::function<void()> FinishDialogueFunc;
   std::function<void()> CloseDialogueFunc;
 };
