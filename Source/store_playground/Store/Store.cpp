@@ -68,6 +68,9 @@ void AStore::StockItemSold(const UItemBase* Item) {
 }
 
 void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
+  checkf((Price * Quantity) <= Money,
+         TEXT("Caller should handle the case when Price is greater than available Money."));
+
   Item->PriceData.BoughtAt = Price;
 
   Money -= Price * Quantity;

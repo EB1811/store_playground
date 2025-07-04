@@ -1,6 +1,7 @@
 #include "PriceNegotiationWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
+#include "store_playground/UI/Components/ControlsHelpersWidget.h"
 #include "store_playground/UI/Negotiation/PriceSliderWidget.h"
 #include "store_playground/UI/Inventory/CompactItemDetailsWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationSkillsWidget.h"
@@ -22,7 +23,20 @@
 #include "Misc/AssertionMacros.h"
 #include "Widgets/Notifications/SProgressBar.h"
 
-void UPriceNegotiationWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
+void UPriceNegotiationWidget::NativeOnInitialized() {
+  Super::NativeOnInitialized();
+
+  SetupUIActionable();
+}
+
+void UPriceNegotiationWidget::OfferAcceptPrice() {
+  float Price = PriceSliderWidget->PlayerPriceSlider->GetValue();
+  check(Price >= 0.0f);
+
+  if (NegotiationSystem->Type == NegotiationType::PlayerBuy && Price > Store->Money) return;
+
+  OfferAcceptFunc(Price);
+}
 
 void UPriceNegotiationWidget::RefreshUI() {
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
@@ -35,11 +49,17 @@ void UPriceNegotiationWidget::RefreshUI() {
   PriceSliderWidget->UpdateNegotiationPrices(PlayerPrice, NpcPrice);
 }
 
-void UPriceNegotiationWidget::InitUI(const AStore* _Store, UNegotiationSystem* _NegotiationSystem) {
-  check(_Store && _NegotiationSystem);
+void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
+                                     const AStore* _Store,
+                                     UNegotiationSystem* _NegotiationSystem,
+                                     std::function<void(float)> _OfferAcceptFunc,
+                                     std::function<void()> _RejectFunc) {
+  check(_Store && _NegotiationSystem && _OfferAcceptFunc && _RejectFunc);
 
   Store = _Store;
   NegotiationSystem = _NegotiationSystem;
+  OfferAcceptFunc = _OfferAcceptFunc;
+  RejectFunc = _RejectFunc;
 
   check(NegotiationSystem->NegotiatedItems.Num() > 0);
 
@@ -53,4 +73,15 @@ void UPriceNegotiationWidget::InitUI(const AStore* _Store, UNegotiationSystem* _
   PriceSliderWidget->InitUI(NegotiationSystem->Type, NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice, BoughtAtPrice);
 
   CompactItemDetailsWidget->InitUI(NegotiationSystem->NegotiatedItems[0], "Bought At:", MarketPrice, BoughtAtPrice);
+
+  ControlsHelpersWidget->SetComponentUI({
+      {FText::FromString("Leave / Reject"), InUIInputActions.RetractUIAction},
+      {FText::FromString("Offer / Accept"), InUIInputActions.AdvanceUIAction},
+  });
+}
+
+void UPriceNegotiationWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { OfferAcceptPrice(); };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) { PriceSliderWidget->ChangePrice(Direction.X); };
+  UIActionable.RetractUI = [this]() { RejectFunc(); };
 }

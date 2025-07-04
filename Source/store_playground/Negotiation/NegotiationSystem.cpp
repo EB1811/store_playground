@@ -20,10 +20,12 @@ UNegotiationSystem::UNegotiationSystem() {
 
       FNStateAction{ENegotiationState::NpcRequest, ENegotiationAction::PlayerReadRequest,
                     ENegotiationState::PlayerConsider},
+      FNStateAction{ENegotiationState::NpcRequest, ENegotiationAction::Reject, ENegotiationState::Rejected},
 
       // * Alternatively, stock check.
       FNStateAction{ENegotiationState::NpcStockCheckRequest, ENegotiationAction::PlayerReadRequest,
                     ENegotiationState::PlayerStockCheck},
+      FNStateAction{ENegotiationState::NpcStockCheckRequest, ENegotiationAction::Reject, ENegotiationState::Rejected},
 
       FNStateAction{ENegotiationState::PlayerStockCheck, ENegotiationAction::PlayerShowItem,
                     ENegotiationState::NpcStockCheckConsider},
@@ -136,7 +138,7 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
 
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
-  CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item);
+  CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item, MarketPrice);
   if (!CustomerOfferResponse.Accepted) return;
 
   NegotiatedItems.Empty();

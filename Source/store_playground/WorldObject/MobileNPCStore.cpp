@@ -11,6 +11,8 @@ AMobileNPCStore::AMobileNPCStore() {
   SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
   SetRootComponent(SceneRoot);
 
+  NpcStoreId = FGuid::NewGuid();
+
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetupAttachment(SceneRoot);
   Mesh->SetSimulatePhysics(true);

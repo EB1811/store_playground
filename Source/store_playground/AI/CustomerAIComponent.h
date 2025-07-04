@@ -38,7 +38,7 @@ public:
                              FActorComponentTickFunction* ThisTickFunction) override;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
-  FGuid CustomerID;
+  FGuid CustomerAIID;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   FText CustomerName;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
@@ -47,7 +47,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   TArray<EItemEconType> ItemEconTypes;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
-  float MoneyToSpend;
+  float AvailableMoney;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerAttitude Attitude;
 

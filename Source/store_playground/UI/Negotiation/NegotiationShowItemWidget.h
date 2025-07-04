@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "NegotiationShowItemWidget.generated.h"
 
 UCLASS()
@@ -49,12 +51,17 @@ public:
   void Reject();
 
   void RefreshUI();
-  void InitUI(const class AStore* _Store,
+  void InitUI(FInUIInputActions InUIInputActions,
+              const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
               class UInventoryComponent* _InventoryC,
               class UNegotiationSystem* _NegotiationSystem,
               std::function<void(class UItemBase*)> _ShowFunc,
               std::function<void()> _RejectFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void(class UItemBase*)> ShowFunc;
   std::function<void()> RejectFunc;

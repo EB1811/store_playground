@@ -15,20 +15,16 @@
 UCustomerAIComponent::UCustomerAIComponent() {
   PrimaryComponentTick.bCanEverTick = false;
   PrimaryComponentTick.TickInterval = 5.0f;
-
-  if (!CustomerID.IsValid()) CustomerID = FGuid::NewGuid();
-  CustomerType = ECustomerType::Generic;
 }
-
 void UCustomerAIComponent::BeginPlay() {
   Super::BeginPlay();
 
+  CustomerAIID = FGuid::NewGuid();
   NegotiationAI = NewObject<UNegotiationAI>(this);
   Attitude = ECustomerAttitude::Neutral;
   CustomerState = ECustomerState::Browsing;
   CustomerAction = ECustomerAction::None;
 }
-
 void UCustomerAIComponent::TickComponent(float DeltaTime,
                                          ELevelTick TickType,
                                          FActorComponentTickFunction* ThisTickFunction) {

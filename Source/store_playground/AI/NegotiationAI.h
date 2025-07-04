@@ -53,6 +53,8 @@ public:
   FWantedItemType WantedItemType;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  float MoneyToSpend;
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float AcceptancePercentage;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float MaxHagglingCount;
@@ -61,5 +63,5 @@ public:
                                float MarketPrice,
                                float LastOfferedPrice,
                                float PlayerOfferedPrices) const;
-  FOfferResponse ConsiderStockCheck(const class UItemBase* Item) const;
+  FOfferResponse ConsiderStockCheck(const class UItemBase* Item, float MarketPrice) const;
 };

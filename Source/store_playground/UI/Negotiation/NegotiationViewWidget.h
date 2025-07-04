@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "NegotiationViewWidget.generated.h"
 
 UCLASS()
@@ -20,13 +21,6 @@ public:
   class UPriceNegotiationWidget* PriceNegotiationWidget;
   UPROPERTY(meta = (BindWidget))
   class UNegotiationShowItemWidget* NegotiationShowItemWidget;
-  UPROPERTY(meta = (BindWidget))
-  class UControlsHelpersWidget* ControlsHelpersWidget;  // TODO: Move to each widget or handle visibility.
-  // Temp
-  UPROPERTY(meta = (BindWidget))
-  class UControlMenuButtonWidget* OfferAcceptButton;
-  UPROPERTY(meta = (BindWidget))
-  class UControlMenuButtonWidget* RejectButton;
 
   UPROPERTY(EditAnywhere)
   FInUIInputActions InUIInputActions;
@@ -42,14 +36,8 @@ public:
   class UDialogueSystem* DialogueSystem;
 
   void ShowItem(class UItemBase* Item);
-  void OfferAccept();
+  void OfferAccept(float Price);
   void Reject();
-
-  // Temp
-  UFUNCTION()
-  void OfferAcceptClicked();
-  UFUNCTION()
-  void RejectClicked();
 
   void RefreshUI();
   void InitUI(FInUIInputActions _InUIInputActions,
@@ -59,6 +47,10 @@ public:
               class UNegotiationSystem* _NegotiationSystem,
               class UDialogueSystem* _DialogueSystem,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> CloseWidgetFunc;
 };

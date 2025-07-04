@@ -29,25 +29,24 @@
 void UNegotiationViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
-  OfferAcceptButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationViewWidget::OfferAcceptClicked);
-  RejectButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationViewWidget::RejectClicked);
-
   DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
   PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
   NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
+
+  SetupUIActionable();
 }
 
 void UNegotiationViewWidget::ShowItem(UItemBase* Item) {
   NegotiationSystem->PlayerShowItem(Item, PlayerInventoryC);
 
-  if (NegotiationSystem->CustomerOfferResponse.Accepted) PriceNegotiationWidget->InitUI(Store, NegotiationSystem);
+  if (NegotiationSystem->CustomerOfferResponse.Accepted)
+    PriceNegotiationWidget->InitUI(
+        InUIInputActions, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
+        [this]() { Reject(); });
   RefreshUI();
 }
 
-void UNegotiationViewWidget::OfferAccept() {
-  float Price = PriceNegotiationWidget->PriceSliderWidget->PlayerPriceSlider->GetValue();
-  check(Price >= 0.0f);
-
+void UNegotiationViewWidget::OfferAccept(float Price) {
   // if (Price == NegotiationSystem->OfferedPrice) NegotiationSystem->AcceptOffer();
   // else NegotiationSystem->OfferPrice(Price);
   NegotiationSystem->OfferPrice(Price);
@@ -60,14 +59,7 @@ void UNegotiationViewWidget::Reject() {
   RefreshUI();
 }
 
-// Temp
-void UNegotiationViewWidget::OfferAcceptClicked() { OfferAccept(); }
-void UNegotiationViewWidget::RejectClicked() { Reject(); }
-
 void UNegotiationViewWidget::RefreshUI() {
-  OfferAcceptButton->SetVisibility(ESlateVisibility::Hidden);
-  RejectButton->SetVisibility(ESlateVisibility::Hidden);
-
   // * When on npc consider states, advance the state machine.
   // * But first, show the dialogue.
   switch (NegotiationSystem->NegotiationState) {
@@ -96,9 +88,6 @@ void UNegotiationViewWidget::RefreshUI() {
     }
     case ENegotiationState::PlayerConsider: {
       PriceNegotiationWidget->RefreshUI();
-
-      OfferAcceptButton->SetVisibility(ESlateVisibility::Visible);
-      RejectButton->SetVisibility(ESlateVisibility::Visible);
 
       DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Visible);
@@ -139,15 +128,6 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   PlayerInventoryC = _PlayerInventoryC;
   NegotiationSystem = _NegotiationSystem;
   DialogueSystem = _DialogueSystem;
-
-  ControlsHelpersWidget->SetComponentUI({
-      {FText::FromString("Leave / Reject"), InUIInputActions.RetractUIAction},
-      {FText::FromString("Offer / Accept"), InUIInputActions.AdvanceUIAction},
-  });
-
-  OfferAcceptButton->ActionText->SetText(FText::FromString("Offer / Accept"));
-  RejectButton->ActionText->SetText(FText::FromString("Reject"));
-
   CloseWidgetFunc = _CloseWidgetFunc;
 
   // * Set initial state.
@@ -157,9 +137,12 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   // When starting with a stock check, there is no item to negotiate on.
   if (NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
     NegotiationShowItemWidget->InitUI(
-        Store, _MarketEconomy, PlayerInventoryC, NegotiationSystem, [this](UItemBase* Item) { ShowItem(Item); },
+        InUIInputActions, Store, _MarketEconomy, PlayerInventoryC, NegotiationSystem,
+        [this](UItemBase* Item) { ShowItem(Item); }, [this]() { Reject(); });
+  else
+    PriceNegotiationWidget->InitUI(
+        InUIInputActions, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
         [this]() { Reject(); });
-  else PriceNegotiationWidget->InitUI(Store, NegotiationSystem);
 
   DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() {
     if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
@@ -171,4 +154,40 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   DialogueWidget->SetVisibility(ESlateVisibility::Visible);
   PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
   NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UNegotiationViewWidget::SetupUIActionable() {
+  // Reroutes inputs to needed widget, using visibility as proxy for state.
+  // ? Store current visible widget?
+  UIActionable.AdvanceUI = [this]() {
+    if (DialogueWidget->IsVisible()) DialogueWidget->UIActionable.AdvanceUI();
+    else if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.AdvanceUI();
+    else if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.AdvanceUI();
+  };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.DirectionalInput(Direction);
+    else if (NegotiationShowItemWidget->IsVisible())
+      NegotiationShowItemWidget->UIActionable.DirectionalInput(Direction);
+  };
+  UIActionable.SideButton1 = [this]() {
+    if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.SideButton1();
+  };
+  UIActionable.SideButton2 = [this]() {
+    if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.SideButton2();
+  };
+  UIActionable.SideButton4 = [this]() {
+    if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.SideButton4();
+  };
+  UIActionable.CycleLeft = [this]() {
+    if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.CycleLeft();
+  };
+  UIActionable.CycleRight = [this]() {
+    if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.CycleRight();
+  };
+  UIActionable.RetractUI = [this]() {
+    if (DialogueWidget->IsVisible()) Reject();
+    else if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.RetractUI();
+    else if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.RetractUI();
+  };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

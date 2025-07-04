@@ -26,6 +26,8 @@ void UNegotiationShowItemWidget::NativeOnInitialized() {
   SortByNameButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::SortByName);
   ShowButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::Show);
   RejectButton->ControlButton->OnClicked.AddDynamic(this, &UNegotiationShowItemWidget::Reject);
+
+  SetupUIActionable();
 }
 
 void UNegotiationShowItemWidget::SortByPrice() {
@@ -63,7 +65,8 @@ void UNegotiationShowItemWidget::RefreshUI() {
   ItemsWidget->RefreshUI();
 }
 
-void UNegotiationShowItemWidget::InitUI(const class AStore* _Store,
+void UNegotiationShowItemWidget::InitUI(FInUIInputActions InUIInputActions,
+                                        const class AStore* _Store,
                                         const class AMarketEconomy* _MarketEconomy,
                                         class UInventoryComponent* _InventoryC,
                                         class UNegotiationSystem* _NegotiationSystem,
@@ -108,10 +111,24 @@ void UNegotiationShowItemWidget::InitUI(const class AStore* _Store,
                       "Bought At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
 
   SortByPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
+  SortByPriceButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton1Action);
   SortByNameButton->ActionText->SetText(FText::FromString("Sort - Name"));
+  SortByNameButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton2Action);
   ShowButton->ActionText->SetText(FText::FromString("Show Item"));
+  ShowButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
   RejectButton->ActionText->SetText(FText::FromString("Reject"));
+  RejectButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
 
   ShowFunc = _ShowFunc;
   RejectFunc = _RejectFunc;
+}
+
+void UNegotiationShowItemWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Show(); };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) { ItemsWidget->SelectNextItem(Direction); };
+  UIActionable.SideButton1 = [this]() { SortByPrice(); };
+  UIActionable.SideButton2 = [this]() { SortByName(); };
+  UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
+  UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
+  UIActionable.RetractUI = [this]() { Reject(); };
 }

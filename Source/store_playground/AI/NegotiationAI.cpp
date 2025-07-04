@@ -41,8 +41,10 @@ FOfferResponse UNegotiationAI::ConsiderOffer(bool NpcBuying,
           CustomerName};
 }
 
-FOfferResponse UNegotiationAI::ConsiderStockCheck(const UItemBase* Item) const {
-  if (Item->ItemType == WantedItemType.ItemType && Item->ItemEconType == WantedItemType.ItemEconType)
+FOfferResponse UNegotiationAI::ConsiderStockCheck(const UItemBase* Item, float MarketPrice) const {
+  // TODO: Check ai available money.
+  if (Item->ItemType == WantedItemType.ItemType && Item->ItemEconType == WantedItemType.ItemEconType &&
+      MarketPrice <= MoneyToSpend)
     return {true, 0, DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues, CustomerName};
 
   return {false, 0, DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues, CustomerName};

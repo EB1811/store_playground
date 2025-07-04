@@ -28,6 +28,13 @@ void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
                           PlayerPriceText->GetDesiredSize().Y / 2.0f));
 }
 
+void UPriceSliderWidget::ChangePrice(float Direction) {
+  float NewValue = FMath::Clamp(PlayerPriceSlider->GetValue() + (-1 * Direction) * PlayerPriceSlider->GetStepSize(),
+                                PlayerPriceSlider->GetMinValue(), PlayerPriceSlider->GetMaxValue());
+  PlayerPriceSlider->SetValue(NewValue);
+  UpdatePlayerPriceText(PlayerPriceSlider->GetValue());
+}
+
 void UPriceSliderWidget::UpdateNegotiationPrices(float PlayerPrice, float NpcPrice) {
   PlayerPriceSlider->SetValue(PlayerPrice);
   NPCPriceSlider->SetValue(NpcPrice);
@@ -68,11 +75,11 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
     default: checkNoEntry()
   }
 
-  float StepSize = FMath::RoundToInt(MarketPrice * 0.01f);
+  float StepSize = FMath::Max(FMath::RoundToInt(MarketPrice * 0.002f), 1.0f);
   float MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
   float MinValue = MarketPrice / (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
 
-  UE_LOG(LogTemp, Warning,
+  UE_LOG(LogTemp, Log,
          TEXT("PriceSliderWidget::InitUI: Type: %s, NpcAcceptance: %.2f, MarketPrice: %.2f, "
               "PlayerPrice: %.2f, NpcPrice: %.2f, BoughtAtPrice: %.2f"),
          *UEnum::GetDisplayValueAsText(Type).ToString(), NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice,

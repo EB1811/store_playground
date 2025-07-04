@@ -143,7 +143,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
       [UniqueNpcData](const FPopEconData& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
   check(CustomerPopData && PopEconData);
   UniqueCustomer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
-  UniqueCustomer->CustomerAIComponent->MoneyToSpend = PopEconData->Money / PopEconData->Population;
+  UniqueCustomer->CustomerAIComponent->AvailableMoney = PopEconData->Money / PopEconData->Population;
 
   AllCustomers.Add(UniqueCustomer);
 
@@ -243,7 +243,7 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
     Customer->CustomerAIComponent->CustomerType = ECustomerType::Generic;
     Customer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
-    Customer->CustomerAIComponent->MoneyToSpend = PopMoneySpendData->Money / PopMoneySpendData->Population;
+    Customer->CustomerAIComponent->AvailableMoney = PopMoneySpendData->Money / PopMoneySpendData->Population;
     Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
@@ -308,7 +308,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     AllCustomers.RemoveSingleSwap(Customer);
 
     // ? Call function somewhere to remove the picked item on successful negotiation?
-    if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerID))
+    if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
       PickingItemIdsMap.Remove(*ItemID);
 
     if (Customer->CustomerAIComponent->NegotiationAI) {
@@ -368,7 +368,7 @@ void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
       if (CustomerStockCheck(Customer->CustomerAIComponent)) MakeCustomerNegotiable(Customer);
       break;
     case (ECustomerAction::SellItem):
-      CustomerSellItem(Customer->CustomerAIComponent);
+      CustomerSellItem(Customer->CustomerAIComponent);  // TODO: Add boolean to check if item price is valid.
       MakeCustomerNegotiable(Customer);
       break;
     case (ECustomerAction::Leave): {
@@ -389,7 +389,7 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
   auto RelevantItems = FilterFunc ? NonPickedItems.FilterByPredicate(FilterFunc)
                                   : NonPickedItems.FilterByPredicate([CustomerAI](const FStockItem& StockItem) {
                                       return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
-                                             CustomerAI->MoneyToSpend >= StockItem.Item->PriceData.BoughtAt;
+                                             CustomerAI->AvailableMoney >= StockItem.Item->PriceData.BoughtAt;
                                     });
   if (RelevantItems.Num() <= 0) return false;
 
@@ -400,7 +400,7 @@ bool ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
   CustomerAI->NegotiationAI->RelevantItem = StockItem.Item;
   CustomerAI->NegotiationAI->StockDisplayInventory = StockItem.BelongingStockInventoryC;
 
-  PickingItemIdsMap.Add(StockItem.Item->UniqueItemID, CustomerAI->CustomerID);
+  PickingItemIdsMap.Add(StockItem.Item->UniqueItemID, CustomerAI->CustomerAIID);
   return true;
 }
 
@@ -442,6 +442,7 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
 
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 
+  CustomerAI->NegotiationAI->MoneyToSpend = CustomerAI->AvailableMoney;
   float AcceptanceMin = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 0.05f
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.00f
                                                                              : 0.05f;

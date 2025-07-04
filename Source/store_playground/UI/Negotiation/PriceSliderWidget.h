@@ -61,6 +61,7 @@ public:
   UFUNCTION()
   void UpdatePlayerPriceText(float Value);
 
+  void ChangePrice(float Direction);
   void UpdateNegotiationPrices(float PlayerPrice, float NpcPrice);
 
   // ? Turn into a struct?
