@@ -3,8 +3,8 @@
 		"Name": "farmer01",
 		"CustomerID": "c_farmer01",
 		"LinkedPopID": "cpc1",
-		"CustomerName": "Farmer",
-		"LinkedPopName": "Farmer",
+		"CustomerName": "NSLOCTEXT(\"DT_CustomerData [0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"farmer01_CustomerName\", \"Farmer\")",
+		"LinkedPopName": "NSLOCTEXT(\"DT_CustomerData [0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"farmer01_LinkedPopName\", \"Farmer\")",
 		"InitAttitude": "Neutral",
 		"AssetData":
 		{
@@ -23,6 +23,22 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Walk_Left.FB_OldMan_Walk_Left'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Walk_Right.FB_OldMan_Walk_Right'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Dialogue.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Dialogue"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -49,6 +65,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Walk_Left.FB_Merc_Walk_Left'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Walk_Right.FB_Merc_Walk_Right'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -75,6 +96,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Walk_B.FB_C103_Walk_B'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Walk_C.FB_C103_Walk_C'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -101,6 +127,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Walk_B.FB_C118_Walk_B'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Walk_C.FB_C118_Walk_C'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -127,6 +158,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Walk_Left.FB_FemAristocrat_Walk_Left'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Walk_Right.FB_FemAristocrat_Walk_Right'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -153,6 +189,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Walk_B.FB_C132_Walk_B'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Walk_C.FB_C132_Walk_C'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -179,6 +220,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Walk_B.FB_C140_Walk_B'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Walk_C.FB_C140_Walk_C'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -205,6 +251,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Walk_B.FB_C139_Walk_B'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Walk_C.FB_C139_Walk_C'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -231,6 +282,11 @@
 				"Left": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Walk_B.FB_C121_Walk_B'",
 				"Right": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Walk_C.FB_C121_Walk_C'"
 			}
+		},
+		"Tags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	}
 ]

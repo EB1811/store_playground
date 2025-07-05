@@ -67,21 +67,21 @@ void AStore::StockItemSold(const UItemBase* Item) {
       [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
 }
 
-void AStore::ItemBought(UItemBase* Item, float Price, int32 Quantity) {
-  checkf((Price * Quantity) <= Money,
+void AStore::ItemBought(UItemBase* Item, float SingleUnitPrice, int32 Quantity) {
+  checkf((SingleUnitPrice * Quantity) <= Money,
          TEXT("Caller should handle the case when Price is greater than available Money."));
 
-  Item->PriceData.BoughtAt = Price;
+  Item->PlayerPriceData.BoughtAt = SingleUnitPrice;
 
-  Money -= Price * Quantity;
+  Money -= SingleUnitPrice * Quantity;
 
-  StatisticsGen->StoreMoneySpent(Price * Quantity);
+  StatisticsGen->StoreMoneySpent(SingleUnitPrice * Quantity);
 }
-void AStore::ItemSold(const UItemBase* Item, float Price, int32 Quantity) {
-  Money += Price * Quantity;
+void AStore::ItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quantity) {
+  Money += SingleUnitPrice * Quantity;
 
-  StatisticsGen->ItemDeal({Item->ItemID, Item->PriceData.BoughtAt, Price, Quantity});
-  StatisticsGen->StoreMoneyGained(Price * Quantity);
+  StatisticsGen->ItemDeal({Item->ItemID, Item->PlayerPriceData.BoughtAt, SingleUnitPrice, Quantity});
+  StatisticsGen->StoreMoneyGained(SingleUnitPrice * Quantity);
 }
 void AStore::MoneyGained(float Amount) {
   Money += Amount;

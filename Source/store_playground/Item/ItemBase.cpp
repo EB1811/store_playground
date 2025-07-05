@@ -17,7 +17,7 @@ UItemBase* UItemBase::CreateItemCopy() const {
   ItemCopy->TextData = TextData;
   ItemCopy->AssetData = AssetData;
   ItemCopy->FlavorData = FlavorData;
-  ItemCopy->PriceData = PriceData;
+  ItemCopy->PlayerPriceData = PlayerPriceData;
 
   return ItemCopy;
 }
@@ -29,5 +29,5 @@ void UItemBase::SetItemFromBase(const UItemBase* ItemBase) {
   TextData = ItemBase->TextData;
   AssetData = ItemBase->AssetData;
   FlavorData = ItemBase->FlavorData;
-  PriceData = ItemBase->PriceData;
+  PlayerPriceData = ItemBase->PlayerPriceData;
 }

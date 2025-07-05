@@ -1,6 +1,7 @@
 #include "MarketLevel.h"
 #include "Components/StaticMeshComponent.h"
 #include "Containers/Array.h"
+#include "GameplayTagContainer.h"
 #include "HAL/Platform.h"
 #include "Logging/LogVerbosity.h"
 #include "Math/UnrealMathUtility.h"
@@ -405,16 +406,34 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     Npc->DialogueComponent->SpeakerName = RandomNpcData.CustomerName;
 
     if (Market->TodaysEconEvents.Num() <= 0) {
-      Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue(
-          [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.IsEmpty(); });
+      Npc->DialogueComponent->DialogueArray =
+          GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
+            FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
+            if (!EventTags.IsEmpty()) return false;
+
+            FGameplayTagContainer NpcDialogueTags =
+                Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc.Dialogue"}));
+            if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
+
+            return true;
+          });
       continue;
     }
 
     const TArray<FEconEvent>& CatastrophicEvents = Market->TodaysEconEvents.FilterByPredicate(
         [](const auto& Event) { return Event.Severity == EEconEventSeverity::Catastrophic; });
     if (CatastrophicEvents.Num() > 0 && FMath::FRand() * 100 < LevelParams.CatastrophicReactionChance) {
-      Npc->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomMarketNpcDialogue(
-          [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAny(CatastrophicEvents[0].Tags); });
+      Npc->DialogueComponent->DialogueArray =
+          GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
+            FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
+            if (!EventTags.HasAny(CatastrophicEvents[0].Tags)) return false;
+
+            FGameplayTagContainer NpcDialogueTags =
+                Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc.Dialogue"}));
+            if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
+
+            return true;
+          });
       continue;
     }
     const FEconEvent& RandomEconEvent = GetWeightedRandomItem<FEconEvent>(
@@ -422,7 +441,13 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     // ? Use rolling or random dialogue component type?
     Npc->DialogueComponent->DialogueArray =
         GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
-          return Dialogue.DialogueTags.IsEmpty() || Dialogue.DialogueTags.HasAny(RandomEconEvent.Tags);
+          FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
+          if (!EventTags.IsEmpty() && !EventTags.HasAny(RandomEconEvent.Tags)) return false;
+
+          FGameplayTagContainer NpcDialogueTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc.Dialogue"}));
+          if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
+
+          return true;
         });
   }
 }

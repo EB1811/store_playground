@@ -11,8 +11,9 @@
 UENUM()
 enum class EInventoryType : uint8 {
   Container UMETA(DisplayName = "Container"),
-  Store UMETA(DisplayName = "Store"),                // Items are not removed.
-  StockDisplay UMETA(DisplayName = "StockDisplay"),  // Only single items.
+  Store UMETA(DisplayName = "Store"),                      // Items are not removed.
+  StockDisplay UMETA(DisplayName = "StockDisplay"),        // Only single items.
+  PlayerInventory UMETA(DisplayName = "PlayerInventory"),  // Item equality defined by BoughtAt price.
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -37,6 +38,10 @@ public:
   auto AddItem(const UItemBase* Item, int32 Quantity = 1) -> UItemBase*;
   void RemoveItem(const UItemBase* Item, int32 Quantity = 1);
 };
+
+auto AreItemsEqual(EInventoryType InventoryType, const UItemBase* Item1, const UItemBase* Item2) -> bool;
+
+auto CanTransferItem(const UInventoryComponent* To, const UItemBase* Item) -> bool;
 
 USTRUCT()
 struct FInventoryTransferRes {

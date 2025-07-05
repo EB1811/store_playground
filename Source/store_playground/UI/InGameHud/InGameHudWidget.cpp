@@ -13,17 +13,6 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void UInGameHudWidget::InitUI(FInGameInputActions InGameInputActions) {
-  ControlsHelpersWidget->SetComponentUI({
-      {FText::FromString("News"), InGameInputActions.OpenNewspaperAction},
-      {FText::FromString("Store"), InGameInputActions.OpenStoreViewAction},
-      {FText::FromString("Items"), InGameInputActions.OpenInventoryViewAction},
-      {FText::FromString("Build"), InGameInputActions.BuildModeAction},
-  });
-
-  NewsHudSlideWidget->InitUI(NewsGen);
-}
-
 void UInGameHudWidget::RefreshUI() {
   check(NewsGen && DayManager && StorePhaseManager && Store && LevelManager);
   UE_LOG(LogTemp, Warning, TEXT("Refreshing InGame HUD UI."));
@@ -47,4 +36,25 @@ void UInGameHudWidget::RefreshUI() {
 
   FText CurrentLevelText = UEnum::GetDisplayValueAsText(LevelManager->LoadedLevel);
   LocationSlideWidget->SlideText->SetText(CurrentLevelText);
+
+  if (LevelManager->LoadedLevel == ELevel::Store) {
+    ControlsHelpersWidget->SetComponentUI({
+        {FText::FromString("News"), InGameInputActions.OpenNewspaperAction},
+        {FText::FromString("Store"), InGameInputActions.OpenStoreViewAction},
+        {FText::FromString("Items"), InGameInputActions.OpenInventoryViewAction},
+        {FText::FromString("Build"), InGameInputActions.BuildModeAction},
+    });
+  } else {
+    ControlsHelpersWidget->SetComponentUI({
+        {FText::FromString("News"), InGameInputActions.OpenNewspaperAction},
+        {FText::FromString("Store"), InGameInputActions.OpenStoreViewAction},
+        {FText::FromString("Items"), InGameInputActions.OpenInventoryViewAction},
+    });
+  }
+}
+
+void UInGameHudWidget::InitUI(FInGameInputActions _InGameInputActions) {
+  InGameInputActions = _InGameInputActions;
+
+  NewsHudSlideWidget->InitUI(NewsGen);
 }

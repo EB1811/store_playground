@@ -1,4 +1,6 @@
 #include "NegotiationSystem.h"
+#include "CoreFwd.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -61,6 +63,21 @@ ENegotiationState UNegotiationSystem::GetNextNegotiationState(ENegotiationState 
   return ENegotiationState::None;
 }
 
+auto UNegotiationSystem::AddVarsToDialogueText(const FText& DialogueText) -> FText {
+  UE_LOG(LogTemp, Warning, TEXT("Adding vars to dialogue text: %s"), *DialogueText.ToString());
+  UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetDisplayValueAsText(NegDialogueVars::WantedItemType).ToString());
+  FString NewDialogue = DialogueText.ToString();
+  NewDialogue = NewDialogue.Replace(
+      *FString::Printf(TEXT("{%s}"), *UEnum::GetDisplayValueAsText(NegDialogueVars::WantedItemType).ToString()),
+      *WantedItemType.WantedItemTypeName.ToString());
+  NewDialogue =
+      NewDialogue.Replace(*FString::Printf(TEXT("{%s}"), *UEnum::GetValueAsString(NegDialogueVars::ItemPrice)),
+                          *FString::Printf(TEXT("%.0f¬"), MarketPrice));
+  UE_LOG(LogTemp, Warning, TEXT("Added vars to dialogue text: %s"), *NewDialogue);
+
+  return FText::FromString(*NewDialogue);
+}
+
 void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
                                           UItemBase* Item,
                                           UInventoryComponent* _FromInventory,
@@ -94,8 +111,9 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
             [NegotiatedItem](const FEconItem& EconItem) { return EconItem.ItemID == NegotiatedItem->ItemID; });
         check(EconItem);
 
-        BoughtAtPrice +=
-            CustomerAI->NegotiationAI->RequestType != ECustomerRequestType::SellItem ? Item->PriceData.BoughtAt : 0;
+        BoughtAtPrice += CustomerAI->NegotiationAI->RequestType != ECustomerRequestType::SellItem
+                             ? Item->PlayerPriceData.BoughtAt
+                             : 0;
         MarketPrice += EconItem->CurrentPrice;
         OfferedPrice += MarketPrice;
       }
@@ -111,9 +129,13 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
 FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
   if (CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::StockCheck) {
     NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcStockCheckRequest);
-    return DialogueSystem->StartDialogue(
-        CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues,
-        CustomerAI->CustomerName.ToString());
+
+    TArray<FDialogueData> StockCheckDialogues =
+        CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues;
+    for (FDialogueData& Dialogue : StockCheckDialogues)
+      Dialogue.DialogueText = AddVarsToDialogueText(FText::FromString(Dialogue.DialogueText)).ToString();
+
+    return DialogueSystem->StartDialogue(StockCheckDialogues, CustomerAI->CustomerName.ToString());
   }
 
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
@@ -152,7 +174,7 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
         [NegotiatedItem](const FEconItem& EconItem) { return EconItem.ItemID == NegotiatedItem->ItemID; });
     check(EconItem);
 
-    BoughtAtPrice += Item->PriceData.BoughtAt;
+    BoughtAtPrice += Item->PlayerPriceData.BoughtAt;
     MarketPrice += EconItem->CurrentPrice;
     OfferedPrice += MarketPrice;
   }
@@ -200,11 +222,16 @@ void UNegotiationSystem::NegotiationSuccess() {
       for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->RemoveItem(NegotiatedItem);
     else
       for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->StockItemSold(NegotiatedItem);
-  } else {
+  } else if (Type == NegotiationType::PlayerBuy) {
     check(PlayerInventory);
 
     for (UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemBought(NegotiatedItem, OfferedPrice);
-    for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->AddItem(NegotiatedItem);
+    for (const UItemBase* NegotiatedItem : NegotiatedItems) {
+      // Checks are done in the negotiation process so this should always be true.
+      check(CanTransferItem(FromInventory, NegotiatedItem));
+
+      PlayerInventory->AddItem(NegotiatedItem);
+    }
   }
 
   if (bIsQuestAssociated) QuestManager->CompleteQuestChain(QuestComponent, {}, true);

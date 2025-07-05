@@ -41,6 +41,9 @@ struct FGenericCustomerData {
 
   UPROPERTY(EditAnywhere)
   FCustomerAssetData AssetData;
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer Tags;
 };
 
 USTRUCT()
@@ -62,6 +65,9 @@ struct FCustomerDataRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FCustomerAssetData AssetData;
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer Tags;
 };
 
 // Dynamic subtypes for stock check requests.

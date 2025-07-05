@@ -139,7 +139,8 @@ public:
   TArray<struct FDialogueData> GetRandomNpcStoreDialogue(
       std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
   TMap<ENegotiationDialogueType, FDialoguesArray> GetRandomNegDialogueMap(
-      ECustomerAttitude Attitude = ECustomerAttitude::Neutral) const;
+      ECustomerAttitude Attitude = ECustomerAttitude::Neutral,
+      std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
 
   TArray<struct FPriceEffect> GetPriceEffects(const TArray<FName>& PriceEffectIDs) const;
   TArray<struct FPopEffect> GetPopEffects(const TArray<FName>& PopEffectIDs) const;

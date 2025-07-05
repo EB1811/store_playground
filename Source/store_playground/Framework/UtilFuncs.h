@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 // * Utility functions and structs.
@@ -64,4 +65,14 @@ inline void SetStructPropertyValue(FStructProperty* StructProp,
     int32* PropValuePtr = Prop->ContainerPtrToValuePtr<int32>(StructPtr);
     *PropValuePtr = static_cast<int32>(FMath::Max(*PropValuePtr, 1) * PropValue);
   }
+}
+
+inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
+  TArray<FGameplayTag> TagsArray;
+  for (const auto& TagString : Tags) {
+    auto Tag = FGameplayTag::RequestGameplayTag(TagString);
+    check(Tag.IsValid());
+    TagsArray.Add(Tag);
+  }
+  return FGameplayTagContainer::CreateFromArray(TagsArray);
 }

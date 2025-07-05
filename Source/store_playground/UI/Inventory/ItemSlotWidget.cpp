@@ -22,7 +22,7 @@ void UItemSlotWidget::RefreshUI() {
   if (ItemRef->Quantity > 1) Quantity->SetText(FText::FromString(FString::FromInt(ItemRef->Quantity)));
   else Quantity->SetText(FText::GetEmpty());
 
-  // float Price = ShowPriceFunc ? ShowPriceFunc(ItemRef->ItemID) : ItemRef->PriceData.BoughtAt;
+  // float Price = ShowPriceFunc ? ShowPriceFunc(ItemRef->ItemID) : ItemRef->PlayerPriceData.BoughtAt;
   check(ShowPriceFunc);
   float Price = ShowPriceFunc(ItemRef->ItemID);
   ShowPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Price)));

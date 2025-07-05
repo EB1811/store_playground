@@ -50,7 +50,7 @@ void UNegotiationShowItemWidget::SortByName() {
 void UNegotiationShowItemWidget::Show() {
   if (ItemsWidget->SelectedItem == nullptr) return;
   auto ItemToShow = InventoryC->ItemsArray.FindByPredicate(
-      [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
+      [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
   check(ItemToShow);
 
   ShowFunc(*ItemToShow);

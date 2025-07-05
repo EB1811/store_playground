@@ -20,7 +20,7 @@ void UItemDetailsWidget::RefreshUI() {
     Quantity->SetVisibility(ESlateVisibility::Collapsed);
   }
 
-  float _ShowPrice = ShowPriceFunc ? ShowPriceFunc(ItemRef->ItemID) : ItemRef->PriceData.BoughtAt;
+  float _ShowPrice = ShowPriceFunc ? ShowPriceFunc(ItemRef->ItemID) : ItemRef->PlayerPriceData.BoughtAt;
   ShowPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _ShowPrice)));
   float _MarketPrice = MarketPriceFunc(ItemRef->ItemID);
   MarketPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _MarketPrice)));

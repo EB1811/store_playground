@@ -107,6 +107,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   FOfferResponse CustomerOfferResponse;
 
+  auto AddVarsToDialogueText(const FText& DialogueText) -> FText;
+
   void StartNegotiation(class UCustomerAIComponent* _CustomerAI,
                         class UItemBase* NegotiatedItem = nullptr,
                         class UInventoryComponent* _FromInventory = nullptr,

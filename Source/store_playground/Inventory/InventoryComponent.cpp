@@ -24,29 +24,31 @@ void UInventoryComponent::BeginPlay() {
       Item->TextData = Row->TextData;
       Item->AssetData = Row->AssetData;
       Item->FlavorData = Row->FlavorData;
-      Item->PriceData.BoughtAt = Row->BasePrice;
+      Item->PlayerPriceData.BoughtAt = 0.0f;
       AddItem(Item, 1);
     }
   }
 }
 
 auto UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) -> UItemBase* {
-  if (TObjectPtr<UItemBase>* ArrayItem =
-          ItemsArray.FindByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; })) {
-    if (InventoryType == EInventoryType::Container) (*ArrayItem)->Quantity += Quantity;
-    return (*ArrayItem);
+  if (TObjectPtr<UItemBase>* ExistingItem = ItemsArray.FindByPredicate(
+          [this, Item](UItemBase* ArrayItem) { return AreItemsEqual(InventoryType, ArrayItem, Item); })) {
+    if (InventoryType == EInventoryType::Container || InventoryType == EInventoryType::PlayerInventory)
+      (*ExistingItem)->Quantity += Quantity;
+
+    return (*ExistingItem);
   }
 
   UItemBase* ItemCopy = Item->CreateItemCopy();
   ItemCopy->Quantity = Quantity;
   ItemsArray.Add(ItemCopy);
 
-  return ItemCopy;  // Return the new item reference if needed.
+  return ItemCopy;
 }
 
 void UInventoryComponent::RemoveItem(const UItemBase* Item, int32 Quantity) {
-  if (TObjectPtr<UItemBase>* ArrayItem =
-          ItemsArray.FindByPredicate([Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; })) {
+  if (TObjectPtr<UItemBase>* ArrayItem = ItemsArray.FindByPredicate(
+          [this, Item](UItemBase* ArrayItem) { return AreItemsEqual(InventoryType, ArrayItem, Item); })) {
     (*ArrayItem)->Quantity -= Quantity;
     if ((*ArrayItem)->Quantity <= 0) ItemsArray.RemoveSingle(*ArrayItem);
   }

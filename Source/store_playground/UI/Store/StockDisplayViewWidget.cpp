@@ -52,13 +52,13 @@ void UStockDisplayViewWidget::AddOrTake() {
     case EStockDisplayViewType::Player: {
       if (DisplayInventory->ItemsArray.Num() > 0) {
         auto StockItem = DisplayInventory->ItemsArray[0];
-        TransferItem(DisplayInventory, PlayerInventory, StockItem).bSuccess;
+        TransferItem(DisplayInventory, PlayerInventory, StockItem);
       }
       check(DisplayInventory->ItemsArray.Num() <= 0);
 
       if (!ItemsWidget->SelectedItem) return;
       auto ItemToAdd = PlayerInventory->ItemsArray.FindByPredicate(
-          [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
+          [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
       check(ItemToAdd);
 
       if (TransferItem(PlayerInventory, DisplayInventory, *ItemToAdd).bSuccess) {
@@ -73,7 +73,7 @@ void UStockDisplayViewWidget::AddOrTake() {
     case EStockDisplayViewType::Display: {
       if (!ItemsWidget->SelectedItem) return;
       auto ItemToAddRemove = DisplayInventory->ItemsArray.FindByPredicate(
-          [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
+          [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
       check(ItemToAddRemove);
 
       if (TransferItem(DisplayInventory, PlayerInventory, *ItemToAddRemove).bSuccess) {

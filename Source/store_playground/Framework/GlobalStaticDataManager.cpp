@@ -150,16 +150,6 @@ TArray<struct FQuestChainData> AGlobalStaticDataManager::GetEligibleQuestChains(
   });
 }
 
-inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
-  TArray<FGameplayTag> TagsArray;
-  for (const auto& TagString : Tags) {
-    auto Tag = FGameplayTag::RequestGameplayTag(TagString);
-    check(Tag.IsValid());
-    TagsArray.Add(Tag);
-  }
-  return FGameplayTagContainer::CreateFromArray(TagsArray);
-}
-
 inline TArray<struct FDialogueData> GetRandomDialogue(const TArray<struct FDialogueData>& DialogueArray) {
   TArray<struct FDialogueData> RandomDialogue;
 
@@ -224,7 +214,8 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcStoreDialogue
 }
 
 TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalStaticDataManager::GetRandomNegDialogueMap(
-    ECustomerAttitude Attitude) const {
+    ECustomerAttitude Attitude,
+    std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {
   auto& DialoguesMap = Attitude == ECustomerAttitude::Friendly  ? FriendlyDialoguesMap
                        : Attitude == ECustomerAttitude::Neutral ? NeutralDialoguesMap
                                                                 : HostileDialoguesMap;
@@ -233,7 +224,10 @@ TMap<ENegotiationDialogueType, FDialoguesArray> AGlobalStaticDataManager::GetRan
   for (auto Type : TEnumRange<ENegotiationDialogueType>()) {
     RandomDialogueIndexMap.Add(Type, {});
 
-    auto& Dialogues = DialoguesMap[Type].Dialogues;
+    auto& Dialogues = !FilterFunc ? DialoguesMap[Type].Dialogues
+                                  : DialoguesMap[Type].Dialogues.FilterByPredicate(
+                                        [&](const FDialogueData& Dialogue) { return FilterFunc(Dialogue); });
+
     RandomDialogueIndexMap[Type].Dialogues = GetRandomDialogue(Dialogues);
   }
   return RandomDialogueIndexMap;
@@ -308,6 +302,7 @@ void AGlobalStaticDataManager::InitializeCustomerData() {
         Row->CustomerName,
         Row->InitAttitude,
         Row->AssetData,
+        Row->Tags,
     });
 
   WantedItemTypesArray.Empty();

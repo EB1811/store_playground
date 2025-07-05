@@ -7,7 +7,7 @@
 #include "ItemBase.generated.h"
 
 USTRUCT()
-struct FItemPriceData {
+struct FItemPlayerPriceData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, SaveGame)
@@ -44,9 +44,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Item Data")
   FItemFlavorData FlavorData;
 
-  // ? Or keep BoughtAt price in statistics gen?
   UPROPERTY(EditAnywhere, Category = "Item Data", SaveGame)
-  FItemPriceData PriceData;
+  FItemPlayerPriceData PlayerPriceData;
 
   UFUNCTION(Category = "Item Functions")
   UItemBase* CreateItemCopy() const;

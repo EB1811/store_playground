@@ -109,12 +109,20 @@ struct FNextDialogueRes {
   EDialogueState State;
 };
 
+// todo-low: replace with tags.
 UENUM()
 enum class ECustomerAttitude : uint8 {
   Friendly,
   Neutral,
   Hostile,
 };
+
+UENUM()
+enum class NegDialogueVars : uint8 {
+  WantedItemType UMETA(DisplayName = "WantedItemType"),
+  ItemPrice UMETA(DisplayName = "ItemPrice")
+};
+ENUM_RANGE_BY_COUNT(NegDialogueVars, 2);
 
 UENUM()
 enum class ENegotiationDialogueType : uint8 {
@@ -154,7 +162,7 @@ struct FNegotiationDialoguesDataTable : public FTableRowBase {
   EDialogueType DialogueType;
 
   UPROPERTY(EditAnywhere)
-  FString DialogueText;
+  FString DialogueText;  // todo-low: Use FText instead.
   UPROPERTY(EditAnywhere)
   EDialogueAction Action;
 

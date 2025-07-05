@@ -129,13 +129,17 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->CustomerAIComponent->CustomerName = UniqueNpcData.NpcName;
   UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
   UniqueCustomer->CustomerAIComponent->Attitude = UniqueNpcData.NegotiationData.Attitude;
+  UniqueCustomer->CustomerAIComponent->Tags = UniqueNpcData.NegotiationData.Tags;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage =
       FMath::FRandRange(UniqueNpcData.NegotiationData.AcceptancePercentageRange[0],
                         UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
       100.0f;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->CustomerName = UniqueNpcData.NpcName;
-  UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap =
-      GlobalStaticDataManager->GetRandomNegDialogueMap(UniqueNpcData.NegotiationData.Attitude);
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(
+      UniqueNpcData.NegotiationData.Attitude, [&](const FDialogueData& Dialogue) {
+        return Dialogue.DialogueTags.IsEmpty() ||
+               Dialogue.DialogueTags.HasAny(UniqueCustomer->CustomerAIComponent->Tags);
+      });
 
   const FCustomerPop* CustomerPopData = MarketEconomy->CustomerPops.FindByPredicate(
       [UniqueNpcData](const FCustomerPop& Pop) { return Pop.ID == UniqueNpcData.LinkedPopID; });
@@ -245,11 +249,15 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
     Customer->CustomerAIComponent->AvailableMoney = PopMoneySpendData->Money / PopMoneySpendData->Population;
     Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
+    Customer->CustomerAIComponent->Tags = RandomCustomerData.Tags;
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
     Customer->DialogueComponent->SpeakerName = RandomCustomerData.CustomerName;
-    Customer->DialogueComponent->DialogueArray = GlobalStaticDataManager->GetRandomCustomerDialogue();
+    Customer->DialogueComponent->DialogueArray =
+        GlobalStaticDataManager->GetRandomCustomerDialogue([&](const FDialogueData& Dialogue) {
+          return Dialogue.DialogueTags.IsEmpty() || Dialogue.DialogueTags.HasAny(Customer->CustomerAIComponent->Tags);
+        });
 
     // ? Maybe have two arrays for customers ai and customer interaction components?
     AllCustomers.Add(Customer);
@@ -385,7 +393,7 @@ auto ACustomerAIManager::CustomerPickItem(UCustomerAIComponent* CustomerAI,
   auto RelevantItems = FilterFunc ? NonPickedItems.FilterByPredicate(FilterFunc)
                                   : NonPickedItems.FilterByPredicate([CustomerAI](const FStockItem& StockItem) {
                                       return CustomerAI->ItemEconTypes.Contains(StockItem.Item->ItemEconType) &&
-                                             CustomerAI->AvailableMoney >= StockItem.Item->PriceData.BoughtAt;
+                                             CustomerAI->AvailableMoney >= StockItem.Item->PlayerPriceData.BoughtAt;
                                     });
   if (RelevantItems.Num() <= 0) return false;
 
@@ -447,7 +455,10 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
   CustomerAI->CustomerState = ECustomerState::Requesting;
 
   CustomerAI->NegotiationAI->CustomerName = CustomerAI->CustomerName;
-  CustomerAI->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude);
+  CustomerAI->NegotiationAI->DialoguesMap =
+      GlobalStaticDataManager->GetRandomNegDialogueMap(CustomerAI->Attitude, [&](const FDialogueData& Dialogue) {
+        return Dialogue.DialogueTags.IsEmpty() || Dialogue.DialogueTags.HasAny(Customer->CustomerAIComponent->Tags);
+      });
 
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 

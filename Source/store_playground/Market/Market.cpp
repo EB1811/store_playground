@@ -1,6 +1,7 @@
 #include "Market.h"
 #include "Containers/Array.h"
 #include "HAL/Platform.h"
+#include "Logging/LogVerbosity.h"
 #include "Math/UnrealMathUtility.h"
 #include "UObject/NameTypes.h"
 #include "store_playground/Item/ItemBase.h"
@@ -45,7 +46,7 @@ void AMarket::BeginPlay() {
     Item->TextData = Row->TextData;
     Item->AssetData = Row->AssetData;
     Item->FlavorData = Row->FlavorData;
-    Item->PriceData.BoughtAt = Row->BasePrice;
+    Item->PlayerPriceData.BoughtAt = 0.0f;
 
     AllItemsMap.Add(Row->ItemID, Item);
     if (!Row->bIsUnlockable) EligibleItemIds.Add(Row->ItemID);
@@ -131,7 +132,7 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
                       int32 Quantity) const -> bool {
   check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
   if (!NPCStoreInventory->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
     return false;
 
   const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
@@ -139,20 +140,22 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
   check(EconItem);
 
   float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
-  float TotalPrice = EconItem->CurrentPrice * Quantity * (1.0f + StoreMarkup);
-  UE_LOG(LogTemp, Warning, TEXT("StoreMarkup: %f"), StoreMarkup);
+  float SingleItemPrice = EconItem->CurrentPrice * (1.0f + StoreMarkup);
+  float TotalPrice = SingleItemPrice * Quantity;
+  UE_LOG(LogTemp, Log, TEXT("StoreMarkup: %f"), StoreMarkup);
 
   if (PlayerStore->Money < TotalPrice) {
-    UE_LOG(LogTemp, Warning, TEXT("Not enough money to buy item: %s, TotalPrice: %.0f, Money: %.0f"),
+    UE_LOG(LogTemp, Log, TEXT("Not enough money to buy item: %s, TotalPrice: %.0f, Money: %.0f"),
            *Item->TextData.Name.ToString(), TotalPrice, PlayerStore->Money);
     return false;
   }
 
-  auto TransferItemRes = TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity);
-  if (!TransferItemRes.bSuccess) return false;
+  if (!CanTransferItem(PlayerInventory, Item)) return false;
 
-  check(TransferItemRes.ItemCopy);
-  PlayerStore->ItemBought(TransferItemRes.ItemCopy, TotalPrice);
+  PlayerStore->ItemBought(Item, SingleItemPrice);
+  auto TransferItemRes = TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity);
+  check(TransferItemRes.bSuccess);
+
   return true;
 }
 
@@ -164,7 +167,7 @@ auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
                        int32 Quantity) const -> bool {
   check(NpcStoreC && NPCStoreInventory && PlayerInventory && PlayerStore && Item);
   if (!PlayerInventory->ItemsArray.ContainsByPredicate(
-          [Item](UItemBase* ArrayItem) { return ArrayItem->ItemID == Item->ItemID; }))
+          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
     return false;
 
   const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(

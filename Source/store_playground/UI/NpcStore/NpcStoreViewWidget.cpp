@@ -36,7 +36,7 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
     case ETradeType::Buy: {
       if (!ItemsWidget->SelectedItem) return;
       auto ItemToBuy = StoreInventory->ItemsArray.FindByPredicate(
-          [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
+          [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
       check(ItemToBuy);
 
       bSuccess = Market->BuyItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToBuy, Quantity);
@@ -46,7 +46,7 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
     case ETradeType::Sell: {
       if (!ItemsWidget->SelectedItem) return;
       auto ItemToSell = PlayerInventory->ItemsArray.FindByPredicate(
-          [this](const UItemBase* Item) { return Item->ItemID == ItemsWidget->SelectedItem->ItemID; });
+          [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
       check(ItemToSell);
 
       bSuccess = Market->SellItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToSell, Quantity);

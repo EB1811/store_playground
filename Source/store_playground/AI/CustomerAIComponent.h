@@ -49,6 +49,8 @@ public:
   float AvailableMoney;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerAttitude Attitude;
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  FGameplayTagContainer Tags;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerAction CustomerAction;

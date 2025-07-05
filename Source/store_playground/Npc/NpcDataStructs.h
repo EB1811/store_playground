@@ -161,6 +161,9 @@ struct FNpcNegotiationData {
   TArray<float> AcceptancePercentageRange;  // * [Min, Max] for random generation.
   UPROPERTY(EditAnywhere)
   float MaxHagglingCount;
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer Tags;
 };
 
 USTRUCT()
@@ -195,6 +198,7 @@ struct FUniqueNpcData {
   // * NPC specific behaviour data.
   UPROPERTY(EditAnywhere)
   TArray<FName> QuestIDs;
+  // TODO: Change to use tags.
   UPROPERTY(EditAnywhere)
   TArray<FName> DialogueChainIDs;  // * Dialogue used outside of a quest.
 

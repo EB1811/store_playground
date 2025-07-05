@@ -129,6 +129,8 @@ void APlayerZDCharacter::BeginPlay() {
   // PlayerWidgetComponent->SetWorldLocation(GetPawnViewLocation());
   // PlayerWidgetComponent->SetWorldRotation(FRotator(45, 90, 0));  // y, z, x
 
+  // Make sure all player data is correctly initialized.
+  check(PlayerInventoryComponent->InventoryType == EInventoryType::PlayerInventory);
   check(SpawnPointClass);
 
   UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
@@ -510,10 +512,12 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     UItemBase* Item) {
   // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
-    return EnterDialogue(DialogueC, nullptr, [this, QuestC, SpriteAnimC, CustomerAI]() {
-      QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
-      SpriteAnimC->ReturnToOgRotation();
-    });
+    return EnterDialogue(
+        DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+        [this, QuestC, SpriteAnimC, CustomerAI]() {
+          QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
+          SpriteAnimC->ReturnToOgRotation();
+        });
 
   switch (QuestC->CustomerAction) {
     case ECustomerAction::PickItem:
@@ -521,21 +525,26 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::SellItem:
       check(CustomerAI->NegotiationAI->RelevantItem);
       if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
-        EnterDialogue(DialogueC, nullptr,
-                      [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
+        EnterDialogue(
+            DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+            [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
-        EnterDialogue(DialogueC, nullptr, [this, QuestC, CustomerAI, Item]() {
-          QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
-          EnterNegotiation(CustomerAI, Item);
-        });
+        EnterDialogue(
+            DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+            [this, QuestC, CustomerAI, Item]() {
+              QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
+              EnterNegotiation(CustomerAI, Item);
+            });
       break;
     case ECustomerAction::Leave:
     case ECustomerAction::None:
       if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
-      EnterDialogue(DialogueC, nullptr, [this, QuestC, CustomerAI]() {
-        QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
-        CustomerAI->CustomerState = ECustomerState::Leaving;
-      });
+      EnterDialogue(
+          DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+          [this, QuestC, CustomerAI]() {
+            QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
+            CustomerAI->CustomerState = ECustomerState::Leaving;
+          });
       break;
     default: checkNoEntry(); break;
   }
