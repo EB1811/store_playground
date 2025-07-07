@@ -44,6 +44,7 @@ public:
   const class AQuestManager* QuestManager;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class AMarket* Market;
+  // TODO: Allow getting only specific operands.
   const TMap<EReqFilterOperand, std::any> GetGameDataMap() const;
 
   UPROPERTY(EditAnywhere, Category = "Data")

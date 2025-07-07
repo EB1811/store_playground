@@ -5,6 +5,7 @@
 #include "store_playground/Market/Market.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "store_playground/Framework/GlobalStaticDataManager.h"
 
 void AAbilityManager::BeginPlay() { Super::BeginPlay(); }
 
@@ -85,10 +86,19 @@ void AAbilityManager::TickDaysTimedVars() {
 }
 
 void AAbilityManager::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {
-  if (DataName != "EconEventAbility") checkf(false, TEXT("UnlockIDs only supports EconEventAbility IDs."));
+  if (DataName != "EconEventAbility" && DataName != "NegotiationSkill")
+    checkf(false, TEXT("UnlockIDs only supports EconEventAbility or NegotiationSkill IDs."));
 
-  for (const auto& Id : Ids) {
-    if (UnlockedEconEventAbilityIDs.Contains(Id)) continue;
-    UnlockedEconEventAbilityIDs.Add(Id);
-  }
+  if (DataName == "EconEventAbility")
+    for (const auto& Id : Ids) {
+      if (UnlockedEconEventAbilityIDs.Contains(Id)) continue;
+      UnlockedEconEventAbilityIDs.Add(Id);
+    }
+
+  if (DataName == "NegotiationSkill")
+    for (const auto& Id : Ids) {
+      if (ActiveNegotiationSkills.ContainsByPredicate([&](const FNegotiationSkill& Skill) { return Skill.ID == Id; }))
+        continue;
+      ActiveNegotiationSkills.Add(GlobalStaticDataManager->GetNegotiationSkillsByIds({Id})[0]);
+    }
 }

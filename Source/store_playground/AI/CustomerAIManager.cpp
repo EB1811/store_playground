@@ -15,6 +15,7 @@
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
+#include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/Market.h"
@@ -462,15 +463,24 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
 
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 
-  CustomerAI->NegotiationAI->MoneyToSpend = CustomerAI->AvailableMoney;
+  float MoneyToSpend = CustomerAI->AvailableMoney;
+  if (CustomerAI->Attitude == ECustomerAttitude::Friendly) MoneyToSpend *= FMath::FRandRange(1.0f, 1.5);
+  else if (CustomerAI->Attitude == ECustomerAttitude::Hostile) MoneyToSpend *= FMath::FRandRange(0.5f, 1.0f);
   float AcceptanceMin = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 0.05f
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.00f
                                                                              : 0.05f;
   float AcceptanceMax = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 0.25f
                         : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.10f
                                                                              : 0.15f;
-  CustomerAI->NegotiationAI->AcceptancePercentage = FMath::FRandRange(
-      AcceptanceMin * BehaviorParams.AcceptanceMinMulti, AcceptanceMax * BehaviorParams.AcceptanceMaxMulti);
+  float AcceptancePercentage = FMath::FRandRange(AcceptanceMin * BehaviorParams.AcceptanceMinMulti,
+                                                 AcceptanceMax * BehaviorParams.AcceptanceMaxMulti);
+
+  for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
+    if (Skill.EffectType == ECustomerAIEffect::MoneyToSpend) MoneyToSpend *= Skill.Multi;
+    else if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
+
+  CustomerAI->NegotiationAI->MoneyToSpend = MoneyToSpend;
+  CustomerAI->NegotiationAI->AcceptancePercentage = AcceptancePercentage;
 }
 
 void ACustomerAIManager::TickDaysTimedVars() {

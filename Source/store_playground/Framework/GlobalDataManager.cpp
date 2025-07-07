@@ -196,8 +196,6 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
 }
 
 const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() const {
-  check(PlayerCharacter);
-
   const TArray<FName> InventoryItems = FormIdList<TObjectPtr<UItemBase>>(
       PlayerCharacter->PlayerInventoryComponent->ItemsArray, [](const UItemBase* Item) { return Item->ItemID; });
   TArray<FName> MadeDialogueChoices = {};

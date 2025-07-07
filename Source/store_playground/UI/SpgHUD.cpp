@@ -41,6 +41,7 @@ ASpgHUD::ASpgHUD() { HUDState = EHUDState::InGame; }
 
 void ASpgHUD::DrawHUD() { Super::DrawHUD(); }
 
+// TODO: Attempt to init uis at the start of the game.
 void ASpgHUD::BeginPlay() {
   Super::BeginPlay();
 
@@ -498,8 +499,8 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
   check(NegotiationViewWidget);
   if (OpenedWidgets.Contains(NegotiationViewWidget)) return CloseWidget(NegotiationViewWidget);
 
-  NegotiationViewWidget->InitUI(InUIInputActions, Store, MarketEconomy, PlayerInventoryC, NegotiationSystem,
-                                DialogueSystem, [this] { CloseWidget(NegotiationViewWidget); });
+  NegotiationViewWidget->InitUI(InUIInputActions, AbilityManager, Store, MarketEconomy, PlayerInventoryC,
+                                NegotiationSystem, DialogueSystem, [this] { CloseWidget(NegotiationViewWidget); });
   NegotiationViewWidget->RefreshUI();
 
   OpenFocusedMenu(NegotiationViewWidget);

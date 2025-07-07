@@ -27,6 +27,8 @@ public:
 
   UPROPERTY(EditAnywhere)
   const class AGlobalDataManager* GlobalDataManager;
+  UPROPERTY(EditAnywhere)
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
 
   UPROPERTY(EditAnywhere)
   class AStore* Store;
@@ -39,6 +41,9 @@ public:
   TMap<FName, int32> EconEventAbilityCooldowns;
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FEconEventAbility> ActiveEconEventAbilities;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FNegotiationSkill> ActiveNegotiationSkills;
 
   auto GetAbilityById(const FName AbilityId) const -> FEconEventAbility;
   auto GetAvailableEconEventAbilities() const -> TArray<FEconEventAbility>;

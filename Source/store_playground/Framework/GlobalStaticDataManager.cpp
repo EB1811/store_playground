@@ -63,7 +63,7 @@ void AGlobalStaticDataManager::BeginPlay() {
         FriendlyNegDialoguesTable.DataTable && NeutralNegDialoguesTable.DataTable &&
         HostileNegDialoguesTable.DataTable && QuestChainDataTable && NpcStoreDialoguesTable && PriceEffectsDataTable &&
         ArticlesDataTable && UpgradesTable && UpgradeEffectsTable && CutsceneChainDataTable && CutsceneDataTable &&
-        PopEffectsDataTable);
+        PopEffectsDataTable && NegotiationSkillsTable);
 
   InitializeCustomerData();
   InitializeNPCData();
@@ -291,6 +291,12 @@ TArray<struct FUpgradeEffect> AGlobalStaticDataManager::GetUpgradeEffectsByIds(c
   return UpgradeEffectsArray.FilterByPredicate(
       [&](const FUpgradeEffect& Effect) { return EffectIDs.Contains(Effect.ID); });
 }
+TArray<struct FNegotiationSkill> AGlobalStaticDataManager::GetNegotiationSkillsByIds(
+    const TArray<FName>& SkillIDs) const {
+  return NegotiationSkills.FilterByPredicate(
+      [&](const FNegotiationSkill& Skill) { return SkillIDs.Contains(Skill.ID); });
+}
+
 void AGlobalStaticDataManager::InitializeCustomerData() {
   GenericCustomersArray.Empty();
   TArray<FCustomerDataRow*> GenericCustomersRows;
@@ -528,9 +534,16 @@ void AGlobalStaticDataManager::InitializeUpgradesData() {
     UpgradeEffectsArray.Add({Row->ID, Row->EffectType, Row->EffectSystem, Row->RelevantName, Row->RelevantIDs,
                              Row->RelevantValues, Row->TextData});
 
+  NegotiationSkills.Empty();
+  TArray<FNegotiationSkillRow*> NegotiationSkillsRows;
+  NegotiationSkillsTable->GetAllRows<FNegotiationSkillRow>("", NegotiationSkillsRows);
+  for (auto Row : NegotiationSkillsRows) NegotiationSkills.Add({Row->ID, Row->EffectType, Row->Multi, Row->TextData});
+
   check(UpgradesArray.Num() > 0);
   check(UpgradeEffectsArray.Num() > 0);
+  check(NegotiationSkills.Num() > 0);
 
   UpgradesTable = nullptr;
   UpgradeEffectsTable = nullptr;
+  NegotiationSkillsTable = nullptr;
 }

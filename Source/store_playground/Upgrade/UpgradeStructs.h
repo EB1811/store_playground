@@ -7,6 +7,37 @@
 #include "Types/SlateEnums.h"
 #include "UpgradeStructs.generated.h"
 
+// * Looped through to gain upgrade points.
+USTRUCT()
+struct FUpgradePointsGen {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName ID;
+
+  UPROPERTY(EditAnywhere)
+  FName Requirements;  // * (RequirementsFilter structure).
+
+  UPROPERTY(EditAnywhere)
+  int32 PointsGained;
+
+  UPROPERTY(EditAnywhere)
+  bool bHasBeenUsed;
+};
+USTRUCT()
+struct FUpgradePointsGenRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName ID;
+
+  UPROPERTY(EditAnywhere)
+  FName Requirements;  // * (RequirementsFilter structure).
+
+  UPROPERTY(EditAnywhere)
+  int32 PointsGained;
+};
+
 UENUM()
 enum class EUpgradeClass : uint8 {
   Holy UMETA(DisplayName = "Holy"),
@@ -70,6 +101,52 @@ struct FEconEventAbilityRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   FEconEventAbilityTextData TextData;
+};
+
+UENUM()
+enum class ECustomerAIEffect : uint8 {
+  MoneyToSpend UMETA(DisplayName = "Money To Spend"),                 // * Money available for negotiation.
+  AcceptancePercentage UMETA(DisplayName = "Acceptance Percentage"),  // * Acceptance percentage for offers
+};
+USTRUCT()
+struct FNegotiationSkillTextData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FText Name;
+};
+// * Affects customer acceptance of offers.
+USTRUCT()
+struct FNegotiationSkill {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName ID;
+
+  UPROPERTY(EditAnywhere)
+  ECustomerAIEffect EffectType;
+
+  UPROPERTY(EditAnywhere)
+  float Multi;
+
+  UPROPERTY(EditAnywhere)
+  FNegotiationSkillTextData TextData;
+};
+USTRUCT()
+struct FNegotiationSkillRow : public FTableRowBase {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  FName ID;
+
+  UPROPERTY(EditAnywhere)
+  ECustomerAIEffect EffectType;
+
+  UPROPERTY(EditAnywhere)
+  float Multi;
+
+  UPROPERTY(EditAnywhere)
+  FNegotiationSkillTextData TextData;
 };
 
 // ! Currently 3 different ways to keep track of unlocked ids.

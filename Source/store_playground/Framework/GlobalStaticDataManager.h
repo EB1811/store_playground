@@ -71,6 +71,8 @@ public:
   TObjectPtr<const class UDataTable> UpgradesTable;
   UPROPERTY(EditAnywhere, Category = "Data")
   TObjectPtr<const class UDataTable> UpgradeEffectsTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> NegotiationSkillsTable;
 
   // Arrays and Maps to hold loaded data
   UPROPERTY(EditAnywhere, Category = "GenericCustomer")
@@ -120,6 +122,8 @@ public:
   TArray<struct FUpgrade> UpgradesArray;
   UPROPERTY(EditAnywhere, Category = "Upgrades")
   TArray<struct FUpgradeEffect> UpgradeEffectsArray;
+  UPROPERTY(EditAnywhere, Category = "Upgrades")
+  TArray<struct FNegotiationSkill> NegotiationSkills;
 
   // Data access methods
   TArray<struct FUniqueNpcData> GetEligibleNpcs() const;
@@ -159,6 +163,7 @@ public:
                                                 int32 Level,
                                                 const TArray<FName>& SelectedUpgradeIDs) const;
   TArray<struct FUpgradeEffect> GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const;
+  TArray<struct FNegotiationSkill> GetNegotiationSkillsByIds(const TArray<FName>& SkillIDs) const;
 
   // Data initialization methods
   void InitializeCustomerData();

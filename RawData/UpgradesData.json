@@ -4,7 +4,7 @@
 		"ID": "respect_1",
 		"UpgradeClass": "Holy",
 		"UpgradeEffectIDs": [
-			"ue_1"
+			"ue_0"
 		],
 		"Cost": 1,
 		"Level": 1,

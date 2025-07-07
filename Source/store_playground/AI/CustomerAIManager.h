@@ -73,6 +73,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  const class AAbilityManager* AbilityManager;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AMarketEconomy* MarketEconomy;

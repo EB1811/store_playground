@@ -82,6 +82,9 @@ public:
   const class AMarketEconomy* MarketEconomy;
 
   UPROPERTY(EditAnywhere)
+  class AUpgradeManager* UpgradeManager;
+
+  UPROPERTY(EditAnywhere)
   FStatisticsGenParams StatisticsGenParams;
 
   UPROPERTY(EditAnywhere, SaveGame)

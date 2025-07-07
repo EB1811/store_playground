@@ -1,4 +1,5 @@
 #include "NegotiationViewWidget.h"
+#include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "store_playground/UI/Components/ControlsHelpersWidget.h"
@@ -41,7 +42,7 @@ void UNegotiationViewWidget::ShowItem(UItemBase* Item) {
 
   if (NegotiationSystem->CustomerOfferResponse.Accepted)
     PriceNegotiationWidget->InitUI(
-        InUIInputActions, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
+        InUIInputActions, AbilityManager, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
         [this]() { RejectLeave(); });
   RefreshUI();
 }
@@ -126,15 +127,18 @@ void UNegotiationViewWidget::RefreshUI() {
 }
 
 void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
+                                    const AAbilityManager* _AbilityManager,
                                     const class AStore* _Store,
                                     const class AMarketEconomy* _MarketEconomy,
                                     class UInventoryComponent* _PlayerInventoryC,
                                     class UNegotiationSystem* _NegotiationSystem,
                                     class UDialogueSystem* _DialogueSystem,
                                     std::function<void()> _CloseWidgetFunc) {
-  check(_Store && _MarketEconomy && _PlayerInventoryC && _NegotiationSystem && _DialogueSystem && _CloseWidgetFunc);
+  check(_AbilityManager && _Store && _MarketEconomy && _PlayerInventoryC && _NegotiationSystem && _DialogueSystem &&
+        _CloseWidgetFunc);
 
   InUIInputActions = _InUIInputActions;
+  AbilityManager = _AbilityManager;
   Store = _Store;
   PlayerInventoryC = _PlayerInventoryC;
   NegotiationSystem = _NegotiationSystem;
@@ -152,7 +156,7 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
         [this](UItemBase* Item) { ShowItem(Item); }, [this]() { RejectLeave(); });
   else
     PriceNegotiationWidget->InitUI(
-        InUIInputActions, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
+        InUIInputActions, AbilityManager, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
         [this]() { RejectLeave(); });
 
   DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() {

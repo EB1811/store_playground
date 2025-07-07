@@ -28,6 +28,11 @@ public:
   FUpgradeManagerParams UpgradeManagerParams;
 
   UPROPERTY(EditAnywhere)
+  TObjectPtr<const class UDataTable> UpgradePointsGenDataTable;
+  UPROPERTY(EditAnywhere)
+  TArray<FUpgradePointsGen> UpgradePointsGenArray;
+
+  UPROPERTY(EditAnywhere)
   const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere)
@@ -56,6 +61,7 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FEconEventAbility> ActiveEconEventAbilities;
 
+  void ConsiderUpgradePoints();  // ? Maybe tick this? Currently called by StatisticsGen on any change.
   void GainUpgradePoints(int32 Points);
 
   auto GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const -> TArray<FUpgradeEffect>;

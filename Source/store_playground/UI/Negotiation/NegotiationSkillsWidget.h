@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "NegotiationSkillsWidget.generated.h"
 
 UCLASS()
@@ -16,5 +17,5 @@ public:
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UNegotiationSkillWidget> NegotiationSkillWidgetClass;
 
-  // void InitUI();
+  void InitUI(TArray<FNegotiationSkill> NegotiationSkills);
 };

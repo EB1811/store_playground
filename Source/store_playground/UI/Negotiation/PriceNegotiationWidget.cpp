@@ -8,6 +8,7 @@
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/AI/NegotiationAI.h"
+#include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "Components/TextBlock.h"
@@ -22,6 +23,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Misc/AssertionMacros.h"
 #include "Widgets/Notifications/SProgressBar.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 
 void UPriceNegotiationWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -50,12 +52,14 @@ void UPriceNegotiationWidget::RefreshUI() {
 }
 
 void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
+                                     const AAbilityManager* _AbilityManager,
                                      const AStore* _Store,
                                      UNegotiationSystem* _NegotiationSystem,
                                      std::function<void(float)> _OfferAcceptFunc,
                                      std::function<void()> _RejectFunc) {
-  check(_Store && _NegotiationSystem && _OfferAcceptFunc && _RejectFunc);
+  check(_AbilityManager && _Store && _NegotiationSystem && _OfferAcceptFunc && _RejectFunc);
 
+  AbilityManager = _AbilityManager;
   Store = _Store;
   NegotiationSystem = _NegotiationSystem;
   OfferAcceptFunc = _OfferAcceptFunc;
@@ -73,6 +77,8 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
   PriceSliderWidget->InitUI(NegotiationSystem->Type, NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice, BoughtAtPrice);
 
   CompactItemDetailsWidget->InitUI(NegotiationSystem->NegotiatedItems[0], "Bought At:", MarketPrice, BoughtAtPrice);
+
+  NegotiationSkillsWidget->InitUI(AbilityManager->ActiveNegotiationSkills);
 
   ControlsHelpersWidget->SetComponentUI({
       {FText::FromString("Leave / Reject"), InUIInputActions.RetractUIAction},

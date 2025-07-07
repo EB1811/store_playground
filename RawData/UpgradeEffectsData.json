@@ -2,14 +2,13 @@
 	{
 		"Name": "ue_0",
 		"ID": "ue_0",
-		"EffectType": "ChangeData",
-		"EffectSystem": "GlobalData",
-		"RelevantIDs": [],
-		"RelevantValues":
-		{
-			"StartChance": 10
-		},
-		"RelevantName": "EconEventsArray",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+      "a_ns_1"
+    ],
+		"RelevantValues":{},
+		"RelevantName": "NegotiationSkill",
 		"TextData":
 		{
 			"Description": "Increased likelihood of customers accepting higher prices."

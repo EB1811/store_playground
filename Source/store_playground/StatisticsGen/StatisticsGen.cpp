@@ -3,6 +3,7 @@
 #include "Containers/AllowShrinking.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/WorldObject/Buildable.h"
@@ -22,9 +23,21 @@ void AStatisticsGen::BeginPlay() {
 
 void AStatisticsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void AStatisticsGen::ItemDeal(const FItemDeal ItemDeal) { TodaysItemDeals.Add(ItemDeal); }
-void AStatisticsGen::StoreMoneySpent(float Amount) { TodaysStoreMoneyActivity.AllExpenses += Amount; }
-void AStatisticsGen::StoreMoneyGained(float Amount) { TodaysStoreMoneyActivity.AllIncome += Amount; }
+void AStatisticsGen::ItemDeal(const FItemDeal ItemDeal) {
+  TodaysItemDeals.Add(ItemDeal);
+
+  UpgradeManager->ConsiderUpgradePoints();
+}
+void AStatisticsGen::StoreMoneySpent(float Amount) {
+  TodaysStoreMoneyActivity.AllExpenses += Amount;
+
+  UpgradeManager->ConsiderUpgradePoints();
+}
+void AStatisticsGen::StoreMoneyGained(float Amount) {
+  TodaysStoreMoneyActivity.AllIncome += Amount;
+
+  UpgradeManager->ConsiderUpgradePoints();
+}
 
 auto AStatisticsGen::CalcTodaysStoreProfit() const -> float {
   return TodaysStoreMoneyActivity.AllIncome - TodaysStoreMoneyActivity.AllExpenses;

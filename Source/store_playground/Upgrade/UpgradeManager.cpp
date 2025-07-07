@@ -14,10 +14,40 @@ AUpgradeManager::AUpgradeManager() {
   Upgradeable.UnlockIDs = [this](const FName DataName, const TArray<FName>& Ids) { UnlockIDs(DataName, Ids); };
 }
 
-void AUpgradeManager::BeginPlay() { Super::BeginPlay(); }
+void AUpgradeManager::BeginPlay() {
+  Super::BeginPlay();
+
+  check(UpgradePointsGenDataTable);
+
+  TArray<FUpgradePointsGenRow*> UpgradePointsGenRows;
+  UpgradePointsGenDataTable->GetAllRows<FUpgradePointsGenRow>("", UpgradePointsGenRows);
+  for (auto Row : UpgradePointsGenRows) {
+    UpgradePointsGenArray.Add({
+        Row->ID,
+        Row->Requirements,
+        Row->PointsGained,
+        false,
+    });
+  }
+  check(UpgradePointsGenArray.Num() > 0);
+
+  UpgradePointsGenDataTable = nullptr;
+}
 
 void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void AUpgradeManager::ConsiderUpgradePoints() {
+  const auto& GameDataMap = GlobalDataManager->GetGameDataMap();
+  auto Filtered = UpgradePointsGenArray.FilterByPredicate(
+      [&](const auto& Gen) { return !Gen.bHasBeenUsed && EvaluateRequirementsFilter(Gen.Requirements, GameDataMap); });
+  if (Filtered.Num() == 0) return;
+
+  for (auto& Gen : Filtered) {
+    GainUpgradePoints(Gen.PointsGained);
+    auto* UsedGen = UpgradePointsGenArray.FindByPredicate([&](const auto& ArrayGen) { return ArrayGen.ID == Gen.ID; });
+    UsedGen->bHasBeenUsed = true;
+  }
+}
 void AUpgradeManager::GainUpgradePoints(int32 Points) { AvailableUpgradePoints += Points; }
 
 auto AUpgradeManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const -> TArray<FUpgradeEffect> {

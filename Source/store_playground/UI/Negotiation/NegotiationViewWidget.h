@@ -26,6 +26,8 @@ public:
   FInUIInputActions InUIInputActions;
 
   UPROPERTY(EditAnywhere)
+  const class AAbilityManager* AbilityManager;
+  UPROPERTY(EditAnywhere)
   const class AStore* Store;
 
   UPROPERTY(EditAnywhere)
@@ -41,6 +43,7 @@ public:
 
   void RefreshUI();
   void InitUI(FInUIInputActions _InUIInputActions,
+              const class AAbilityManager* _AbilityManager,
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
               class UInventoryComponent* _PlayerInventoryC,

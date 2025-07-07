@@ -29,6 +29,8 @@ public:
   class UControlsHelpersWidget* ControlsHelpersWidget;
 
   UPROPERTY(EditAnywhere)
+  const class AAbilityManager* AbilityManager;
+  UPROPERTY(EditAnywhere)
   const class AStore* Store;
 
   UPROPERTY(EditAnywhere)
@@ -38,6 +40,7 @@ public:
 
   void RefreshUI();
   void InitUI(FInUIInputActions InUIInputActions,
+              const class AAbilityManager* _AbilityManager,
               const class AStore* _Store,
               class UNegotiationSystem* _NegotiationSystem,
               std::function<void(float)> _OfferAcceptFunc,
