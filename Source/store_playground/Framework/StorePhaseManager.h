@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
+#include "store_playground/Player/PlayerZDCharacter.h"
 #include "StorePhaseManager.generated.h"
 
 UENUM()
@@ -67,6 +68,8 @@ public:
   FTimerHandle OpenShopTimerHandle;
   UFUNCTION()
   void OnOpenShopTimerEnd();
+
+  void ShopOpenConsiderPlayerState(EPlayerState PlayerBehaviourState);
 
   void Start();
   void BuildMode();

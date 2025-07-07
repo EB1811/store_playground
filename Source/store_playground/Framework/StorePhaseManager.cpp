@@ -46,6 +46,22 @@ void AStorePhaseManager::BeginPlay() {
 
 void AStorePhaseManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void AStorePhaseManager::ShopOpenConsiderPlayerState(EPlayerState PlayerBehaviourState) {
+  check(StorePhaseState == EStorePhaseState::ShopOpen);
+
+  switch (PlayerBehaviourState) {
+    case EPlayerState::FocussedMenu:
+    case EPlayerState::Cutscene: {
+      GetWorld()->GetTimerManager().PauseTimer(OpenShopTimerHandle);
+      break;
+    }
+    case EPlayerState::Normal: {
+      GetWorld()->GetTimerManager().UnPauseTimer(OpenShopTimerHandle);
+      break;
+    }
+  }
+}
+
 void AStorePhaseManager::Start() {
   check(CustomerAIManager);
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::Start);
@@ -120,7 +136,7 @@ void AStorePhaseManager::NextPhase() {
       default: break;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("Next phase: %s"), *UEnum::GetDisplayValueAsText(StorePhaseState).ToString());
+    UE_LOG(LogTemp, Log, TEXT("Next phase: %s"), *UEnum::GetDisplayValueAsText(StorePhaseState).ToString());
   });
 }
 
@@ -130,5 +146,5 @@ void AStorePhaseManager::OnOpenShopTimerEnd() {
   PlayerCommand->CommandExitCurrentAction();
   NextPhase();
 
-  UE_LOG(LogTemp, Warning, TEXT("Open shop timer ended."));
+  UE_LOG(LogTemp, Log, TEXT("Open shop timer ended."));
 }

@@ -177,6 +177,9 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
 
   PlayerBehaviourState = NewState;
   UE_LOG(LogTemp, Warning, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
+
+  if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen)
+    StorePhaseManager->ShopOpenConsiderPlayerState(PlayerBehaviourState);
 }
 
 void APlayerZDCharacter::Move(const FInputActionValue& Value) {
