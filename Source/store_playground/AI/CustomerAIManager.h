@@ -53,6 +53,9 @@ struct FCustomerAIBehaviorParams {
   float AcceptanceMinMulti;
   UPROPERTY(EditAnywhere, SaveGame)
   float AcceptanceMaxMulti;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float CustomerWaitingTime;  // * Time the customer waits before leaving.
 };
 
 UCLASS(Blueprintable)

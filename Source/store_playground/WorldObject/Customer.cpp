@@ -20,16 +20,16 @@ ACustomer::ACustomer() {
 void ACustomer::BeginPlay() {
   Super::BeginPlay();
 
-  WidgetComponent->SetVisibility(false, true);
+  // WidgetComponent->SetVisibility(false, true);
   // WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-  WidgetComponent->SetDrawSize(FVector2D(100.0f, 100.0f));
-  WidgetComponent->SetWorldLocation(GetActorLocation());
-  WidgetComponent->SetWorldRotation(FRotator(45, 90, 0));  // y, z, x
+  // WidgetComponent->SetDrawSize(FVector2D(100.0f, 100.0f));
+  WidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -35.0f, 110.0f));
+  WidgetComponent->SetWorldRotation(FRotator(35, 90, 0));  // y, z, x
 }
 
 void ACustomer::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
 
   if (WidgetComponent->IsWidgetVisible())
-    WidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -45, 25.0f));
+    WidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -35.0f, 110.0f));
 }

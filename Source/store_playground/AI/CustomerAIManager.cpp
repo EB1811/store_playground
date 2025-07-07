@@ -55,6 +55,7 @@ ACustomerAIManager::ACustomerAIManager() {
   };
   BehaviorParams.AcceptanceMinMulti = 1.0f;
   BehaviorParams.AcceptanceMaxMulti = 1.0f;
+  BehaviorParams.CustomerWaitingTime = 10.0f;
 
   LastSpawnTime = 0.0f;
   LastPickItemCheckTime = 0.0f;
@@ -292,7 +293,11 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         break;
       }
       case (ECustomerState::Requesting): {
-        // ? Maybe have a timer for how long the customer waits for the item.
+        if (GetWorld()->TimeSince(Customer->CustomerAIComponent->RequestingTime) > BehaviorParams.CustomerWaitingTime) {
+          Customer->WidgetComponent->SetVisibility(false, true);
+          Customer->InteractionComponent->InteractionType = EInteractionType::None;
+          Customer->CustomerAIComponent->CustomerState = ECustomerState::Leaving;
+        }
         break;
       }
       case (ECustomerState::Negotiating): {
@@ -447,7 +452,11 @@ auto ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UIte
 }
 
 void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
+  AAIController* OwnerAIController = Customer->GetController<AAIController>();
+  if (OwnerAIController) OwnerAIController->StopMovement();
+
   UCustomerAIComponent* CustomerAI = Customer->CustomerAIComponent;
+  CustomerAI->RequestingTime = GetWorld()->GetTimeSeconds();
 
   Customer->InteractionComponent->InteractionType = EInteractionType::WaitingCustomer;
   Customer->WidgetComponent->SetVisibility(true, true);

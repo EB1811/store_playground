@@ -16,7 +16,6 @@ public:
   ANpc();
 
   virtual void BeginPlay() override;
-
   UPROPERTY(EditAnywhere, Category = "Npc")
   class UInteractionComponent* InteractionComponent;
 
@@ -28,6 +27,9 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Npc")
   class USimpleSpriteAnimComponent* SimpleSpriteAnimComponent;
+
+  UPROPERTY(EditAnywhere, Category = "Npc")
+  class UWidgetComponent* DynamicTalkingWidgetComponent;
 
   UPROPERTY(EditAnywhere, Category = "Npc", SaveGame)
   FGuid SpawnPointId;  // * Spawn point id (for saving).

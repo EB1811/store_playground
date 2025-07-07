@@ -39,6 +39,7 @@
 #include "store_playground/Player/PlayerCommand.h"
 #include "PaperFlipbookComponent.h"
 #include "PaperZDAnimationComponent.h"
+#include "Components/WidgetComponent.h"
 
 AMarketLevel::AMarketLevel() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -404,6 +405,8 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     Npc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
     Npc->DialogueComponent->SpeakerName = RandomNpcData.CustomerName;
+
+    if (FMath::FRand() < 0.1) Npc->DynamicTalkingWidgetComponent->SetVisibility(true, true);
 
     if (Market->TodaysEconEvents.Num() <= 0) {
       Npc->DialogueComponent->DialogueArray =

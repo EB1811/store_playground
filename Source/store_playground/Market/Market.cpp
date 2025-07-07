@@ -152,7 +152,7 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
 
   if (!CanTransferItem(PlayerInventory, Item)) return false;
 
-  PlayerStore->ItemBought(Item, SingleItemPrice);
+  PlayerStore->ItemBought(Item, SingleItemPrice, Quantity);
   auto TransferItemRes = TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity);
   check(TransferItemRes.bSuccess);
 

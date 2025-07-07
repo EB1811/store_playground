@@ -64,6 +64,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerState CustomerState;
 
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  float RequestingTime;  // * Time the customer waits.
+
   void LeaveRequestDialogue();
 
   void StartNegotiation();
