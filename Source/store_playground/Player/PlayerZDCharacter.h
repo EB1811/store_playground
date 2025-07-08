@@ -11,10 +11,11 @@
 // * Corresponds to different input contexts to control allowed input actions in various states.
 UENUM()
 enum class EPlayerState : uint8 {
-  Normal UMETA(DisplayName = "Normal"),              // * Normal state.
-  Cutscene UMETA(DisplayName = "Cutscene"),          // * In a cutscene.
+  Normal UMETA(DisplayName = "Normal"),
+  Cutscene UMETA(DisplayName = "Cutscene"),
   FocussedMenu UMETA(DisplayName = "FocussedMenu"),  // * In a focussed menu (dialogue, negotiation, etc.).
-  Paused UMETA(DisplayName = "Paused"),              // * In a paused state.
+  NoControl UMETA(DisplayName = "NoControl"),
+  Paused UMETA(DisplayName = "Paused"),
 };
 
 USTRUCT()
@@ -220,7 +221,9 @@ public:
                   class UCustomerAIComponent* CustomerAI = nullptr,
                   class UItemBase* Item = nullptr);
   void EnterCutscene(const struct FResolvedCutsceneData ResolvedCutsceneData);
+
   void ExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
+  void ResetLocationToSpawnPoint();
 
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
   void LeaveStore();

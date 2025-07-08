@@ -88,10 +88,11 @@ public:
   UPROPERTY()
   EHUDState HUDState;
 
-  std::function<void()> SetPlayerFocussedFunc;  // * Set player state to menu (in control of the player).
-  std::function<void()> SetPlayerCutsceneFunc;  // * Set player state to cutscene (not in control of the player).
-  std::function<void()> SetPlayerNormalFunc;    // * Set player state to normal (not in menu, etc.).
-  std::function<void()> SetPlayerPausedFunc;    // * Set player state to paused (not in menu, etc.).
+  std::function<void()> SetPlayerFocussedFunc;   // * Set player state to menu (in control of the player).
+  std::function<void()> SetPlayerCutsceneFunc;   // * Set player state to cutscene (not in control of the player).
+  std::function<void()> SetPlayerNormalFunc;     // * Set player state to normal (not in menu, etc.).
+  std::function<void()> SetPlayerNoControlFunc;  // * Set player state to no control (i.e, loading, etc.).
+  std::function<void()> SetPlayerPausedFunc;     // * Set player state to paused (not in menu, etc.).
 
   UPROPERTY(EditAnywhere)
   FInGameInputActions InGameInputActions;

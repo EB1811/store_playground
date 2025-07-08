@@ -228,7 +228,7 @@ void UNegotiationSystem::NegotiationSuccess() {
     for (UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemBought(NegotiatedItem, OfferedPrice);
     for (const UItemBase* NegotiatedItem : NegotiatedItems) {
       // Checks are done in the negotiation process so this should always be true.
-      check(CanTransferItem(FromInventory, NegotiatedItem));
+      check(CanTransferItem(PlayerInventory, NegotiatedItem));
 
       PlayerInventory->AddItem(NegotiatedItem);
     }

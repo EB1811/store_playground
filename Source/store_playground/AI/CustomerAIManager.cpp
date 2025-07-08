@@ -34,7 +34,7 @@
 
 ACustomerAIManager::ACustomerAIManager() {
   PrimaryActorTick.bCanEverTick = true;
-  PrimaryActorTick.TickInterval = 1.0f;
+  // PrimaryActorTick.TickInterval = 1.0f;
 
   ManagerParams.bSpawnCustomers = false;
   ManagerParams.CustomerSpawnInterval = 5.0f;
@@ -90,7 +90,10 @@ void ACustomerAIManager::EndCustomerAI() {
 
   TArray<ACustomer*> CustomersToRemove;
   for (ACustomer* Customer : AllCustomers) CustomersToRemove.Add(Customer);
+  for (ACustomer* Customer : ExitingCustomers) CustomersToRemove.Add(Customer);
   AllCustomers.Empty();
+  ExitingCustomers.Empty();
+
   for (ACustomer* Customer : CustomersToRemove) Customer->Destroy();
 }
 
@@ -132,16 +135,6 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
   UniqueCustomer->CustomerAIComponent->Attitude = UniqueNpcData.NegotiationData.Attitude;
   UniqueCustomer->CustomerAIComponent->Tags = UniqueNpcData.NegotiationData.Tags;
-  UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage =
-      FMath::FRandRange(UniqueNpcData.NegotiationData.AcceptancePercentageRange[0],
-                        UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
-      100.0f;
-  UniqueCustomer->CustomerAIComponent->NegotiationAI->CustomerName = UniqueNpcData.NpcName;
-  UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(
-      UniqueNpcData.NegotiationData.Attitude, [&](const FDialogueData& Dialogue) {
-        return Dialogue.DialogueTags.IsEmpty() ||
-               Dialogue.DialogueTags.HasAny(UniqueCustomer->CustomerAIComponent->Tags);
-      });
 
   const FCustomerPop* CustomerPopData = MarketEconomy->CustomerPops.FindByPredicate(
       [UniqueNpcData](const FCustomerPop& Pop) { return Pop.ID == UniqueNpcData.LinkedPopID; });
@@ -150,6 +143,25 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   check(CustomerPopData && PopEconData);
   UniqueCustomer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
   UniqueCustomer->CustomerAIComponent->AvailableMoney = PopEconData->Money / PopEconData->Population;
+
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->CustomerName = UniqueNpcData.NpcName;
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(
+      UniqueNpcData.NegotiationData.Attitude, [&](const FDialogueData& Dialogue) {
+        return Dialogue.DialogueTags.IsEmpty() ||
+               Dialogue.DialogueTags.HasAny(UniqueCustomer->CustomerAIComponent->Tags);
+      });
+
+  float MoneyToSpend = UniqueCustomer->CustomerAIComponent->AvailableMoney;
+  float AcceptancePercentage = FMath::FRandRange(UniqueNpcData.NegotiationData.AcceptancePercentageRange[0],
+                                                 UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]) /
+                               100.0f;
+
+  for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
+    if (Skill.EffectType == ECustomerAIEffect::MoneyToSpend) MoneyToSpend *= Skill.Multi;
+    else if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
+
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->MoneyToSpend = MoneyToSpend;
+  UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage = AcceptancePercentage;
 
   AllCustomers.Add(UniqueCustomer);
 
@@ -270,18 +282,16 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   check(Store);
   LastPickItemCheckTime = GetWorld()->GetTimeSeconds();
 
-  TArray<ACustomer*> CustomersToRemove;
-
   UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
   check(NavSystem);
 
+  TArray<ACustomer*> CustomersToExit;
   for (ACustomer* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
         if (PickingItemIdsMap.Num() < ManagerParams.MaxCustomersPickingAtOnce) {
           if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
             CustomerPerformAction(Customer);
-            // Stop movement.
             break;
           }
         }
@@ -304,7 +314,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         break;
       }
       case (ECustomerState::Leaving): {
-        CustomersToRemove.Add(Customer);
+        CustomersToExit.Add(Customer);
         break;
       }
       case (ECustomerState::PerformingQuest): {
@@ -314,17 +324,30 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     }
   }
 
-  for (ACustomer* Customer : CustomersToRemove) {
+  for (ACustomer* Customer : CustomersToExit) {
+    MoveCustomerToExit(NavSystem, Customer);
+
+    ExitingCustomers.Add(Customer);
     AllCustomers.RemoveSingleSwap(Customer);
 
     // ? Call function somewhere to remove the picked item on successful negotiation?
     if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
       PickingItemIdsMap.Remove(*ItemID);
+  }
+
+  TArray<ACustomer*> CustomersToDestroy;
+  for (ACustomer* Customer : ExitingCustomers) {
+    if (Customer->GetController<AAIController>()->GetMoveStatus() != EPathFollowingStatus::Idle) continue;
+
+    CustomersToDestroy.Add(Customer);
 
     if (Customer->CustomerAIComponent->NegotiationAI) {
       Customer->CustomerAIComponent->NegotiationAI->RelevantItem = nullptr;
       Customer->CustomerAIComponent->NegotiationAI = nullptr;
     }
+  }
+  for (ACustomer* Customer : CustomersToDestroy) {
+    ExitingCustomers.RemoveSingleSwap(Customer);
     Customer->Destroy();
   }
 }
@@ -338,7 +361,7 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
 
   FNavLocation RandomLocation;
   NavSystem->GetRandomReachablePointInRadius(Customer->GetActorLocation(), float(500.0f), RandomLocation);
-  Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(50.0f, 350.0f);
+  Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(75.0f, 300.0f);
 
   // ? Do we only need to bind it once?
   OwnerAIController->GetPathFollowingComponent()->OnRequestFinished.RemoveAll(this);
@@ -353,6 +376,25 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   Customer->SimpleSpriteAnimComponent->Walk(DirectionEnum);
 
   OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, true, false);
+}
+void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem, ACustomer* Customer) {
+  check(NavSystem && Customer);
+
+  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];  // Spawn point is exit.
+  check(SpawnPoint);
+
+  AAIController* OwnerAIController = Customer->GetController<AAIController>();
+  check(OwnerAIController);
+  check(OwnerAIController->GetMoveStatus() == EPathFollowingStatus::Idle);
+
+  FVector Direction = (SpawnPoint->GetActorLocation() - Customer->GetActorLocation()).GetSafeNormal();
+  ESimpleSpriteDirection DirectionEnum = ESimpleSpriteDirection::Down;
+  if (FMath::Abs(Direction.X) > FMath::Abs(Direction.Y))
+    DirectionEnum = Direction.X > 0 ? ESimpleSpriteDirection::Right : ESimpleSpriteDirection::Left;
+  else DirectionEnum = Direction.Y > 0 ? ESimpleSpriteDirection::Down : ESimpleSpriteDirection::Up;
+  Customer->SimpleSpriteAnimComponent->Walk(DirectionEnum);
+
+  OwnerAIController->MoveToLocation(SpawnPoint->GetActorLocation(), 1.0f, false, true, true, false);
 }
 
 void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
@@ -370,6 +412,7 @@ void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
   ECustomerAction Action = Customer->CustomerAIComponent->CustomerAction != ECustomerAction::None
                                ? Customer->CustomerAIComponent->CustomerAction
                                : RandomAction;
+  // ? Fallthrough?
   switch (Action) {
     case (ECustomerAction::PickItem):
       if (CustomerPickItem(Customer->CustomerAIComponent)) MakeCustomerNegotiable(Customer);
@@ -382,6 +425,9 @@ void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
 
       break;
     case (ECustomerAction::Leave): {
+      AAIController* OwnerAIController = Customer->GetController<AAIController>();
+      if (OwnerAIController) OwnerAIController->StopMovement();
+
       Customer->CustomerAIComponent->CustomerState = ECustomerState::Leaving;
       break;
     }

@@ -25,6 +25,8 @@ public:
   UPROPERTY(EditAnywhere)
   class APlayerZDCharacter* PlayerCharacter;
 
+  void ResetPosition();  // * Reset player position to the last spawn point.
+
   void CommandDialogue(TArray<struct FDialogueData> DialogueArray);
   void CommandNegotiation(class UCustomerAIComponent* CustomerAI,
                           class UItemBase* Item,

@@ -141,6 +141,7 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerFocussedFunc = [this]() { ChangePlayerState(EPlayerState::FocussedMenu); };
   HUD->SetPlayerNormalFunc = [this]() { ChangePlayerState(EPlayerState::Normal); };
   HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
+  HUD->SetPlayerNoControlFunc = [this]() { ChangePlayerState(EPlayerState::NoControl); };
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
 
   HUD->InGameInputActions = InGameInputActions;
@@ -227,7 +228,9 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
       StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode)
     return;
 
-  StorePhaseManager->BuildMode();
+  if (LevelManager->CurrentLevel != ELevel::Store) return;
+
+  StorePhaseManager->EnterBuildMode();
 }
 // Rechecking on input to avoid problems with the interaction frequency not keeping up.
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
@@ -339,6 +342,8 @@ auto APlayerZDCharacter::CheckForInteraction() -> bool {
 }
 
 auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactable) const -> bool {
+  if (PlayerBehaviourState != EPlayerState::Normal) return false;
+
   switch (Interactable->InteractionType) {
     case EInteractionType::None: return false; break;
     case EInteractionType::Buildable:
@@ -347,6 +352,10 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
     case EInteractionType::StockDisplay:
       if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) return false;
       break;
+    case EInteractionType::LevelChange:
+    case EInteractionType::LeaveStore:
+      if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen) return false;
+      break;
   }
 
   return true;
@@ -354,11 +363,6 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
 
 void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) {
   HUD->CloseInteractionPopup();
-
-  // HUD->EarlyCloseWidgetFunc = [this, Interactable]() {
-  //   check(Interactable);
-  //   Interactable->EndInteraction();
-  // };
 
   switch (Interactable->InteractionType) {
     case EInteractionType::LevelChange: {
@@ -566,8 +570,16 @@ void APlayerZDCharacter::ExitCurrentAction() {
   // ? Implement a queue to exit after cutscene?
   check(PlayerBehaviourState != EPlayerState::Cutscene);
 
-  HUD->PlayerCloseAllMenus();
-  ChangePlayerState(EPlayerState::Normal);
+  HUD->QuitUIAction();
+}
+void APlayerZDCharacter::ResetLocationToSpawnPoint() {
+  ASpawnPoint* SpawnPoint =
+      *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([this](const ASpawnPoint* SpawnPoint) {
+        return SpawnPoint->Level == LevelManager->CurrentLevel;
+      });
+  check(SpawnPoint);
+
+  this->SetActorLocation(SpawnPoint->GetActorLocation());
 }
 
 // ? Change parameter to ELevel?
@@ -578,7 +590,8 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
       if (LevelManager->CurrentLevel == ELevel::Store && LevelChangeC->LevelToLoad != ELevel::Market) return;
       if (LevelManager->CurrentLevel == ELevel::Market && LevelChangeC->LevelToLoad != ELevel::Store) return;
 
-      if (StorePhaseManager->StorePhaseState == EStorePhaseState::MorningBuildMode) StorePhaseManager->BuildMode();
+      if (StorePhaseManager->StorePhaseState == EStorePhaseState::MorningBuildMode)
+        StorePhaseManager->ToggleBuildMode();
       break;
     case EStorePhaseState::ShopOpen: return;
     case EStorePhaseState::Night:

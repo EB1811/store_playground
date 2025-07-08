@@ -12,6 +12,12 @@ void APlayerCommand::BeginPlay() { Super::BeginPlay(); }
 
 void APlayerCommand::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void APlayerCommand::ResetPosition() {
+  check(PlayerCharacter);
+
+  PlayerCharacter->ResetLocationToSpawnPoint();
+}
+
 void APlayerCommand::CommandDialogue(TArray<struct FDialogueData> DialogueArray) {
   check(PlayerCharacter);
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);

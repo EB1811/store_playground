@@ -46,6 +46,15 @@ void AStorePhaseManager::BeginPlay() {
 
 void AStorePhaseManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+void AStorePhaseManager::OnOpenShopTimerEnd() {
+  if (StorePhaseState != EStorePhaseState::ShopOpen) return;
+
+  PlayerCommand->CommandExitCurrentAction();
+  NextPhase();
+
+  UE_LOG(LogTemp, Log, TEXT("Open shop timer ended."));
+}
+
 void AStorePhaseManager::ShopOpenConsiderPlayerState(EPlayerState PlayerBehaviourState) {
   check(StorePhaseState == EStorePhaseState::ShopOpen);
 
@@ -69,7 +78,7 @@ void AStorePhaseManager::Start() {
   DayManager->StartNewDay();
 }
 
-void AStorePhaseManager::BuildMode() {
+void AStorePhaseManager::ToggleBuildMode() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::ToggleBuildMode);
 
   TArray<ABuildable*> EmptyBuildables =
@@ -123,12 +132,12 @@ void AStorePhaseManager::EndDay() {
 }
 
 void AStorePhaseManager::NextPhase() {
-  ASpgHUD* HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  ASpgHUD* HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());  // ? Save as reference?
   HUD->StorePhaseTransition([this]() {
     switch (StorePhaseState) {
       case EStorePhaseState::Morning: OpenShop(); break;
       case EStorePhaseState::MorningBuildMode:
-        BuildMode();
+        ToggleBuildMode();
         OpenShop();
         break;
       case EStorePhaseState::ShopOpen: CloseShop(); break;
@@ -140,11 +149,13 @@ void AStorePhaseManager::NextPhase() {
   });
 }
 
-void AStorePhaseManager::OnOpenShopTimerEnd() {
-  if (StorePhaseState != EStorePhaseState::ShopOpen) return;
+void AStorePhaseManager::EnterBuildMode() {
+  if (StorePhaseState != EStorePhaseState::Morning && StorePhaseState != EStorePhaseState::MorningBuildMode) return;
 
-  PlayerCommand->CommandExitCurrentAction();
-  NextPhase();
+  ASpgHUD* HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());  // ? Save as reference?
+  HUD->StorePhaseTransition([this]() {
+    ToggleBuildMode();
 
-  UE_LOG(LogTemp, Log, TEXT("Open shop timer ended."));
+    PlayerCommand->ResetPosition();
+  });
 }

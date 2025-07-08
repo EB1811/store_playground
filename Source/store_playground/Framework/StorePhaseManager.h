@@ -72,9 +72,10 @@ public:
   void ShopOpenConsiderPlayerState(EPlayerState PlayerBehaviourState);
 
   void Start();
-  void BuildMode();
+  void ToggleBuildMode();
   void OpenShop();
   void CloseShop();
   void EndDay();
   void NextPhase();
+  void EnterBuildMode();
 };

@@ -106,6 +106,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TArray<class ACustomer*> AllCustomers;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  TArray<class ACustomer*> ExitingCustomers;
 
   void StartCustomerAI();
   void EndCustomerAI();
@@ -115,6 +117,8 @@ public:
   void PerformCustomerAILoop();
 
   void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
+  void MoveCustomerToExit(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
+
   void CustomerPerformAction(class ACustomer* Customer);
 
   auto CustomerPickItem(class UCustomerAIComponent* CustomerAI,

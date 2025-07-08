@@ -54,7 +54,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float MoneyToSpend;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  float AcceptancePercentage;
+  float AcceptancePercentage;  // todo-low: Actually multi (0-1), change name to reflect that.
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float MaxHagglingCount;
 

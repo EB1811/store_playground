@@ -209,10 +209,7 @@ void ASpgHUD::PlayerCloseTopOpenMenu() {
 }
 
 void ASpgHUD::PlayerCloseAllMenus() {
-  for (UUserWidget* Widget : OpenedWidgets) HideWidget(Widget);
-
-  if (EarlyCloseWidgetFunc) EarlyCloseWidgetFunc();
-  EarlyCloseWidgetFunc = nullptr;
+  QuitUIAction();
 
   OpenedWidgets.Empty();
   LeaveHUD();
@@ -568,12 +565,12 @@ void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
   OpenFocusedMenu(MiniGameWidget);
 }
 void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
-  // SetPlayerPausedFunc();
+  SetPlayerNoControlFunc();
 
   StorePhaseTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
   StorePhaseTransitionWidget->FadeOutEndFunc = [this]() {
     ShowInGameHudWidget();
-    // SetPlayerNormalFunc();
+    SetPlayerNormalFunc();
 
     StorePhaseTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
     StorePhaseTransitionWidget->RemoveFromParent();
@@ -584,7 +581,7 @@ void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
 }
 
 void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {
-  // SetPlayerPausedFunc();
+  SetPlayerNoControlFunc();
 
   LevelLoadingTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
 
@@ -593,7 +590,7 @@ void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) 
 }
 void ASpgHUD::EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc) {
   LevelLoadingTransitionWidget->FadeOutEndFunc = [this, _FadeOutEndFunc = _FadeOutEndFunc]() {
-    // SetPlayerNormalFunc();
+    SetPlayerNormalFunc();
 
     LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
     LevelLoadingTransitionWidget->RemoveFromParent();
