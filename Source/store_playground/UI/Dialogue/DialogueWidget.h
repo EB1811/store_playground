@@ -14,6 +14,9 @@ class STORE_PLAYGROUND_API UDialogueWidget : public UUserWidget {
 public:
   virtual void NativeOnInitialized() override;
 
+  UPROPERTY(EditAnywhere)
+  TSubclassOf<class UDialogueChoiceWidget> DialogueChoiceWidgetClass;
+
   UPROPERTY(meta = (BindWidget))
   class UDialogueBoxWidget* DialogueBoxWidget;
   UPROPERTY(meta = (BindWidget))
@@ -21,8 +24,13 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UControlsHelpersWidget* ControlsHelpersWidget;
 
-  UPROPERTY(EditAnywhere)
-  TSubclassOf<class UDialogueChoiceWidget> DialogueChoiceWidgetClass;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* ShowAnim;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* HideAnim;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* NextSound;
 
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
@@ -42,10 +50,16 @@ public:
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
   void SetupUIActionable();
+
   UPROPERTY(EditAnywhere)
   FUIBehaviour UIBehaviour;
   void SetupUIBehaviour();
 
+  UFUNCTION()
+  void UIAnimComplete();
+  std::function<void()> UIAnimCompleteFunc;
+
+  // Needed for blueprint/c++ communication.
   UFUNCTION(BlueprintImplementableEvent)
   void OnVisibilityChangeRequested(ESlateVisibility NewVisibility);
 

@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include <cstddef>
+#include "Engine/EngineTypes.h"
 #include "Engine/StaticMesh.h"
 #include "Internationalization/Text.h"
 #include "Logging/LogVerbosity.h"
@@ -8,6 +10,7 @@
 #include "Misc/AssertionMacros.h"
 #include "PaperZDCharacter.h"
 #include "PlayerZDCharacter.h"
+#include "TimerManager.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
@@ -54,6 +57,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/AudioComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 
 APlayerZDCharacter::APlayerZDCharacter() {
   // Set this character to call Tick() every frame.
@@ -71,6 +76,7 @@ APlayerZDCharacter::APlayerZDCharacter() {
   PlayerInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
   PlayerTagsComponent = CreateDefaultSubobject<UTagsComponent>(TEXT("TagsComponent"));
   PlayerWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("PlayerWidgetComponent"));
+  FootstepAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("FootstepAudio"));
 }
 
 void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -80,6 +86,10 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     // In Game
     EnhancedInputComponent->BindAction(InGameInputActions.MoveAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::Move);
+    EnhancedInputComponent->BindAction(InGameInputActions.MoveAction, ETriggerEvent::Started, this,
+                                       &APlayerZDCharacter::StartMove);
+    EnhancedInputComponent->BindAction(InGameInputActions.MoveAction, ETriggerEvent::Completed, this,
+                                       &APlayerZDCharacter::StopMove);
     EnhancedInputComponent->BindAction(InGameInputActions.OpenPauseMenuAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::OpenPauseMenu);
     EnhancedInputComponent->BindAction(InGameInputActions.OpenInventoryViewAction, ETriggerEvent::Triggered, this,
@@ -149,6 +159,10 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->InCutsceneInputActions = InCutsceneInputActions;
 
   CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+
+  // !
+  // auto* PlayerController = Cast<APlayerController>(GetController());
+  // PlayerController->SetAudioListenerOverride(GetSprite(), FVector::ZeroVector, FRotator::ZeroRotator);
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) {
@@ -161,6 +175,11 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
   if (PlayerBehaviourState == EPlayerState::Normal &&
       GetWorld()->TimeSince(OcclusionCheckData.LastOcclusionCheckTime) > OcclusionCheckData.OcclusionCheckFrequency) {
     HandleOcclusion();
+  }
+
+  if (PlayerBehaviourState == EPlayerState::Normal &&
+      GetWorld()->TimeSince(LastCurrentFootstepPhysMatCheckTime) > InteractionData.InteractionCheckFrequency) {
+    CheckCurrentFootstepPhysMat();
   }
 }
 
@@ -203,6 +222,14 @@ void APlayerZDCharacter::Move(const FInputActionValue& Value) {
   NewRotation.Roll = 0.0f;
   NewRotation.Normalize();
   SetActorRotation(NewRotation);
+}
+void APlayerZDCharacter::StartMove(const FInputActionValue& Value) {
+  FootstepAudio->Activate();
+  GetWorld()->GetTimerManager().SetTimer(FootstepAudioTimer, this, &APlayerZDCharacter::PlayFootstepAudio, 0.32f, true);
+}
+void APlayerZDCharacter::StopMove(const FInputActionValue& Value) {
+  // FootstepAudio->Deactivate();
+  GetWorld()->GetTimerManager().ClearTimer(FootstepAudioTimer);
 }
 
 void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
@@ -257,6 +284,33 @@ void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
   check(PlayerBehaviourState == EPlayerState::Cutscene);
 
   HUD->SkipCutscene();
+}
+
+void APlayerZDCharacter::PlayFootstepAudio() {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
+  if (CurrentFootstepPhysMat) FootstepAudio->SetIntParameter(FName("SurfaceType"), CurrentFootstepPhysMat->SurfaceType);
+  FootstepAudio->Play();
+}
+void APlayerZDCharacter::CheckCurrentFootstepPhysMat() {
+  LastCurrentFootstepPhysMatCheckTime = GetWorld()->GetTimeSeconds();
+
+  // pawn to ground
+  FVector TraceStart{GetPawnViewLocation() - FVector(0, 0, 50)};
+  FVector TraceEnd{TraceStart - FVector(0, 0, 500)};
+
+  FCollisionQueryParams TraceParams;
+  TraceParams.AddIgnoredActor(this);
+  TraceParams.bReturnPhysicalMaterial = true;  // Why is this not default?
+  FHitResult TraceHit;
+
+  if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, TraceParams)) {
+    if (auto PhysMaterial = TraceHit.PhysMaterial.Get()) {
+      if (CurrentFootstepPhysMat != PhysMaterial) CurrentFootstepPhysMat = PhysMaterial;
+    } else {
+      UE_LOG(LogTemp, Log, TEXT("No physical material found for footstep sound."));
+    }
+  }
 }
 
 void APlayerZDCharacter::HandleOcclusion() {

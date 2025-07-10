@@ -3,6 +3,7 @@
 #pragma once
 
 #include <functional>
+#include "Components/AudioComponent.h"
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
 #include "store_playground/Player/InputStructs.h"
@@ -80,6 +81,10 @@ public:
   // In Game
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Move(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void StartMove(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void StopMove(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void OpenPauseMenu(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
@@ -174,6 +179,19 @@ public:
   // * Movement
   UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Movement")
   FVector FacingDirection;
+  // Movement Audio
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Movement")
+  UAudioComponent* FootstepAudio;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Movement")
+  FTimerHandle FootstepAudioTimer;  // * Loops footstep audio.
+  UFUNCTION(BlueprintCallable, Category = "Character | Movement")
+  void PlayFootstepAudio();
+  UPROPERTY(EditAnywhere, Category = "Character | Movement")
+  class UPhysicalMaterial* CurrentFootstepPhysMat;
+  UPROPERTY(EditAnywhere, Category = "Character | Movement")
+  float LastCurrentFootstepPhysMatCheckTime;
+  UFUNCTION(Category = "Character | Movement")
+  void CheckCurrentFootstepPhysMat();
 
   // * Occlusion Masking
   UPROPERTY(EditAnywhere, Category = "Character | Occlusion")

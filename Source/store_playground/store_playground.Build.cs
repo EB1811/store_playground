@@ -11,7 +11,7 @@ public class store_playground : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Paper2D", "AIModule", "NavigationSystem", "GameplayTags" }); 
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "MassEntity", "MassCommon", "MassMovement", "Renderer", "RenderCore", "RHI", "CommonUI",});
+		PrivateDependencyModuleNames.AddRange(new string[] { "MassEntity", "MassCommon", "MassMovement", "Renderer", "RenderCore", "RHI", "CommonUI", "PhysicsCore"});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

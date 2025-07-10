@@ -98,6 +98,7 @@ Content/**/*
 !/Content/Levels/**/*.uasset
 !/Content/Levels/**/*.umap
 !/Content/PostProcess/**
+!/Content/Audio/**
 
 # Ignoring starter content since it can be easily downloaded
 Content/StarterContent/*

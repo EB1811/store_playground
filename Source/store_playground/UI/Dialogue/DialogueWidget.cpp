@@ -3,6 +3,7 @@
 #include "DialogueChoiceWidget.h"
 #include "HAL/Platform.h"
 #include "Logging/LogMacros.h"
+#include "Misc/AssertionMacros.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/UI/Components/ControlsHelpersWidget.h"
@@ -11,6 +12,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/WrapBox.h"
+#include "Animation/WidgetAnimation.h"
+#include "Kismet/GameplayStatics.h"
 
 auto GetSpeakerName(const UDialogueSystem* DialogueSystem) -> FString {
   return DialogueSystem->DialogueState == EDialogueState::PlayerTalk ? "Player"
@@ -19,6 +22,8 @@ auto GetSpeakerName(const UDialogueSystem* DialogueSystem) -> FString {
 
 void UDialogueWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
+
+  check(NextSound);
 
   DialogueBoxWidget->NextButton->OnClicked.AddDynamic(this, &UDialogueWidget::Next);
 
@@ -58,7 +63,7 @@ void UDialogueWidget::Next() {
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
       ChoicesBoxWidget->SetVisibility(ESlateVisibility::Visible);
 
-      return;
+      break;
     }
     case EDialogueState::NPCTalk:
     case EDialogueState::PlayerTalk: {
@@ -66,10 +71,12 @@ void UDialogueWidget::Next() {
       UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                          NextDialogue.DialogueData->Action == EDialogueAction::End);
 
-      return;
+      break;
     }
-    default: check(false); return;
+    default: checkNoEntry(); break;
   }
+
+  UGameplayStatics::PlaySound2D(this, NextSound, 0.75f);
 }
 
 void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
@@ -92,6 +99,8 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
   FString SpeakerName = GetSpeakerName(DialogueSystem);
   UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                      NextDialogue.DialogueData->Action == EDialogueAction::End);
+
+  UGameplayStatics::PlaySound2D(this, NextSound, 0.75f);
 }
 
 void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
@@ -132,7 +141,28 @@ void UDialogueWidget::SetupUIActionable() {
   UIActionable.RetractUI = [this]() { CloseDialogueFunc(); };
   UIActionable.QuitUI = [this]() { CloseDialogueFunc(); };
 }
+
 void UDialogueWidget::SetupUIBehaviour() {
-  UIBehaviour.ShowUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Visible); };
-  UIBehaviour.HideUI = [this]() { OnVisibilityChangeRequested(ESlateVisibility::Collapsed); };
+  FWidgetAnimationDynamicEvent UIAnimEvent;
+  UIAnimEvent.BindDynamic(this, &UDialogueWidget::UIAnimComplete);
+  BindToAnimationFinished(ShowAnim, UIAnimEvent);
+
+  UIBehaviour.ShowUI = [this](std::function<void()> Callback) {
+    UIAnimCompleteFunc = Callback;
+
+    SetVisibility(ESlateVisibility::Visible);
+    UUserWidget::PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+  };
+  UIBehaviour.HideUI = [this](std::function<void()> Callback) {
+    UIAnimCompleteFunc = [this, Callback]() {
+      if (Callback) Callback();
+
+      SetVisibility(ESlateVisibility::Collapsed);
+    };
+
+    UUserWidget::PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+  };
+}
+void UDialogueWidget::UIAnimComplete() {
+  if (UIAnimCompleteFunc) UIAnimCompleteFunc();
 }

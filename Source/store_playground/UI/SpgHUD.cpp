@@ -153,7 +153,7 @@ inline void ShowWidget(UUserWidget* Widget) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
     FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
     check(UIBehaviour->ShowUI);
-    return UIBehaviour->ShowUI();
+    return UIBehaviour->ShowUI(nullptr);
   }
 
   Widget->SetVisibility(ESlateVisibility::Visible);
@@ -162,7 +162,7 @@ inline void HideWidget(UUserWidget* Widget) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
     FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
     check(UIBehaviour->HideUI);
-    return UIBehaviour->HideUI();
+    return UIBehaviour->HideUI(nullptr);
   }
 
   Widget->SetVisibility(ESlateVisibility::Collapsed);
@@ -200,10 +200,6 @@ void ASpgHUD::PlayerCloseTopOpenMenu() {
   HideWidget(Widget);
 
   if (!OpenedWidgets.IsEmpty()) return;
-
-  // Only relevant for focussed menus.
-  if (EarlyCloseWidgetFunc) EarlyCloseWidgetFunc();
-  EarlyCloseWidgetFunc = nullptr;
 
   LeaveHUD();
 }

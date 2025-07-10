@@ -75,6 +75,8 @@ void AStorePhaseManager::Start() {
   check(CustomerAIManager);
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::Start);
 
+  // MusicManager->MorningMusicCalled();
+
   DayManager->StartNewDay();
 }
 
@@ -104,7 +106,7 @@ void AStorePhaseManager::OpenShop() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::OpenShop);
 
   StorePhaseLightingManager->OnOpenShopLightingCalled();
-  // MusicManager->OnOpenShopMusicCalled();
+  // MusicManager->ShopOpenMusicCalled();
 
   GetWorld()->GetTimerManager().SetTimer(OpenShopTimerHandle, this, &AStorePhaseManager::OnOpenShopTimerEnd,
                                          StorePhaseManagerParams.OpenShopDuration, false);
@@ -115,7 +117,7 @@ void AStorePhaseManager::CloseShop() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::CloseShop);
 
   StorePhaseLightingManager->OnCloseShopLightingCalled();
-  // MusicManager->OnCloseShopMusicCalled();
+  // MusicManager->NightMusicCalled();
 
   GetWorld()->GetTimerManager().ClearTimer(OpenShopTimerHandle);
   CustomerAIManager->EndCustomerAI();
@@ -125,7 +127,7 @@ void AStorePhaseManager::EndDay() {
   StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::EndDay);
 
   StorePhaseLightingManager->OnEndDayLightingCalled();
-  // MusicManager->OnEndDayMusicCalled();
+  // MusicManager->MorningMusicCalled();
 
   DayManager->StartNewDay();
   // SaveManager->CreateNewSaveGame();

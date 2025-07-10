@@ -35,6 +35,6 @@ USTRUCT()
 struct FUIBehaviour {
   GENERATED_BODY()
 
-  std::function<void()> ShowUI;
-  std::function<void()> HideUI;
+  std::function<void(std::function<void()>)> ShowUI;
+  std::function<void(std::function<void()>)> HideUI;
 };

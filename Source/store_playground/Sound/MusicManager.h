@@ -6,6 +6,8 @@
 #include "GameFramework/Info.h"
 #include "MusicManager.generated.h"
 
+// ? Have a music struct (datatable?) with tags + an array holding each music type?
+
 USTRUCT()
 struct FMusicManagerParams {
   GENERATED_BODY()
@@ -18,14 +20,17 @@ class STORE_PLAYGROUND_API AMusicManager : public AInfo {
 public:
   AMusicManager() { PrimaryActorTick.bCanEverTick = false; }
 
-  UPROPERTY(EditAnywhere, Category = "Music")
+  UPROPERTY(EditAnywhere)
   FMusicManagerParams MusicManagerParams;
+
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class UAudioComponent* CurrentMusic;
 
   // * Music changes done in blueprints for fine tuning iterations.
   UFUNCTION(BlueprintImplementableEvent)
-  void OnEndDayMusicCalled();
+  void MorningMusicCalled();
   UFUNCTION(BlueprintImplementableEvent)
-  void OnOpenShopMusicCalled();
+  void ShopOpenMusicCalled();
   UFUNCTION(BlueprintImplementableEvent)
-  void OnCloseShopMusicCalled();
+  void NightMusicCalled();
 };
