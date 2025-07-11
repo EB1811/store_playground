@@ -21,6 +21,8 @@ void USaveSlotsWidget::RefreshUI() {
 
   auto PopulatedSelectSlotFunc = [this](int32 SlotIndex) {
     if (bIsSaving) {
+      if (!SaveManagerRef->CanSave()) return;
+
       SaveManagerRef->CreateNewSaveGame(SlotIndex);
 
       RefreshUI();
@@ -32,6 +34,8 @@ void USaveSlotsWidget::RefreshUI() {
     }
   };
   auto EmptySelectSlotFunc = [this](int32 SlotIndex) {
+    if (!SaveManagerRef->CanSave()) return;
+
     if (bIsSaving) SaveManagerRef->CreateNewSaveGame(SlotIndex);
 
     RefreshUI();

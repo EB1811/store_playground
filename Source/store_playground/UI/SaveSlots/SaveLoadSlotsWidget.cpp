@@ -23,6 +23,7 @@ void USaveLoadSlotsWidget::NativeOnInitialized() {
 void USaveLoadSlotsWidget::ConfirmSaveLoad(int32 SlotIndex) {
   check(SaveManagerRef);
   if (!bIsSaving) check(SlotIndex < SaveManagerRef->SaveManagerParams.SaveSlotCount);
+  if (bIsSaving) check(SaveManagerRef->CanSave());
 
   if (bIsConfirming) return;
 

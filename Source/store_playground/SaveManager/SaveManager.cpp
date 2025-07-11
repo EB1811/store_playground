@@ -16,6 +16,7 @@
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/SaveSlotListSaveGame.h"
 #include "store_playground/SaveManager/MySaveGame.h"
+#include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
 #include "store_playground/Tags/TagsComponent.h"
 #include "Containers/Map.h"
@@ -59,6 +60,13 @@ void ASaveManager::BeginPlay() { Super::BeginPlay(); }
 
 void ASaveManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+auto ASaveManager::CanSave() const -> bool {
+  check(StorePhaseManager);
+  return StorePhaseManager->StorePhaseState != EStorePhaseState::None &&
+         StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode &&
+         StorePhaseManager->StorePhaseState != EStorePhaseState::ShopOpen;
+}
+
 void ASaveManager::LoadSaveGameSlots() {
   if (!UGameplayStatics::DoesSaveGameExist(SaveManagerParams.SaveSlotListSaveName, 0)) {
     SaveSlotListSaveGame =
@@ -83,6 +91,7 @@ void ASaveManager::CreateNewSaveGame(int32 SlotIndex) {
   check(SaveSlotListSaveGame);
   check(SlotIndex < SaveManagerParams.SaveSlotCount);
   check(Store && DayManager);
+  check(CanSave());
 
   CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
   check(CurrentSaveGame);

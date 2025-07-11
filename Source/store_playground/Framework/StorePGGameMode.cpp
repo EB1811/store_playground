@@ -146,6 +146,7 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->GlobalDataManager = GlobalDataManager;
   SaveManager->GlobalStaticDataManager = GlobalStaticDataManager;
   SaveManager->DayManager = DayManager;
+  SaveManager->StorePhaseManager = StorePhaseManager;
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
 

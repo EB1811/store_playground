@@ -76,7 +76,7 @@ void AStorePhaseManager::ShopOpenConsiderPlayerState(EPlayerState PlayerBehaviou
 void AStorePhaseManager::SetupStoreEnvironment() {
   switch (StorePhaseState) {
     case EStorePhaseState::Morning:
-      StorePhaseLightingManager->OnOpenShopLightingCalled();
+      StorePhaseLightingManager->OnEndDayLightingCalled();
       AmbientSoundManager->MorningSoundCalled();
       break;
     case EStorePhaseState::ShopOpen:

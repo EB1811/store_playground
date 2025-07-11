@@ -18,6 +18,8 @@ void UPauseMenuWidget::NativeOnInitialized() {
 }
 
 void UPauseMenuWidget::OnSaveButtonClicked() {
+  if (!SaveManagerRef->CanSave()) return;
+
   SaveSlotsWidget->SetVisibility(ESlateVisibility::Visible);
 
   SaveSlotsWidget->SaveManagerRef = SaveManagerRef;
@@ -36,4 +38,7 @@ void UPauseMenuWidget::OnLoadButtonClicked() {
   SaveSlotsWidget->RefreshUI();
 }
 
-void UPauseMenuWidget::RefreshUI() { check(SaveManagerRef); }
+void UPauseMenuWidget::RefreshUI() {
+  if (SaveManagerRef->CanSave()) SaveButton->SetIsEnabled(true);
+  else SaveButton->SetIsEnabled(false);
+}

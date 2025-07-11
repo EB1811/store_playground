@@ -15,8 +15,6 @@ public:
 
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class USaveSlotsWidget* SaveSlotsWidget;
-  UPROPERTY(EditAnywhere, meta = (BindWidget))
-  class ULoadSlotsWidget* LoadSlotsWidget;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* SaveButton;

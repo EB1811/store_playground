@@ -21,6 +21,8 @@ void UPauseMenuViewWidget::NativeOnInitialized() {
 void UPauseMenuViewWidget::Resume() { CloseWidgetFunc(); }
 
 void UPauseMenuViewWidget::SaveMenu() {
+  if (!SaveManager->CanSave()) return;
+
   auto BackFunc = [this]() { SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed); };
   SaveLoadSlotsWidget->InitUI(true, SaveManager, BackFunc);
   SaveLoadSlotsWidget->RefreshUI();
@@ -45,7 +47,10 @@ void UPauseMenuViewWidget::SettingsMenu() {
 }
 void UPauseMenuViewWidget::Quit() {}
 
-void UPauseMenuViewWidget::RefreshUI() {}
+void UPauseMenuViewWidget::RefreshUI() {
+  if (SaveManager->CanSave()) SaveButton->SetIsEnabled(true);
+  else SaveButton->SetIsEnabled(false);
+}
 
 void UPauseMenuViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                   class ASaveManager* _SaveManager,

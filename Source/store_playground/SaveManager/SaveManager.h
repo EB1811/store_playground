@@ -52,11 +52,15 @@ public:
   class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY()
   class ADayManager* DayManager;
+  UPROPERTY()
+  class AStorePhaseManager* StorePhaseManager;
 
   UPROPERTY()
   class USaveSlotListSaveGame* SaveSlotListSaveGame;
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;
+
+  auto CanSave() const -> bool;  // * For UI.
 
   void LoadSaveGameSlots();
 
