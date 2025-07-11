@@ -665,6 +665,9 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
     check(SpawnPoint);
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
+
+    if (LevelChangeC->LevelToLoad == ELevel::Store)
+      StorePhaseManager->SetupStoreEnvironment();  // ? Put in level manager?
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);

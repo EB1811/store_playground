@@ -36,6 +36,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AMusicManager> MusicManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AAmbientSoundManager> AmbientSoundManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStoreExpansionManager> StoreExpansionManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ACutsceneManager> CutsceneManagerClass;

@@ -63,6 +63,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class AMusicManager* MusicManager;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class AAmbientSoundManager* AmbientSoundManager;
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ACustomerAIManager* CustomerAIManager;
 
   FTimerHandle OpenShopTimerHandle;
@@ -70,6 +72,8 @@ public:
   void OnOpenShopTimerEnd();
 
   void ShopOpenConsiderPlayerState(EPlayerState PlayerBehaviourState);
+
+  void SetupStoreEnvironment();  // Called when phase starts or when entering the level.
 
   void Start();
   void ToggleBuildMode();

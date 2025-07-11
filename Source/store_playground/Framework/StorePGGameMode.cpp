@@ -25,6 +25,7 @@
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/Lighting/StorePhaseLightingManager.h"
+#include "store_playground/Sound/AmbientSoundManager.h"
 #include "store_playground/Sound/MusicManager.h"
 #include "store_playground/Minigame/MiniGameManager.h"
 #include "store_playground/Level/LevelStructs.h"
@@ -47,7 +48,8 @@ void AStorePGGameMode::BeginPlay() {
         UpgradeManagerClass && SaveManagerClass && PlayerCommandClass && StorePhaseManagerClass && DayManagerClass &&
         CustomerAIManagerClass && QuestManagerClass && MarketLevelClass && MarketClass && MarketEconomyClass &&
         NewsGenClass && StatisticsGenClass && StoreExpansionManagerClass && StoreClass && MiniGameManagerClass &&
-        AbilityManagerClass && CutsceneManagerClass && StorePhaseLightingManagerClass);
+        AbilityManagerClass && CutsceneManagerClass && StorePhaseLightingManagerClass && MusicManagerClass &&
+        AmbientSoundManagerClass);
 
   // * Initialize the game world and all systems.
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
@@ -66,6 +68,7 @@ void AStorePGGameMode::BeginPlay() {
   AStorePhaseLightingManager* StorePhaseLightingManager =
       GetWorld()->SpawnActor<AStorePhaseLightingManager>(StorePhaseLightingManagerClass);
   AMusicManager* MusicManager = GetWorld()->SpawnActor<AMusicManager>(MusicManagerClass);
+  AAmbientSoundManager* AmbientSoundManager = GetWorld()->SpawnActor<AAmbientSoundManager>(AmbientSoundManagerClass);
   ACutsceneManager* CutsceneManager = GetWorld()->SpawnActor<ACutsceneManager>(CutsceneManagerClass);
   AStoreExpansionManager* StoreExpansionManager =
       GetWorld()->SpawnActor<AStoreExpansionManager>(StoreExpansionManagerClass);
@@ -158,6 +161,7 @@ void AStorePGGameMode::BeginPlay() {
   StorePhaseManager->DayManager = DayManager;
   StorePhaseManager->StorePhaseLightingManager = StorePhaseLightingManager;
   StorePhaseManager->MusicManager = MusicManager;
+  StorePhaseManager->AmbientSoundManager = AmbientSoundManager;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
 
   DayManager->AbilityManager = AbilityManager;
