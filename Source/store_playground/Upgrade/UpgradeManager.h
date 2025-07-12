@@ -30,7 +30,7 @@ public:
   UPROPERTY(EditAnywhere)
   TObjectPtr<const class UDataTable> UpgradePointsGenDataTable;
   UPROPERTY(EditAnywhere)
-  TArray<FUpgradePointsGen> UpgradePointsGenArray;
+  TArray<FUpgradePointsGen> AllUpgradePointsGenArray;
 
   UPROPERTY(EditAnywhere)
   const class AStatisticsGen* StatisticsGen;
@@ -46,7 +46,10 @@ public:
   UPROPERTY(EditAnywhere)
   class AAbilityManager* AbilityManager;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FUpgradePointsGen> UpgradePointsGenArrayUsed;
+
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 AvailableUpgradePoints;
 
   UPROPERTY(EditAnywhere, SaveGame)

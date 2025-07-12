@@ -108,13 +108,8 @@ public:
 
   UPROPERTY(EditAnywhere)
   TArray<class UUserWidget*> OpenedWidgets;
-  UFUNCTION(BlueprintCallable)
-  void PlayerCloseTopOpenMenu();
-  UFUNCTION(BlueprintCallable)
-  void PlayerCloseAllMenus();
 
-  void CloseWidget(class UUserWidget* Widget);
-  std::function<void()> EarlyCloseWidgetFunc;  // * When leaving a widget early, i.e, before the end of a dialogue, etc.
+  void CloseWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc = nullptr);
 
   void AdvanceUI();
   void RetractUIAction();

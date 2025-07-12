@@ -94,7 +94,6 @@ void AStore::MoneySpent(float Amount) {
   StatisticsGen->StoreMoneySpent(Amount);
 }
 
-// todo-low: Save store dynamic lights.
 void AStore::SaveStoreLevelState() {
   StoreLevelState.ActorSaveMap.Empty();
   StoreLevelState.ComponentSaveMap.Empty();
@@ -145,7 +144,6 @@ void AStore::LoadStoreLevelState() {
           [ComponentSaveState](const FObjectSaveState& ObjectSaveState) {
             return ComponentSaveState.ComponentObjects.Contains(ObjectSaveState.Id);
           });
-      UE_LOG(LogTemp, Warning, TEXT("ComponentObjectSaveStates number: %d"), ComponentObjectSaveStates.Num());
       SaveManager->LoadInventoryCSaveState(Buildable->StockInventory, ComponentSaveState, ComponentObjectSaveStates);
 
       // FBuildableBinary BuildableBinary = StoreLevelState.BinaryMap[Buildable->BuildableId];

@@ -35,6 +35,9 @@ USTRUCT()
 struct FUIBehaviour {
   GENERATED_BODY()
 
+  // * Need callback since theres no generic way to wait for hide animation finish.
+  // * Then, we can go from one widget's hide animation to another widget's show animation.
+  // Currently only relevant for dialogue.
   std::function<void(std::function<void()>)> ShowUI;
   std::function<void(std::function<void()>)> HideUI;
 };

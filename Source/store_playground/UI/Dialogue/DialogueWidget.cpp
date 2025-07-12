@@ -146,6 +146,7 @@ void UDialogueWidget::SetupUIBehaviour() {
   FWidgetAnimationDynamicEvent UIAnimEvent;
   UIAnimEvent.BindDynamic(this, &UDialogueWidget::UIAnimComplete);
   BindToAnimationFinished(ShowAnim, UIAnimEvent);
+  BindToAnimationFinished(HideAnim, UIAnimEvent);
 
   UIBehaviour.ShowUI = [this](std::function<void()> Callback) {
     UIAnimCompleteFunc = Callback;

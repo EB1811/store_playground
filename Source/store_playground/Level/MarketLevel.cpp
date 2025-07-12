@@ -100,12 +100,18 @@ void AMarketLevel::SaveLevelState() {
     auto SpriteSaveState = SaveManager->SaveMesh(MobileStore->Sprite, FGuid::NewGuid());
     ActorSaveState.ActorComponentsMap.Add("Sprite", SpriteSaveState.Id);
 
+    auto [InventorySaveState, FObjectSaveStates] =
+        SaveManager->SaveInventoryCSaveState(MobileStore->InventoryComponent);
+    ActorSaveState.ActorComponentsMap.Add("InventoryComponent", InventorySaveState.Id);
+
     LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
     LevelState.ComponentSaveMap.Add(InteractionCSaveState.Id, InteractionCSaveState);
     LevelState.ComponentSaveMap.Add(DialogueCSaveState.Id, DialogueCSaveState);
     LevelState.ComponentSaveMap.Add(NpcStoreCSaveState.Id, NpcStoreCSaveState);
     LevelState.ComponentSaveMap.Add(MeshSaveState.Id, MeshSaveState);
     LevelState.ComponentSaveMap.Add(SpriteSaveState.Id, SpriteSaveState);
+    LevelState.ComponentSaveMap.Add(InventorySaveState.Id, InventorySaveState);
+    for (FObjectSaveState& ObjectSaveState : FObjectSaveStates) LevelState.ObjectSaveStates.Add(ObjectSaveState);
   }
 
   TArray<ANpc*> Npcs = GetAllActorsOf<ANpc>(GetWorld(), NpcClass);
@@ -193,6 +199,13 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
     auto NpcStoreMeshSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["Mesh"]];
     auto NpcStoreSpriteSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["Sprite"]];
 
+    FComponentSaveState InventorySaveState =
+        LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["InventoryComponent"]];
+    TArray<FObjectSaveState> ComponentObjectSaveStates =
+        LevelState.ObjectSaveStates.FilterByPredicate([InventorySaveState](const FObjectSaveState& ObjectSaveState) {
+          return InventorySaveState.ComponentObjects.Contains(ObjectSaveState.Id);
+        });
+
     NpcStoreSpawnParams.OverrideLevel = SpawnPoint->GetLevel();
     AMobileNPCStore* SpawnedNpcStore = GetWorld()->SpawnActor<AMobileNPCStore>(
         MobileNPCStoreClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation(), NpcStoreSpawnParams);
@@ -202,6 +215,8 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
     SaveManager->LoadComponent(SpawnedNpcStore->NpcStoreComponent, NpcStoreCSaveState);
     SaveManager->LoadMesh(SpawnedNpcStore->Mesh, NpcStoreMeshSaveState);
     SaveManager->LoadMesh(SpawnedNpcStore->Sprite, NpcStoreSpriteSaveState);
+    SaveManager->LoadInventoryCSaveState(SpawnedNpcStore->InventoryComponent, InventorySaveState,
+                                         ComponentObjectSaveStates);
   }
 
   FActorSpawnParameters NpcSpawnParams;

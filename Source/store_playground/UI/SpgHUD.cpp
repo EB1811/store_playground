@@ -148,7 +148,6 @@ void ASpgHUD::SetupInitUIStates() {
   InGameHudWidget->InitUI(InGameInputActions);
 }
 
-// * For when animations / sounds are used.
 inline void ShowWidget(UUserWidget* Widget) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
     FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
@@ -158,14 +157,15 @@ inline void ShowWidget(UUserWidget* Widget) {
 
   Widget->SetVisibility(ESlateVisibility::Visible);
 }
-inline void HideWidget(UUserWidget* Widget) {
+inline void HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
     FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
     check(UIBehaviour->HideUI);
-    return UIBehaviour->HideUI(nullptr);
+    return UIBehaviour->HideUI(PostCloseFunc);
   }
 
   Widget->SetVisibility(ESlateVisibility::Collapsed);
+  if (PostCloseFunc) PostCloseFunc();
 }
 
 void ASpgHUD::LeaveHUD() {
@@ -178,7 +178,7 @@ void ASpgHUD::LeaveHUD() {
 }
 
 void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
-  for (auto* OpenedWidget : OpenedWidgets) HideWidget(OpenedWidget);
+  for (auto* OpenedWidget : OpenedWidgets) HideWidget(OpenedWidget, nullptr);
   OpenedWidgets.Empty();
 
   ShowWidget(Widget);
@@ -193,32 +193,17 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
   SetPlayerFocussedFunc();
 }
 
-void ASpgHUD::PlayerCloseTopOpenMenu() {
-  if (OpenedWidgets.IsEmpty()) return;
-
-  auto* Widget = OpenedWidgets.Pop();
-  HideWidget(Widget);
-
-  if (!OpenedWidgets.IsEmpty()) return;
-
-  LeaveHUD();
-}
-
-void ASpgHUD::PlayerCloseAllMenus() {
-  QuitUIAction();
-
-  OpenedWidgets.Empty();
-  LeaveHUD();
-}
-
-// * Called by the widget themselves.
-void ASpgHUD::CloseWidget(UUserWidget* Widget) {
+void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
   check(Widget);
 
-  // ? Set visibility in the widget itself?
-  HideWidget(Widget);
+  // HideWidget(Widget, [this, Widget]() {
+  //   OpenedWidgets.RemoveSingle(Widget);
+
+  //   if (!OpenedWidgets.IsEmpty()) return;
+  //   LeaveHUD();
+  // });
+  HideWidget(Widget, PostCloseFunc);
   OpenedWidgets.RemoveSingle(Widget);
-  EarlyCloseWidgetFunc = nullptr;
 
   if (!OpenedWidgets.IsEmpty()) return;
   LeaveHUD();
@@ -244,7 +229,7 @@ void ASpgHUD::RetractUIAction() {
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
-  if (!ActionableWidget || !ActionableWidget->RetractUI) return PlayerCloseTopOpenMenu();
+  if (!ActionableWidget || !ActionableWidget->RetractUI) return CloseWidget(TopWidget);
 
   ActionableWidget->RetractUI();
 }
@@ -254,7 +239,7 @@ void ASpgHUD::QuitUIAction() {
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
-  if (!ActionableWidget || !ActionableWidget->QuitUI) return PlayerCloseTopOpenMenu();
+  if (!ActionableWidget || !ActionableWidget->QuitUI) return CloseWidget(TopWidget);
 
   ActionableWidget->QuitUI();
 }
@@ -426,8 +411,6 @@ void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLe
   StoreExpansionsListWidget->StoreExpansionManagerRef = StoreExpansionManager;
   StoreExpansionsListWidget->SelectExpansionFunc = [this, SelectExpansionFunc](EStoreExpansionLevel ExpansionLevel) {
     SelectExpansionFunc(ExpansionLevel);
-
-    PlayerCloseAllMenus();
   };
   StoreExpansionsListWidget->RefreshUI();
 
@@ -480,6 +463,8 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue,
       [this, OnDialogueCloseFunc] {
         CloseWidget(DialogueWidget);
 
+        // todo-low: For flowing animations from hide dialogue animation to the next show animation,
+        // todo-low: this needs to be in a callback in CloseWidget.
         if (OnDialogueCloseFunc) OnDialogueCloseFunc();
       },
       OnDialogueFinishFunc);

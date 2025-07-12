@@ -15,13 +15,13 @@ struct FUpgradePointsGen {
   UPROPERTY(EditAnywhere, SaveGame)
   FName ID;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName Requirements;  // * (RequirementsFilter structure).
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 PointsGained;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   bool bHasBeenUsed;
 };
 USTRUCT()

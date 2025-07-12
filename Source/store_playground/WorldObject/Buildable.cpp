@@ -27,6 +27,8 @@ ABuildable::ABuildable() {
 void ABuildable::BeginPlay() {
   Super::BeginPlay();
 
+  check(BuildableId.IsValid());
+
   for (auto Type : TEnumRange<EBuildableType>()) {
     check(MeshesMap.Contains(Type));
     check(IsBuildableMap.Contains(Type));

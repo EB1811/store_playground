@@ -22,14 +22,14 @@ void AUpgradeManager::BeginPlay() {
   TArray<FUpgradePointsGenRow*> UpgradePointsGenRows;
   UpgradePointsGenDataTable->GetAllRows<FUpgradePointsGenRow>("", UpgradePointsGenRows);
   for (auto Row : UpgradePointsGenRows) {
-    UpgradePointsGenArray.Add({
+    AllUpgradePointsGenArray.Add({
         Row->ID,
         Row->Requirements,
         Row->PointsGained,
         false,
     });
   }
-  check(UpgradePointsGenArray.Num() > 0);
+  check(AllUpgradePointsGenArray.Num() > 0);
 
   UpgradePointsGenDataTable = nullptr;
 }
@@ -38,14 +38,22 @@ void AUpgradeManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void AUpgradeManager::ConsiderUpgradePoints() {
   const auto& GameDataMap = GlobalDataManager->GetGameDataMap();
-  auto Filtered = UpgradePointsGenArray.FilterByPredicate(
-      [&](const auto& Gen) { return !Gen.bHasBeenUsed && EvaluateRequirementsFilter(Gen.Requirements, GameDataMap); });
+  auto Filtered = AllUpgradePointsGenArray.FilterByPredicate([this, GameDataMap](const auto& Gen) {
+    return !UpgradePointsGenArrayUsed.ContainsByPredicate([&](const auto& UsedGen) { return UsedGen.ID == Gen.ID; }) &&
+           EvaluateRequirementsFilter(Gen.Requirements, GameDataMap);
+  });
   if (Filtered.Num() == 0) return;
 
   for (auto& Gen : Filtered) {
     GainUpgradePoints(Gen.PointsGained);
-    auto* UsedGen = UpgradePointsGenArray.FindByPredicate([&](const auto& ArrayGen) { return ArrayGen.ID == Gen.ID; });
-    UsedGen->bHasBeenUsed = true;
+    auto* UsedGen =
+        AllUpgradePointsGenArray.FindByPredicate([&](const auto& ArrayGen) { return ArrayGen.ID == Gen.ID; });
+    UpgradePointsGenArrayUsed.Add({
+        UsedGen->ID,
+        UsedGen->Requirements,
+        UsedGen->PointsGained,
+        true,
+    });
   }
 }
 void AUpgradeManager::GainUpgradePoints(int32 Points) { AvailableUpgradePoints += Points; }
