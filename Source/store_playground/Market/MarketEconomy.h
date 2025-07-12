@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "MarketDataStructs.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "MarketEconomy.generated.h"
 
 USTRUCT()
@@ -103,4 +104,7 @@ public:
   void TickDaysActivePriceEffects();
 
   void InitializeEconomyData();
+
+  UPROPERTY(EditAnywhere, Category = "Economy")
+  FUpgradeable Upgradeable;
 };

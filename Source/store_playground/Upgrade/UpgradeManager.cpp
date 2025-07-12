@@ -6,6 +6,7 @@
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
+#include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
 
 AUpgradeManager::AUpgradeManager() {
@@ -89,12 +90,12 @@ auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> T
 void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
   if (AvailableUpgradePoints <= 0) return;
 
-  // TODO: Add all possible upgradeable systems here.
   const TMap<EUpgradeEffectSystem, FUpgradeable> UpgradeableMap = {
       {EUpgradeEffectSystem::Ability, AbilityManager->Upgradeable},
       {EUpgradeEffectSystem::CustomerAI, CustomerAIManager->Upgradeable},
-      {EUpgradeEffectSystem::Market, Market->Upgradeable},
       {EUpgradeEffectSystem::GlobalData, GlobalDataManager->Upgradeable},
+      {EUpgradeEffectSystem::Market, Market->Upgradeable},
+      {EUpgradeEffectSystem::MarketEconomy, MarketEconomy->Upgradeable},
   };
   UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 

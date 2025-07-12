@@ -40,6 +40,8 @@ public:
   UPROPERTY(EditAnywhere)
   class AMarket* Market;
   UPROPERTY(EditAnywhere)
+  class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere)
   class AGlobalDataManager* GlobalDataManager;
   UPROPERTY(EditAnywhere)
   class AGlobalStaticDataManager* GlobalStaticDataManager;

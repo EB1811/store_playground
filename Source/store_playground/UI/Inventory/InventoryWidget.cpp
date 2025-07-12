@@ -24,10 +24,7 @@ bool UInventoryWidget::NativeOnDrop(const FGeometry& InGeometry,
 
   if (SourceInventoryRef == InventoryRef) return false;
 
-  // todo-low: show success/failure message.
-  if (OnDropItemFunc)
-    // todo-low: Add source inventory parameter.
-    OnDropItemFunc(DroppedItem, 1);
+  if (OnDropItemFunc) OnDropItemFunc(DroppedItem, 1);
   else TransferItem(SourceInventoryRef, InventoryRef, DroppedItem);
 
   RefreshInventory();
@@ -46,7 +43,6 @@ void UInventoryWidget::RefreshInventory() {
     UInventoryItemSlotWidget* InventoryItemSlot = CreateWidget<UInventoryItemSlotWidget>(this, ItemSlotClass);
     InventoryItemSlot->ItemRef = Item;
     InventoryItemSlot->InventoryWidgetRef = this;
-    // todo-low: Select mode + single select mode.
     InventoryItemSlot->OnSelectItemFunc = [this, InventoryItemSlot](UItemBase* Item) {
       if (SelectedItemSlotWidget)
         SelectedItemSlotWidget->SelectItemButton->SetBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f));

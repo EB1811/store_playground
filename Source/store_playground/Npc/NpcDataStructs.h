@@ -198,7 +198,6 @@ struct FUniqueNpcData {
   // * NPC specific behaviour data.
   UPROPERTY(EditAnywhere)
   TArray<FName> QuestIDs;
-  // TODO: Change to use tags.
   UPROPERTY(EditAnywhere)
   TArray<FName> DialogueChainIDs;  // * Dialogue used outside of a quest.
 

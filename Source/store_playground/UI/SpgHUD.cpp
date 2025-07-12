@@ -41,7 +41,9 @@ ASpgHUD::ASpgHUD() { HUDState = EHUDState::InGame; }
 
 void ASpgHUD::DrawHUD() { Super::DrawHUD(); }
 
-// TODO: Attempt to init uis at the start of the game.
+// ? Init uis at the start of the game?
+// ? Or have another function that sets up the initial state of each the UI, e.g., references to systems?
+// ? This would be for performance reasons.
 void ASpgHUD::BeginPlay() {
   Super::BeginPlay();
 
@@ -463,8 +465,7 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue,
       [this, OnDialogueCloseFunc] {
         CloseWidget(DialogueWidget);
 
-        // todo-low: For flowing animations from hide dialogue animation to the next show animation,
-        // todo-low: this needs to be in a callback in CloseWidget.
+        // todo-low: For flowing animations from hide dialogue animation to the next show animation, this needs to be in a callback in CloseWidget.
         if (OnDialogueCloseFunc) OnDialogueCloseFunc();
       },
       OnDialogueFinishFunc);

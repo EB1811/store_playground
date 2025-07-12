@@ -161,15 +161,13 @@ enum class EUpgradeEffectType : uint8 {
 ENUM_RANGE_BY_COUNT(EUpgradeEffectType, 4);
 UENUM()
 enum class EUpgradeEffectSystem : uint8 {
-  Store UMETA(DisplayName = "Store"),                  // * Store upgrades.
+  Ability UMETA(DisplayName = "Ability"),              // * Ability changes.
   CustomerAI UMETA(DisplayName = "CustomerAI"),        // * Customer / behavior changes.
+  GlobalData UMETA(DisplayName = "GlobalData"),        // * GlobalData changes.
   Market UMETA(DisplayName = "Market"),                // * Market / behavior changes.
   MarketEconomy UMETA(DisplayName = "MarketEconomy"),  // * MarketEconomy changes.
-  GlobalData UMETA(DisplayName = "GlobalData"),        // * GlobalData changes.
-  Player UMETA(DisplayName = "Player"),                // * Player changes.
-  Ability UMETA(DisplayName = "Ability"),              // * Ability changes.
 };
-ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 7);
+ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 5);
 
 USTRUCT()
 struct FUpgradeEffectTextData {

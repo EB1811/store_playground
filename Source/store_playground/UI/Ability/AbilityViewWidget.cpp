@@ -22,6 +22,7 @@ void UAbilityViewWidget::NativeOnInitialized() {
 }
 
 void UAbilityViewWidget::Activate() {
+  // todo-low: Check for player money and cooldown.
   if (SelectedAbilityID.IsNone()) return;
 
   AbilityManager->ActivateEconEventAbility(SelectedAbilityID);
