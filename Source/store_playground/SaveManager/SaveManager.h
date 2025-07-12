@@ -64,13 +64,12 @@ public:
 
   void LoadSaveGameSlots();
 
-  // TODO: Delete save slot
-
   void CreateNewSaveGame(int32 SlotIndex);
   void SaveCurrentSlotToDisk();
   // Systems and Levels need to be separated to load store level info.
   void LoadSystemsFromDisk(int32 SlotIndex);
   void LoadLevelsAndPlayerFromDisk();
+  void DeleteSaveGame(int32 SlotIndex);
 
   auto SaveAllSystems() -> TArray<FSystemSaveState>;
   void LoadAllSystems(TArray<FSystemSaveState> SystemSaveStates);

@@ -12,5 +12,5 @@ void UEmptySaveSlotWidget::NativeOnInitialized() {
 void UEmptySaveSlotWidget::OnSelectButtonClicked() {
   check(SelectSlotFunc);
 
-  SelectSlotFunc(SlotIndex);
+  SelectSlotFunc(SlotIndex, this);
 }

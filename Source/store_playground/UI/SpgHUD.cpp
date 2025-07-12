@@ -249,6 +249,7 @@ void ASpgHUD::RetractUIAction() {
   ActionableWidget->RetractUI();
 }
 void ASpgHUD::QuitUIAction() {
+  UE_LOG(LogTemp, Warning, TEXT("QuitUIAction called"));
   if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();

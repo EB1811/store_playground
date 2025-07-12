@@ -74,6 +74,15 @@ void ASaveManager::LoadSaveGameSlots() {
     check(SaveSlotListSaveGame);
 
     SaveSlotListSaveGame->SaveSlotList = {};
+    for (int32 i = 0; i < SaveManagerParams.SaveSlotCount; i++) {
+      FSaveSlotData Data;
+      Data.SlotName = SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(i);
+      Data.bIsPopulated = false;
+      Data.LastModified = FDateTime::Now();
+      Data.CurrentDay = 0;
+      Data.StoreMoney = 0.0f;
+      SaveSlotListSaveGame->SaveSlotList.Add(Data);
+    }
     SaveSlotListSaveGame->MostRecentSaveSlotIndex = -1;
 
     UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
@@ -99,7 +108,10 @@ void ASaveManager::CreateNewSaveGame(int32 SlotIndex) {
   CurrentSaveGame->Initialize(SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(SlotIndex), SlotIndex);
   SaveCurrentSlotToDisk();
 
-  if (SlotIndex >= SaveSlotListSaveGame->SaveSlotList.Num()) SaveSlotListSaveGame->SaveSlotList.Add({});
+  if (SlotIndex >= SaveSlotListSaveGame->SaveSlotList.Num())
+    for (int32 i = SaveSlotListSaveGame->SaveSlotList.Num(); i <= SlotIndex; i++)
+      SaveSlotListSaveGame->SaveSlotList.Add({});
+  SaveSlotListSaveGame->SaveSlotList[SlotIndex].bIsPopulated = true;
   SaveSlotListSaveGame->SaveSlotList[SlotIndex].SlotName = CurrentSaveGame->SlotName;
   SaveSlotListSaveGame->SaveSlotList[SlotIndex].LastModified = FDateTime::Now();
   SaveSlotListSaveGame->SaveSlotList[SlotIndex].CurrentDay = DayManager->CurrentDay;
@@ -165,6 +177,18 @@ void ASaveManager::LoadLevelsAndPlayerFromDisk() {
             });
       });
   LoadPlayer(PlayerSaveState, PComponentSaveStates, PObjectSaveStates);
+}
+void ASaveManager::DeleteSaveGame(int32 SlotIndex) {
+  check(SaveSlotListSaveGame && SlotIndex < SaveManagerParams.SaveSlotCount);
+
+  FString SlotName = SaveSlotListSaveGame->SaveSlotList[SlotIndex].SlotName;
+  UGameplayStatics::DeleteGameInSlot(SlotName, SlotIndex);
+
+  SaveSlotListSaveGame->SaveSlotList[SlotIndex].bIsPopulated = false;
+  if (SaveSlotListSaveGame->MostRecentSaveSlotIndex == SlotIndex) SaveSlotListSaveGame->MostRecentSaveSlotIndex = -1;
+
+  UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
+  UE_LOG(LogTemp, Warning, TEXT("SaveManager: Deleted save game at slot %d."), SlotIndex);
 }
 
 auto ASaveManager::SaveAllSystems() -> TArray<FSystemSaveState> {

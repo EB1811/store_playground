@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "PauseMenuViewWidget.generated.h"
 
 UCLASS()
@@ -29,6 +30,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* QuitButton;
 
+  UPROPERTY(EditAnywhere)
+  FInUIInputActions InUIInputActions;
+
   UPROPERTY()
   class ASaveManager* SaveManager;
 
@@ -44,9 +48,14 @@ public:
   void Quit();
 
   void RefreshUI();
-  void InitUI(FInUIInputActions InUIInputActions,
+  void InitUI(FInUIInputActions _InUIInputActions,
               class ASaveManager* _SaveManager,
               std::function<void()> _CloseWidgetFunc);
+
+  // * Pause state currently doesn't have inputs.
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> CloseWidgetFunc;
 };

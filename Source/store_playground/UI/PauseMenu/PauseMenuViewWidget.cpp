@@ -16,6 +16,8 @@ void UPauseMenuViewWidget::NativeOnInitialized() {
   LoadButton->OnClicked.AddDynamic(this, &UPauseMenuViewWidget::LoadMenu);
   SettingsButton->OnClicked.AddDynamic(this, &UPauseMenuViewWidget::SettingsMenu);
   QuitButton->OnClicked.AddDynamic(this, &UPauseMenuViewWidget::Quit);
+
+  SetupUIActionable();
 }
 
 void UPauseMenuViewWidget::Resume() { CloseWidgetFunc(); }
@@ -24,7 +26,7 @@ void UPauseMenuViewWidget::SaveMenu() {
   if (!SaveManager->CanSave()) return;
 
   auto BackFunc = [this]() { SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed); };
-  SaveLoadSlotsWidget->InitUI(true, SaveManager, BackFunc);
+  SaveLoadSlotsWidget->InitUI(InUIInputActions, true, SaveManager, BackFunc);
   SaveLoadSlotsWidget->RefreshUI();
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
@@ -32,7 +34,7 @@ void UPauseMenuViewWidget::SaveMenu() {
 }
 void UPauseMenuViewWidget::LoadMenu() {
   auto BackFunc = [this]() { SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed); };
-  SaveLoadSlotsWidget->InitUI(false, SaveManager, BackFunc);
+  SaveLoadSlotsWidget->InitUI(InUIInputActions, false, SaveManager, BackFunc);
   SaveLoadSlotsWidget->RefreshUI();
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
@@ -52,14 +54,32 @@ void UPauseMenuViewWidget::RefreshUI() {
   else SaveButton->SetIsEnabled(false);
 }
 
-void UPauseMenuViewWidget::InitUI(FInUIInputActions InUIInputActions,
+void UPauseMenuViewWidget::InitUI(FInUIInputActions _InUIInputActions,
                                   class ASaveManager* _SaveManager,
                                   std::function<void()> _CloseWidgetFunc) {
   check(_SaveManager && _CloseWidgetFunc);
 
+  InUIInputActions = _InUIInputActions;
   SaveManager = _SaveManager;
   CloseWidgetFunc = _CloseWidgetFunc;
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UPauseMenuViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() {
+    if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.AdvanceUI();
+  };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.DirectionalInput(Direction);
+  };
+  UIActionable.SideButton4 = [this]() {
+    if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.SideButton4;
+  };
+  UIActionable.RetractUI = [this]() {
+    if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.RetractUI();
+    else CloseWidgetFunc();
+  };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

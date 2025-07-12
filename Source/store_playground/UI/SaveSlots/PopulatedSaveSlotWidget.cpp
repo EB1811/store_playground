@@ -20,5 +20,5 @@ void UPopulatedSaveSlotWidget::SetSlotData(int32 index, const FSaveSlotData& Slo
 void UPopulatedSaveSlotWidget::OnSelectButtonClicked() {
   check(SelectSlotFunc);
 
-  SelectSlotFunc(SlotIndex);
+  SelectSlotFunc(SlotIndex, this);
 }

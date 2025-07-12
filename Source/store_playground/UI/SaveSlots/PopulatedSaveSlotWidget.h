@@ -33,5 +33,5 @@ public:
 
   UFUNCTION()
   void OnSelectButtonClicked();
-  std::function<void(int32)> SelectSlotFunc;
+  std::function<void(int32, UUserWidget*)> SelectSlotFunc;
 };

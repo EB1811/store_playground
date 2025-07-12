@@ -100,6 +100,9 @@ struct FSaveSlotData {
   GENERATED_BODY()
 
   UPROPERTY()
+  bool bIsPopulated;  // * Save game or empty slot.
+
+  UPROPERTY()
   FString SlotName;
   UPROPERTY()
   FDateTime LastModified;

@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "SaveLoadSlotsWidget.generated.h"
+
+// * PopulatedSaveSlotWidget & EmptySaveSlotWidget are old style widgets but still using.
 
 UCLASS()
 class STORE_PLAYGROUND_API USaveLoadSlotsWidget : public UUserWidget {
@@ -35,6 +39,12 @@ public:
   class ASaveManager* SaveManagerRef;
   UPROPERTY(EditAnywhere)
   bool bIsSaving;
+
+  UPROPERTY()
+  int32 SelectedSlotIndex;
+  UPROPERTY()
+  UWidget* SelectedSlotWidget;
+
   UPROPERTY(EditAnywhere)
   bool bIsConfirming;
 
@@ -49,7 +59,14 @@ public:
   void Back();
 
   void RefreshUI();
-  void InitUI(bool _bIsSaving, class ASaveManager* _SaveManager, std::function<void()> _CloseWidgetFunc);
+  void InitUI(FInUIInputActions InUIInputActions,
+              bool _bIsSaving,
+              class ASaveManager* _SaveManager,
+              std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> BackFunc;
 };

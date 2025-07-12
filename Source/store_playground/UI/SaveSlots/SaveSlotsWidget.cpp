@@ -48,14 +48,14 @@ void USaveSlotsWidget::RefreshUI() {
       FSaveSlotData SlotData = SaveManagerRef->SaveSlotListSaveGame->SaveSlotList[i];
       if (UPopulatedSaveSlotWidget* PopulatedSaveSlotWidget =
               CreateWidget<UPopulatedSaveSlotWidget>(this, PopulatedSaveSlotWidgetClass)) {
-        PopulatedSaveSlotWidget->SelectSlotFunc = PopulatedSelectSlotFunc;
+        // PopulatedSaveSlotWidget->SelectSlotFunc = PopulatedSelectSlotFunc;
         PopulatedSaveSlotWidget->SetSlotData(i, SlotData);
 
         SaveSlotsWrapBox->AddChildToWrapBox(PopulatedSaveSlotWidget);
       }
     } else if (UEmptySaveSlotWidget* EmptySaveSlotWidget =
                    CreateWidget<UEmptySaveSlotWidget>(this, EmptySaveSlotWidgetClass)) {
-      EmptySaveSlotWidget->SelectSlotFunc = EmptySelectSlotFunc;
+      // EmptySaveSlotWidget->SelectSlotFunc = EmptySelectSlotFunc;
       EmptySaveSlotWidget->SlotIndex = i;
 
       if (bIsSaving) EmptySaveSlotWidget->SelectButton->SetIsEnabled(true);

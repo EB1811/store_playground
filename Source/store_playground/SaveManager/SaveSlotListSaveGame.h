@@ -13,6 +13,7 @@ class STORE_PLAYGROUND_API USaveSlotListSaveGame : public USaveGame {
 public:
   USaveSlotListSaveGame() {}
 
+  // ? Maybe turn into tmap so that this is actual save slots and not a list of saves.
   UPROPERTY()
   TArray<FSaveSlotData> SaveSlotList;  // * List of save slots.
   UPROPERTY()
