@@ -23,7 +23,7 @@ void UInGameHudWidget::RefreshUI() {
   int32 CurrentDay = DayManager->CurrentDay;
   DaySlideWidget->SlideText->SetText(
       FText::FromString(FString::Printf(TEXT("%s - Day: %d"), *CurrentPhaseText.ToString(), CurrentDay)));
-  DaySlideWidget->RightSlideText->SetText(FText::FromString("Normal Day"));
+  DaySlideWidget->RightSlideText->SetText(FText::FromString(DayManager->bIsWeekend ? "Weekend" : "Normal Day"));
 
   float NextDebtAmount = DayManager->NextDebtAmount;
   int32 NextPaymentDay = DayManager->NextDayToPayDebt;

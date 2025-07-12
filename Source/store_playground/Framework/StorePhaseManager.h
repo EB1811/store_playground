@@ -49,7 +49,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   FStorePhaseManagerParams StorePhaseManagerParams;
 
-  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  UPROPERTY(EditAnywhere, Category = "Store Phase", SaveGame)
   EStorePhaseState StorePhaseState;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase")

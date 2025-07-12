@@ -36,11 +36,11 @@ USTRUCT()
 struct FStoreLevelState {
   GENERATED_BODY()
 
-  UPROPERTY()
+  UPROPERTY(EditAnywhere)
   TMap<FGuid, FActorSavaState> ActorSaveMap;
-  UPROPERTY()
+  UPROPERTY(EditAnywhere)
   TMap<FGuid, FComponentSaveState> ComponentSaveMap;
-  UPROPERTY()
+  UPROPERTY(EditAnywhere)
   TArray<FObjectSaveState> ObjectSaveStates;
 };
 

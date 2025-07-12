@@ -93,12 +93,24 @@ void AStorePhaseManager::SetupStoreEnvironment() {
 
 void AStorePhaseManager::Start() {
   check(CustomerAIManager);
-  StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::Start);
 
-  MusicManager->MorningMusicCalled();
+  if (StorePhaseState == EStorePhaseState::None) {
+    StorePhaseState = GetNextStorePhaseState(StorePhaseState, EStorePhaseAction::Start);
+
+    MusicManager->MorningMusicCalled();
+    SetupStoreEnvironment();
+
+    DayManager->StartNewDay();
+    return;
+  }
+
   SetupStoreEnvironment();
-
-  DayManager->StartNewDay();
+  switch (StorePhaseState) {
+    case EStorePhaseState::Morning: MusicManager->MorningMusicCalled(); break;
+    case EStorePhaseState::ShopOpen: MusicManager->ShopOpenMusicCalled(); break;
+    case EStorePhaseState::Night: MusicManager->NightMusicCalled(); break;
+    default: checkNoEntry();
+  }
 }
 
 void AStorePhaseManager::ToggleBuildMode() {

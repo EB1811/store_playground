@@ -70,20 +70,38 @@ void AMarketLevel::TickDaysTimedVars() {
 }
 
 void AMarketLevel::SaveLevelState() {
-  LevelState.NpcStoreSaveMap.Empty();
   LevelState.ActorSaveMap.Empty();
   LevelState.ComponentSaveMap.Empty();
   LevelState.ObjectSaveStates.Empty();
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
-  for (ANPCStore* Store : FoundStores)
-    LevelState.NpcStoreSaveMap.Add(Store->NpcStoreId, {
-                                                          Store->NpcStoreId,
-                                                          Store->DialogueComponent->DialogueArray,
-                                                          Store->InventoryComponent->ItemsArray,
-                                                          Store->NpcStoreComponent->NpcStoreType,
-                                                      });
+  for (ANPCStore* Store : FoundStores) {
+    FActorSavaState ActorSaveState = SaveManager->SaveActor(Store, Store->NpcStoreId);
 
+    auto InteractionCSaveState = SaveManager->SaveComponent(Store->InteractionComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("InteractionComponent", InteractionCSaveState.Id);
+    auto DialogueCSaveState = SaveManager->SaveComponent(Store->DialogueComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("DialogueComponent", DialogueCSaveState.Id);
+    auto NpcStoreCSaveState = SaveManager->SaveComponent(Store->NpcStoreComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("NpcStoreComponent", NpcStoreCSaveState.Id);
+
+    auto MeshSaveState = SaveManager->SaveMesh(Store->Mesh, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("Mesh", MeshSaveState.Id);
+    auto SpriteSaveState = SaveManager->SaveMesh(Store->Sprite, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("Sprite", SpriteSaveState.Id);
+
+    auto [InventorySaveState, FObjectSaveStates] = SaveManager->SaveInventoryCSaveState(Store->InventoryComponent);
+    ActorSaveState.ActorComponentsMap.Add("InventoryComponent", InventorySaveState.Id);
+
+    LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
+    LevelState.ComponentSaveMap.Add(InteractionCSaveState.Id, InteractionCSaveState);
+    LevelState.ComponentSaveMap.Add(DialogueCSaveState.Id, DialogueCSaveState);
+    LevelState.ComponentSaveMap.Add(NpcStoreCSaveState.Id, NpcStoreCSaveState);
+    LevelState.ComponentSaveMap.Add(MeshSaveState.Id, MeshSaveState);
+    LevelState.ComponentSaveMap.Add(SpriteSaveState.Id, SpriteSaveState);
+    LevelState.ComponentSaveMap.Add(InventorySaveState.Id, InventorySaveState);
+    for (FObjectSaveState& ObjectSaveState : FObjectSaveStates) LevelState.ObjectSaveStates.Add(ObjectSaveState);
+  }
   TArray<AMobileNPCStore*> FoundMobileStores = GetAllActorsOf<AMobileNPCStore>(GetWorld(), MobileNPCStoreClass);
   for (AMobileNPCStore* MobileStore : FoundMobileStores) {
     FActorSavaState ActorSaveState = SaveManager->SaveActor(MobileStore, MobileStore->SpawnPointId);
@@ -161,7 +179,7 @@ void AMarketLevel::SaveLevelState() {
 }
 
 void AMarketLevel::LoadLevelState(bool bIsWeekend) {
-  if (LevelState.NpcStoreSaveMap.Num() <= 0) {
+  if (LevelState.ActorSaveMap.Num() <= 0) {
     InitNPCStores(bIsWeekend);
     InitMarketNpcs(bIsWeekend);
     InitMiniGames(bIsWeekend);
@@ -170,13 +188,29 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* Store : FoundStores) {
-    check(LevelState.NpcStoreSaveMap.Contains(Store->NpcStoreId));
+    FActorSavaState NpcStoreSaveState = LevelState.ActorSaveMap[Store->NpcStoreId];
+    auto InteractionCSaveState =
+        LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["InteractionComponent"]];
+    auto DialogueCSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["DialogueComponent"]];
+    auto NpcStoreCSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["NpcStoreComponent"]];
 
-    FNpcStoreSaveState SaveState = LevelState.NpcStoreSaveMap[Store->NpcStoreId];
-    Store->NpcStoreId = SaveState.Id;
-    Store->DialogueComponent->DialogueArray = SaveState.DialogueArray;
-    Store->InventoryComponent->ItemsArray = SaveState.ItemsArray;
-    Store->NpcStoreComponent->NpcStoreType = SaveState.NpcStoreType;
+    auto NpcStoreMeshSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["Mesh"]];
+    auto NpcStoreSpriteSaveState = LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["Sprite"]];
+
+    FComponentSaveState InventorySaveState =
+        LevelState.ComponentSaveMap[NpcStoreSaveState.ActorComponentsMap["InventoryComponent"]];
+    TArray<FObjectSaveState> ComponentObjectSaveStates =
+        LevelState.ObjectSaveStates.FilterByPredicate([InventorySaveState](const FObjectSaveState& ObjectSaveState) {
+          return InventorySaveState.ComponentObjects.Contains(ObjectSaveState.Id);
+        });
+
+    SaveManager->LoadActor(Store, NpcStoreSaveState);
+    SaveManager->LoadComponent(Store->InteractionComponent, InteractionCSaveState);
+    SaveManager->LoadComponent(Store->DialogueComponent, DialogueCSaveState);
+    SaveManager->LoadComponent(Store->NpcStoreComponent, NpcStoreCSaveState);
+    SaveManager->LoadMesh(Store->Mesh, NpcStoreMeshSaveState);
+    SaveManager->LoadMesh(Store->Sprite, NpcStoreSpriteSaveState);
+    SaveManager->LoadInventoryCSaveState(Store->InventoryComponent, InventorySaveState, ComponentObjectSaveStates);
   }
 
   FActorSpawnParameters NpcStoreSpawnParams;
@@ -280,7 +314,6 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
 }
 
 void AMarketLevel::ResetLevelState() {
-  LevelState.NpcStoreSaveMap.Empty();
   LevelState.ActorSaveMap.Empty();
   LevelState.ComponentSaveMap.Empty();
   LevelState.ObjectSaveStates.Empty();

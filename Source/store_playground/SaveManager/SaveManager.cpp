@@ -7,6 +7,7 @@
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
+#include "store_playground/Level/MarketLevel.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/DayManager/DayManager.h"
@@ -248,11 +249,14 @@ void ASaveManager::MarketEconomyCustomLoad(const FSystemSaveState& SystemSaveSta
 }
 
 auto ASaveManager::SaveLevels() -> FLevelsSaveData {
-  // Saving only store for now.
-  // TODO: Save all levels.
   FLevelsSaveData LevelsSaveData;
 
-  Store->SaveStoreLevelState();
+  switch (LevelManager->CurrentLevel) {
+    case ELevel::Store: Store->SaveStoreLevelState(); break;
+    case ELevel::Market: MarketLevel->SaveLevelState(); break;
+    default: break;
+  }
+
   FLevelSaveState StoreLevelSaveState;
   StoreLevelSaveState.Name = "Store";
   for (auto& Pair : Store->StoreLevelState.ActorSaveMap) {
@@ -268,6 +272,22 @@ auto ASaveManager::SaveLevels() -> FLevelsSaveData {
     LevelsSaveData.ObjectSaveStates.Add(o);
   }
   LevelsSaveData.LevelSaveMap.Add(StoreLevelSaveState.Name, StoreLevelSaveState);
+
+  FLevelSaveState MarketLevelSaveState;
+  MarketLevelSaveState.Name = "MarketLevel";
+  for (auto& Pair : MarketLevel->LevelState.ActorSaveMap) {
+    MarketLevelSaveState.ActorIds.Add(Pair.Key);
+    LevelsSaveData.ActorSaveMap.Add(Pair.Key, Pair.Value);
+  }
+  for (auto& Pair : MarketLevel->LevelState.ComponentSaveMap) {
+    MarketLevelSaveState.ActorComponentIds.Add(Pair.Key);
+    LevelsSaveData.ComponentSaveMap.Add(Pair.Key, Pair.Value);
+  }
+  for (auto& o : MarketLevel->LevelState.ObjectSaveStates) {
+    MarketLevelSaveState.ComponentObjectIds.Add(o.Id);
+    LevelsSaveData.ObjectSaveStates.Add(o);
+  }
+  LevelsSaveData.LevelSaveMap.Add(MarketLevelSaveState.Name, MarketLevelSaveState);
 
   return LevelsSaveData;
 }
@@ -289,6 +309,25 @@ void ASaveManager::LoadLevels(FLevelsSaveData LevelsSaveData) {
   Store->StoreLevelState = StoreLevelState;
 
   Store->LoadStoreLevelState();
+
+  if (LevelsSaveData.LevelSaveMap.Contains("MarketLevel")) {
+    FLevelSaveState MarketLevelSaveState = LevelsSaveData.LevelSaveMap["MarketLevel"];
+    FMarketLevelState MarketLevelState;
+    for (auto& Id : MarketLevelSaveState.ActorIds)
+      MarketLevelState.ActorSaveMap.Add(Id, LevelsSaveData.ActorSaveMap[Id]);
+    for (auto& Id : MarketLevelSaveState.ActorComponentIds)
+      MarketLevelState.ComponentSaveMap.Add(Id, LevelsSaveData.ComponentSaveMap[Id]);
+    for (auto& Id : MarketLevelSaveState.ComponentObjectIds)
+      MarketLevelState.ObjectSaveStates.Add(*LevelsSaveData.ObjectSaveStates.FindByPredicate(
+          [Id](const FObjectSaveState& ObjectSaveState) { return ObjectSaveState.Id == Id; }));
+
+    MarketLevel->LevelState.ActorSaveMap.Empty();
+    MarketLevel->LevelState.ComponentSaveMap.Empty();
+    MarketLevel->LevelState.ObjectSaveStates.Empty();
+    MarketLevel->LevelState = MarketLevelState;
+
+    // MarketLevel->LoadLevelState();
+  }
 }
 
 auto ASaveManager::SavePlayer() -> TTuple<FPlayerSavaState, TArray<FComponentSaveState>, TArray<FObjectSaveState>> {

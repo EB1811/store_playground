@@ -30,27 +30,8 @@ struct FMarketLevelParams {
 };
 
 USTRUCT()
-struct FNpcStoreSaveState {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  FGuid Id;
-
-  UPROPERTY(EditAnywhere)
-  TArray<struct FDialogueData> DialogueArray;
-  UPROPERTY(EditAnywhere)
-  TArray<TObjectPtr<class UItemBase>> ItemsArray;
-  UPROPERTY(EditAnywhere)
-  FNpcStoreType NpcStoreType;
-};
-
-// * Simplified save state since its not saved to disc.
-USTRUCT()
 struct FMarketLevelState {
   GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  TMap<FGuid, struct FNpcStoreSaveState> NpcStoreSaveMap;
 
   UPROPERTY(EditAnywhere)
   TMap<FGuid, FActorSavaState> ActorSaveMap;

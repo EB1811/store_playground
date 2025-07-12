@@ -30,6 +30,21 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  UPROPERTY()
+  const class ALevelManager* LevelManager;
+  UPROPERTY()
+  const class AMarket* Market;
+  UPROPERTY()
+  const class AUpgradeManager* UpgradeManager;
+  UPROPERTY()
+  const class AGlobalDataManager* GlobalDataManager;
+  UPROPERTY()
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
+  UPROPERTY()
+  const class ADayManager* DayManager;
+  UPROPERTY()
+  const class AStorePhaseManager* StorePhaseManager;
+
   UPROPERTY(EditAnywhere)
   FSaveManagerParams SaveManagerParams;
 
@@ -39,21 +54,11 @@ public:
   TMap<FName, AInfo*> SystemsToSave;
 
   UPROPERTY()
-  class AMarket* Market;
-  UPROPERTY()
-  class AMarketEconomy* MarketEconomy;
+  class AMarketLevel* MarketLevel;
   UPROPERTY()
   class AStore* Store;
   UPROPERTY()
-  class AUpgradeManager* UpgradeManager;
-  UPROPERTY()
-  class AGlobalDataManager* GlobalDataManager;
-  UPROPERTY()
-  class AGlobalStaticDataManager* GlobalStaticDataManager;
-  UPROPERTY()
-  class ADayManager* DayManager;
-  UPROPERTY()
-  class AStorePhaseManager* StorePhaseManager;
+  class AMarketEconomy* MarketEconomy;
 
   UPROPERTY()
   class USaveSlotListSaveGame* SaveSlotListSaveGame;

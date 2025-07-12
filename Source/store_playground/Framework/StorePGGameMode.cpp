@@ -126,6 +126,7 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->PlayerCharacter = PlayerCharacter;
   SaveManager->SystemsToSave = {
       {"UpgradeManager", UpgradeManager},
+      {"StorePhaseManager", StorePhaseManager},
       {"DayManager", DayManager},
       {"StoreExpansionManager", StoreExpansionManager},
       {"Store", Store},
@@ -139,14 +140,16 @@ void AStorePGGameMode::BeginPlay() {
       {"NewsGen", NewsGen},
       {"MiniGameManager", MiniGameManager},
   };
+  SaveManager->LevelManager = LevelManager;
   SaveManager->Market = Market;
-  SaveManager->MarketEconomy = MarketEconomy;
-  SaveManager->Store = Store;
   SaveManager->UpgradeManager = UpgradeManager;
   SaveManager->GlobalDataManager = GlobalDataManager;
   SaveManager->GlobalStaticDataManager = GlobalStaticDataManager;
   SaveManager->DayManager = DayManager;
   SaveManager->StorePhaseManager = StorePhaseManager;
+  SaveManager->MarketEconomy = MarketEconomy;
+  SaveManager->MarketLevel = MarketLevel;
+  SaveManager->Store = Store;
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
 

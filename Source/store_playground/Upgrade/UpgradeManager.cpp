@@ -89,6 +89,7 @@ auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> T
 void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
   if (AvailableUpgradePoints <= 0) return;
 
+  // TODO: Add all possible upgradeable systems here.
   const TMap<EUpgradeEffectSystem, FUpgradeable> UpgradeableMap = {
       {EUpgradeEffectSystem::Ability, AbilityManager->Upgradeable},
       {EUpgradeEffectSystem::CustomerAI, CustomerAIManager->Upgradeable},
