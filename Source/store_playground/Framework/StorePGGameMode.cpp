@@ -163,9 +163,8 @@ void AStorePGGameMode::BeginPlay() {
   StorePhaseManager->PlayerCommand = PlayerCommand;
   StorePhaseManager->SaveManager = SaveManager;
   StorePhaseManager->DayManager = DayManager;
-  StorePhaseManager->StorePhaseLightingManager = StorePhaseLightingManager;
   StorePhaseManager->MusicManager = MusicManager;
-  StorePhaseManager->AmbientSoundManager = AmbientSoundManager;
+  StorePhaseManager->Store = Store;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
 
   DayManager->AbilityManager = AbilityManager;
@@ -220,7 +219,10 @@ void AStorePGGameMode::BeginPlay() {
   QuestManager->GlobalStaticDataManager = GlobalStaticDataManager;
 
   Store->SaveManager = SaveManager;
+  Store->StorePhaseManager = StorePhaseManager;
   Store->StatisticsGen = StatisticsGen;
+  Store->StorePhaseLightingManager = StorePhaseLightingManager;
+  Store->AmbientSoundManager = AmbientSoundManager;
 
   Market->GlobalDataManager = GlobalDataManager;
   Market->GlobalStaticDataManager = GlobalStaticDataManager;

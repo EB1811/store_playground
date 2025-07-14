@@ -10,10 +10,13 @@
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/Store/StockDisplayComponent.h"
+#include "store_playground/Lighting/StorePhaseLightingManager.h"
+#include "store_playground/Sound/AmbientSoundManager.h"
 
 AStore::AStore() {
   PrimaryActorTick.bCanEverTick = false;
@@ -94,6 +97,25 @@ void AStore::MoneySpent(float Amount) {
   StatisticsGen->StoreMoneySpent(Amount);
 }
 
+void AStore::SetupStoreEnvironment() {
+  switch (StorePhaseManager->StorePhaseState) {
+    case EStorePhaseState::None: break;
+    case EStorePhaseState::Morning:
+      StorePhaseLightingManager->OnEndDayLightingCalled();
+      AmbientSoundManager->MorningSoundCalled();
+      break;
+    case EStorePhaseState::ShopOpen:
+      StorePhaseLightingManager->OnOpenShopLightingCalled();
+      AmbientSoundManager->ShopOpenSoundCalled();
+      break;
+    case EStorePhaseState::Night:
+      StorePhaseLightingManager->OnCloseShopLightingCalled();
+      AmbientSoundManager->NightSoundCalled();
+      break;
+    default: checkNoEntry();
+  }
+}
+
 void AStore::SaveStoreLevelState() {
   StoreLevelState.ActorSaveMap.Empty();
   StoreLevelState.ComponentSaveMap.Empty();
@@ -155,6 +177,7 @@ void AStore::LoadStoreLevelState() {
     }
   }
 
+  SetupStoreEnvironment();
   InitStockDisplays();
 }
 

@@ -8,6 +8,8 @@
 #include "GameFramework/Info.h"
 #include "Store.generated.h"
 
+// ? Probably should be separated into a store level class.
+
 USTRUCT()
 struct FStockItem {
   GENERATED_BODY()
@@ -56,12 +58,18 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Store")
   const class ASaveManager* SaveManager;
+  UPROPERTY(EditAnywhere, Category = "Store")
+  const class AStorePhaseManager* StorePhaseManager;
 
   UPROPERTY(EditAnywhere, Category = "Store")
   class TSubclassOf<class AActor> BuildableClass;
 
   UPROPERTY(EditAnywhere, Category = "Store")
   class AStatisticsGen* StatisticsGen;
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class AStorePhaseLightingManager* StorePhaseLightingManager;
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class AAmbientSoundManager* AmbientSoundManager;
 
   UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   float Money;
@@ -82,6 +90,8 @@ public:
   void ItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quantity = 1);
   void MoneyGained(float Amount);
   void MoneySpent(float Amount);
+
+  void SetupStoreEnvironment();
 
   UPROPERTY(EditAnywhere, Category = "Store")
   FStoreLevelState StoreLevelState;
