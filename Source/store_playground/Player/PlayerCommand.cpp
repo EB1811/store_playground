@@ -44,11 +44,9 @@ void APlayerCommand::CommandQuest(UQuestComponent* QuestC,
   PlayerCharacter->EnterQuest(QuestC, DialogueC, SpriteAnimC, CustomerAI, Item);
 }
 
-void APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData, FGameplayTag CutsceneTag) {
+void APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData) {
   check(PlayerCharacter);
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
-
-  if (CutsceneTag.IsValid()) PlayerCharacter->PlayerTagsComponent->CutsceneTags.RemoveTag(CutsceneTag);
 
   PlayerCharacter->EnterCutscene(ResolvedCutsceneData);
 }

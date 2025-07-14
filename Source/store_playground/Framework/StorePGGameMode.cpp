@@ -120,6 +120,7 @@ void AStorePGGameMode::BeginPlay() {
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
   NegotiationSystem->QuestManager = QuestManager;
 
+  CutsceneSystem->HUD = HUD;
   CutsceneSystem->DialogueSystem = DialogueSystem;
   CutsceneSystem->CutsceneManager = CutsceneManager;
 
@@ -133,6 +134,7 @@ void AStorePGGameMode::BeginPlay() {
       {"AbilityManager", AbilityManager},
       {"CustomerAIManager", CustomerAIManager},
       {"QuestManager", QuestManager},
+      {"CutsceneManager", CutsceneManager},
       {"MarketLevel", MarketLevel},
       {"Market", Market},
       {"MarketEconomy", MarketEconomy},
@@ -197,6 +199,7 @@ void AStorePGGameMode::BeginPlay() {
 
   GlobalStaticDataManager->GlobalDataManager = GlobalDataManager;
 
+  CutsceneManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
   CutsceneManager->GlobalStaticDataManager = GlobalStaticDataManager;
   CutsceneManager->PlayerCommand = PlayerCommand;
 

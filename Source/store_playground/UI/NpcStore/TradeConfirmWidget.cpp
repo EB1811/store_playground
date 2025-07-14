@@ -61,7 +61,7 @@ void UTradeConfirmWidget::Back() { BackFunc(); }
 
 void UTradeConfirmWidget::RefreshUI() {
   float Price = ShowPriceFunc();
-  UE_LOG(LogTemp, Warning, TEXT("TradeConfirmWidget::RefreshUI: Price: %.0f, Quantity: %d"), Price, Quantity);
+  // UE_LOG(LogTemp, Log, TEXT("TradeConfirmWidget::RefreshUI: Price: %.0f, Quantity: %d"), Price, Quantity);
 
   QuantityText->SetText(FText::FromString(FString::Printf(TEXT("%d"), Quantity)));
   TradePrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Price * Quantity)));

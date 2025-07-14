@@ -168,7 +168,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Components")
   class UInventoryComponent* PlayerInventoryComponent;
   UPROPERTY(EditAnywhere, Category = "Character | Components")
-  class UTagsComponent* PlayerTagsComponent;
+  class UTagsComponent* PlayerTagsComponent;  // Flags
   UPROPERTY(EditAnywhere, Category = "Character | Components")
   class UWidgetComponent* PlayerWidgetComponent;
 

@@ -15,7 +15,7 @@
 
 void UInGameHudWidget::RefreshUI() {
   check(NewsGen && DayManager && StorePhaseManager && Store && LevelManager);
-  UE_LOG(LogTemp, Warning, TEXT("Refreshing InGame HUD UI."));
+  UE_LOG(LogTemp, Log, TEXT("Refreshing InGame HUD UI."));
 
   NewsHudSlideWidget->RefreshUI();
 

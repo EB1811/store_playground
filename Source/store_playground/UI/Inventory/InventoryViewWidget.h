@@ -31,6 +31,11 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
 
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* ShowAnim;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* HideAnim;
+
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
   UPROPERTY(EditAnywhere)
@@ -53,6 +58,13 @@ public:
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
   void SetupUIActionable();
+
+  UPROPERTY(EditAnywhere)
+  FUIBehaviour UIBehaviour;
+  void SetupUIBehaviour();
+  UFUNCTION()
+  void UIAnimComplete();
+  std::function<void()> UIAnimCompleteFunc;
 
   std::function<void()> CloseWidgetFunc;
 };

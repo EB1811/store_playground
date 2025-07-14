@@ -35,7 +35,7 @@ public:
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
 
-  void UpdateDialogueText(const FString& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
+  void UpdateDialogueText(const FText& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()
   void Next();
@@ -54,7 +54,6 @@ public:
   UPROPERTY(EditAnywhere)
   FUIBehaviour UIBehaviour;
   void SetupUIBehaviour();
-
   UFUNCTION()
   void UIAnimComplete();
   std::function<void()> UIAnimCompleteFunc;

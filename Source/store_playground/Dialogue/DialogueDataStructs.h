@@ -66,6 +66,8 @@ struct FDialogueData {
 
   UPROPERTY(EditAnywhere, SaveGame)
   EDialogueSpeaker DialogueSpeaker;
+  UPROPERTY(EditAnywhere, SaveGame)
+  FText SpeakerName;  // * Override
 
   UPROPERTY(EditAnywhere, SaveGame)
   int32 ChoicesAmount;
@@ -91,6 +93,8 @@ struct FDialogueDataTable : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   EDialogueSpeaker DialogueSpeaker;
+  UPROPERTY(EditAnywhere, SaveGame)
+  FText SpeakerName;  // * Override
 
   UPROPERTY(EditAnywhere)
   int32 ChoicesAmount;  // Note: To know number of children in a preorder tree traversal.

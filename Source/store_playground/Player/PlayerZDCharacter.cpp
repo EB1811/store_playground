@@ -148,8 +148,16 @@ void APlayerZDCharacter::BeginPlay() {
   Subsystem->AddMappingContext(InputContexts[EPlayerState::Normal], 0);
 
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-  HUD->SetPlayerFocussedFunc = [this]() { ChangePlayerState(EPlayerState::FocussedMenu); };
-  HUD->SetPlayerNormalFunc = [this]() { ChangePlayerState(EPlayerState::Normal); };
+  HUD->SetPlayerFocussedFunc = [this]() {
+    // ? Set these states in player?
+    if (PlayerBehaviourState == EPlayerState::Cutscene) return;
+    ChangePlayerState(EPlayerState::FocussedMenu);
+  };
+  HUD->SetPlayerNormalFunc = [this]() {
+    // ? Set these states in player?
+    if (PlayerBehaviourState == EPlayerState::Cutscene) return;
+    ChangePlayerState(EPlayerState::Normal);
+  };
   HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
   HUD->SetPlayerNoControlFunc = [this]() { ChangePlayerState(EPlayerState::NoControl); };
   HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
@@ -196,7 +204,7 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
     UGameplayStatics::SetGamePaused(GetWorld(), false);
 
   PlayerBehaviourState = NewState;
-  UE_LOG(LogTemp, Warning, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
+  UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
 
   if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen)
     StorePhaseManager->ShopOpenConsiderPlayerState(PlayerBehaviourState);
@@ -612,8 +620,14 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
 }
 
 void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsceneData) {
-  CutsceneSystem->StartCutscene(ResolvedCutsceneData);
-  HUD->SetAndOpenCutscene(CutsceneSystem);
+  UE_LOG(LogTemp, Warning, TEXT("Entering cutscene: %s"), *ResolvedCutsceneData.CutsceneData.ID.ToString());
+
+  ChangePlayerState(EPlayerState::Cutscene);
+  CutsceneSystem->StartCutscene(ResolvedCutsceneData, [this]() {
+    UE_LOG(LogTemp, Warning, TEXT("Cutscene finished"));
+    ChangePlayerState(EPlayerState::Normal);
+  });
+  // HUD->SetAndOpenCutscene(CutsceneSystem);
 }
 
 // ? All player states handled?

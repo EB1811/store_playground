@@ -69,6 +69,7 @@ inline void SetStructPropertyValue(FStructProperty* StructProp,
 
 inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
   TArray<FGameplayTag> TagsArray;
+  TagsArray.Reserve(Tags.Num());
   for (const auto& TagString : Tags) {
     auto Tag = FGameplayTag::RequestGameplayTag(TagString);
     check(Tag.IsValid());

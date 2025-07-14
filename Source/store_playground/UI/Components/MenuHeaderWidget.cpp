@@ -2,7 +2,7 @@
 #include "Logging/LogVerbosity.h"
 #include "MenuHeaderTabWidget.h"
 #include "Components/TextBlock.h"
-#include "Components/WrapBox.h"
+#include "Components/HorizontalBox.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "EnhancedInputComponent.h"
@@ -55,7 +55,7 @@ void UMenuHeaderWidget::SetComponentUI(TArray<FTopBarTab>& TopBarTabs,
   TabSelectedFunc = _TabSelectedFunc;
 
   TabWidgets.Empty();
-  TopBarWrapBox->ClearChildren();
+  TopBarBox->ClearChildren();
   for (int i = 0; i < TopBarTabs.Num(); i++) {
     const FTopBarTab& Tab = TopBarTabs[i];
 
@@ -66,7 +66,7 @@ void UMenuHeaderWidget::SetComponentUI(TArray<FTopBarTab>& TopBarTabs,
     MenuHeaderTabWidget->OnTabClickedFunc = [this](int32 TabIndex) { SelectTab(TabIndex); };
 
     TabWidgets.Add(MenuHeaderTabWidget);
-    TopBarWrapBox->AddChildToWrapBox(MenuHeaderTabWidget);
+    TopBarBox->AddChildToHorizontalBox(MenuHeaderTabWidget);
   }
 
   ActiveTabIndex = InitTab;

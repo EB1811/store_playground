@@ -3,27 +3,31 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Player/PlayerCommand.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
+#include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Tags/TagsComponent.h"
 
 void ACutsceneManager::BeginPlay() { Super::BeginPlay(); }
 
 void ACutsceneManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-// ? Pass in caller tag to play specific cutscenes. Currently, just using the first tag in the array.
-bool ACutsceneManager::PlayPotentialCutscene(const UTagsComponent* PlayerTags) {
-  if (PlayerTags->CutsceneTags.IsEmpty()) return false;
+bool ACutsceneManager::PlayPotentialCutscene(FGameplayTagContainer& CallerCutsceneTags) {
+  TArray<FCutsceneData> EligibleCutscenes =
+      GlobalStaticDataManager->CutscenesArray.FilterByPredicate([this, CallerCutsceneTags](const auto& Cutscene) {
+        return !PlayedCutscenes.Contains(Cutscene.ID) && Cutscene.Tags.HasAny(CallerCutsceneTags) &&
+               EvaluatePlayerTagsRequirements(Cutscene.PlayerTagsRequirements, PlayerTags);
+      });
+  if (EligibleCutscenes.Num() <= 0) return false;
 
-  // Just using the first tag.
-  FGameplayTag Tag = PlayerTags->CutsceneTags.GetByIndex(0);
-  check(CutsceneManagerParams.TagToCutsceneMap.Contains(Tag.GetTagName()));
-  const FName CutsceneId = CutsceneManagerParams.TagToCutsceneMap[Tag.GetTagName()];
+  EligibleCutscenes.Sort([](const FCutsceneData& A, const FCutsceneData& B) { return A.Priority < B.Priority; });
+  FCutsceneData CutsceneData = EligibleCutscenes[0];
 
-  FCutsceneData CutsceneData = *GlobalStaticDataManager->CutscenesArray.FindByPredicate(
-      [&](const FCutsceneData& Cutscene) { return Cutscene.ID == CutsceneId; });
   TArray<FCutsceneChainData> CutsceneChains = GlobalStaticDataManager->CutsceneChainsArray.FilterByPredicate(
-      [&](const FCutsceneChainData& Chain) { return Chain.CutsceneID == CutsceneId; });
+      [CutsceneData](const FCutsceneChainData& Chain) { return Chain.CutsceneID == CutsceneData.ID; });
+
   TArray<FDialogueData> DialogueDataArray = {};
   for (const auto& Chain : CutsceneChains) {
+    if (Chain.CutsceneChainType != ECutsceneChainType::Dialogue) continue;
+
     TArray<FDialogueData> DialogueArray = GlobalStaticDataManager->CutsceneDialoguesMap[Chain.RelevantId].Dialogues;
     DialogueDataArray.Append(DialogueArray);
   }
@@ -32,6 +36,7 @@ bool ACutsceneManager::PlayPotentialCutscene(const UTagsComponent* PlayerTags) {
 
   //
 
-  PlayerCommand->CommandCutscene({CutsceneData, CutsceneChains, DialogueDataArray}, Tag);
+  PlayedCutscenes.Add(CutsceneData.ID);
+  PlayerCommand->CommandCutscene({CutsceneData, CutsceneChains, DialogueDataArray});
   return true;
 }

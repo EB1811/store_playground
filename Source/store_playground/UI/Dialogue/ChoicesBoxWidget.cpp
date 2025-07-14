@@ -19,12 +19,12 @@ void UChoicesBoxWidget::RefreshUI() {
 }
 
 void UChoicesBoxWidget::InitUI(TArray<FDialogueData>& _Dialogues,
-                               const FString& SpeakerName,
+                               const FText& SpeakerName,
                                std::function<void(int32)> _ChoiceSelectedFunc) {
   check(_ChoiceSelectedFunc);
 
   Dialogues = _Dialogues;
-  Speaker->SetText(FText::FromString(SpeakerName));
+  Speaker->SetText(SpeakerName);
   ChoiceSelectedFunc = _ChoiceSelectedFunc;
   ChoicesBox->ClearChildren();
 }

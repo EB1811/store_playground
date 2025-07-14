@@ -4,6 +4,7 @@
 
 #include <optional>
 #include "CoreMinimal.h"
+#include "Engine/TimerHandle.h"
 #include "store_playground/Cutscene/CutsceneStructs.h"
 #include "CutsceneSystem.generated.h"
 
@@ -11,7 +12,7 @@ UENUM()
 enum class ECutsceneState : uint8 {
   None UMETA(DisplayName = "NONE"),
   InDialogue UMETA(DisplayName = "InDialogue"),
-  Waiting UMETA(DisplayName = "Waiting"),
+  WaitingForAction UMETA(DisplayName = "WaitingForAction"),
   Finished UMETA(DisplayName = "Finished"),
 };
 UENUM()
@@ -40,6 +41,8 @@ public:
   TArray<FCStateAction> StateTransitions;
   ECutsceneState GetNextCutsceneState(ECutsceneState State, ECutsceneAction Action);
 
+  UPROPERTY()
+  class ASpgHUD* HUD;
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
   UPROPERTY(EditAnywhere)
@@ -53,11 +56,14 @@ public:
   UPROPERTY(EditAnywhere)
   int32 CurrentCutsceneChainIndex;
 
-  void StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData);
+  void StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData, std::function<void()> _CutsceneFinishedFunc);
+  void HandleCutsceneState();  // * Cutscene loop.
   auto NextCutsceneChain() -> ECutsceneState;
 
   auto PerformCutsceneChainDialogues() -> FNextDialogueRes;
   void PerformCutsceneAction(std::function<void()> ActionFinishedFunc = nullptr);
 
   void ResetCutscene();
+
+  std::function<void()> CutsceneFinishedFunc;
 };

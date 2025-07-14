@@ -1,4 +1,5 @@
 #include "LevelManager.h"
+#include "Containers/ContainersFwd.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -6,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "UObject/Class.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/MarketLevel.h"
@@ -136,7 +138,10 @@ void ALevelManager::InitLevel(ELevel Level) {
 void ALevelManager::EnterLevel(ELevel Level) {
   check(CutsceneManager && PlayerTags && MarketLevel);
 
-  if (CutsceneManager->PlayPotentialCutscene(PlayerTags)) return;
+  // TODO: Parameterize.
+  FGameplayTagContainer LevelCutsceneTags = StringTagsToContainer(
+      {FName(FString::Printf(TEXT("Cutscene.%s"), *UEnum::GetDisplayValueAsText(Level).ToString()))});
+  if (CutsceneManager->PlayPotentialCutscene(LevelCutsceneTags)) return;
 
   switch (Level) {
     case ELevel::Store: break;

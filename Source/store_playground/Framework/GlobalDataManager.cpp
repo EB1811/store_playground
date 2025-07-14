@@ -6,6 +6,7 @@
 #include "UObject/Field.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/Tags/TagsComponent.h"
 #include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
@@ -36,6 +37,17 @@ void AGlobalDataManager::BeginPlay() {
 }
 
 void AGlobalDataManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags,
+                                    const class UTagsComponent* PlayerTagsC) {
+  if (RequiredTags.IsEmpty()) return true;
+
+  if (!PlayerTagsC->ConfigurationTags.HasAllExact(RequiredTags) && !PlayerTagsC->QuestTags.HasAllExact(RequiredTags) &&
+      !PlayerTagsC->CutsceneTags.HasAllExact(RequiredTags)) {
+    return false;
+  }
+  return true;
+}
 
 template <typename T>
 inline bool ApplyOperator(const FString& Operator, const T& Value1, const T& Value2) {

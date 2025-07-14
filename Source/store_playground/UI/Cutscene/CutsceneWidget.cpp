@@ -37,7 +37,7 @@ void UCutsceneWidget::RefreshUI() {
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     }
-    case ECutsceneState::Waiting: {
+    case ECutsceneState::WaitingForAction: {
       DialogueWidget->SetVisibility(ESlateVisibility::Hidden);
 
       CutsceneSystemRef->PerformCutsceneAction([this]() { RefreshUI(); });

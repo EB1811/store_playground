@@ -7,14 +7,6 @@
 #include "store_playground/Upgrade/UpgradeStructs.h"
 #include "CutsceneManager.generated.h"
 
-USTRUCT()
-struct FCutsceneManagerParams {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  TMap<FName, FName> TagToCutsceneMap;  // * Tags to cutscene ids.
-};
-
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ACutsceneManager : public AInfo {
   GENERATED_BODY()
@@ -26,13 +18,15 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere)
-  const class AGlobalStaticDataManager* GlobalStaticDataManager;
-
+  const class UTagsComponent* PlayerTags;
   UPROPERTY(EditAnywhere)
-  FCutsceneManagerParams CutsceneManagerParams;
+  const class AGlobalStaticDataManager* GlobalStaticDataManager;
 
   UPROPERTY(EditAnywhere)
   class APlayerCommand* PlayerCommand;
 
-  auto PlayPotentialCutscene(const class UTagsComponent* PlayerTags) -> bool;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FName> PlayedCutscenes;
+
+  auto PlayPotentialCutscene(FGameplayTagContainer& CallerCutsceneTags) -> bool;
 };

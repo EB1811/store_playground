@@ -37,8 +37,7 @@ public:
                     class USimpleSpriteAnimComponent* SpriteAnimC,
                     class UCustomerAIComponent* CustomerAI = nullptr,
                     class UItemBase* Item = nullptr);
-  void CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData,
-                       FGameplayTag CutsceneTag = FGameplayTag::EmptyTag);
+  void CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData);
 
   void CommandExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
 };

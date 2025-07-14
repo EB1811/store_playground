@@ -22,6 +22,7 @@ enum class EReqFilterOperand : uint8 {
 };
 ENUM_RANGE_BY_COUNT(EReqFilterOperand, 5);
 
+bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags, const class UTagsComponent* PlayerTagsC);
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap);
 
 UCLASS(Blueprintable)

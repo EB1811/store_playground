@@ -1,20 +1,24 @@
 #include "CutsceneSystem.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
+#include "TimerManager.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
+#include "store_playground/UI/SpgHUD.h"
 
 UCutsceneSystem::UCutsceneSystem() {
   StateTransitions = {
       FCStateAction{ECutsceneState::None, ECutsceneAction::StartDialogue, ECutsceneState::InDialogue},
-      FCStateAction{ECutsceneState::None, ECutsceneAction::StartCutsceneAction, ECutsceneState::Waiting},
+      FCStateAction{ECutsceneState::None, ECutsceneAction::StartCutsceneAction, ECutsceneState::WaitingForAction},
 
       FCStateAction{ECutsceneState::InDialogue, ECutsceneAction::StartDialogue, ECutsceneState::InDialogue},
-      FCStateAction{ECutsceneState::InDialogue, ECutsceneAction::StartCutsceneAction, ECutsceneState::Waiting},
+      FCStateAction{ECutsceneState::InDialogue, ECutsceneAction::StartCutsceneAction, ECutsceneState::WaitingForAction},
       FCStateAction{ECutsceneState::InDialogue, ECutsceneAction::FinishCutscene, ECutsceneState::Finished},
 
-      FCStateAction{ECutsceneState::Waiting, ECutsceneAction::StartDialogue, ECutsceneState::InDialogue},
-      FCStateAction{ECutsceneState::Waiting, ECutsceneAction::StartCutsceneAction, ECutsceneState::Waiting},
-      FCStateAction{ECutsceneState::Waiting, ECutsceneAction::FinishCutscene, ECutsceneState::Finished},
+      FCStateAction{ECutsceneState::WaitingForAction, ECutsceneAction::StartDialogue, ECutsceneState::InDialogue},
+      FCStateAction{ECutsceneState::WaitingForAction, ECutsceneAction::StartCutsceneAction,
+                    ECutsceneState::WaitingForAction},
+      FCStateAction{ECutsceneState::WaitingForAction, ECutsceneAction::FinishCutscene, ECutsceneState::Finished},
   };
 
   CutsceneState = ECutsceneState::None;
@@ -30,13 +34,39 @@ ECutsceneState UCutsceneSystem::GetNextCutsceneState(ECutsceneState State, ECuts
   return ECutsceneState::None;
 }
 
-void UCutsceneSystem::StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData) {
-  check(DialogueSystem && CutsceneManager);
+void UCutsceneSystem::StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData,
+                                    std::function<void()> _CutsceneFinishedFunc) {
+  check(DialogueSystem && CutsceneManager && _CutsceneFinishedFunc);
 
   ResetCutscene();
 
   ResolvedCutsceneData = _ResolvedCutsceneData;
-  CurrentCutsceneChainIndex = -1;
+  CutsceneFinishedFunc = _CutsceneFinishedFunc;
+
+  HandleCutsceneState();
+}
+
+// Trying this without a cutscene widget.
+void UCutsceneSystem::HandleCutsceneState() {
+  HUD->HideInGameHudWidget();  // ? Have a CanShowHUD bool? Otherwise, the hud is constantly showing then hiding.
+  NextCutsceneChain();
+
+  switch (CutsceneState) {
+    case ECutsceneState::InDialogue: {
+      PerformCutsceneChainDialogues();
+      HUD->SetAndOpenDialogue(DialogueSystem, [this]() { HandleCutsceneState(); });
+      break;
+    }
+    case ECutsceneState::WaitingForAction: {
+      PerformCutsceneAction();
+      break;
+    }
+    case ECutsceneState::Finished: {
+      HUD->ShowInGameHudWidget();
+      CutsceneFinishedFunc();
+      break;
+    }
+  }
 }
 
 auto UCutsceneSystem::NextCutsceneChain() -> ECutsceneState {
@@ -51,7 +81,8 @@ auto UCutsceneSystem::NextCutsceneChain() -> ECutsceneState {
   ECutsceneAction Action = CutsceneChainData.CutsceneChainType == ECutsceneChainType::Dialogue
                                ? ECutsceneAction::StartDialogue
                                : ECutsceneAction::StartCutsceneAction;
-  CutsceneState = GetNextCutsceneState(CutsceneState, ECutsceneAction::StartDialogue);
+  CutsceneState = GetNextCutsceneState(CutsceneState, Action);
+
   return CutsceneState;
 }
 
@@ -62,19 +93,23 @@ auto UCutsceneSystem::PerformCutsceneChainDialogues() -> FNextDialogueRes {
   const auto& CutsceneChainData = ResolvedCutsceneData.CutsceneChains[CurrentCutsceneChainIndex];
   TArray<FDialogueData> Dialogues = ResolvedCutsceneData.Dialogues.FilterByPredicate(
       [&](const FDialogueData& Dialogue) { return Dialogue.DialogueChainID == CutsceneChainData.RelevantId; });
+  check(Dialogues.Num() > 0);
 
   return DialogueSystem->StartDialogue(Dialogues);
 }
 
 void UCutsceneSystem::PerformCutsceneAction(std::function<void()> ActionFinishedFunc) {
-  check(CutsceneState == ECutsceneState::Waiting);
+  check(CutsceneState == ECutsceneState::WaitingForAction);
   check(CurrentCutsceneChainIndex < ResolvedCutsceneData.CutsceneChains.Num());
 
   const auto& CutsceneChainData = ResolvedCutsceneData.CutsceneChains[CurrentCutsceneChainIndex];
   // * Call the CutsceneManager to perform the cutscene action.
   // Note: Not implemented.
 
-  if (ActionFinishedFunc) ActionFinishedFunc();
+  // Temp
+  FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]() { HandleCutsceneState(); });
+  FTimerHandle ActionTimer;
+  GetWorld()->GetTimerManager().SetTimer(ActionTimer, Delegate, 3.0f, false);
 }
 
 void UCutsceneSystem::ResetCutscene() {
@@ -82,4 +117,5 @@ void UCutsceneSystem::ResetCutscene() {
   ResolvedCutsceneData.CutsceneChains.Empty();
   ResolvedCutsceneData.Dialogues.Empty();
   CurrentCutsceneChainIndex = -1;
+  CutsceneFinishedFunc = nullptr;
 }

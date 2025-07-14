@@ -58,7 +58,7 @@ void ASpgHUD::BeginPlay() {
   check(PauseMenuViewWidgetClass);
   check(InteractionDisplayWidgetClass);
   check(InventoryViewWidgetClass);
-  check(PlayerAndContainerWidgetClass);
+  // check(PlayerAndContainerWidgetClass);
   check(BuildableDisplayViewWidgetClass);
   check(NpcStoreViewWidgetClass);
   check(NegotiationViewWidgetClass);
@@ -102,9 +102,9 @@ void ASpgHUD::BeginPlay() {
   StoreExpansionsListWidget->AddToViewport(10);
   StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  PlayerAndContainerWidget = CreateWidget<UPlayerAndContainerWidget>(GetWorld(), PlayerAndContainerWidgetClass);
-  PlayerAndContainerWidget->AddToViewport(10);
-  PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Collapsed);
+  // PlayerAndContainerWidget = CreateWidget<UPlayerAndContainerWidget>(GetWorld(), PlayerAndContainerWidgetClass);
+  // PlayerAndContainerWidget->AddToViewport(10);
+  // PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   NpcStoreViewWidget = CreateWidget<UNpcStoreViewWidget>(GetWorld(), NpcStoreViewWidgetClass);
   NpcStoreViewWidget->AddToViewport(10);
@@ -159,18 +159,20 @@ inline void ShowWidget(UUserWidget* Widget) {
 
   Widget->SetVisibility(ESlateVisibility::Visible);
 }
-inline void HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
+inline void HideWidget(UUserWidget* Widget, std::function<void()> CloseAnimFinFunc) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
     FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
     check(UIBehaviour->HideUI);
-    return UIBehaviour->HideUI(PostCloseFunc);
+    return UIBehaviour->HideUI(CloseAnimFinFunc);
   }
 
   Widget->SetVisibility(ESlateVisibility::Collapsed);
-  if (PostCloseFunc) PostCloseFunc();
+  if (CloseAnimFinFunc) CloseAnimFinFunc();
 }
 
 void ASpgHUD::LeaveHUD() {
+  UE_LOG(LogTemp, Log, TEXT("Leaving HUD state."));
+
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(false);
@@ -180,9 +182,6 @@ void ASpgHUD::LeaveHUD() {
 }
 
 void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
-  for (auto* OpenedWidget : OpenedWidgets) HideWidget(OpenedWidget, nullptr);
-  OpenedWidgets.Empty();
-
   ShowWidget(Widget);
 
   const FInputModeGameAndUI InputMode;
@@ -195,20 +194,22 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
   SetPlayerFocussedFunc();
 }
 
+// Callback just for dialogue widget since other widgets are shown on the dialogue's callback.
 void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
   check(Widget);
 
-  // HideWidget(Widget, [this, Widget]() {
-  //   OpenedWidgets.RemoveSingle(Widget);
+  HideWidget(Widget, [this, Widget, PostCloseFunc]() {
+    OpenedWidgets.RemoveSingle(Widget);
+    if (!OpenedWidgets.IsEmpty()) return;
+    LeaveHUD();
 
-  //   if (!OpenedWidgets.IsEmpty()) return;
-  //   LeaveHUD();
-  // });
-  HideWidget(Widget, PostCloseFunc);
-  OpenedWidgets.RemoveSingle(Widget);
+    if (PostCloseFunc) PostCloseFunc();
+  });
+  // HideWidget(Widget, PostCloseFunc);
+  // OpenedWidgets.RemoveSingle(Widget);
 
-  if (!OpenedWidgets.IsEmpty()) return;
-  LeaveHUD();
+  // if (!OpenedWidgets.IsEmpty()) return;
+  // LeaveHUD();
 }
 
 inline FUIActionable* GetUIActionable(UUserWidget* Widget) {
@@ -463,11 +464,10 @@ void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue,
   DialogueWidget->InitUI(
       InUIInputActions, Dialogue,
       [this, OnDialogueCloseFunc] {
-        CloseWidget(DialogueWidget);
-
-        // todo-low: For flowing animations from hide dialogue animation to the next show animation, this needs to be in a callback in CloseWidget.
-        if (OnDialogueCloseFunc) OnDialogueCloseFunc();
+        // * For flowing animations from hide dialogue animation to the next show animation, this needs to be in a callback in CloseWidget.
+        CloseWidget(DialogueWidget, OnDialogueCloseFunc);
       },
+      // ! This runs before hide animation finishes.
       OnDialogueFinishFunc);
 
   OpenFocusedMenu(DialogueWidget);

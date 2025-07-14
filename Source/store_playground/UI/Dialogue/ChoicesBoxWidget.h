@@ -25,7 +25,7 @@ public:
 
   void RefreshUI();
   void InitUI(TArray<FDialogueData>& _Dialogues,
-              const FString& SpeakerName,
+              const FText& SpeakerName,
               std::function<void(int32)> _ChoiceSelectedFunc);
 
   std::function<void(int32)> ChoiceSelectedFunc;

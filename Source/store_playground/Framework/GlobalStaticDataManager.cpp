@@ -29,6 +29,7 @@ inline void AddDialogueTableRows(TArray<struct FDialogueData>& DialogueDataArray
         Row->DialogueText,
         Row->Action,
         Row->DialogueSpeaker,
+        Row->SpeakerName,
         Row->ChoicesAmount,
         Row->DialogueTags,
     });
@@ -47,6 +48,7 @@ inline void AddDialogueTableRows(TMap<FName, FDialoguesArray>& DialogueDataMap, 
         Row->DialogueText,
         Row->Action,
         Row->DialogueSpeaker,
+        Row->SpeakerName,
         Row->ChoicesAmount,
         Row->DialogueTags,
     });
@@ -345,7 +347,7 @@ void AGlobalStaticDataManager::InitializeDialogueData() {
   for (FNegotiationDialoguesDataTable* Row : FriendlyRows)
     FriendlyDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
                                                               Row->DialogueText, Row->Action, Row->DialogueSpeaker,
-                                                              Row->ChoicesAmount, Row->DialogueTags});
+                                                              FText(), Row->ChoicesAmount, Row->DialogueTags});
 
   NeutralDialoguesMap.Empty();
   for (auto Type : TEnumRange<ENegotiationDialogueType>()) NeutralDialoguesMap.Add(Type, {});
@@ -354,7 +356,7 @@ void AGlobalStaticDataManager::InitializeDialogueData() {
   for (FNegotiationDialoguesDataTable* Row : NeutralRows)
     NeutralDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
                                                              Row->DialogueText, Row->Action, Row->DialogueSpeaker,
-                                                             Row->ChoicesAmount, Row->DialogueTags});
+                                                             FText(), Row->ChoicesAmount, Row->DialogueTags});
 
   HostileDialoguesMap.Empty();
   for (auto Type : TEnumRange<ENegotiationDialogueType>()) HostileDialoguesMap.Add(Type, {});
@@ -363,7 +365,7 @@ void AGlobalStaticDataManager::InitializeDialogueData() {
   for (FNegotiationDialoguesDataTable* Row : HostileRows)
     HostileDialoguesMap[Row->NegotiationType].Dialogues.Add({Row->DialogueChainID, Row->DialogueID, Row->DialogueType,
                                                              Row->DialogueText, Row->Action, Row->DialogueSpeaker,
-                                                             Row->ChoicesAmount, Row->DialogueTags});
+                                                             FText(), Row->ChoicesAmount, Row->DialogueTags});
 
   check(PlayerMiscDialogues.Num() > 0);
   check(UniqueNpcDialoguesMap.Num() > 0);
@@ -454,9 +456,11 @@ void AGlobalStaticDataManager::InitializeCutsceneData() {
   for (auto* Row : CutscenesRows)
     CutscenesArray.Add({
         Row->ID,
-        Row->CutsceneTags,
+        Row->PlayerTagsRequirements,
+        Row->Priority,
         Row->StartingNpcIDs,
         Row->StartingNpcLocations,
+        Row->Tags,
     });
 
   check(CutsceneChainsArray.Num() > 0);

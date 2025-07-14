@@ -35,7 +35,7 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* TitleText;
   UPROPERTY(meta = (BindWidget))
-  class UWrapBox* TopBarWrapBox;
+  class UHorizontalBox* TopBarBox;
 
   UPROPERTY(EditAnywhere)
   EHeaderType HeaderType;

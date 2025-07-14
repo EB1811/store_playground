@@ -18,7 +18,7 @@ public:
   UTagsComponent() { PrimaryComponentTick.bCanEverTick = false; }
 
   UPROPERTY(EditAnywhere, SaveGame)
-  FGameplayTagContainer GeneralTags;
+  FGameplayTagContainer ConfigurationTags;
   UPROPERTY(EditAnywhere, SaveGame)
   FGameplayTagContainer QuestTags;
   UPROPERTY(EditAnywhere, SaveGame)

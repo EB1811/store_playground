@@ -8,6 +8,7 @@
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "CutsceneStructs.generated.h"
 
+// * Only dialogue for this.
 UENUM()
 enum class ECutsceneChainType : uint8 {
   Dialogue UMETA(DisplayName = "Dialogue"),
@@ -62,12 +63,17 @@ struct FCutsceneData {
   FName ID;
 
   UPROPERTY(EditAnywhere)
-  FGameplayTagContainer CutsceneTags;  // * For specific cutscenes.
+  FGameplayTagContainer PlayerTagsRequirements;
+  UPROPERTY(EditAnywhere)
+  int32 Priority;  // * Lowest int first.
 
   UPROPERTY(EditAnywhere)
   TArray<FName> StartingNpcIDs;  // * Npc ids that are relevant to the cutscene.
   UPROPERTY(EditAnywhere)
   TArray<FVector> StartingNpcLocations;  // * Npc locations that are relevant to the cutscene.
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer Tags;  // * To filter.
 };
 USTRUCT()
 struct FCutsceneDataRow : public FTableRowBase {
@@ -77,12 +83,17 @@ struct FCutsceneDataRow : public FTableRowBase {
   FName ID;
 
   UPROPERTY(EditAnywhere)
-  FGameplayTagContainer CutsceneTags;  // * For specific cutscenes.
+  FGameplayTagContainer PlayerTagsRequirements;
+  UPROPERTY(EditAnywhere)
+  int32 Priority;  // * Lowest int first.
 
   UPROPERTY(EditAnywhere)
   TArray<FName> StartingNpcIDs;  // * Npc ids that are relevant to the cutscene.
   UPROPERTY(EditAnywhere)
   TArray<FVector> StartingNpcLocations;  // * Npc locations that are relevant to the cutscene.
+
+  UPROPERTY(EditAnywhere)
+  FGameplayTagContainer Tags;  // * To filter.
 };
 
 USTRUCT()
