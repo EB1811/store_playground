@@ -58,7 +58,9 @@ public:
 
   void StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData, std::function<void()> _CutsceneFinishedFunc);
   void HandleCutsceneState();  // * Cutscene loop.
+
   auto NextCutsceneChain() -> ECutsceneState;
+  void SkipCutsceneChain();
 
   auto PerformCutsceneChainDialogues() -> FNextDialogueRes;
   void PerformCutsceneAction(std::function<void()> ActionFinishedFunc = nullptr);

@@ -49,6 +49,9 @@ public:
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UItemSlotWidget> ItemSlotWidgetClass;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* SelectSound;
+
   UPROPERTY(EditAnywhere)
   const class UInventoryComponent* InventoryRef;
 

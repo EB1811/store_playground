@@ -85,6 +85,22 @@ auto UCutsceneSystem::NextCutsceneChain() -> ECutsceneState {
 
   return CutsceneState;
 }
+void UCutsceneSystem::SkipCutsceneChain() {
+  check(CutsceneState == ECutsceneState::InDialogue || CutsceneState == ECutsceneState::WaitingForAction);
+
+  switch (CutsceneState) {
+    case ECutsceneState::InDialogue: {
+      // * Quiting the ui will run the CloseDialogueFunc, which will call HandleCutsceneState.
+      HUD->QuitUIAction();
+      break;
+    }
+    case ECutsceneState::WaitingForAction: {
+      // TODO: Implement skipping cutscene action.
+      // HandleCutsceneState();
+      break;
+    }
+  }
+}
 
 auto UCutsceneSystem::PerformCutsceneChainDialogues() -> FNextDialogueRes {
   check(CutsceneState == ECutsceneState::InDialogue);

@@ -40,16 +40,16 @@ public:
   TSubclassOf<class UStockDisplayViewWidget> StockDisplayViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UStoreExpansionsListWidget> StoreExpansionsListWidgetClass;
-  UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
+  // UPROPERTY(EditAnywhere, Category = "Widgets")
+  // TSubclassOf<class UUserWidget> PlayerAndContainerWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UNpcStoreViewWidget> NpcStoreViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UUserWidget> UDialogueWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UNegotiationViewWidget> NegotiationViewWidgetClass;
-  UPROPERTY(EditAnywhere, Category = "Widgets")
-  TSubclassOf<class UCutsceneWidget> CutsceneWidgetClass;
+  // UPROPERTY(EditAnywhere, Category = "Widgets")
+  // TSubclassOf<class UCutsceneWidget> CutsceneWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UNewsAndEconomyViewWidget> NewsAndEconomyViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
@@ -162,8 +162,8 @@ public:
   class UStoreExpansionsListWidget* StoreExpansionsListWidget;
   void SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLevel)> SelectExpansionFunc);
 
-  UPROPERTY()
-  class UPlayerAndContainerWidget* PlayerAndContainerWidget;
+  // UPROPERTY()
+  // class UPlayerAndContainerWidget* PlayerAndContainerWidget;
   void SetAndOpenContainer(const class UInventoryComponent* PlayerInventory,
                            const class UInventoryComponent* ContainerInventory);
 
@@ -185,8 +185,8 @@ public:
                              class UDialogueSystem* DialogueSystem,
                              class UInventoryComponent* PlayerInventoryC);
 
-  UPROPERTY()
-  class UCutsceneWidget* CutsceneWidget;
+  // UPROPERTY()
+  // class UCutsceneWidget* CutsceneWidget;
   void SetAndOpenCutscene(class UCutsceneSystem* CutsceneSystem);
   void SkipCutscene();  // * Skips to next cutscene chain, not the whole cutscene.
 

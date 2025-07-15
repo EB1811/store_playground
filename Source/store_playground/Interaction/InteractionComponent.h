@@ -48,6 +48,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Interaction", SaveGame)
   EInteractionType InteractionType;
 
+  UPROPERTY(EditAnywhere)
+  class USoundBase* InteractionSound;
+
+  void PlayInteractionSound() const;
+
   UPROPERTY(EditAnywhere, Category = "Interaction")
   bool bIsInteracting;  // * For interactions that need tracking.
   void StartInteraction();

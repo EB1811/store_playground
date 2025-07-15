@@ -33,10 +33,10 @@ void UBuildableDisplayWidget::RefreshUI() {
   MoneyNumberText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Money)));
 
   if (Price > Money) {
-    BuildStockDisplayButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
+    BuildStockDisplayButton->SetActiveStyle(false);
     BuildStockDisplayButton->ControlButton->SetIsEnabled(false);
   } else {
-    BuildStockDisplayButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
+    BuildStockDisplayButton->SetActiveStyle(true);
     BuildStockDisplayButton->ControlButton->SetIsEnabled(true);
   }
 }
@@ -55,5 +55,5 @@ void UBuildableDisplayWidget::InitUI(FInUIInputActions InUIInputActions,
   BuildStockDisplayButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
   BackButton->ActionText->SetText(FText::FromString("Back"));
   BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
-  BackButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
+  BackButton->SetActiveStyle(false);
 }

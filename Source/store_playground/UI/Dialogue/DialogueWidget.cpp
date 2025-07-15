@@ -78,7 +78,7 @@ void UDialogueWidget::Next() {
     default: checkNoEntry(); break;
   }
 
-  UGameplayStatics::PlaySound2D(this, NextSound, 0.75f);
+  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
 }
 
 void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {

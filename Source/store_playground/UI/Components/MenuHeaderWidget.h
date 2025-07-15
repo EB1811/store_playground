@@ -37,6 +37,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UHorizontalBox* TopBarBox;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* TabSelectedSound;
+
   UPROPERTY(EditAnywhere)
   EHeaderType HeaderType;
   UPROPERTY(EditAnywhere)

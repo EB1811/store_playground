@@ -17,6 +17,7 @@
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UStockDisplayViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -35,16 +36,20 @@ void UStockDisplayViewWidget::SortByMarketPrice() {
       {.SortType = ESortType::Price,
        .bReverse = ItemsWidget->SortData.SortType == ESortType::Price ? !ItemsWidget->SortData.bReverse : false});
 
-  SortByMarketPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
-  SortByNameButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
+  SortByMarketPriceButton->SetActiveStyle(true);
+  SortByNameButton->SetActiveStyle(false);
+
+  UGameplayStatics::PlaySound2D(this, SortByMarketPriceButton->ClickedSound, 1.0f);
 }
 void UStockDisplayViewWidget::SortByName() {
   ItemsWidget->SortItems(
       {.SortType = ESortType::Name,
        .bReverse = ItemsWidget->SortData.SortType == ESortType::Name ? !ItemsWidget->SortData.bReverse : false});
 
-  SortByNameButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
-  SortByMarketPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
+  SortByMarketPriceButton->SetActiveStyle(false);
+  SortByNameButton->SetActiveStyle(true);
+
+  UGameplayStatics::PlaySound2D(this, SortByMarketPriceButton->ClickedSound, 1.0f);
 }
 
 void UStockDisplayViewWidget::AddOrTake() {

@@ -9,9 +9,9 @@
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "store_playground/UI/Components/ControlTextWidget.h"
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
-#include "InventoryWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UInventoryViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -29,16 +29,20 @@ void UInventoryViewWidget::SortByMarketPrice() {
       {.SortType = ESortType::Price,
        .bReverse = ItemsWidget->SortData.SortType == ESortType::Price ? !ItemsWidget->SortData.bReverse : false});
 
-  SortByMarketPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
-  SortByNameButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
+  SortByMarketPriceButton->SetActiveStyle(true);
+  SortByNameButton->SetActiveStyle(false);
+
+  UGameplayStatics::PlaySound2D(this, SortByMarketPriceButton->ClickedSound, 1.0f);
 }
 void UInventoryViewWidget::SortByName() {
   ItemsWidget->SortItems(
       {.SortType = ESortType::Name,
        .bReverse = ItemsWidget->SortData.SortType == ESortType::Name ? !ItemsWidget->SortData.bReverse : false});
 
-  SortByNameButton->ControlButton->SetBackgroundColor(FColor::FromHex("6A8DFFFF"));
-  SortByMarketPriceButton->ControlButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
+  SortByMarketPriceButton->SetActiveStyle(false);
+  SortByNameButton->SetActiveStyle(true);
+
+  UGameplayStatics::PlaySound2D(this, SortByMarketPriceButton->ClickedSound, 1.0f);
 }
 void UInventoryViewWidget::Back() {
   check(CloseWidgetFunc);
@@ -99,6 +103,7 @@ void UInventoryViewWidget::InitUI(FInUIInputActions InUIInputActions,
 
   ItemsWidget->InitUI(InventoryC,
                       "Bought At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
+  if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
 
   SortByMarketPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
   SortByNameButton->ActionText->SetText(FText::FromString("Sort - Name"));

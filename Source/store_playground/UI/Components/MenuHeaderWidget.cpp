@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Kismet/GameplayStatics.h"
 
 void UMenuHeaderWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -33,6 +34,8 @@ void UMenuHeaderWidget::SelectTab(int32 TabIndex) {
   TabWidgets[ActiveTabIndex]->BottomBorder->SetVisibility(ESlateVisibility::Visible);
 
   TabSelectedFunc(TabWidgets[ActiveTabIndex]->TabText->GetText());
+
+  UGameplayStatics::PlaySound2D(this, TabSelectedSound, 1.0f);
 }
 void UMenuHeaderWidget::CycleLeft() {
   if (TabWidgets.Num() <= 1) return;

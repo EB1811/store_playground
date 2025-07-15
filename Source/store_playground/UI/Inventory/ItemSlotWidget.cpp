@@ -27,13 +27,8 @@ void UItemSlotWidget::RefreshUI() {
   float Price = ShowPriceFunc(ItemRef->ItemID);
   ShowPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Price)));
 
-  if (bIsSelected) {
-    // SelectItemButton->SetBackgroundColor(FColor::FromHex("FFDC6AAA"));
-    SelectItemButton->SetIsEnabled(false);
-  } else {
-    // SelectItemButton->SetBackgroundColor(FColor::FromHex("F7F7F7FF"));
-    SelectItemButton->SetIsEnabled(true);
-  }
+  if (bIsSelected) SelectItemButton->SetIsEnabled(false);
+  else SelectItemButton->SetIsEnabled(true);
 }
 
 void UItemSlotWidget::OnSelectItemButtonClicked() {

@@ -8,9 +8,12 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
+#include "Kismet/GameplayStatics.h"
 
 void UItemsWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
+
+  check(SelectSound);
 
   SortData = {.SortType = ESortType::None, .bReverse = false};
   FilterData = {.ItemType = EItemType::Weapon, .bFilterByType = false};
@@ -32,6 +35,8 @@ void UItemsWidget::SelectItem(const UItemBase* Item, UItemSlotWidget* ItemSlotWi
   SelectedItemSlotWidget = ItemSlotWidget;
   ItemSlotWidget->bIsSelected = true;
   ItemSlotWidget->RefreshUI();
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UItemsWidget::SelectNextItem(FVector2D Direction) {
   if (SortedItems.IsEmpty()) return;

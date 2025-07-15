@@ -29,5 +29,4 @@ void UItemBase::SetItemFromBase(const UItemBase* ItemBase) {
   TextData = ItemBase->TextData;
   AssetData = ItemBase->AssetData;
   FlavorData = ItemBase->FlavorData;
-  PlayerPriceData = ItemBase->PlayerPriceData;
 }

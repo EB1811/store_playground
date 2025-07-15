@@ -1,13 +1,11 @@
 #include "SpgHUD.h"
 #include "GameFramework/PlayerController.h"
 #include "store_playground/UI/PauseMenu/PauseMenuViewWidget.h"
-#include "store_playground/UI/Inventory/PlayerAndContainerWidget.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/SaveManager/SaveManager.h"
-#include "store_playground/UI/Inventory/InventoryWidget.h"
 #include "store_playground/UI/Inventory/InventoryViewWidget.h"
 #include "store_playground/UI/Dialogue/DialogueWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationViewWidget.h"
@@ -15,7 +13,6 @@
 #include "store_playground/UI/Store/StockDisplayViewWidget.h"
 #include "store_playground/UI/Store/BuildableDisplayViewWidget.h"
 #include "store_playground/UI/Newspaper/NewsAndEconomyViewWidget.h"
-#include "store_playground/UI/Statistics/StatisticsWidget.h"
 #include "store_playground/UI/Ability/AbilityViewWidget.h"
 #include "store_playground/UI/InGameHud/InGameHudWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationViewWidget.h"
@@ -118,9 +115,9 @@ void ASpgHUD::BeginPlay() {
   NegotiationViewWidget->AddToViewport(10);
   NegotiationViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  CutsceneWidget = CreateWidget<UCutsceneWidget>(GetWorld(), CutsceneWidgetClass);
-  CutsceneWidget->AddToViewport(10);
-  CutsceneWidget->SetVisibility(ESlateVisibility::Collapsed);
+  // CutsceneWidget = CreateWidget<UCutsceneWidget>(GetWorld(), CutsceneWidgetClass);
+  // CutsceneWidget->AddToViewport(10);
+  // CutsceneWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   NewsAndEconomyViewWidget = CreateWidget<UNewsAndEconomyViewWidget>(GetWorld(), NewsAndEconomyViewWidgetClass);
   NewsAndEconomyViewWidget->AddToViewport(10);
@@ -426,25 +423,7 @@ void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLe
 }
 
 void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
-                                  const UInventoryComponent* ContainerInventory) {
-  check(PlayerAndContainerWidget);
-
-  PlayerAndContainerWidget->PlayerInventoryWidget->InventoryRef = const_cast<UInventoryComponent*>(PlayerInventory);
-  PlayerAndContainerWidget->PlayerInventoryWidget->InventoryTitleText->SetText(FText::FromString("Player"));
-  PlayerAndContainerWidget->ContainerInventoryWidget->InventoryRef =
-      const_cast<UInventoryComponent*>(ContainerInventory);
-  PlayerAndContainerWidget->ContainerInventoryWidget->InventoryTitleText->SetText(FText::FromString("Container"));
-
-  PlayerAndContainerWidget->PlayerInventoryWidget->RefreshInventory();
-  PlayerAndContainerWidget->ContainerInventoryWidget->RefreshInventory();
-
-  ShowWidget(PlayerAndContainerWidget);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(PlayerAndContainerWidget);
-}
+                                  const UInventoryComponent* ContainerInventory) {}
 
 void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
                                  UInventoryComponent* NPCStoreInventory,
@@ -486,22 +465,8 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
   OpenFocusedMenu(NegotiationViewWidget);
 }
 
-void ASpgHUD::SetAndOpenCutscene(UCutsceneSystem* CutsceneSystem) {
-  check(CutsceneWidget);
-
-  CutsceneWidget->CloseThisUI = [this]() {
-    CloseWidget(CutsceneWidget);
-    SetPlayerNormalFunc();
-  };
-  OpenFocusedMenu(CutsceneWidget);
-  SetPlayerCutsceneFunc();
-
-  CutsceneWidget->InitUI(CutsceneSystem);
-}
-void ASpgHUD::SkipCutscene() {
-  check(CutsceneWidget);
-  CutsceneWidget->SkipCutscene();
-}
+void ASpgHUD::SetAndOpenCutscene(UCutsceneSystem* CutsceneSystem) {}
+void ASpgHUD::SkipCutscene() {}
 
 void ASpgHUD::SetAndOpenNewsAndEconomyView() {
   check(NewsAndEconomyViewWidget);

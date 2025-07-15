@@ -14,6 +14,7 @@
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 UInteractionComponent::UInteractionComponent() {
   PrimaryComponentTick.bCanEverTick = false;
@@ -22,6 +23,10 @@ UInteractionComponent::UInteractionComponent() {
 }
 
 void UInteractionComponent::BeginPlay() { Super::BeginPlay(); }
+
+void UInteractionComponent::PlayInteractionSound() const {
+  if (InteractionSound) UGameplayStatics::PlaySoundAtLocation(this, InteractionSound, GetOwner()->GetActorLocation());
+}
 
 void UInteractionComponent::StartInteraction() {
   if (bIsInteracting) return;

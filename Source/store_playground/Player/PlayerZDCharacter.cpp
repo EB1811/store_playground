@@ -291,7 +291,7 @@ void APlayerZDCharacter::UICycleRightAction(const FInputActionValue& Value) { HU
 void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
   check(PlayerBehaviourState == EPlayerState::Cutscene);
 
-  HUD->SkipCutscene();
+  CutsceneSystem->SkipCutsceneChain();
 }
 
 void APlayerZDCharacter::PlayFootstepAudio() {
@@ -426,6 +426,7 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
 void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) {
   HUD->CloseInteractionPopup();
 
+  Interactable->PlayInteractionSound();
   switch (Interactable->InteractionType) {
     case EInteractionType::LevelChange: {
       auto LevelChangeC = Interactable->InteractLevelChange();
