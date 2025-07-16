@@ -27,6 +27,7 @@ void UNpcStoreViewWidget::NativeOnInitialized() {
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UNpcStoreViewWidget::Back);
 
   SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
@@ -41,7 +42,7 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
       check(ItemToBuy);
 
       bSuccess = Market->BuyItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToBuy, Quantity);
-      UE_LOG(LogTemp, Warning, TEXT("Success: %s"), bSuccess ? TEXT("true") : TEXT("false"));
+      UE_LOG(LogTemp, Log, TEXT("TradeConfirmed -> Success: %s"), bSuccess ? TEXT("true") : TEXT("false"));
       break;
     }
     case ETradeType::Sell: {
@@ -51,7 +52,7 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
       check(ItemToSell);
 
       bSuccess = Market->SellItem(NpcStoreC, StoreInventory, PlayerInventory, Store, *ItemToSell, Quantity);
-      UE_LOG(LogTemp, Warning, TEXT("Success: %s"), bSuccess ? TEXT("true") : TEXT("false"));
+      UE_LOG(LogTemp, Log, TEXT("TradeConfirmed -> Success: %s"), bSuccess ? TEXT("true") : TEXT("false"));
       break;
     }
     default: checkNoEntry();
@@ -240,4 +241,11 @@ void UNpcStoreViewWidget::SetupUIActionable() {
   };
   UIActionable.RetractUI = [this]() { Back(); };
   UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+}
+
+void UNpcStoreViewWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }

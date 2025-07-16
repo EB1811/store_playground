@@ -13,9 +13,9 @@ UENUM()
 enum class EHUDState : uint8 {
   InGame UMETA(DisplayName = "InGame"),
   Paused UMETA(DisplayName = "Paused"),
-  MainMenu UMETA(DisplayName = "MainMenu"),
   FocusedMenu UMETA(DisplayName = "FocusedMenu"),
   PlayingAnim UMETA(DisplayName = "PlayingAnimation"),
+  GameOver UMETA(DisplayName = "GameOver"),
 };
 
 UCLASS()
@@ -60,6 +60,8 @@ public:
   TSubclassOf<class UAbilityViewWidget> AbilityViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UStoreViewWidget> StoreViewWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UGameOverViewWidget> GameOverViewWidgetClass;
 
   UPROPERTY(EditAnywhere)
   const class AStatisticsGen* StatisticsGen;
@@ -91,7 +93,6 @@ public:
   EHUDState HUDState;
 
   std::function<void()> SetPlayerFocussedFunc;   // * Set player state to menu (in control of the player).
-  std::function<void()> SetPlayerCutsceneFunc;   // * Set player state to cutscene (not in control of the player).
   std::function<void()> SetPlayerNormalFunc;     // * Set player state to normal (not in menu, etc.).
   std::function<void()> SetPlayerNoControlFunc;  // * Set player state to no control (i.e, loading, etc.).
   std::function<void()> SetPlayerPausedFunc;     // * Set player state to paused (not in menu, etc.).
@@ -216,6 +217,10 @@ public:
                           class UMiniGameComponent* MiniGameC,
                           class AStore* _Store,
                           class UInventoryComponent* PlayerInventory);
+
+  UPROPERTY()
+  class UGameOverViewWidget* GameOverViewWidget;
+  void SetAndOpenGameOverView();
 
   // * Transitions
   UPROPERTY(EditAnywhere, Category = "Widgets")

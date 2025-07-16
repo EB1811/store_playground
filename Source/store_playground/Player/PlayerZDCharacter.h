@@ -15,8 +15,10 @@ enum class EPlayerState : uint8 {
   Normal UMETA(DisplayName = "Normal"),
   Cutscene UMETA(DisplayName = "Cutscene"),
   FocussedMenu UMETA(DisplayName = "FocussedMenu"),  // * In a focussed menu (dialogue, negotiation, etc.).
-  NoControl UMETA(DisplayName = "NoControl"),
+  NoControl UMETA(DisplayName = "NoControl"),        // * No control over the character (e.g., during loading).
   Paused UMETA(DisplayName = "Paused"),
+  PausedCutscene UMETA(DisplayName = "PausedCutscene"),
+  GameOver UMETA(DisplayName = "GameOver"),
 };
 
 USTRUCT()
@@ -245,6 +247,8 @@ public:
 
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
   void LeaveStore();
+
+  void GameOverReset();
 
   // // * SaveManager
   // UPROPERTY(EditAnywhere, Category = "Character | SaveManager")

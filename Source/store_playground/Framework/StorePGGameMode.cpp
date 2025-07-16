@@ -286,14 +286,18 @@ void AStorePGGameMode::BeginPlay() {
 void AStorePGGameMode::GameOverReset() {
   UE_LOG(LogTemp, Warning, TEXT("Game Over. Resetting game."));
 
+  APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+  check(PlayerCharacter);
+  PlayerCharacter->GameOverReset();
+}
+void AStorePGGameMode::ExitToMainMenu() {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
   StorePGGameInstance->bFromSaveGame = false;
-  StorePGGameInstance->bFromGameOver = true;
+  StorePGGameInstance->bFromGameOver = false;
 
-  UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
+  UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap", true);
 }
-
 // * Reopen the game with the selected save slot.
 void AStorePGGameMode::LoadGame(int32 SlotIndex) {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));

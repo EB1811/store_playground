@@ -58,7 +58,7 @@ void ADayManager::ManageDebt() {
     return;
   }
 
-  if (Store->Money > NextDebtAmount) {
+  if (Store->Money >= NextDebtAmount) {
     Store->MoneySpent(NextDebtAmount);
 
     NextDayToPayDebt = CurrentDay + DayManagerParams.DebtPaymentDayDivisor;

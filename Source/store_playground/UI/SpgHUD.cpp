@@ -16,6 +16,7 @@
 #include "store_playground/UI/Ability/AbilityViewWidget.h"
 #include "store_playground/UI/InGameHud/InGameHudWidget.h"
 #include "store_playground/UI/Negotiation/NegotiationViewWidget.h"
+#include "store_playground/UI/GameOver/GameOverViewWidget.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/UI/UIStructs.h"
@@ -179,6 +180,7 @@ void ASpgHUD::ShowWidget(UUserWidget* Widget) {
     Widget->PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 
     USoundBase* OpenSound = UIBehaviour->OpenSound;
+    checkf(OpenSound, TEXT("OpenSound is not set for %s"), *Widget->GetName());
     UGameplayStatics::PlaySound2D(this, OpenSound, 1.0f);
 
     return;
@@ -201,6 +203,7 @@ void ASpgHUD::HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFun
     Widget->PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 
     USoundBase* HideSound = UIBehaviour->HideSound;
+    checkf(HideSound, TEXT("HideSound is not set for %s"), *Widget->GetName());
     UGameplayStatics::PlaySound2D(this, HideSound, 1.0f);
 
     return;
@@ -362,6 +365,8 @@ void ASpgHUD::ShowInGameHudWidget() {
   bShowingHud = true;
 }
 void ASpgHUD::HideInGameHudWidget() {
+  if (!bShowingHud) return;
+
   InGameHudWidget->Hide();
 
   bShowingHud = false;
@@ -383,7 +388,7 @@ void ASpgHUD::OpenPauseMenuView() {
 
   OpenedWidgets.Add(PauseMenuViewWidget);
 
-  SetPlayerPausedFunc();
+  // SetPlayerPausedFunc();
 }
 
 void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
@@ -566,20 +571,37 @@ void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
   MiniGameWidget->AddToViewport(10);
   OpenFocusedMenu(MiniGameWidget);
 }
+
 void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
   SetPlayerNoControlFunc();
 
   StorePhaseTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
   StorePhaseTransitionWidget->FadeOutEndFunc = [this]() {
-    ShowInGameHudWidget();
-    SetPlayerNormalFunc();
-
     StorePhaseTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
     StorePhaseTransitionWidget->RemoveFromParent();
+
+    if (HUDState == EHUDState::GameOver) return;
+
+    ShowInGameHudWidget();
+    SetPlayerNormalFunc();
   };
 
   StorePhaseTransitionWidget->AddToViewport(100);
   StorePhaseTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void ASpgHUD::SetAndOpenGameOverView() {
+  HUDState = EHUDState::GameOver;
+  HideInGameHudWidget();
+
+  GameOverViewWidget = CreateWidget<UGameOverViewWidget>(GetWorld(), GameOverViewWidgetClass);
+  GameOverViewWidget->AddToViewport(20);
+  GameOverViewWidget->InitUI(InUIInputActions);
+  GameOverViewWidget->SetVisibility(ESlateVisibility::Visible);
+
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
 }
 
 void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {

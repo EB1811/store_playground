@@ -76,5 +76,7 @@ public:
   UFUNCTION(BlueprintCallable, Category = "GameMode")
   void GameOverReset();
   UFUNCTION(BlueprintCallable, Category = "GameMode")
+  void ExitToMainMenu();
+  UFUNCTION(BlueprintCallable, Category = "GameMode")
   void LoadGame(int32 SlotIndex);
 };

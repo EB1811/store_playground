@@ -1,4 +1,5 @@
 #include "PauseMenuViewWidget.h"
+#include "store_playground/Framework/StorePGGameMode.h"
 #include "store_playground/UI/SaveSlots/SaveLoadSlotsWidget.h"
 #include "store_playground/UI/Settings/SettingsWidget.h"
 #include "store_playground/SaveManager/SaveManager.h"
@@ -7,6 +8,7 @@
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UPauseMenuViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -47,7 +49,11 @@ void UPauseMenuViewWidget::SettingsMenu() {
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
 }
-void UPauseMenuViewWidget::Quit() {}
+void UPauseMenuViewWidget::Quit() {
+  AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+  check(GameMode);
+  GameMode->ExitToMainMenu();
+}
 
 void UPauseMenuViewWidget::RefreshUI() {
   if (SaveManager->CanSave()) SaveButton->SetIsEnabled(true);

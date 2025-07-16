@@ -158,11 +158,17 @@ void APlayerZDCharacter::BeginPlay() {
   HUD->SetPlayerNormalFunc = [this]() {
     // ? Set these states in player?
     if (PlayerBehaviourState == EPlayerState::Cutscene) return;
+    if (PlayerBehaviourState == EPlayerState::PausedCutscene) return ChangePlayerState(EPlayerState::Cutscene);
+    if (PlayerBehaviourState == EPlayerState::Paused) return;
+
     ChangePlayerState(EPlayerState::Normal);
   };
-  HUD->SetPlayerCutsceneFunc = [this]() { ChangePlayerState(EPlayerState::Cutscene); };
   HUD->SetPlayerNoControlFunc = [this]() { ChangePlayerState(EPlayerState::NoControl); };
-  HUD->SetPlayerPausedFunc = [this]() { ChangePlayerState(EPlayerState::Paused); };
+  HUD->SetPlayerPausedFunc = [this]() {
+    // ? Set these states in player?
+    if (PlayerBehaviourState == EPlayerState::Cutscene) return ChangePlayerState(EPlayerState::PausedCutscene);
+    ChangePlayerState(EPlayerState::Paused);
+  };
 
   HUD->InGameInputActions = InGameInputActions;
   HUD->InUIInputActions = InUIInputActions;
@@ -194,16 +200,19 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
 }
 
 void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
+  check(PlayerBehaviourState != EPlayerState::GameOver);
   if (PlayerBehaviourState == NewState) return;
+
+  if (NewState == EPlayerState::Paused || NewState == EPlayerState::PausedCutscene)
+    UGameplayStatics::SetGamePaused(GetWorld(), true);
+  if ((PlayerBehaviourState == EPlayerState::Paused || PlayerBehaviourState == EPlayerState::PausedCutscene) &&
+      (NewState != EPlayerState::Paused || NewState != EPlayerState::PausedCutscene))
+    UGameplayStatics::SetGamePaused(GetWorld(), false);
 
   UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
       GetWorld()->GetFirstPlayerController()->GetLocalPlayer());
   Subsystem->RemoveMappingContext(InputContexts[PlayerBehaviourState]);
   Subsystem->AddMappingContext(InputContexts[NewState], 0);
-
-  if (NewState == EPlayerState::Paused) UGameplayStatics::SetGamePaused(GetWorld(), true);
-  if (PlayerBehaviourState == EPlayerState::Paused && NewState != EPlayerState::Paused)
-    UGameplayStatics::SetGamePaused(GetWorld(), false);
 
   PlayerBehaviourState = NewState;
   UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
@@ -243,11 +252,21 @@ void APlayerZDCharacter::StopMove(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
-  check(PlayerBehaviourState != EPlayerState::Cutscene);
-  check(SaveManager);
-
   HUD->OpenPauseMenuView();
+
+  switch (PlayerBehaviourState) {
+    case EPlayerState::Normal: ChangePlayerState(EPlayerState::Paused); break;
+    case EPlayerState::Cutscene: ChangePlayerState(EPlayerState::PausedCutscene); break;
+    case EPlayerState::Paused: ChangePlayerState(EPlayerState::Normal); break;
+    case EPlayerState::PausedCutscene: ChangePlayerState(EPlayerState::Cutscene); break;
+
+    case EPlayerState::FocussedMenu:
+    case EPlayerState::NoControl:
+    case EPlayerState::GameOver: checkNoEntry();
+    default: checkNoEntry();
+  }
 }
+
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent);
 }
@@ -712,6 +731,13 @@ void APlayerZDCharacter::LeaveStore() {
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
+}
+
+void APlayerZDCharacter::GameOverReset() {
+  ChangePlayerState(EPlayerState::GameOver);
+  UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+  HUD->SetAndOpenGameOverView();
 }
 
 // void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
