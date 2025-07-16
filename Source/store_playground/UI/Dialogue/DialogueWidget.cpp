@@ -185,33 +185,9 @@ void UDialogueWidget::SetupUIActionable() {
   UIActionable.RetractUI = [this]() { CloseDialogueFunc(); };
   UIActionable.QuitUI = [this]() { CloseDialogueFunc(); };
 }
-
 void UDialogueWidget::SetupUIBehaviour() {
-  FWidgetAnimationDynamicEvent UIAnimEvent;
-  UIAnimEvent.BindDynamic(this, &UDialogueWidget::UIAnimComplete);
-  BindToAnimationFinished(ShowAnim, UIAnimEvent);
-  BindToAnimationFinished(HideAnim, UIAnimEvent);
-
-  UIBehaviour.ShowUI = [this](std::function<void()> Callback) {
-    check(!UUserWidget::IsAnimationPlaying(HideAnim));
-
-    UIAnimCompleteFunc = Callback;
-
-    SetVisibility(ESlateVisibility::Visible);
-    PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-  };
-  UIBehaviour.HideUI = [this](std::function<void()> Callback) {
-    check(!UUserWidget::IsAnimationPlaying(ShowAnim));
-
-    UIAnimCompleteFunc = [this, Callback]() {
-      SetVisibility(ESlateVisibility::Collapsed);
-
-      if (Callback) Callback();
-    };
-
-    UUserWidget::PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-  };
-}
-void UDialogueWidget::UIAnimComplete() {
-  if (UIAnimCompleteFunc) UIAnimCompleteFunc();
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }

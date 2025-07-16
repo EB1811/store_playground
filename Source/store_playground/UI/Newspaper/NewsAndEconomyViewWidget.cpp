@@ -18,6 +18,7 @@ void UNewsAndEconomyViewWidget::NativeOnInitialized() {
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UNewsAndEconomyViewWidget::Back);
 
   SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 void UNewsAndEconomyViewWidget::SwitchTab(ENewsAndEconomyViewTab Tab) {
@@ -85,4 +86,10 @@ void UNewsAndEconomyViewWidget::SetupUIActionable() {
   UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
   UIActionable.RetractUI = [this]() { Back(); };
   UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+}
+void UNewsAndEconomyViewWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }

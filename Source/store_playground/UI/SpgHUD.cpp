@@ -139,6 +139,8 @@ void ASpgHUD::BeginPlay() {
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(false);
+
+  UIAnimCompleteEvent.BindDynamic(this, &ASpgHUD::UIAnimComplete);
 }
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -159,25 +161,57 @@ void ASpgHUD::LeaveHUD() {
   SetPlayerNormalFunc();
 }
 
-inline void ShowWidget(UUserWidget* Widget, std::function<void()> OpenAnimFinFunc) {
-  if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
-    FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
-    check(UIBehaviour->ShowUI);
-    return UIBehaviour->ShowUI(OpenAnimFinFunc);
+inline FUIBehaviour* GetUIBehaviour(UUserWidget* Widget) {
+  FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour");
+  if (!FUIBehaviourProp) return nullptr;
+
+  return FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
+}
+void ASpgHUD::ShowWidget(UUserWidget* Widget) {
+  if (FUIBehaviour* UIBehaviour = GetUIBehaviour(Widget)) {
+    Widget->SetVisibility(ESlateVisibility::Visible);
+    HUDState = EHUDState::PlayingAnim;
+    UIAnimCompleteFunc = [this]() { HUDState = EHUDState::FocusedMenu; };
+
+    UWidgetAnimation* ShowAnim = UIBehaviour->ShowAnim;
+    Widget->UnbindAllFromAnimationFinished(ShowAnim);
+    Widget->BindToAnimationFinished(ShowAnim, UIAnimCompleteEvent);
+    Widget->PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+
+    USoundBase* OpenSound = UIBehaviour->OpenSound;
+    UGameplayStatics::PlaySound2D(this, OpenSound, 1.0f);
+
+    return;
   }
 
   Widget->SetVisibility(ESlateVisibility::Visible);
-  if (OpenAnimFinFunc) OpenAnimFinFunc();
 }
-inline void HideWidget(UUserWidget* Widget, std::function<void()> CloseAnimFinFunc) {
-  if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
-    FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
-    check(UIBehaviour->HideUI);
-    return UIBehaviour->HideUI(CloseAnimFinFunc);
+void ASpgHUD::HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
+  if (FUIBehaviour* UIBehaviour = GetUIBehaviour(Widget)) {
+    HUDState = EHUDState::PlayingAnim;
+    UIAnimCompleteFunc = [this, Widget, PostCloseFunc]() {
+      HUDState = EHUDState::InGame;
+      Widget->SetVisibility(ESlateVisibility::Collapsed);
+      if (PostCloseFunc) PostCloseFunc();
+    };
+
+    UWidgetAnimation* HideAnim = UIBehaviour->HideAnim;
+    Widget->UnbindAllFromAnimationFinished(HideAnim);
+    Widget->BindToAnimationFinished(HideAnim, UIAnimCompleteEvent);
+    Widget->PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+
+    USoundBase* HideSound = UIBehaviour->HideSound;
+    UGameplayStatics::PlaySound2D(this, HideSound, 1.0f);
+
+    return;
   }
 
   Widget->SetVisibility(ESlateVisibility::Collapsed);
-  if (CloseAnimFinFunc) CloseAnimFinFunc();
+  if (PostCloseFunc) PostCloseFunc();
+}
+
+void ASpgHUD::UIAnimComplete() {
+  if (UIAnimCompleteFunc) UIAnimCompleteFunc();
 }
 
 void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
@@ -189,28 +223,14 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
   GetOwningPlayerController()->SetShowMouseCursor(true);
   SetPlayerFocussedFunc();
 
-  ShowWidget(Widget, nullptr);
+  ShowWidget(Widget);
 }
-
 // Callback just for dialogue widget since other widgets are shown on the dialogue's callback.
 void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
   check(Widget);
 
-  UE_LOG(LogTemp, Log, TEXT("Closing widget: %s"), *Widget->GetName());
-
-  HideWidget(Widget, [this, Widget, PostCloseFunc]() {
-    // OpenedWidgets.RemoveSingle(Widget);
-    // if (!OpenedWidgets.IsEmpty()) return;
-    // LeaveHUD();
-
-    if (PostCloseFunc) PostCloseFunc();
-  });
-
-  // * Better transition animations but controls widget jerks due to not being in the right control state.
-  // ShowInGameHudWidget();
-
-  // * Better transition animations but HUD reopens and closes again, and control button widgets shrink for a frame.
   HideWidget(Widget, PostCloseFunc);
+
   OpenedWidgets.RemoveSingle(Widget);
   if (!OpenedWidgets.IsEmpty()) return;
   LeaveHUD();
@@ -223,7 +243,8 @@ inline FUIActionable* GetUIActionable(UUserWidget* Widget) {
   return UIActionableProp->ContainerPtrToValuePtr<FUIActionable>(Widget);
 }
 void ASpgHUD::AdvanceUI() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -232,7 +253,8 @@ void ASpgHUD::AdvanceUI() {
   ActionableWidget->AdvanceUI();
 }
 void ASpgHUD::RetractUIAction() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -241,7 +263,8 @@ void ASpgHUD::RetractUIAction() {
   ActionableWidget->RetractUI();
 }
 void ASpgHUD::QuitUIAction() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -250,7 +273,8 @@ void ASpgHUD::QuitUIAction() {
   ActionableWidget->QuitUI();
 }
 void ASpgHUD::UINumericInputAction(float Value) {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -259,7 +283,8 @@ void ASpgHUD::UINumericInputAction(float Value) {
   ActionableWidget->NumericInput(Value);
 }
 void ASpgHUD::UIDirectionalInputAction(FVector2D Direction) {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -268,7 +293,8 @@ void ASpgHUD::UIDirectionalInputAction(FVector2D Direction) {
   ActionableWidget->DirectionalInput(Direction);
 }
 void ASpgHUD::UISideButton1Action() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -277,7 +303,8 @@ void ASpgHUD::UISideButton1Action() {
   ActionableWidget->SideButton1();
 }
 void ASpgHUD::UISideButton2Action() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -286,7 +313,8 @@ void ASpgHUD::UISideButton2Action() {
   ActionableWidget->SideButton2();
 }
 void ASpgHUD::UISideButton3Action() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -295,7 +323,8 @@ void ASpgHUD::UISideButton3Action() {
   ActionableWidget->SideButton3();
 }
 void ASpgHUD::UISideButton4Action() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -304,7 +333,8 @@ void ASpgHUD::UISideButton4Action() {
   ActionableWidget->SideButton4();
 }
 void ASpgHUD::UICycleLeftAction() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -313,7 +343,8 @@ void ASpgHUD::UICycleLeftAction() {
   ActionableWidget->CycleLeft();
 }
 void ASpgHUD::UICycleRightAction() {
-  if (OpenedWidgets.IsEmpty()) return;
+  if (HUDState == EHUDState::PlayingAnim) return;
+  check(!OpenedWidgets.IsEmpty());
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -420,7 +451,7 @@ void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLe
   };
   StoreExpansionsListWidget->RefreshUI();
 
-  ShowWidget(StoreExpansionsListWidget, nullptr);
+  // ShowWidget(StoreExpansionsListWidget, nullptr);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -473,7 +504,7 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
 
 void ASpgHUD::SetAndOpenCutsceneDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueCloseFunc) {
   DialogueWidget->InitUI(InCutsceneInputActions, Dialogue, [this, OnDialogueCloseFunc] {
-    DialogueWidget->UIBehaviour.HideUI(OnDialogueCloseFunc);
+    HideWidget(DialogueWidget, OnDialogueCloseFunc);
 
     OpenedWidgets.RemoveSingle(DialogueWidget);
     const FInputModeGameOnly InputMode;
@@ -486,7 +517,7 @@ void ASpgHUD::SetAndOpenCutsceneDialogue(UDialogueSystem* Dialogue, std::functio
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
 
-  ShowWidget(DialogueWidget, nullptr);
+  ShowWidget(DialogueWidget);
 }
 void ASpgHUD::SetAndOpenCutscene(UCutsceneSystem* CutsceneSystem) {}
 void ASpgHUD::SkipCutscene() {}

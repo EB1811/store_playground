@@ -3,6 +3,7 @@
 #pragma once
 
 #include <functional>
+#include "Animation/WidgetAnimation.h"
 #include "CoreMinimal.h"
 #include "store_playground/Player/InputStructs.h"
 #include "UIStructs.generated.h"
@@ -35,15 +36,9 @@ USTRUCT()
 struct FUIBehaviour {
   GENERATED_BODY()
 
-  // * Need callbacks since theres no generic way to wait for hide animation finish.
-  // * And avoid problems such as being able to exit the UI while the animation is still playing, resulting in a stuck state.
-  std::function<void(std::function<void()>)> ShowUI;
-  std::function<void(std::function<void()>)> HideUI;
-
-  // * Override the base sounds for opening and closing the UI.
-  // * If not set, the default sounds will be used.
-  UPROPERTY(EditAnywhere)
-  class USoundBase* OpenSoundOverride;
-  UPROPERTY(EditAnywhere)
-  class USoundBase* CloseSoundOverride;
+  // * Attempt to pass the animnation itself.
+  UWidgetAnimation* ShowAnim;
+  UWidgetAnimation* HideAnim;
+  USoundBase* OpenSound;
+  USoundBase* HideSound;
 };

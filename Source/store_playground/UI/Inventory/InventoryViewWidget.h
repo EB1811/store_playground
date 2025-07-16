@@ -35,7 +35,6 @@ public:
   class UWidgetAnimation* ShowAnim;
   UPROPERTY(Transient, meta = (BindWidgetAnim))
   class UWidgetAnimation* HideAnim;
-
   UPROPERTY(EditAnywhere)
   class USoundBase* OpenSound;
   UPROPERTY(EditAnywhere)
@@ -67,16 +66,6 @@ public:
   UPROPERTY(EditAnywhere)
   FUIBehaviour UIBehaviour;
   void SetupUIBehaviour();
-  UFUNCTION()
-  void UIAnimComplete();
-  std::function<void()> UIAnimCompleteFunc;
-
-  // FWidgetAnimationDynamicEvent UIShowAnimEvent;
-  // UFUNCTION()
-  // void UIShowAnimComplete();
-  // FWidgetAnimationDynamicEvent UIHideAnimEvent;
-  // UFUNCTION()
-  // void UIHideAnimComplete();
 
   std::function<void()> CloseWidgetFunc;
 };

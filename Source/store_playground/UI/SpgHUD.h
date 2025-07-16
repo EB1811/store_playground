@@ -2,18 +2,20 @@
 
 #pragma once
 
+#include "Animation/WidgetAnimationEvents.h"
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "store_playground/Player/InputStructs.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "SPGHUD.generated.h"
 
-// todo Expand as needed.
 UENUM()
 enum class EHUDState : uint8 {
   InGame UMETA(DisplayName = "InGame"),
   Paused UMETA(DisplayName = "Paused"),
-  MainMenu UMETA(DisplayName = "MainMenu")
+  MainMenu UMETA(DisplayName = "MainMenu"),
+  FocusedMenu UMETA(DisplayName = "FocusedMenu"),
+  PlayingAnim UMETA(DisplayName = "PlayingAnimation"),
 };
 
 UCLASS()
@@ -103,12 +105,19 @@ public:
 
   void SetupInitUIStates();  // * Some stuff needs to be set up after all unreal funcs are called.
 
-  void LeaveHUD();                                  // * Leave the current HUD state (main menu, etc.).
-  void OpenFocusedMenu(class UUserWidget* Widget);  // * Open a menu in the focused state (dialogue, negotiation, etc.).
+  void LeaveHUD();  // * Leave the current HUD state (main menu, etc.).
+
+  void ShowWidget(class UUserWidget* Widget);
+  void HideWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc = nullptr);
+  FWidgetAnimationDynamicEvent UIAnimCompleteEvent;
+  UFUNCTION()
+  void UIAnimComplete();
+  std::function<void()> UIAnimCompleteFunc;
 
   UPROPERTY(EditAnywhere)
   TArray<class UUserWidget*> OpenedWidgets;
 
+  void OpenFocusedMenu(class UUserWidget* Widget);
   void CloseWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc = nullptr);
 
   void AdvanceUI();

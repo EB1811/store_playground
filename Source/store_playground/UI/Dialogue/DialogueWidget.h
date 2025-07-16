@@ -63,13 +63,6 @@ public:
   UPROPERTY(EditAnywhere)
   FUIBehaviour UIBehaviour;
   void SetupUIBehaviour();
-  UFUNCTION()
-  void UIAnimComplete();
-  std::function<void()> UIAnimCompleteFunc;
-
-  // Needed for blueprint/c++ communication.
-  UFUNCTION(BlueprintImplementableEvent)
-  void OnVisibilityChangeRequested(ESlateVisibility NewVisibility);
 
   std::function<void()> FinishDialogueFunc;
   std::function<void()> CloseDialogueFunc;

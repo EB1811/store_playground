@@ -127,55 +127,8 @@ void UInventoryViewWidget::SetupUIActionable() {
 }
 
 void UInventoryViewWidget::SetupUIBehaviour() {
-  // // FWidgetAnimationDynamicEvent UIShowAnimEvent;
-  // UIShowAnimEvent.BindDynamic(this, &UInventoryViewWidget::UIShowAnimComplete);
-  // BindToAnimationFinished(ShowAnim, UIShowAnimEvent);
-  // // FWidgetAnimationDynamicEvent UIHideAnimEvent;
-  // UIHideAnimEvent.BindDynamic(this, &UInventoryViewWidget::UIHideAnimComplete);
-  // BindToAnimationFinished(HideAnim, UIHideAnimEvent);
-
-  FWidgetAnimationDynamicEvent UIAnimEvent;
-  UIAnimEvent.BindDynamic(this, &UInventoryViewWidget::UIAnimComplete);
-  BindToAnimationFinished(ShowAnim, UIAnimEvent);
-  BindToAnimationFinished(HideAnim, UIAnimEvent);
-
-  UIBehaviour.ShowUI = [this](std::function<void()> Callback) {
-    // UUserWidget::StopAllAnimations(); // ! StopAllAnimations calls anim complete after the first time running anim.
-    // check(!UUserWidget::IsAnimationPlaying(HideAnim));
-
-    UIAnimCompleteFunc = nullptr;
-    if (UUserWidget::IsAnimationPlaying(HideAnim)) UUserWidget::StopAllAnimations();
-
-    UIAnimCompleteFunc = Callback;
-    SetVisibility(ESlateVisibility::Visible);
-
-    PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-  };
-  UIBehaviour.HideUI = [this](std::function<void()> Callback) {
-    // UUserWidget::StopAllAnimations();
-    // check(!UUserWidget::IsAnimationPlaying(ShowAnim));
-
-    UIAnimCompleteFunc = nullptr;
-    if (UUserWidget::IsAnimationPlaying(ShowAnim)) UUserWidget::StopAllAnimations();
-
-    UIAnimCompleteFunc = [this, Callback]() {
-      SetVisibility(ESlateVisibility::Collapsed);
-
-      if (Callback) Callback();
-    };
-
-    UUserWidget::PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
-  };
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }
-void UInventoryViewWidget::UIAnimComplete() {
-  UE_LOG(LogTemp, Log, TEXT("UIShowAnimComplete UI Animation Complete."));
-  if (UIAnimCompleteFunc) UIAnimCompleteFunc();
-}
-// void UInventoryViewWidget::UIShowAnimComplete() {
-//   UE_LOG(LogTemp, Log, TEXT("UIShowAnimComplete UI Animation Complete."));
-//   if (UIAnimCompleteFunc) UIAnimCompleteFunc();
-// }
-// void UInventoryViewWidget::UIHideAnimComplete() {
-//   UE_LOG(LogTemp, Log, TEXT("UIHideAnimComplete UI Animation Complete."));
-//   if (UIAnimCompleteFunc) UIAnimCompleteFunc();
-// }

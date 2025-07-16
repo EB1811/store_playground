@@ -31,6 +31,15 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
 
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* ShowAnim;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* HideAnim;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* OpenSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* HideSound;
+
   UPROPERTY(EditAnywhere)
   EStoreViewTab ActiveTab;
   void SwitchTab(EStoreViewTab Tab);
@@ -55,6 +64,10 @@ public:
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
   void SetupUIActionable();
+
+  UPROPERTY(EditAnywhere)
+  FUIBehaviour UIBehaviour;
+  void SetupUIBehaviour();
 
   std::function<void()> CloseWidgetFunc;
 };

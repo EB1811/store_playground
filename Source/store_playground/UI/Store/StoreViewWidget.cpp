@@ -10,6 +10,7 @@
 #include "store_playground/UI/Store/StoreDetailsWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UStoreViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -17,6 +18,7 @@ void UStoreViewWidget::NativeOnInitialized() {
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UStoreViewWidget::Back);
 
   SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
@@ -85,4 +87,10 @@ void UStoreViewWidget::SetupUIActionable() {
   UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
   UIActionable.RetractUI = [this]() { Back(); };
   UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+}
+void UStoreViewWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }
