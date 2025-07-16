@@ -61,5 +61,7 @@ struct FInCutsceneInputActions {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* AdvanceCutsceneAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* SkipCutsceneAction;
 };

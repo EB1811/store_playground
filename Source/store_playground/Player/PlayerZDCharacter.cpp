@@ -127,6 +127,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                        &APlayerZDCharacter::UICycleRightAction);
 
     // In Cutscene
+    EnhancedInputComponent->BindAction(InCutsceneInputActions.AdvanceCutsceneAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::AdvanceUI);
     EnhancedInputComponent->BindAction(InCutsceneInputActions.SkipCutsceneAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::SkipCutscene);
   }

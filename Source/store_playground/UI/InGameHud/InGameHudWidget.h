@@ -12,6 +12,8 @@ class STORE_PLAYGROUND_API UInGameHudWidget : public UUserWidget {
   GENERATED_BODY()
 
 public:
+  virtual void NativeOnInitialized() override;
+
   UPROPERTY(meta = (BindWidget))
   class UNewsHudSlideWidget* NewsHudSlideWidget;
   UPROPERTY(meta = (BindWidget))
@@ -24,6 +26,11 @@ public:
   class URightSlideSecondaryWidget* MoneySlideWidget;
   UPROPERTY(meta = (BindWidget))
   class URightSlideInvertedWidget* LocationSlideWidget;
+
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* ShowAnim;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* HideAnim;
 
   UPROPERTY(EditAnywhere)
   const class ANewsGen* NewsGen;
@@ -41,4 +48,11 @@ public:
 
   void RefreshUI();
   void InitUI(FInGameInputActions _InGameInputActions);
+
+  UPROPERTY(EditAnywhere)
+  bool bShowingHud;  // ! Workaround for HideAnimComplete event stuck being called when playing animations fast.
+  void Show();
+  void Hide();
+  UFUNCTION()
+  void HideAnimComplete();
 };

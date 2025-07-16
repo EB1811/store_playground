@@ -1,5 +1,7 @@
 #include "InGameHudWidget.h"
+#include "Blueprint/UserWidget.h"
 #include "Internationalization/Text.h"
+#include "Logging/LogVerbosity.h"
 #include "store_playground/UI/Components/ControlsHelpersWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
 #include "store_playground/UI/Components/RightSlideSecondaryWidget.h"
@@ -12,6 +14,14 @@
 #include "store_playground/Level/LevelManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+
+void UInGameHudWidget::NativeOnInitialized() {
+  Super::NativeOnInitialized();
+
+  FWidgetAnimationDynamicEvent UIAnimEvent;
+  UIAnimEvent.BindDynamic(this, &UInGameHudWidget::HideAnimComplete);
+  BindToAnimationFinished(HideAnim, UIAnimEvent);
+}
 
 void UInGameHudWidget::RefreshUI() {
   check(NewsGen && DayManager && StorePhaseManager && Store && LevelManager);
@@ -57,4 +67,20 @@ void UInGameHudWidget::InitUI(FInGameInputActions _InGameInputActions) {
   InGameInputActions = _InGameInputActions;
 
   NewsHudSlideWidget->InitUI(NewsGen);
+}
+
+void UInGameHudWidget::Show() {
+  bShowingHud = true;
+
+  SetVisibility(ESlateVisibility::Visible);
+  PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+}
+void UInGameHudWidget::Hide() {
+  bShowingHud = false;
+
+  PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+}
+void UInGameHudWidget::HideAnimComplete() {
+  if (!bShowingHud) SetVisibility(ESlateVisibility::Collapsed);
+  else check(GetVisibility() == ESlateVisibility::Visible);
 }

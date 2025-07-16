@@ -43,18 +43,18 @@ void UCutsceneSystem::StartCutscene(const FResolvedCutsceneData& _ResolvedCutsce
   ResolvedCutsceneData = _ResolvedCutsceneData;
   CutsceneFinishedFunc = _CutsceneFinishedFunc;
 
+  HUD->HideInGameHudWidget();
   HandleCutsceneState();
 }
 
 // Trying this without a cutscene widget.
 void UCutsceneSystem::HandleCutsceneState() {
-  HUD->HideInGameHudWidget();  // ? Have a CanShowHUD bool? Otherwise, the hud is constantly showing then hiding.
   NextCutsceneChain();
 
   switch (CutsceneState) {
     case ECutsceneState::InDialogue: {
       PerformCutsceneChainDialogues();
-      HUD->SetAndOpenDialogue(DialogueSystem, [this]() { HandleCutsceneState(); });
+      HUD->SetAndOpenCutsceneDialogue(DialogueSystem, [this]() { HandleCutsceneState(); });
       break;
     }
     case ECutsceneState::WaitingForAction: {
@@ -95,7 +95,6 @@ void UCutsceneSystem::SkipCutsceneChain() {
       break;
     }
     case ECutsceneState::WaitingForAction: {
-      // TODO: Implement skipping cutscene action.
       // HandleCutsceneState();
       break;
     }
@@ -122,7 +121,7 @@ void UCutsceneSystem::PerformCutsceneAction(std::function<void()> ActionFinished
   // * Call the CutsceneManager to perform the cutscene action.
   // Note: Not implemented.
 
-  // Temp
+  // Just waiting for a few seconds to simulate the cutscene action.
   FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]() { HandleCutsceneState(); });
   FTimerHandle ActionTimer;
   GetWorld()->GetTimerManager().SetTimer(ActionTimer, Delegate, 3.0f, false);

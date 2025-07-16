@@ -102,10 +102,49 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
   UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                      NextDialogue.DialogueData->Action == EDialogueAction::End);
 
-  UGameplayStatics::PlaySound2D(this, NextSound, 0.75f);
+  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
 }
 
-void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
+void UDialogueWidget::InitUI() {
+  if (DialogueSystem->DialogueState == EDialogueState::End) {
+    CloseDialogueFunc();
+    if (FinishDialogueFunc) FinishDialogueFunc();
+    return;
+  }
+
+  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+
+  switch (DialogueSystem->DialogueState) {
+    case EDialogueState::PlayerChoice: {
+      FText SpeakerName =
+          GetSpeakerName(DialogueSystem, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex]);
+      auto Dialogues = DialogueSystem->GetChoiceDialogues();
+
+      ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 ChoiceIndex) { SelectChoice(ChoiceIndex); });
+      ChoicesBoxWidget->RefreshUI();
+
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
+      ChoicesBoxWidget->SetVisibility(ESlateVisibility::Visible);
+
+      break;
+    }
+    case EDialogueState::NPCTalk:
+    case EDialogueState::PlayerTalk: {
+      FText SpeakerName =
+          GetSpeakerName(DialogueSystem, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex]);
+      UpdateDialogueText(
+          SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
+          DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
+
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
+      ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+      break;
+    }
+    default: checkNoEntry(); break;
+  }
+}
+void UDialogueWidget::InitUI(FInUIInputActions InputActions,
                              UDialogueSystem* _DialogueSystem,
                              std::function<void()> _CloseDialogueFunc,
                              std::function<void()> _FinishDialogueFunc) {
@@ -116,26 +155,28 @@ void UDialogueWidget::InitUI(FInUIInputActions InUIInputActions,
   CloseDialogueFunc = _CloseDialogueFunc;
 
   ControlsHelpersWidget->SetComponentUI({
-      {FText::FromString("Leave"), InUIInputActions.RetractUIAction},
-      {FText::FromString("Next"), InUIInputActions.AdvanceUIAction},
+      {FText::FromString("Leave"), InputActions.RetractUIAction},
+      {FText::FromString("Next"), InputActions.AdvanceUIAction},
   });
 
-  if (DialogueSystem->DialogueState == EDialogueState::End) {
-    CloseDialogueFunc();
-    if (FinishDialogueFunc) FinishDialogueFunc();
-    return;
-  }
+  InitUI();
+}
+void UDialogueWidget::InitUI(FInCutsceneInputActions InputActions,
+                             UDialogueSystem* _DialogueSystem,
+                             std::function<void()> _CloseDialogueFunc,
+                             std::function<void()> _FinishDialogueFunc) {
+  check(_DialogueSystem && _CloseDialogueFunc);
 
-  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+  DialogueSystem = _DialogueSystem;
+  FinishDialogueFunc = _FinishDialogueFunc;
+  CloseDialogueFunc = _CloseDialogueFunc;
 
-  FText SpeakerName =
-      GetSpeakerName(DialogueSystem, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex]);
-  UpdateDialogueText(
-      SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
-      DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
+  ControlsHelpersWidget->SetComponentUI({
+      {FText::FromString("Skip"), InputActions.SkipCutsceneAction},
+      {FText::FromString("Next"), InputActions.AdvanceCutsceneAction},
+  });
 
-  DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
-  ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
+  InitUI();
 }
 
 void UDialogueWidget::SetupUIActionable() {

@@ -33,6 +33,7 @@
 #include "store_playground/UI/Store/StoreViewWidget.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 
 ASpgHUD::ASpgHUD() { HUDState = EHUDState::InGame; }
 
@@ -147,14 +148,26 @@ void ASpgHUD::SetupInitUIStates() {
   InGameHudWidget->InitUI(InGameInputActions);
 }
 
-inline void ShowWidget(UUserWidget* Widget) {
+void ASpgHUD::LeaveHUD() {
+  UE_LOG(LogTemp, Log, TEXT("Leaving HUD state."));
+
+  const FInputModeGameOnly InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(false);
+
+  ShowInGameHudWidget();
+  SetPlayerNormalFunc();
+}
+
+inline void ShowWidget(UUserWidget* Widget, std::function<void()> OpenAnimFinFunc) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
     FUIBehaviour* UIBehaviour = FUIBehaviourProp->ContainerPtrToValuePtr<FUIBehaviour>(Widget);
     check(UIBehaviour->ShowUI);
-    return UIBehaviour->ShowUI(nullptr);
+    return UIBehaviour->ShowUI(OpenAnimFinFunc);
   }
 
   Widget->SetVisibility(ESlateVisibility::Visible);
+  if (OpenAnimFinFunc) OpenAnimFinFunc();
 }
 inline void HideWidget(UUserWidget* Widget, std::function<void()> CloseAnimFinFunc) {
   if (FProperty* FUIBehaviourProp = Widget->GetClass()->FindPropertyByName("UIBehaviour")) {
@@ -167,46 +180,40 @@ inline void HideWidget(UUserWidget* Widget, std::function<void()> CloseAnimFinFu
   if (CloseAnimFinFunc) CloseAnimFinFunc();
 }
 
-void ASpgHUD::LeaveHUD() {
-  UE_LOG(LogTemp, Log, TEXT("Leaving HUD state."));
-
-  const FInputModeGameOnly InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(false);
-
-  ShowInGameHudWidget();
-  SetPlayerNormalFunc();
-}
-
 void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
-  ShowWidget(Widget);
+  HideInGameHudWidget();
 
+  OpenedWidgets.Add(Widget);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(Widget);
-
-  HideInGameHudWidget();
   SetPlayerFocussedFunc();
+
+  ShowWidget(Widget, nullptr);
 }
 
 // Callback just for dialogue widget since other widgets are shown on the dialogue's callback.
 void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
   check(Widget);
 
+  UE_LOG(LogTemp, Log, TEXT("Closing widget: %s"), *Widget->GetName());
+
   HideWidget(Widget, [this, Widget, PostCloseFunc]() {
-    OpenedWidgets.RemoveSingle(Widget);
-    if (!OpenedWidgets.IsEmpty()) return;
-    LeaveHUD();
+    // OpenedWidgets.RemoveSingle(Widget);
+    // if (!OpenedWidgets.IsEmpty()) return;
+    // LeaveHUD();
 
     if (PostCloseFunc) PostCloseFunc();
   });
-  // HideWidget(Widget, PostCloseFunc);
-  // OpenedWidgets.RemoveSingle(Widget);
 
-  // if (!OpenedWidgets.IsEmpty()) return;
-  // LeaveHUD();
+  // * Better transition animations but controls widget jerks due to not being in the right control state.
+  // ShowInGameHudWidget();
+
+  // * Better transition animations but HUD reopens and closes again, and control button widgets shrink for a frame.
+  HideWidget(Widget, PostCloseFunc);
+  OpenedWidgets.RemoveSingle(Widget);
+  if (!OpenedWidgets.IsEmpty()) return;
+  LeaveHUD();
 }
 
 inline FUIActionable* GetUIActionable(UUserWidget* Widget) {
@@ -234,7 +241,6 @@ void ASpgHUD::RetractUIAction() {
   ActionableWidget->RetractUI();
 }
 void ASpgHUD::QuitUIAction() {
-  UE_LOG(LogTemp, Warning, TEXT("QuitUIAction called"));
   if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
@@ -317,15 +323,15 @@ void ASpgHUD::UICycleRightAction() {
 }
 
 void ASpgHUD::ShowInGameHudWidget() {
-  if (bShowingHud) return InGameHudWidget->RefreshUI();
-
-  InGameHudWidget->SetVisibility(ESlateVisibility::Visible);
   InGameHudWidget->RefreshUI();
+  if (bShowingHud) return;
+
+  InGameHudWidget->Show();
 
   bShowingHud = true;
 }
 void ASpgHUD::HideInGameHudWidget() {
-  InGameHudWidget->SetVisibility(ESlateVisibility::Collapsed);
+  InGameHudWidget->Hide();
 
   bShowingHud = false;
 }
@@ -414,7 +420,7 @@ void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLe
   };
   StoreExpansionsListWidget->RefreshUI();
 
-  ShowWidget(StoreExpansionsListWidget);
+  ShowWidget(StoreExpansionsListWidget, nullptr);
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -465,6 +471,23 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
   OpenFocusedMenu(NegotiationViewWidget);
 }
 
+void ASpgHUD::SetAndOpenCutsceneDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueCloseFunc) {
+  DialogueWidget->InitUI(InCutsceneInputActions, Dialogue, [this, OnDialogueCloseFunc] {
+    DialogueWidget->UIBehaviour.HideUI(OnDialogueCloseFunc);
+
+    OpenedWidgets.RemoveSingle(DialogueWidget);
+    const FInputModeGameOnly InputMode;
+    GetOwningPlayerController()->SetInputMode(InputMode);
+    GetOwningPlayerController()->SetShowMouseCursor(false);
+  });
+
+  OpenedWidgets.Add(DialogueWidget);
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+
+  ShowWidget(DialogueWidget, nullptr);
+}
 void ASpgHUD::SetAndOpenCutscene(UCutsceneSystem* CutsceneSystem) {}
 void ASpgHUD::SkipCutscene() {}
 

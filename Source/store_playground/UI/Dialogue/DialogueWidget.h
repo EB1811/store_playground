@@ -30,6 +30,10 @@ public:
   class UWidgetAnimation* HideAnim;
 
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* OpenSound;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* HideSound;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
   class USoundBase* NextSound;
 
   UPROPERTY(EditAnywhere)
@@ -42,7 +46,12 @@ public:
   UFUNCTION()
   void SelectChoice(int32 ChoiceIndex);
 
-  void InitUI(FInUIInputActions InUIInputActions,
+  void InitUI();
+  void InitUI(FInUIInputActions InputActions,
+              class UDialogueSystem* _DialogueSystem,
+              std::function<void()> _CloseDialogueFunc,
+              std::function<void()> _FinishDialogueFunc = nullptr);
+  void InitUI(FInCutsceneInputActions InputActions,
               class UDialogueSystem* _DialogueSystem,
               std::function<void()> _CloseDialogueFunc,
               std::function<void()> _FinishDialogueFunc = nullptr);

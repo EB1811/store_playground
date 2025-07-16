@@ -187,6 +187,7 @@ public:
 
   // UPROPERTY()
   // class UCutsceneWidget* CutsceneWidget;
+  void SetAndOpenCutsceneDialogue(class UDialogueSystem* Dialogue, std::function<void()> OnDialogueCloseFunc = nullptr);
   void SetAndOpenCutscene(class UCutsceneSystem* CutsceneSystem);
   void SkipCutscene();  // * Skips to next cutscene chain, not the whole cutscene.
 

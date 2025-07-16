@@ -35,9 +35,15 @@ USTRUCT()
 struct FUIBehaviour {
   GENERATED_BODY()
 
-  // * Need callback since theres no generic way to wait for hide animation finish.
-  // * Then, we can go from one widget's hide animation to another widget's show animation.
-  // Currently only relevant for dialogue.
+  // * Need callbacks since theres no generic way to wait for hide animation finish.
+  // * And avoid problems such as being able to exit the UI while the animation is still playing, resulting in a stuck state.
   std::function<void(std::function<void()>)> ShowUI;
   std::function<void(std::function<void()>)> HideUI;
+
+  // * Override the base sounds for opening and closing the UI.
+  // * If not set, the default sounds will be used.
+  UPROPERTY(EditAnywhere)
+  class USoundBase* OpenSoundOverride;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* CloseSoundOverride;
 };

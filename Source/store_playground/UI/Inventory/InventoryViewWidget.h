@@ -37,6 +37,11 @@ public:
   class UWidgetAnimation* HideAnim;
 
   UPROPERTY(EditAnywhere)
+  class USoundBase* OpenSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* HideSound;
+
+  UPROPERTY(EditAnywhere)
   const class AStore* Store;
   UPROPERTY(EditAnywhere)
   const class AMarketEconomy* MarketEconomy;
@@ -65,6 +70,13 @@ public:
   UFUNCTION()
   void UIAnimComplete();
   std::function<void()> UIAnimCompleteFunc;
+
+  // FWidgetAnimationDynamicEvent UIShowAnimEvent;
+  // UFUNCTION()
+  // void UIShowAnimComplete();
+  // FWidgetAnimationDynamicEvent UIHideAnimEvent;
+  // UFUNCTION()
+  // void UIHideAnimComplete();
 
   std::function<void()> CloseWidgetFunc;
 };
