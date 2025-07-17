@@ -44,7 +44,7 @@ void UPauseMenuViewWidget::LoadMenu() {
 }
 void UPauseMenuViewWidget::SettingsMenu() {
   auto BackFunc = [this]() { SettingsWidget->SetVisibility(ESlateVisibility::Collapsed); };
-  // SettingsWidget->InitUI(false, SaveManager, BackFunc);
+  SettingsWidget->InitUI(InUIInputActions, SettingsManager, BackFunc);
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
@@ -61,11 +61,13 @@ void UPauseMenuViewWidget::RefreshUI() {
 }
 
 void UPauseMenuViewWidget::InitUI(FInUIInputActions _InUIInputActions,
+                                  class ASettingsManager* _SettingsManager,
                                   class ASaveManager* _SaveManager,
                                   std::function<void()> _CloseWidgetFunc) {
-  check(_SaveManager && _CloseWidgetFunc);
+  check(_SettingsManager && _SaveManager && _CloseWidgetFunc);
 
   InUIInputActions = _InUIInputActions;
+  SettingsManager = _SettingsManager;
   SaveManager = _SaveManager;
   CloseWidgetFunc = _CloseWidgetFunc;
 

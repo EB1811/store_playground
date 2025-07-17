@@ -8,6 +8,7 @@
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Level/MarketLevel.h"
+#include "store_playground/SaveManager/SettingsSaveGame.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/DayManager/DayManager.h"
@@ -51,6 +52,7 @@ void SetStructNonSaveGameProperties(UScriptStruct* StaticStruct, T& Current, T& 
 ASaveManager::ASaveManager() {
   PrimaryActorTick.bCanEverTick = false;
 
+  SaveManagerParams.SettingsSaveName = "Settings";
   SaveManagerParams.SaveSlotListSaveName = "SaveSlotList";
   SaveManagerParams.SaveSlotCount = 4;
   SaveManagerParams.SaveSlotNamePrefix = "SaveSlot_";
@@ -61,11 +63,29 @@ void ASaveManager::BeginPlay() { Super::BeginPlay(); }
 
 void ASaveManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-auto ASaveManager::CanSave() const -> bool {
-  check(StorePhaseManager);
-  return StorePhaseManager->StorePhaseState != EStorePhaseState::None &&
-         StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode &&
-         StorePhaseManager->StorePhaseState != EStorePhaseState::ShopOpen;
+void ASaveManager::SaveSettingsToDisk(FSavedSoundSettings SoundSettings) {
+  check(SettingsSaveGame);
+
+  SettingsSaveGame->SoundSettings = SoundSettings;
+  UGameplayStatics::SaveGameToSlot(SettingsSaveGame, SaveManagerParams.SettingsSaveName, 0);
+}
+auto ASaveManager::LoadSettingsFromDisk() -> USettingsSaveGame* {
+  if (!UGameplayStatics::DoesSaveGameExist(SaveManagerParams.SettingsSaveName, 0)) {
+    SettingsSaveGame =
+        Cast<USettingsSaveGame>(UGameplayStatics::CreateSaveGameObject(USettingsSaveGame::StaticClass()));
+    check(SettingsSaveGame);
+
+    SettingsSaveGame->SoundSettings = {};
+    UGameplayStatics::SaveGameToSlot(SettingsSaveGame, SaveManagerParams.SettingsSaveName, 0);
+    UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new settings save game."));
+
+    return SettingsSaveGame;
+  }
+
+  SettingsSaveGame = Cast<USettingsSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveManagerParams.SettingsSaveName, 0));
+  check(SettingsSaveGame);
+
+  return SettingsSaveGame;
 }
 
 void ASaveManager::LoadSaveGameSlots() {
@@ -95,6 +115,13 @@ void ASaveManager::LoadSaveGameSlots() {
   SaveSlotListSaveGame =
       Cast<USaveSlotListSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveManagerParams.SaveSlotListSaveName, 0));
   check(SaveSlotListSaveGame);
+}
+
+auto ASaveManager::CanSave() const -> bool {
+  check(StorePhaseManager);
+  return StorePhaseManager->StorePhaseState != EStorePhaseState::None &&
+         StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode &&
+         StorePhaseManager->StorePhaseState != EStorePhaseState::ShopOpen;
 }
 
 void ASaveManager::CreateNewSaveGame(int32 SlotIndex) {

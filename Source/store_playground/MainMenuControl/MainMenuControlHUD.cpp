@@ -1,8 +1,9 @@
 #include "MainMenuControlHUD.h"
 #include "Components/Button.h"
 #include "Components/SlateWrapperTypes.h"
-#include "store_playground/MainMenuControl/SettingsSaveGame.h"
+#include "store_playground/SaveManager/SettingsSaveGame.h"
 #include "store_playground/SaveManager/SaveSlotListSaveGame.h"
+#include "store_playground/Framework/StorePGGameInstance.h"
 #include "Serialization/MemoryReader.h"
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
@@ -26,7 +27,7 @@ void AMainMenuControlHUD::BeginPlay() {
 
   check(MainMenuWidgetClass && LoadSlotsWidgetClass && LevelLoadingTransitionWidgetClass);
 
-  LoadSettings();
+  // LoadSettings();
   LoadSaveGameSlots();
 
   MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
@@ -92,31 +93,31 @@ void AMainMenuControlHUD::ExitLoadGameMenu() {
   LoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
-void AMainMenuControlHUD::CreateNewSettingsSaveGame() {
-  CurrentSettingsSaveGame =
-      Cast<USettingsSaveGame>(UGameplayStatics::CreateSaveGameObject(USettingsSaveGame::StaticClass()));
-  check(CurrentSettingsSaveGame);
+// void AMainMenuControlHUD::CreateNewSettingsSaveGame() {
+//   CurrentSettingsSaveGame =
+//       Cast<USettingsSaveGame>(UGameplayStatics::CreateSaveGameObject(USettingsSaveGame::StaticClass()));
+//   check(CurrentSettingsSaveGame);
 
-  CurrentSettingsSaveGame->SlotName = "Settings";
-}
+//   CurrentSettingsSaveGame->SlotName = "Settings";
+// }
 
-void AMainMenuControlHUD::SaveSettings() {
-  if (!CurrentSettingsSaveGame) CreateNewSettingsSaveGame();
+// void AMainMenuControlHUD::SaveSettings() {
+//   if (!CurrentSettingsSaveGame) CreateNewSettingsSaveGame();
 
-  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-  CurrentSettingsSaveGame->GameSettings = StorePGGameInstance->GameSettings;
+//   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+//   CurrentSettingsSaveGame->GameSettings = StorePGGameInstance->GameSettings;
 
-  UGameplayStatics::SaveGameToSlot(CurrentSettingsSaveGame, CurrentSettingsSaveGame->SlotName, 0);
-}
-void AMainMenuControlHUD::LoadSettings() {
-  if (!UGameplayStatics::DoesSaveGameExist("Settings", 0)) return CreateNewSettingsSaveGame();
+//   UGameplayStatics::SaveGameToSlot(CurrentSettingsSaveGame, CurrentSettingsSaveGame->SlotName, 0);
+// }
+// void AMainMenuControlHUD::LoadSettings() {
+//   if (!UGameplayStatics::DoesSaveGameExist("Settings", 0)) return CreateNewSettingsSaveGame();
 
-  CurrentSettingsSaveGame = Cast<USettingsSaveGame>(UGameplayStatics::LoadGameFromSlot("Settings", 0));
-  check(CurrentSettingsSaveGame);
+//   CurrentSettingsSaveGame = Cast<USettingsSaveGame>(UGameplayStatics::LoadGameFromSlot("Settings", 0));
+//   check(CurrentSettingsSaveGame);
 
-  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-  StorePGGameInstance->GameSettings = CurrentSettingsSaveGame->GameSettings;
-}
+//   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+//   StorePGGameInstance->GameSettings = CurrentSettingsSaveGame->GameSettings;
+// }
 
 void AMainMenuControlHUD::LoadSaveGameSlots() {
   if (!UGameplayStatics::DoesSaveGameExist(MainMenuControlParams.SaveSlotListSaveName, 0)) {

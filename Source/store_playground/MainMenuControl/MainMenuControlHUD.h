@@ -59,9 +59,9 @@ public:
   // UFUNCTION(BlueprintCallable, Category = "Widgets")
   // void QuitGame();
 
-  void CreateNewSettingsSaveGame();
-  void SaveSettings();
-  void LoadSettings();
+  // void CreateNewSettingsSaveGame();
+  // void SaveSettings();
+  // void LoadSettings();
 
   // ? Put in a save slot manager?
   void LoadSaveGameSlots();

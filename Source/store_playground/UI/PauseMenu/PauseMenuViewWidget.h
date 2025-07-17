@@ -33,6 +33,8 @@ public:
   UPROPERTY(EditAnywhere)
   FInUIInputActions InUIInputActions;
 
+  UPROPERTY(EditAnywhere)
+  class ASettingsManager* SettingsManager;
   UPROPERTY()
   class ASaveManager* SaveManager;
 
@@ -49,6 +51,7 @@ public:
 
   void RefreshUI();
   void InitUI(FInUIInputActions _InUIInputActions,
+              class ASettingsManager* _SettingsManager,
               class ASaveManager* _SaveManager,
               std::function<void()> _CloseWidgetFunc);
 

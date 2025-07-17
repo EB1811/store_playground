@@ -11,6 +11,8 @@ struct FSaveManagerParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  FString SettingsSaveName;
+  UPROPERTY(EditAnywhere)
   FString SaveSlotListSaveName;
   UPROPERTY(EditAnywhere)
   int32 SaveSlotCount;
@@ -61,14 +63,18 @@ public:
   class AMarketEconomy* MarketEconomy;
 
   UPROPERTY()
+  class USettingsSaveGame* SettingsSaveGame;
+  UPROPERTY()
   class USaveSlotListSaveGame* SaveSlotListSaveGame;
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;
 
-  auto CanSave() const -> bool;  // * For UI.
+  void SaveSettingsToDisk(FSavedSoundSettings SoundSettings);
+  auto LoadSettingsFromDisk() -> class USettingsSaveGame*;
 
   void LoadSaveGameSlots();
 
+  auto CanSave() const -> bool;  // * For UI.
   void CreateNewSaveGame(int32 SlotIndex);
   void SaveCurrentSlotToDisk();
   // Systems and Levels need to be separated to load store level info.

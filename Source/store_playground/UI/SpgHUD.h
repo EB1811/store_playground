@@ -77,6 +77,8 @@ public:
   const class AMarket* Market;
 
   UPROPERTY(EditAnywhere)
+  class ASettingsManager* SettingsManager;
+  UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;

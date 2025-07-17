@@ -113,3 +113,15 @@ struct FSaveSlotData {
   UPROPERTY()
   float StoreMoney;
 };
+
+USTRUCT()
+struct FSavedSoundSettings {
+  GENERATED_BODY()
+
+  UPROPERTY()
+  float MasterVolume = 1.0f;
+  UPROPERTY()
+  float MusicVolume = 1.0f;
+  UPROPERTY()
+  float SFXVolume = 1.0f;
+};

@@ -7,6 +7,7 @@
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Framework/StorePGGameInstance.h"
+#include "store_playground/Framework/SettingsManager.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Store/Store.h"
@@ -56,10 +57,11 @@ void AStorePGGameMode::BeginPlay() {
   UNegotiationSystem* NegotiationSystem = NewObject<UNegotiationSystem>(this);
   UCutsceneSystem* CutsceneSystem = NewObject<UCutsceneSystem>(this);
 
-  ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
+  ASettingsManager* SettingsManager = GetWorld()->SpawnActor<ASettingsManager>(SettingsManagerClass);
   SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
-  APlayerCommand* PlayerCommand = GetWorld()->SpawnActor<APlayerCommand>(PlayerCommandClass);
+  ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   AUpgradeManager* UpgradeManager = GetWorld()->SpawnActor<AUpgradeManager>(UpgradeManagerClass);
+  APlayerCommand* PlayerCommand = GetWorld()->SpawnActor<APlayerCommand>(PlayerCommandClass);
   AGlobalDataManager* GlobalDataManager = GetWorld()->SpawnActor<AGlobalDataManager>(GlobalDataManagerClass);
   AGlobalStaticDataManager* GlobalStaticDataManager =
       GetWorld()->SpawnActor<AGlobalStaticDataManager>(GlobalStaticDataManagerClass);
@@ -107,6 +109,7 @@ void AStorePGGameMode::BeginPlay() {
   HUD->MarketEconomy = MarketEconomy;
   HUD->Market = Market;
   HUD->StatisticsGen = StatisticsGen;
+  HUD->SettingsManager = SettingsManager;
   HUD->SaveManager = SaveManager;
   HUD->UpgradeManager = UpgradeManager;
   HUD->AbilityManager = AbilityManager;
@@ -123,6 +126,8 @@ void AStorePGGameMode::BeginPlay() {
   CutsceneSystem->HUD = HUD;
   CutsceneSystem->DialogueSystem = DialogueSystem;
   CutsceneSystem->CutsceneManager = CutsceneManager;
+
+  SettingsManager->SaveManager = SaveManager;
 
   SaveManager->PlayerCharacter = PlayerCharacter;
   SaveManager->SystemsToSave = {
@@ -153,14 +158,14 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->MarketLevel = MarketLevel;
   SaveManager->Store = Store;
 
-  PlayerCommand->PlayerCharacter = PlayerCharacter;
-
   LevelManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
   LevelManager->DayManager = DayManager;
   LevelManager->StoreExpansionManager = StoreExpansionManager;
   LevelManager->CutsceneManager = CutsceneManager;
   LevelManager->Store = Store;
   LevelManager->MarketLevel = MarketLevel;
+
+  PlayerCommand->PlayerCharacter = PlayerCharacter;
 
   StorePhaseManager->PlayerCommand = PlayerCommand;
   StorePhaseManager->SaveManager = SaveManager;
@@ -253,6 +258,8 @@ void AStorePGGameMode::BeginPlay() {
   // No way to do a blocking load so need a callback.
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
+
+  SettingsManager->LoadSettings();
 
   SaveManager->LoadSaveGameSlots();
   if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadSystemsFromDisk(StorePGGameInstance->SaveSlotIndex);

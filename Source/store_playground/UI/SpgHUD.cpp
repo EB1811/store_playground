@@ -375,7 +375,7 @@ void ASpgHUD::HideInGameHudWidget() {
 void ASpgHUD::OpenPauseMenuView() {
   if (OpenedWidgets.Contains(PauseMenuViewWidget)) return CloseWidget(PauseMenuViewWidget);
 
-  PauseMenuViewWidget->InitUI(InUIInputActions, SaveManager, [this] {
+  PauseMenuViewWidget->InitUI(InUIInputActions, SettingsManager, SaveManager, [this] {
     CloseWidget(PauseMenuViewWidget);
     SetPlayerNormalFunc();
   });

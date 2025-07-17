@@ -159,7 +159,6 @@ void APlayerZDCharacter::BeginPlay() {
     // ? Set these states in player?
     if (PlayerBehaviourState == EPlayerState::Cutscene) return;
     if (PlayerBehaviourState == EPlayerState::PausedCutscene) return ChangePlayerState(EPlayerState::Cutscene);
-    if (PlayerBehaviourState == EPlayerState::Paused) return;
 
     ChangePlayerState(EPlayerState::Normal);
   };
@@ -252,19 +251,19 @@ void APlayerZDCharacter::StopMove(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
-  HUD->OpenPauseMenuView();
-
   switch (PlayerBehaviourState) {
     case EPlayerState::Normal: ChangePlayerState(EPlayerState::Paused); break;
     case EPlayerState::Cutscene: ChangePlayerState(EPlayerState::PausedCutscene); break;
-    case EPlayerState::Paused: ChangePlayerState(EPlayerState::Normal); break;
-    case EPlayerState::PausedCutscene: ChangePlayerState(EPlayerState::Cutscene); break;
+    case EPlayerState::Paused:
+    case EPlayerState::PausedCutscene: break;
 
     case EPlayerState::FocussedMenu:
     case EPlayerState::NoControl:
     case EPlayerState::GameOver: checkNoEntry();
     default: checkNoEntry();
   }
+
+  HUD->OpenPauseMenuView();
 }
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
