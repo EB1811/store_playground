@@ -68,15 +68,6 @@ void ASpgHUD::BeginPlay() {
   check(UpgradeViewWidgetClass);
   check(AbilityViewWidgetClass);
 
-  InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
-  InGameHudWidget->AddToViewport(0);
-  InGameHudWidget->SetVisibility(ESlateVisibility::Collapsed);
-  InGameHudWidget->NewsGen = NewsGen;
-  InGameHudWidget->DayManager = DayManager;
-  InGameHudWidget->StorePhaseManager = StorePhaseManager;
-  InGameHudWidget->Store = Store;
-  InGameHudWidget->LevelManager = LevelManager;
-
   PauseMenuViewWidget = CreateWidget<UPauseMenuViewWidget>(GetWorld(), PauseMenuViewWidgetClass);
   PauseMenuViewWidget->AddToViewport(20);
   PauseMenuViewWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -147,6 +138,14 @@ void ASpgHUD::BeginPlay() {
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void ASpgHUD::SetupInitUIStates() {
+  InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
+  InGameHudWidget->AddToViewport(0);
+  InGameHudWidget->SetVisibility(ESlateVisibility::Hidden);
+  InGameHudWidget->NewsGen = NewsGen;
+  InGameHudWidget->DayManager = DayManager;
+  InGameHudWidget->StorePhaseManager = StorePhaseManager;
+  InGameHudWidget->Store = Store;
+  InGameHudWidget->LevelManager = LevelManager;
   // * Input actions are created in SetupPlayerInputComponent, but it runs after BeginPlay, so we need to set them here.
   InGameHudWidget->InitUI(InGameInputActions);
 }

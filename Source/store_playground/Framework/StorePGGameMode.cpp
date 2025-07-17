@@ -251,7 +251,7 @@ void AStorePGGameMode::BeginPlay() {
 
   MiniGameManager->Market = Market;
 
-  // todo-low: Put loading screen here.
+  // TODO: Put loading screen here.
   UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
 
   // * Load systems save data, then store level, then load level save data.
@@ -303,7 +303,7 @@ void AStorePGGameMode::ExitToMainMenu() {
   StorePGGameInstance->bFromSaveGame = false;
   StorePGGameInstance->bFromGameOver = false;
 
-  UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap", true);
+  HUD->StartLevelLoadingTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap", true); });
 }
 // * Reopen the game with the selected save slot.
 void AStorePGGameMode::LoadGame(int32 SlotIndex) {
@@ -314,5 +314,5 @@ void AStorePGGameMode::LoadGame(int32 SlotIndex) {
 
   StorePGGameInstance->bFromGameOver = false;
 
-  UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true);
+  HUD->StartLevelLoadingTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); });
 }

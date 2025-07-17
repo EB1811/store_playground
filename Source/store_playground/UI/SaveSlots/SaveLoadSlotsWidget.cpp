@@ -1,4 +1,5 @@
 #include "SaveLoadSlotsWidget.h"
+#include "store_playground/MainMenuControl/MainMenuGameMode.h"
 #include "store_playground/UI/SaveSlots/PopulatedSaveSlotWidget.h"
 #include "store_playground/UI/SaveSlots/EmptySaveSlotWidget.h"
 #include "store_playground/UI/SaveSlots/SaveLoadConfirmWidget.h"
@@ -42,10 +43,13 @@ void USaveLoadSlotsWidget::ConfirmSaveLoad(int32 SlotIndex) {
 
       RefreshUI();
     } else {
-      AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+      // ? Have a callback?
+      auto* GameMode = UGameplayStatics::GetGameMode(GetWorld());
       check(GameMode);
 
-      GameMode->LoadGame(SlotIndex);
+      if (AStorePGGameMode* InGameGameMode = Cast<AStorePGGameMode>(GameMode)) InGameGameMode->LoadGame(SlotIndex);
+      else if (AMainMenuGameMode* MainMenuGameMode = Cast<AMainMenuGameMode>(GameMode))
+        MainMenuGameMode->LoadGame(SlotIndex);
     }
   };
   auto CancelFunc = [this]() {

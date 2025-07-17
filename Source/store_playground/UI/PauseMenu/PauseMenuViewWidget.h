@@ -19,6 +19,7 @@ public:
   class USaveLoadSlotsWidget* SaveLoadSlotsWidget;
   UPROPERTY(meta = (BindWidget))
   class USettingsWidget* SettingsWidget;
+
   UPROPERTY(meta = (BindWidget))
   class UButton* ResumeButton;
   UPROPERTY(meta = (BindWidget))
