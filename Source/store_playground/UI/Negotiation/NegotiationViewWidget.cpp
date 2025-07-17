@@ -91,7 +91,7 @@ void UNegotiationViewWidget::RefreshUI() {
     }
     case ENegotiationState::NpcStockCheckConsider: {
       auto Dialogue = NegotiationSystem->NPCNegotiationTurn();
-      DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() { RefreshUI(); });
+      DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this](bool bDialogueFinished) { RefreshUI(); });
 
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -109,7 +109,7 @@ void UNegotiationViewWidget::RefreshUI() {
 
     case ENegotiationState::NpcConsider: {
       auto Dialogue = NegotiationSystem->NPCNegotiationTurn();
-      DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() { RefreshUI(); });
+      DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this](bool bDialogueFinished) { RefreshUI(); });
 
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
@@ -159,7 +159,7 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
         InUIInputActions, AbilityManager, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
         [this]() { RejectLeave(); });
 
-  DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this]() {
+  DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this](bool bDialogueFinished) {
     if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||
         NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
       NegotiationSystem->PlayerReadRequest();

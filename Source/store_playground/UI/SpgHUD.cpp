@@ -132,7 +132,8 @@ void ASpgHUD::BeginPlay() {
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(false);
 
-  UIAnimCompleteEvent.BindDynamic(this, &ASpgHUD::UIAnimComplete);
+  UIShowAnimCompleteEvent.BindDynamic(this, &ASpgHUD::UIShowAnimComplete);
+  UIHideAnimCompleteEvent.BindDynamic(this, &ASpgHUD::UIHideAnimComplete);
 }
 
 void ASpgHUD::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -169,18 +170,18 @@ inline FUIBehaviour* GetUIBehaviour(UUserWidget* Widget) {
 }
 void ASpgHUD::ShowWidget(UUserWidget* Widget) {
   if (FUIBehaviour* UIBehaviour = GetUIBehaviour(Widget)) {
-    Widget->SetVisibility(ESlateVisibility::Visible);
     HUDState = EHUDState::PlayingAnim;
-    UIAnimCompleteFunc = [this]() { HUDState = EHUDState::FocusedMenu; };
+    UIShowAnimCompleteFunc = [this]() { HUDState = EHUDState::FocusedMenu; };
 
     UWidgetAnimation* ShowAnim = UIBehaviour->ShowAnim;
     Widget->UnbindAllFromAnimationFinished(ShowAnim);
-    Widget->BindToAnimationFinished(ShowAnim, UIAnimCompleteEvent);
+    Widget->BindToAnimationFinished(ShowAnim, UIShowAnimCompleteEvent);
+
+    Widget->SetVisibility(ESlateVisibility::Visible);
     Widget->PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 
     USoundBase* OpenSound = UIBehaviour->OpenSound;
-    checkf(OpenSound, TEXT("OpenSound is not set for %s"), *Widget->GetName());
-    UGameplayStatics::PlaySound2D(this, OpenSound, 1.0f);
+    if (OpenSound) UGameplayStatics::PlaySound2D(this, OpenSound, 1.0f);
 
     return;
   }
@@ -190,7 +191,7 @@ void ASpgHUD::ShowWidget(UUserWidget* Widget) {
 void ASpgHUD::HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
   if (FUIBehaviour* UIBehaviour = GetUIBehaviour(Widget)) {
     HUDState = EHUDState::PlayingAnim;
-    UIAnimCompleteFunc = [this, Widget, PostCloseFunc]() {
+    UIHideAnimCompleteFunc = [this, Widget, PostCloseFunc]() {
       HUDState = EHUDState::InGame;
       Widget->SetVisibility(ESlateVisibility::Collapsed);
       if (PostCloseFunc) PostCloseFunc();
@@ -198,12 +199,11 @@ void ASpgHUD::HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFun
 
     UWidgetAnimation* HideAnim = UIBehaviour->HideAnim;
     Widget->UnbindAllFromAnimationFinished(HideAnim);
-    Widget->BindToAnimationFinished(HideAnim, UIAnimCompleteEvent);
+    Widget->BindToAnimationFinished(HideAnim, UIHideAnimCompleteEvent);
     Widget->PlayAnimation(HideAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
 
     USoundBase* HideSound = UIBehaviour->HideSound;
-    checkf(HideSound, TEXT("HideSound is not set for %s"), *Widget->GetName());
-    UGameplayStatics::PlaySound2D(this, HideSound, 1.0f);
+    if (HideSound) UGameplayStatics::PlaySound2D(this, HideSound, 1.0f);
 
     return;
   }
@@ -212,8 +212,11 @@ void ASpgHUD::HideWidget(UUserWidget* Widget, std::function<void()> PostCloseFun
   if (PostCloseFunc) PostCloseFunc();
 }
 
-void ASpgHUD::UIAnimComplete() {
-  if (UIAnimCompleteFunc) UIAnimCompleteFunc();
+void ASpgHUD::UIShowAnimComplete() {
+  if (UIShowAnimCompleteFunc) UIShowAnimCompleteFunc();
+}
+void ASpgHUD::UIHideAnimComplete() {
+  if (UIHideAnimCompleteFunc) UIHideAnimCompleteFunc();
 }
 
 void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
@@ -227,15 +230,26 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
 
   ShowWidget(Widget);
 }
-// Callback just for dialogue widget since other widgets are shown on the dialogue's callback.
-void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
+void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   check(Widget);
 
-  HideWidget(Widget, PostCloseFunc);
+  HideWidget(Widget, nullptr);
 
   OpenedWidgets.RemoveSingle(Widget);
   if (!OpenedWidgets.IsEmpty()) return;
   LeaveHUD();
+}
+// Callback just for dialogue widget since other widgets are shown on the dialogue's callback.
+void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
+  check(Widget);
+
+  HideWidget(Widget, [this, Widget, PostCloseFunc]() {
+    OpenedWidgets.RemoveSingle(Widget);
+    if (PostCloseFunc) PostCloseFunc();
+
+    if (!OpenedWidgets.IsEmpty()) return;
+    LeaveHUD();
+  });
 }
 
 inline FUIActionable* GetUIActionable(UUserWidget* Widget) {
@@ -480,15 +494,23 @@ void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
 
 void ASpgHUD::SetAndOpenDialogue(UDialogueSystem* Dialogue,
                                  std::function<void()> OnDialogueCloseFunc,
-                                 std::function<void()> OnDialogueFinishFunc) {
-  DialogueWidget->InitUI(
-      InUIInputActions, Dialogue,
-      [this, OnDialogueCloseFunc] {
-        // * For flowing animations from hide dialogue animation to the next show animation, this needs to be in a callback in CloseWidget.
-        CloseWidget(DialogueWidget, OnDialogueCloseFunc);
-      },
-      // ! This runs before hide animation finishes.
-      OnDialogueFinishFunc);
+                                 std::function<void()> OnDialogueFinishedFunc) {
+  auto CloseDialogueFunc = [this, OnDialogueCloseFunc, OnDialogueFinishedFunc](bool bDialogueFinished) {
+    if (!bDialogueFinished || !OnDialogueFinishedFunc) {
+      CloseWidget(DialogueWidget);
+      if (OnDialogueCloseFunc) OnDialogueCloseFunc();
+      return;
+    }
+
+    HideWidget(DialogueWidget);
+    OpenedWidgets.RemoveSingle(DialogueWidget);
+    if (OnDialogueCloseFunc) OnDialogueCloseFunc();
+    OnDialogueFinishedFunc();
+
+    if (!OpenedWidgets.IsEmpty()) return;
+    LeaveHUD();
+  };
+  DialogueWidget->InitUI(InUIInputActions, Dialogue, CloseDialogueFunc);
 
   OpenFocusedMenu(DialogueWidget);
 }
@@ -507,14 +529,15 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
 }
 
 void ASpgHUD::SetAndOpenCutsceneDialogue(UDialogueSystem* Dialogue, std::function<void()> OnDialogueCloseFunc) {
-  DialogueWidget->InitUI(InCutsceneInputActions, Dialogue, [this, OnDialogueCloseFunc] {
+  auto CloseDialogueFunc = [this, OnDialogueCloseFunc](bool bDialogueFinished) {
     HideWidget(DialogueWidget, OnDialogueCloseFunc);
 
     OpenedWidgets.RemoveSingle(DialogueWidget);
     const FInputModeGameOnly InputMode;
     GetOwningPlayerController()->SetInputMode(InputMode);
     GetOwningPlayerController()->SetShowMouseCursor(false);
-  });
+  };
+  DialogueWidget->InitUI(InCutsceneInputActions, Dialogue, CloseDialogueFunc);
 
   OpenedWidgets.Add(DialogueWidget);
   const FInputModeGameAndUI InputMode;

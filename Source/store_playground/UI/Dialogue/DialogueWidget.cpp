@@ -47,11 +47,7 @@ void UDialogueWidget::Next() {
     return;
 
   FNextDialogueRes NextDialogue = DialogueSystem->NextDialogue();
-  if (NextDialogue.State == EDialogueState::End) {
-    CloseDialogueFunc();
-    if (FinishDialogueFunc) FinishDialogueFunc();
-    return;
-  }
+  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc(true);
 
   check(NextDialogue.DialogueData);
   switch (NextDialogue.State) {
@@ -87,11 +83,7 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
     return;
 
   FNextDialogueRes NextDialogue = DialogueSystem->DialogueChoice(ChoiceIndex);
-  if (NextDialogue.State == EDialogueState::End) {
-    CloseDialogueFunc();
-    if (FinishDialogueFunc) FinishDialogueFunc();
-    return;
-  }
+  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc(true);
 
   check(NextDialogue.DialogueData);
 
@@ -106,11 +98,7 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
 }
 
 void UDialogueWidget::InitUI() {
-  if (DialogueSystem->DialogueState == EDialogueState::End) {
-    CloseDialogueFunc();
-    if (FinishDialogueFunc) FinishDialogueFunc();
-    return;
-  }
+  if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueFunc(true);
 
   DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
 
@@ -146,12 +134,10 @@ void UDialogueWidget::InitUI() {
 }
 void UDialogueWidget::InitUI(FInUIInputActions InputActions,
                              UDialogueSystem* _DialogueSystem,
-                             std::function<void()> _CloseDialogueFunc,
-                             std::function<void()> _FinishDialogueFunc) {
+                             std::function<void(bool)> _CloseDialogueFunc) {
   check(_DialogueSystem && _CloseDialogueFunc);
 
   DialogueSystem = _DialogueSystem;
-  FinishDialogueFunc = _FinishDialogueFunc;
   CloseDialogueFunc = _CloseDialogueFunc;
 
   ControlsHelpersWidget->SetComponentUI({
@@ -163,12 +149,10 @@ void UDialogueWidget::InitUI(FInUIInputActions InputActions,
 }
 void UDialogueWidget::InitUI(FInCutsceneInputActions InputActions,
                              UDialogueSystem* _DialogueSystem,
-                             std::function<void()> _CloseDialogueFunc,
-                             std::function<void()> _FinishDialogueFunc) {
+                             std::function<void(bool)> _CloseDialogueFunc) {
   check(_DialogueSystem && _CloseDialogueFunc);
 
   DialogueSystem = _DialogueSystem;
-  FinishDialogueFunc = _FinishDialogueFunc;
   CloseDialogueFunc = _CloseDialogueFunc;
 
   ControlsHelpersWidget->SetComponentUI({
@@ -182,12 +166,11 @@ void UDialogueWidget::InitUI(FInCutsceneInputActions InputActions,
 void UDialogueWidget::SetupUIActionable() {
   UIActionable.AdvanceUI = [this]() { Next(); };
   UIActionable.NumericInput = [this](float Value) { SelectChoice(FMath::RoundToInt(Value) - 1); };
-  UIActionable.RetractUI = [this]() { CloseDialogueFunc(); };
-  UIActionable.QuitUI = [this]() { CloseDialogueFunc(); };
+  UIActionable.RetractUI = [this]() { CloseDialogueFunc(false); };
+  UIActionable.QuitUI = [this]() { CloseDialogueFunc(false); };
 }
 void UDialogueWidget::SetupUIBehaviour() {
   UIBehaviour.ShowAnim = ShowAnim;
   UIBehaviour.HideAnim = HideAnim;
   UIBehaviour.OpenSound = OpenSound;
-  UIBehaviour.HideSound = HideSound;
 }

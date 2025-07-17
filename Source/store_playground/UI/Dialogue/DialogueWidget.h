@@ -32,8 +32,6 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   class USoundBase* OpenSound;
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  class USoundBase* HideSound;
-  UPROPERTY(EditAnywhere, BlueprintReadWrite)
   class USoundBase* NextSound;
 
   UPROPERTY(EditAnywhere)
@@ -49,12 +47,10 @@ public:
   void InitUI();
   void InitUI(FInUIInputActions InputActions,
               class UDialogueSystem* _DialogueSystem,
-              std::function<void()> _CloseDialogueFunc,
-              std::function<void()> _FinishDialogueFunc = nullptr);
+              std::function<void(bool)> _CloseDialogueFunc);
   void InitUI(FInCutsceneInputActions InputActions,
               class UDialogueSystem* _DialogueSystem,
-              std::function<void()> _CloseDialogueFunc,
-              std::function<void()> _FinishDialogueFunc = nullptr);
+              std::function<void(bool)> _CloseDialogueFunc);
 
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
@@ -64,6 +60,6 @@ public:
   FUIBehaviour UIBehaviour;
   void SetupUIBehaviour();
 
-  std::function<void()> FinishDialogueFunc;
-  std::function<void()> CloseDialogueFunc;
+  // * Passes in whether the dialogue is finished or not.
+  std::function<void(bool)> CloseDialogueFunc;
 };

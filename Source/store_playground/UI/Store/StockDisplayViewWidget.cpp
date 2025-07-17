@@ -29,6 +29,7 @@ void UStockDisplayViewWidget::NativeOnInitialized() {
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UStockDisplayViewWidget::Back);
 
   SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 void UStockDisplayViewWidget::SortByMarketPrice() {
@@ -194,4 +195,11 @@ void UStockDisplayViewWidget::SetupUIActionable() {
   UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
   UIActionable.RetractUI = [this]() { Back(); };
   UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+}
+
+void UStockDisplayViewWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }

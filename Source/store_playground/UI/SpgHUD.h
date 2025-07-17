@@ -112,16 +112,21 @@ public:
 
   void ShowWidget(class UUserWidget* Widget);
   void HideWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc = nullptr);
-  FWidgetAnimationDynamicEvent UIAnimCompleteEvent;
+  FWidgetAnimationDynamicEvent UIShowAnimCompleteEvent;
   UFUNCTION()
-  void UIAnimComplete();
-  std::function<void()> UIAnimCompleteFunc;
+  void UIShowAnimComplete();
+  std::function<void()> UIShowAnimCompleteFunc;
+  FWidgetAnimationDynamicEvent UIHideAnimCompleteEvent;
+  UFUNCTION()
+  void UIHideAnimComplete();
+  std::function<void()> UIHideAnimCompleteFunc;
 
   UPROPERTY(EditAnywhere)
   TArray<class UUserWidget*> OpenedWidgets;
 
   void OpenFocusedMenu(class UUserWidget* Widget);
-  void CloseWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc = nullptr);
+  void CloseWidget(class UUserWidget* Widget);
+  void CloseWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc);
 
   void AdvanceUI();
   void RetractUIAction();
@@ -189,7 +194,7 @@ public:
   class UDialogueWidget* DialogueWidget;
   void SetAndOpenDialogue(class UDialogueSystem* Dialogue,
                           std::function<void()> OnDialogueCloseFunc = nullptr,
-                          std::function<void()> OnDialogueFinishFunc = nullptr);
+                          std::function<void()> OnDialogueFinishedFunc = nullptr);
 
   UPROPERTY()
   class UNegotiationViewWidget* NegotiationViewWidget;
