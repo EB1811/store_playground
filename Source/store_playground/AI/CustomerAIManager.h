@@ -33,6 +33,13 @@ struct FCustomerAIManagerParams {
   float PickItemFrequency;
   UPROPERTY(EditAnywhere)
   int32 MaxCustomersPickingAtOnce;
+
+  UPROPERTY(EditAnywhere)
+  TMap<ECustomerAttitude, float> AttitudeBaseAcceptMinMap;
+  UPROPERTY(EditAnywhere)
+  TMap<ECustomerAttitude, float> AttitudeBaseAcceptMaxMap;
+  UPROPERTY(EditAnywhere)
+  TMap<ECustomerAttitude, float> AttitudeBaseAcceptFalloffMultiMap;
 };
 
 USTRUCT()
@@ -53,6 +60,12 @@ struct FCustomerAIBehaviorParams {
   float AcceptanceMinMulti;
   UPROPERTY(EditAnywhere, SaveGame)
   float AcceptanceMaxMulti;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float AcceptanceFalloffMulti;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PostHagglingAcceptanceMulti;  // * If npc counteroffers, the acceptance drops.
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 InitHagglingCount;  // * Decreases after each attempt.
 
   UPROPERTY(EditAnywhere, SaveGame)
   float CustomerWaitingTime;  // * Time the customer waits before leaving.
@@ -127,6 +140,13 @@ public:
                           std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr) -> bool;
   auto CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr) -> bool;
   void MakeCustomerNegotiable(class ACustomer* Customer);
+
+  auto ConsiderOffer(class UNegotiationAI* NegotiationAI,
+                     const class UItemBase* Item,
+                     float LastOfferedPrice,
+                     float PlayerOfferedPrice) const -> FOfferResponse;
+  auto ConsiderStockCheck(const class UNegotiationAI* NegotiationAI,
+                          const class UItemBase* Item) const -> FOfferResponse;
 
   void TickDaysTimedVars();
 

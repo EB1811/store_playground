@@ -118,6 +118,7 @@ void AStorePGGameMode::BeginPlay() {
   HUD->StoreExpansionManager = StoreExpansionManager;
 
   NegotiationSystem->MarketEconomy = MarketEconomy;
+  NegotiationSystem->CustomerAIManager = CustomerAIManager;
   NegotiationSystem->DialogueSystem = DialogueSystem;
   NegotiationSystem->Store = Store;
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;

@@ -4,7 +4,8 @@
 
 #include <optional>
 #include "CoreMinimal.h"
-#include "store_playground/AI/NegotiationAI.h"
+#include "store_playground/AI/AIStructs.h"
+#include "store_playground/AI/CustomerDataStructs.h"
 #include "NegotiationSystem.generated.h"
 
 UENUM()
@@ -67,6 +68,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   const class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  const class ACustomerAIManager* CustomerAIManager;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UDialogueSystem* DialogueSystem;

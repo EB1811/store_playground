@@ -18,6 +18,9 @@
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
+#include "store_playground/AI/AIStructs.h"
+#include "store_playground/AI/CustomerDataStructs.h"
+#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
@@ -432,7 +435,9 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
       if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) return false;
       break;
     case EInteractionType::StockDisplay:
-      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning) return false;
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning ||
+          StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
+        return false;
       break;
     case EInteractionType::LevelChange:
     case EInteractionType::LeaveStore:

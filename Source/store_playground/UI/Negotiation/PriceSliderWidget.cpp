@@ -35,21 +35,29 @@ void UPriceSliderWidget::ChangePrice(float Direction) {
   UpdatePlayerPriceText(PlayerPriceSlider->GetValue());
 }
 
-void UPriceSliderWidget::UpdateNegotiationPrices(float PlayerPrice, float NpcPrice) {
-  PlayerPriceSlider->SetValue(PlayerPrice);
+void UPriceSliderWidget::UpdateNegotiationPrices(float NpcAcceptance,
+                                                 float MarketPrice,
+                                                 float PlayerPrice,
+                                                 float NpcPrice) {
   NPCPriceSlider->SetValue(NpcPrice);
-
   NPCPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(NpcPrice))));
-  PlayerPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(PlayerPrice))));
 
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);
   auto PlayerSliderBoxSize = PlayerSliderBoxAsCanvas->GetSize().Y;
   NPCPriceText->SetRenderTranslation(FVector2D(0.0f, PlayerSliderBoxSize -
                                                          NPCPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize -
                                                          PlayerPriceText->GetDesiredSize().Y / 2.0f));
-  PlayerPriceText->SetRenderTranslation(
-      FVector2D(0.0f, PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize -
-                          PlayerPriceText->GetDesiredSize().Y / 2.0f));
+
+  switch (Type) {
+    case NegotiationType::PlayerBuy:
+      YellowBar->SetPercent(
+          1.0f - FMath::Max((MarketPrice * (1.0f - NpcAcceptance) - MinValue) / (MaxValue - MinValue), 0.0f));
+      break;
+    case NegotiationType::PlayerSell:
+      YellowBar->SetPercent((MarketPrice * (1.0f + NpcAcceptance) - MinValue) / (MaxValue - MinValue));
+      break;
+    default: checkNoEntry()
+  }
 }
 
 void UPriceSliderWidget::InitUI(NegotiationType _Type,
@@ -76,8 +84,8 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   }
 
   float StepSize = FMath::Max(FMath::RoundToInt(MarketPrice * 0.002f), 1.0f);
-  float MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
-  float MinValue = MarketPrice / (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+  MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+  MinValue = MarketPrice / (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
 
   UE_LOG(LogTemp, Log,
          TEXT("PriceSliderWidget::InitUI: Type: %s, NpcAcceptance: %.2f, MarketPrice: %.2f, "
@@ -101,8 +109,16 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   MarketPriceSlider->SetValue(MarketPrice);
   PlayerPriceSlider->SetValue(PlayerPrice);
   NPCPriceSlider->SetValue(NpcPrice);
-  if (BoughtAtPrice > 0.0f) BoughtAtSlider->SetValue(BoughtAtPrice);
-  else BoughtAtSlider->SetVisibility(ESlateVisibility::Collapsed);
+  if (BoughtAtPrice > 0.0f) {
+    BoughtAtSlider->SetValue(FMath::Clamp(BoughtAtPrice, MinValue, MaxValue));
+    BoughtAtSlider->SetVisibility(ESlateVisibility::Visible);
+
+  } else BoughtAtSlider->SetVisibility(ESlateVisibility::Collapsed);
+
+  UE_LOG(LogTemp, Log,
+         TEXT("PriceSliderWidget::BoughtAtSlider: MinValue: %.2f, MaxValue: %.2f, StepSize: %.2f, value: %.2f"),
+         BoughtAtSlider->GetMinValue(), BoughtAtSlider->GetMaxValue(), BoughtAtSlider->GetStepSize(),
+         BoughtAtSlider->GetValue());
 
   switch (Type) {
     case NegotiationType::PlayerBuy:

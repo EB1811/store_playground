@@ -44,11 +44,13 @@ void UPriceNegotiationWidget::RefreshUI() {
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
+  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAI->AcceptancePercentage / 100.0f;
+  float MarketPrice = NegotiationSystem->MarketPrice;
   float PlayerPrice = NegotiationSystem->OfferedPrice;
   float NpcPrice = NegotiationSystem->CustomerOfferResponse.CounterOffer > 0.0f
                        ? NegotiationSystem->CustomerOfferResponse.CounterOffer
                        : NegotiationSystem->MarketPrice;
-  PriceSliderWidget->UpdateNegotiationPrices(PlayerPrice, NpcPrice);
+  PriceSliderWidget->UpdateNegotiationPrices(NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice);
 }
 
 void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
@@ -67,7 +69,7 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
 
   check(NegotiationSystem->NegotiatedItems.Num() > 0);
 
-  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAI->AcceptancePercentage;
+  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAI->AcceptancePercentage / 100.0f;
   float MarketPrice = NegotiationSystem->MarketPrice;
   float PlayerPrice = NegotiationSystem->OfferedPrice;
   float NpcPrice = NegotiationSystem->CustomerOfferResponse.CounterOffer > 0.0f

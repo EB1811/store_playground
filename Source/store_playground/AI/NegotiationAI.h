@@ -6,28 +6,8 @@
 #include "CoreMinimal.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/AI/CustomerDataStructs.h"
+#include "store_playground/AI/AIStructs.h"
 #include "NegotiationAI.generated.h"
-
-UENUM()
-enum class ECustomerRequestType : uint8 {
-  BuyStockItem UMETA(DisplayName = "Buy Stock Item"),
-  SellItem UMETA(DisplayName = "Sell Item"),
-  StockCheck UMETA(DisplayName = "Stock Check"),
-};
-
-USTRUCT()
-struct FOfferResponse {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  bool Accepted;
-  UPROPERTY(EditAnywhere)
-  float CounterOffer;
-  UPROPERTY(EditAnywhere)
-  TArray<struct FDialogueData> ResponseDialogue;
-  UPROPERTY(EditAnywhere)
-  FText CustomerName;
-};
 
 UCLASS()
 class STORE_PLAYGROUND_API UNegotiationAI : public UObject {
@@ -54,13 +34,15 @@ public:
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
   float MoneyToSpend;
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  float AcceptancePercentage;  // todo-low: Actually multi (0-1), change name to reflect that.
+  float AcceptancePercentage;  // * + or - depending on whether NPC is buying or selling.
   UPROPERTY(EditAnywhere, Category = "Negotiation AI")
-  float MaxHagglingCount;
+  float AcceptanceFalloffMulti;  // * The rate of which acceptance falls off using OfferedPercentBetween.
+  UPROPERTY(EditAnywhere, Category = "Negotiation AI")
+  float HagglingCount;  // * Decreases after each haggling attempt.
 
-  FOfferResponse ConsiderOffer(bool bNpcBuying,
-                               float MarketPrice,
-                               float LastOfferedPrice,
-                               float PlayerOfferedPrices) const;
-  FOfferResponse ConsiderStockCheck(const class UItemBase* Item, float MarketPrice) const;
+  // FOfferResponse ConsiderOffer(bool bNpcBuying,
+  //                              float MarketPrice,
+  //                              float LastOfferedPrice,
+  //                              float PlayerOfferedPrices) const;
+  // FOfferResponse ConsiderStockCheck(const class UItemBase* Item, float MarketPrice) const;
 };

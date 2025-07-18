@@ -10,6 +10,7 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Market/MarketEconomy.h"
+#include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
 
@@ -162,7 +163,7 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
 
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
-  CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderStockCheck(Item, MarketPrice);
+  CustomerOfferResponse = CustomerAIManager->ConsiderStockCheck(CustomerAI->NegotiationAI, Item);
   if (!CustomerOfferResponse.Accepted) return;
 
   NegotiatedItems.Empty();
@@ -194,8 +195,8 @@ void UNegotiationSystem::OfferPrice(float Price) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
   if (NegotiationState == ENegotiationState::NpcConsider)
-    CustomerOfferResponse = CustomerAI->NegotiationAI->ConsiderOffer(Type == NegotiationType::PlayerSell ? true : false,
-                                                                     MarketPrice, OfferedPrice, Price);
+    CustomerOfferResponse =
+        CustomerAIManager->ConsiderOffer(CustomerAI->NegotiationAI, NegotiatedItems[0], OfferedPrice, Price);
 
   OfferedPrice = Price;
 }

@@ -57,12 +57,16 @@ public:
 
   UPROPERTY(EditAnywhere)
   NegotiationType Type;
+  UPROPERTY(EditAnywhere)
+  float MaxValue;
+  UPROPERTY(EditAnywhere)
+  float MinValue;
 
   UFUNCTION()
   void UpdatePlayerPriceText(float Value);
 
   void ChangePrice(float Direction);
-  void UpdateNegotiationPrices(float PlayerPrice, float NpcPrice);
+  void UpdateNegotiationPrices(float NpcAcceptance, float MarketPrice, float PlayerPrice, float NpcPrice);
 
   // ? Turn into a struct?
   void InitUI(NegotiationType _Type,

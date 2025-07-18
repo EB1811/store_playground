@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/SlateEnums.h"
+#include "AIStructs.generated.h"
 
 UENUM()
 enum class ECustomerAction : uint8 {
@@ -13,3 +15,24 @@ enum class ECustomerAction : uint8 {
   Leave UMETA(DisplayName = "Leave"),
 };
 ENUM_RANGE_BY_COUNT(ECustomerAction, 5);
+
+UENUM()
+enum class ECustomerRequestType : uint8 {
+  BuyStockItem UMETA(DisplayName = "Buy Stock Item"),
+  SellItem UMETA(DisplayName = "Sell Item"),
+  StockCheck UMETA(DisplayName = "Stock Check"),
+};
+
+USTRUCT()
+struct FOfferResponse {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  bool Accepted;
+  UPROPERTY(EditAnywhere)
+  float CounterOffer;
+  UPROPERTY(EditAnywhere)
+  TArray<struct FDialogueData> ResponseDialogue;
+  UPROPERTY(EditAnywhere)
+  FText CustomerName;
+};
