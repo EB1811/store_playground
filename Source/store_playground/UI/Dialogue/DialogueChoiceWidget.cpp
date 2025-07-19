@@ -10,12 +10,12 @@ void UDialogueChoiceWidget::NativeOnInitialized() {
 
 void UDialogueChoiceWidget::ClickChoice() { ChoiceSelectedFunc(ChoiceIndex); }
 
-void UDialogueChoiceWidget::InitUI(const FString& ChoiceTextContent,
+void UDialogueChoiceWidget::InitUI(const FText& ChoiceTextContent,
                                    int32 Index,
                                    std::function<void(int32)> _ChoiceSelectedFunc) {
   check(_ChoiceSelectedFunc);
 
-  ChoiceText->SetText(FText::FromString(FString::Printf(TEXT("%d. %s"), Index + 1, *ChoiceTextContent)));
+  ChoiceText->SetText(FText::FromString(FString::Printf(TEXT("%d. %s"), Index + 1, *ChoiceTextContent.ToString())));
   ChoiceIndex = Index;
   ChoiceSelectedFunc = _ChoiceSelectedFunc;
 }

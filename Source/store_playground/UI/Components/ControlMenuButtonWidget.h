@@ -8,7 +8,6 @@
 #include "ControlMenuButtonWidget.generated.h"
 
 // * Both buttons and control
-// TODO: Change to not hardcode colors everywhere.
 
 UCLASS()
 class STORE_PLAYGROUND_API UControlMenuButtonWidget : public UUserWidget {

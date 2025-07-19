@@ -26,4 +26,6 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Spawn Point")
   float SpawnChance;
+  UPROPERTY(EditAnywhere, Category = "Spawn Point")
+  float SpawnRadius;  // * Radius around the spawn point to spawn the npc in.
 };

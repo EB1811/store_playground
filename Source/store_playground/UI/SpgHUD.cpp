@@ -28,6 +28,7 @@
 #include "store_playground/UI/Store/StoreExpansion/StoreExpansionsListWidget.h"
 #include "store_playground/UI/Transitions/StorePhaseTransitionWidget.h"
 #include "store_playground/UI/Transitions/LevelLoadingTransitionWidget.h"
+#include "store_playground/UI/Transitions/InitLoadTransitionWidget.h"
 #include "store_playground/UI/Cutscene/CutsceneWidget.h"
 #include "store_playground/UI/WorldUI/Player/InteractionDisplayWidget.h"
 #include "store_playground/UI/NpcStore/NpcStoreViewWidget.h"
@@ -48,10 +49,14 @@ void ASpgHUD::BeginPlay() {
 
   check(StorePhaseTransitionWidgetClass);
   check(LevelLoadingTransitionWidgetClass);
+  check(InitLoadTransitionWidgetClass);
 
   StorePhaseTransitionWidget = CreateWidget<UStorePhaseTransitionWidget>(GetWorld(), StorePhaseTransitionWidgetClass);
   LevelLoadingTransitionWidget =
       CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
+  InitLoadTransitionWidget = CreateWidget<UInitLoadTransitionWidget>(GetWorld(), InitLoadTransitionWidgetClass);
+
+  InitGameStartTransition();  // End transition is called in the game mode after all systems are initialized.
 
   check(InGameHudWidgetClass);
   check(PauseMenuViewWidgetClass);
@@ -577,7 +582,7 @@ void ASpgHUD::SetAndOpenAbilityView() {
 
   if (OpenedWidgets.Contains(AbilityViewWidget)) return CloseWidget(AbilityViewWidget);
 
-  AbilityViewWidget->InitUI(InUIInputActions, AbilityManager, [this] { CloseWidget(AbilityViewWidget); });
+  AbilityViewWidget->InitUI(InUIInputActions, Store, AbilityManager, [this] { CloseWidget(AbilityViewWidget); });
   AbilityViewWidget->RefreshUI();
 
   OpenFocusedMenu(AbilityViewWidget);
@@ -644,4 +649,17 @@ void ASpgHUD::EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc) {
     if (_FadeOutEndFunc) _FadeOutEndFunc();
   };
   LevelLoadingTransitionWidget->OnEndLevelLoadingCalled();
+}
+
+void ASpgHUD::InitGameStartTransition() {
+  InitLoadTransitionWidget->AddToViewport(100);
+  InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+void ASpgHUD::InitGameEndTransition() {
+  InitLoadTransitionWidget->FadeOutEndFunc = [this]() {
+    InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
+    InitLoadTransitionWidget->RemoveFromParent();
+    InitLoadTransitionWidget->SetRenderOpacity(1.0f);
+  };
+  InitLoadTransitionWidget->FadeOut();
 }

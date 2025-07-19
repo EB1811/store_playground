@@ -1,0 +1,54 @@
+[
+	{
+		"Name": "NewRow",
+		"ID": "tut01_d1",
+		"CutsceneID": "tut01",
+		"CutsceneChainType": "Dialogue",
+		"RelevantId": "d_tut01_d1",
+		"RelevantLocation":
+		{
+			"X": 0,
+			"Y": 0,
+			"Z": 0
+		}
+	},
+	{
+		"Name": "NewRow_1",
+		"ID": "tut01_a1",
+		"CutsceneID": "tut02",
+		"CutsceneChainType": "CameraPan",
+		"RelevantId": "None",
+		"RelevantLocation":
+		{
+			"X": 0,
+			"Y": 0,
+			"Z": 0
+		}
+	},
+	{
+		"Name": "NewRow_0",
+		"ID": "tut01_d2",
+		"CutsceneID": "tut01",
+		"CutsceneChainType": "Dialogue",
+		"RelevantId": "d_tut01_d2",
+		"RelevantLocation":
+		{
+			"X": 0,
+			"Y": 0,
+			"Z": 0
+		}
+	},
+	{
+		"Name": "NewRow_2",
+		"ID": "tut02_d1",
+		"CutsceneID": "tut02",
+		"CutsceneChainType": "Dialogue",
+		"RelevantId": "d_tut02_d1",
+		"RelevantLocation":
+		{
+			"X": 0,
+			"Y": 0,
+			"Z": 0
+		}
+	}
+]

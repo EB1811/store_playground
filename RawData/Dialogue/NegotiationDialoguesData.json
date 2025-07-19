@@ -1,0 +1,200 @@
+[
+	{
+		"Name": "rqf",
+		"Attitude": "Friendly",
+		"NegotiationType": "BuyItemRequest",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Can I have this please?",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_0",
+		"Attitude": "Friendly",
+		"NegotiationType": "BuyItemTooHigh",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Too high.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_1",
+		"Attitude": "Friendly",
+		"NegotiationType": "BuyItemClose",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "3",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Close.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_8",
+		"Attitude": "Friendly",
+		"NegotiationType": "SellItemRequest",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "4",
+		"DialogueType": "Dialogue",
+		"DialogueText": "I found this on the side of the road.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_9",
+		"Attitude": "Friendly",
+		"NegotiationType": "SellItemTooLow",
+		"DialogueChainID": "fstl-01",
+		"DialogueID": "5",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Way too low",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow",
+		"Attitude": "Friendly",
+		"NegotiationType": "SellItemClose",
+		"DialogueChainID": "fstl-02",
+		"DialogueID": "6",
+		"DialogueType": "Dialogue",
+		"DialogueText": "A bit higher",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_2",
+		"Attitude": "Friendly",
+		"NegotiationType": "Accept",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "7",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Thank you :)",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_3",
+		"Attitude": "Friendly",
+		"NegotiationType": "Reject",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "8",
+		"DialogueType": "Dialogue",
+		"DialogueText": "bro...",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_4",
+		"Attitude": "Friendly",
+		"NegotiationType": "StockCheckRequest",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "9",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Do you have any {WantedItemType}s?",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_5",
+		"Attitude": "Friendly",
+		"NegotiationType": "StockCheckAccept",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "11",
+		"DialogueType": "Dialogue",
+		"DialogueText": "That item is perfect.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "rqf_6",
+		"Attitude": "Friendly",
+		"NegotiationType": "StockCheckReject",
+		"DialogueChainID": "rqf-01",
+		"DialogueID": "12",
+		"DialogueType": "Dialogue",
+		"DialogueText": "That item sucks.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	}
+]

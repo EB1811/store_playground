@@ -1,0 +1,19 @@
+[
+	{
+		"Name": "1",
+		"DialogueChainID": "unpc_01",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Im just browsing as a UNIQUE",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	}
+]

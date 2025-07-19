@@ -8,8 +8,6 @@
 #include "store_playground/UI/UIStructs.h"
 #include "InventoryViewWidget.generated.h"
 
-// TODO: Fix not being able to click.
-
 UCLASS()
 class STORE_PLAYGROUND_API UInventoryViewWidget : public UUserWidget {
   GENERATED_BODY()

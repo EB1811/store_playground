@@ -1,0 +1,308 @@
+[
+	{
+		"Name": "d",
+		"DialogueChainID": "first_01",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Hello World.",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_0",
+		"DialogueChainID": "first_01",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Whats your name?",
+		"Action": "AskPlayer",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 2,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_1",
+		"DialogueChainID": "first_01",
+		"DialogueID": "3",
+		"DialogueType": "Choice",
+		"DialogueText": "George",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 1,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_4",
+		"DialogueChainID": "first_01",
+		"DialogueID": "4",
+		"DialogueType": "Dialogue",
+		"DialogueText": "George who?",
+		"Action": "AskPlayer",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 2,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_6",
+		"DialogueChainID": "first_01",
+		"DialogueID": "5",
+		"DialogueType": "Choice",
+		"DialogueText": "George george",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 1,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow",
+		"DialogueChainID": "first_01",
+		"DialogueID": "6",
+		"DialogueType": "Dialogue",
+		"DialogueText": "wow",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_0",
+		"DialogueChainID": "first_01",
+		"DialogueID": "7",
+		"DialogueType": "Choice",
+		"DialogueText": "George Beast",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 2,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_1",
+		"DialogueChainID": "first_01",
+		"DialogueID": "8",
+		"DialogueType": "Dialogue",
+		"DialogueText": "George BEAST???",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_3",
+		"DialogueChainID": "first_01",
+		"DialogueID": "9",
+		"DialogueType": "Choice",
+		"DialogueText": "Mr Beast",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 2,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_5",
+		"DialogueChainID": "first_01",
+		"DialogueID": "11",
+		"DialogueType": "Dialogue",
+		"DialogueText": "MR BEAST???",
+		"Action": "PlayerNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_7",
+		"DialogueChainID": "first_01",
+		"DialogueID": "12",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Yeah",
+		"Action": "End",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d00_0",
+		"DialogueChainID": "first_02",
+		"DialogueID": "13",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Wow",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d00_1",
+		"DialogueChainID": "first_02",
+		"DialogueID": "14",
+		"DialogueType": "Dialogue",
+		"DialogueText": "You need more money!",
+		"Action": "PlayerNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d00_2",
+		"DialogueChainID": "first_02",
+		"DialogueID": "15",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Thanks :(",
+		"Action": "End",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "d_8",
+		"DialogueChainID": "first_01_post",
+		"DialogueID": "16",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Nice talking to ya.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_2",
+		"DialogueChainID": "first_03",
+		"DialogueID": "13",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Wow",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_3",
+		"DialogueChainID": "first_03",
+		"DialogueID": "14",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Thats a lot of money!",
+		"Action": "PlayerNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_4",
+		"DialogueChainID": "first_03",
+		"DialogueID": "15",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Thanks :)",
+		"Action": "End",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	}
+]

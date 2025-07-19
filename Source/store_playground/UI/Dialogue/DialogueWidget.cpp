@@ -34,9 +34,9 @@ void UDialogueWidget::NativeOnInitialized() {
 }
 
 // ? Change this to refresh all data?
-void UDialogueWidget::UpdateDialogueText(const FText& SpeakerName, const FString& NewDialogueContent, bool IsLast) {
+void UDialogueWidget::UpdateDialogueText(const FText& SpeakerName, const FText& NewDialogueContent, bool IsLast) {
   DialogueBoxWidget->Speaker->SetText(SpeakerName);
-  DialogueBoxWidget->DialogueText->SetText(FText::FromString(NewDialogueContent));
+  DialogueBoxWidget->DialogueText->SetText(NewDialogueContent);
 
   if (IsLast) DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Close"));
 }

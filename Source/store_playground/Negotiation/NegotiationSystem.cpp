@@ -134,7 +134,7 @@ FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
     TArray<FDialogueData> StockCheckDialogues =
         CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues;
     for (FDialogueData& Dialogue : StockCheckDialogues)
-      Dialogue.DialogueText = AddVarsToDialogueText(FText::FromString(Dialogue.DialogueText)).ToString();
+      Dialogue.DialogueText = AddVarsToDialogueText(Dialogue.DialogueText);
 
     return DialogueSystem->StartDialogue(StockCheckDialogues, CustomerAI->CustomerName.ToString());
   }

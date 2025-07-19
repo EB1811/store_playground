@@ -26,19 +26,8 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [
-				{
-					"TagName": "Npc.Dialogue.Harsh"
-				}
-			],
-			"ParentTags": [
-				{
-					"TagName": "Npc.Dialogue"
-				},
-				{
-					"TagName": "Npc"
-				}
-			]
+			"GameplayTags": [],
+			"ParentTags": []
 		}
 	},
 	{
@@ -68,8 +57,19 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Merc.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Merc"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -99,8 +99,16 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Noble"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -130,8 +138,16 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Cheerful"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -161,8 +177,19 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Noble"
+				},
+				{
+					"TagName": "Npc.Gossip"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -192,8 +219,19 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Noble"
+				},
+				{
+					"TagName": "Npc.Enthusiastic"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -223,8 +261,19 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mage.Funny"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Mage"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -254,8 +303,19 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mage"
+				},
+				{
+					"TagName": "Npc.Mysterious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	},
 	{
@@ -285,8 +345,19 @@
 		},
 		"Tags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mysterious"
+				},
+				{
+					"TagName": "Npc.Wise"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
 		}
 	}
 ]

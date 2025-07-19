@@ -8,7 +8,6 @@
 #include "SpawnPoint.generated.h"
 
 // * Location of spawn.
-// ? Also use for other spawn points (customer, etc.)?
 
 UCLASS()
 class STORE_PLAYGROUND_API ASpawnPoint : public AActor {

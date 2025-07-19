@@ -1,0 +1,15 @@
+[
+	{
+		"Name": "NewRow",
+		"ID": "cp_0",
+		"PopTypes": [
+			"Common"
+		],
+		"PopWealthTypes": [
+			"Poorer"
+		],
+		"PopChangeMulti": 1.5,
+		"Duration": 2,
+		"PopChangeMultiFalloff": 0.01
+	}
+]

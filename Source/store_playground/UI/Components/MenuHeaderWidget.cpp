@@ -14,10 +14,6 @@ void UMenuHeaderWidget::NativeOnInitialized() {
 
   check(MenuHeaderTabWidgetClass);
 
-  // switch (HeaderType) {
-  //   case EHeaderType::Primary: HeaderBorder->SetBrushColor(FColor::FromHex("FFDC6AFF")); break;
-  //   case EHeaderType::Secondary: HeaderBorder->SetBrushColor(FColor::FromHex("F7F7F7FF")); break;
-  // }
   TitleText->SetText(Title);
 }
 

@@ -60,7 +60,7 @@ struct FDialogueData {
   EDialogueType DialogueType;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  FString DialogueText;
+  FText DialogueText;
   UPROPERTY(EditAnywhere, SaveGame)
   EDialogueAction Action;
 
@@ -87,7 +87,7 @@ struct FDialogueDataTable : public FTableRowBase {
   EDialogueType DialogueType;
 
   UPROPERTY(EditAnywhere)
-  FString DialogueText;
+  FText DialogueText;
   UPROPERTY(EditAnywhere)
   EDialogueAction Action;
 
@@ -113,7 +113,7 @@ struct FNextDialogueRes {
   EDialogueState State;
 };
 
-// todo-low: replace with tags.
+// ? replace with tags?
 UENUM()
 enum class ECustomerAttitude : uint8 {
   Friendly,
@@ -166,7 +166,7 @@ struct FNegotiationDialoguesDataTable : public FTableRowBase {
   EDialogueType DialogueType;
 
   UPROPERTY(EditAnywhere)
-  FString DialogueText;  // todo-low: Use FText instead.
+  FText DialogueText;
   UPROPERTY(EditAnywhere)
   EDialogueAction Action;
 

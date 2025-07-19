@@ -10,6 +10,7 @@
 #include "store_playground/UI/Ability/AbilityListWidget.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/Ability/AbilityManager.h"
+#include "store_playground/Store/Store.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
@@ -22,8 +23,10 @@ void UAbilityViewWidget::NativeOnInitialized() {
 }
 
 void UAbilityViewWidget::Activate() {
-  // todo-low: Check for player money and cooldown.
   if (SelectedAbilityID.IsNone()) return;
+
+  FEconEventAbility SelectedAbility = AbilityManager->GetAbilityById(SelectedAbilityID);
+  check(SelectedAbility.Cost <= Store->Money);  // SelectReplaceAbility should ensure this.
 
   AbilityManager->ActivateEconEventAbility(SelectedAbilityID);
 
@@ -79,12 +82,14 @@ void UAbilityViewWidget::RefreshUI() {
 }
 
 void UAbilityViewWidget::InitUI(FInUIInputActions InUIInputActions,
+                                const class AStore* _Store,
                                 class AAbilityManager* _AbilityManager,
                                 std::function<void()> _CloseWidgetFunc) {
-  check(_AbilityManager && _CloseWidgetFunc);
+  check(_Store && _AbilityManager && _CloseWidgetFunc);
 
   AbilityListWidget->SetVisibility(ESlateVisibility::Collapsed);
 
+  Store = _Store;
   AbilityManager = _AbilityManager;
 
   SelectedAbilityID = FName();

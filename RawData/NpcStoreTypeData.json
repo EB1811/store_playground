@@ -1,0 +1,57 @@
+[
+	{
+		"Name": "s_0",
+		"ID": "gs01",
+		"StoreTypeName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"AEBA88E24CC54BAEC136049887730173\", \"General Store\")",
+		"StoreSpawnWeight": 10,
+		"StockCountRange": [ 6, 12 ],
+		"StoreMarkup": 0.25,
+		"ItemTypeWeightMap":
+		{
+			"Consumable": 9,
+			"Jewellery": 1,
+			"Weapon": 4
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Consumer": 5,
+			"Adventurer": 5
+		},
+		"DisplayName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"9957754E4278BD224B1AD1B6DCD9A33D\", \"General Store\")",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C76_Idle_A.FB_C76_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_1",
+		"ID": "ws01",
+		"StoreTypeName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"0B9F896F4A8CC1CFF4613D8858E4881E\", \"Weapon Store\")",
+		"StoreSpawnWeight": 5,
+		"StockCountRange": [ 2, 4 ],
+		"StoreMarkup": 0.4,
+		"ItemTypeWeightMap":
+		{
+			"Weapon": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Adventurer": 5
+		},
+		"DisplayName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"50EF2D51453135E07D9847841E64AD2B\", \"Weapon Store\")",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Idle_Down.FB_Merc_Idle_Down'"
+			}
+		}
+	}
+]

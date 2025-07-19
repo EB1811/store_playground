@@ -1,0 +1,53 @@
+[
+	{
+		"Name": "NewRow",
+		"DialogueChainID": "ns_01",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Take a look.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_0",
+		"DialogueChainID": "ns_02",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "I have some good stuff today.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_1",
+		"DialogueChainID": "ns_03",
+		"DialogueID": "3",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Hey.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	}
+]

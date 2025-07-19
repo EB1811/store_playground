@@ -24,7 +24,7 @@ public:
   UFUNCTION()
   void ClickChoice();
 
-  void InitUI(const FString& ChoiceTextContent, int32 Index, std::function<void(int32)> _ChoiceSelectedFunc);
+  void InitUI(const FText& ChoiceTextContent, int32 Index, std::function<void(int32)> _ChoiceSelectedFunc);
 
   std::function<void(int32)> ChoiceSelectedFunc;
 };

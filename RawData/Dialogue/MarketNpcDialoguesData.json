@@ -1,0 +1,940 @@
+[
+	{
+		"Name": "1",
+		"DialogueChainID": "mn_01",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"8D89F0F64504ABE77135C2BBDEF7DBB0\", \"Great products today.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "2",
+		"DialogueChainID": "mn_02",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"B0A2FBE7467E05F2FC64098D7D31C459\", \"Everything\\'s so expensive!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Negative"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	},
+	{
+		"Name": "2_1",
+		"DialogueChainID": "mn_04",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"DC1F5C134918D2D05E9C5C99D104C9D2\", \"Vordiehead!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "2_2",
+		"DialogueChainID": "mn_05",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"153B29E14005A8E22C2D1F820DBD7BF3\", \"Leave me alone.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Merc.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Merc"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "2_3",
+		"DialogueChainID": "mn_06",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"B8E45FA84885602533D1349B66566505\", \"Woosh!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mage.Funny"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Mage"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "1_0",
+		"DialogueChainID": "mn_07",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"2D010189476D08D0B3A2B788DC915763\", \"The prices today are soooo good.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Positive"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	},
+	{
+		"Name": "1_1",
+		"DialogueChainID": "mn_08",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"B344E35A4D114E7B02C40A9E3417F985\", \"I hate scammers.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "1_2",
+		"DialogueChainID": "mn_08",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"84B231D440E3385F067439BE9147E87F\", \"I found a small magic org today.\")",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mage"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "1_3",
+		"DialogueChainID": "mn_08",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"20A51CDD439BADA6BF55A28E42DCA875\", \"No you can\\'t have it.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mage"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "cheerful_1",
+		"DialogueChainID": "mn_09",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"A1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6\", \"What a beautiful day for shopping!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Cheerful"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "cheerful_2",
+		"DialogueChainID": "mn_10",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7\", \"I just love the energy here!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Cheerful"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "mysterious_1",
+		"DialogueChainID": "mn_11",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8\", \"The shadows whisper of rare treasures today...\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mysterious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "gossip_1",
+		"DialogueChainID": "mn_12",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9\", \"Did you hear? The baker's cat can predict the weather!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Gossip"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "gossip_2",
+		"DialogueChainID": "mn_13",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0\", \"They say the mayor's daughter eloped with a traveling bard!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Gossip"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "complainer_1",
+		"DialogueChainID": "mn_14",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1\", \"These crowds are getting ridiculous!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Complainer"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "enthusiastic_1",
+		"DialogueChainID": "mn_15",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2\", \"Oh my goodness, they have DRAGON SCALE POLISH!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Enthusiastic"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "wise_1",
+		"DialogueChainID": "mn_16",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3\", \"Remember, young one: the best deals come to those who wait.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Wise"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "bargain_1",
+		"DialogueChainID": "mn_17",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4\", \"Half price on healing potions? I'll take twenty!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Bargain"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "curious_1",
+		"DialogueChainID": "mn_18",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5\", \"What's that sparkly thing behind the counter?\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Curious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "romantic_1",
+		"DialogueChainID": "mn_19",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6\", \"Do you have any love charms? Asking for a friend...\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Romantic"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "paranoid_1",
+		"DialogueChainID": "mn_20",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6A7\", \"Keep your voice down! The guild spies are everywhere...\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Paranoid"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "artist_1",
+		"DialogueChainID": "mn_21",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6A7B8\", \"The color palette here is simply divine!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Artist"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "noble_1",
+		"DialogueChainID": "mn_22",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"N4O5P6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9\", \"I do hope they accept platinum coins here.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Noble"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "peasant_1",
+		"DialogueChainID": "mn_23",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"O5P6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0\", \"These prices... there goes my week's wages.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Peasant"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "traveler_1",
+		"DialogueChainID": "mn_24",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"P6Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1\", \"Back in the Eastern Kingdoms, we'd pay twice this much!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Traveler"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "local_1",
+		"DialogueChainID": "mn_25",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"Q7R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2\", \"I've been shopping here since I was knee-high to a gnome!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Local"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "foodie_1",
+		"DialogueChainID": "mn_26",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"R8S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3\", \"Those honeyed pastries smell absolutely divine!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Foodie"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "weather_1",
+		"DialogueChainID": "mn_27",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"S9T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4\", \"Perfect market weather - not too hot, not too cold!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+			],
+			"ParentTags": [
+			]
+		}
+	},
+	{
+		"Name": "superstitious_1",
+		"DialogueChainID": "mn_28",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"T0U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5\", \"A black cat crossed my path - today will bring good fortune!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Superstitious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "mage_funny_1",
+		"DialogueChainID": "mn_29",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"U1V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6\", \"I tried to conjure coins this morning. Got copper buttons instead!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mage.Funny"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Mage"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "merchant_complaint_1",
+		"DialogueChainID": "mn_30",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"V2W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7\", \"My cart wheel broke and now everything's overpriced!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Negative"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	},
+	{
+		"Name": "festival_positive_1",
+		"DialogueChainID": "mn_31",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"W3X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8\", \"The Harvest Festival brings such wonderful merchants!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Positive"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	},
+	{
+		"Name": "chain_start_1",
+		"DialogueChainID": "mn_32",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"X4Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8M9\", \"Excuse me, have you seen a runaway pig around here?\")",
+		"Action": "NPCNext",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Curious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "chain_continue_1",
+		"DialogueChainID": "mn_32",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"Y5Z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0\", \"It's wearing a tiny blue hat and answers to Princess Snortington.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Curious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "harsh_merc_1",
+		"DialogueChainID": "mn_33",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"Z6A7B8C9D0E1F2G3H4I5J6K7L8M9N0O1\", \"Move along, citizen. Nothing to see here.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Merc.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Merc"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "whimsical_1",
+		"DialogueChainID": "mn_34",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"A7B8C9D0E1F2G3H4I5J6K7L8M9N0O1P2\", \"I heard the flowers here sing opera when nobody's listening!\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Mysterious"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "economic_positive_1",
+		"DialogueChainID": "mn_35",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "NSLOCTEXT(\"\", \"B8C9D0E1F2G3H4I5J6K7L8M9N0O1P2Q3\", \"Business is booming! Everyone's so prosperous lately.\")",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Positive"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	}
+]

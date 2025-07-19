@@ -252,17 +252,15 @@ void AStorePGGameMode::BeginPlay() {
 
   MiniGameManager->Market = Market;
 
-  // TODO: Put loading screen here.
   UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
+
+  SettingsManager->LoadSettings();
+  SaveManager->LoadSaveGameSlots();
 
   // * Load systems save data, then store level, then load level save data.
   // No way to do a blocking load so need a callback.
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
-
-  SettingsManager->LoadSettings();
-
-  SaveManager->LoadSaveGameSlots();
   if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadSystemsFromDisk(StorePGGameInstance->SaveSlotIndex);
 
   LevelManager->InitLoadStore([this, StorePGGameInstance]() {
@@ -281,10 +279,10 @@ void AStorePGGameMode::BeginPlay() {
         });
     check(PlayerCharacter);
     check(SpawnPoint);
-
     PlayerCharacter->SetActorLocation(SpawnPoint->GetActorLocation());
 
     UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
+    HUD->InitGameEndTransition();
 
     // * Clearing datatable refs mostly.
     CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);

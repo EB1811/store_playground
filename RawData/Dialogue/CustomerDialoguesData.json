@@ -1,0 +1,64 @@
+[
+	{
+		"Name": "NewRow",
+		"DialogueChainID": "gc_01",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Im just browsing u vordiehead",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Npc.Dialogue.Harsh"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Npc.Dialogue"
+				},
+				{
+					"TagName": "Npc"
+				}
+			]
+		}
+	},
+	{
+		"Name": "NewRow_0",
+		"DialogueChainID": "gc_02",
+		"DialogueID": "2",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Looking, looking.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	},
+	{
+		"Name": "NewRow_1",
+		"DialogueChainID": "gc_03",
+		"DialogueID": "3",
+		"DialogueType": "Dialogue",
+		"DialogueText": "good store",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [],
+			"ParentTags": []
+		}
+	}
+]

@@ -7,8 +7,6 @@
 #include "GameFramework/Actor.h"
 #include "WorldAudio.generated.h"
 
-// ? Combine with customer?
-
 UCLASS()
 class STORE_PLAYGROUND_API AWorldAudio : public AActor {
   GENERATED_BODY()

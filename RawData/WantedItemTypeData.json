@@ -1,0 +1,9 @@
+[
+	{
+		"Name": "wa001",
+		"WantedItemTypeID": "weapon",
+		"WantedItemTypeName": "NSLOCTEXT(\"[DCC6B9A6A661FF2552E0565416AEE81A]\", \"8DA1FFE048D85CFAA95A40A0CBC588A5\", \"Weapon\")",
+		"ItemType": "Weapon",
+		"ItemEconType": "Adventurer"
+	}
+]

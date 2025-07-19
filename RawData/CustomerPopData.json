@@ -1,0 +1,109 @@
+[
+	{
+		"Name": "cpd1",
+		"ID": "cpc1",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"E70387E5494F01E1509F4C98B22B9707\", \"Farmer\")",
+		"InitPopulation": 70,
+		"PopType": "Common",
+		"WealthType": "Poorer",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character099_Sprite_1.Character099_Sprite_1'"
+		}
+	},
+	{
+		"Name": "cpd1_0",
+		"ID": "cmc1",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"9BC1E9194AF67CE45F76E4977A558762\", \"Clerk\")",
+		"InitPopulation": 15,
+		"PopType": "Common",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character076_Sprite_1.Character076_Sprite_1'"
+		}
+	},
+	{
+		"Name": "nmc",
+		"ID": "nmc1",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"D4918AF645CD01656A1D7A9147859868\", \"Aristocrat\")",
+		"InitPopulation": 5,
+		"PopType": "Nobility",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character132_Sprite_1.Character132_Sprite_1'"
+		}
+	},
+	{
+		"Name": "ap01",
+		"ID": "merc",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"5AD38FC5465F2F5D2F57B0B6AF1D575C\", \"Mercenary\")",
+		"InitPopulation": 10,
+		"PopType": "Adventurer",
+		"WealthType": "Poorer",
+		"ItemEconTypes": [
+			"Adventurer",
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
+		}
+	},
+	{
+		"Name": "nuc2",
+		"ID": "nuc1",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"C8207C54472F9C55E8C175A4EDF29C57\", \"Royalty\")",
+		"InitPopulation": 1,
+		"PopType": "Nobility",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character133_Sprite_1.Character133_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mm",
+		"ID": "mm1",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"575572604F3C43F60FD520A85941B302\", \"Mage\")",
+		"InitPopulation": 10,
+		"PopType": "Mystic",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Adventurer",
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "cm",
+		"ID": "cm1",
+		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"3D1718F24804A3FF8BC463B0EE082E8B\", \"Assassin\")",
+		"InitPopulation": 10,
+		"PopType": "Criminal",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character145_Sprite_1.Character145_Sprite_1'"
+		}
+	}
+]

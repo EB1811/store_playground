@@ -1,0 +1,34 @@
+[
+	{
+		"Name": "e_0",
+		"ID": "ceci_0",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"ItemWealthTypes": [
+			"Essential"
+		],
+		"ItemTypes": [
+			"Consumable"
+		],
+		"PriceMultiPercent": 100,
+		"Duration": 1,
+		"PriceMultiPercentFalloff": 10
+	},
+	{
+		"Name": "e_1",
+		"ID": "ceci_1",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"ItemWealthTypes": [
+			"Essential"
+		],
+		"ItemTypes": [
+			"Consumable"
+		],
+		"PriceMultiPercent": -20,
+		"Duration": 1,
+		"PriceMultiPercentFalloff": 10
+	}
+]

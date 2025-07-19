@@ -7,8 +7,6 @@
 #include "GameFramework/Actor.h"
 #include "ControlledLight.generated.h"
 
-// ? Combine with customer?
-
 UCLASS()
 class STORE_PLAYGROUND_API AControlledLight : public AActor {
   GENERATED_BODY()

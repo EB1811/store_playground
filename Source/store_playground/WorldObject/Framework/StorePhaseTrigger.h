@@ -7,8 +7,6 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "StorePhaseTrigger.generated.h"
 
-// ? Combine with customer?
-
 UCLASS()
 class STORE_PLAYGROUND_API AStorePhaseTrigger : public AActor {
   GENERATED_BODY()

@@ -138,7 +138,6 @@ void ALevelManager::InitLevel(ELevel Level) {
 void ALevelManager::EnterLevel(ELevel Level) {
   check(CutsceneManager && PlayerTags && MarketLevel);
 
-  // TODO: Parameterize.
   FGameplayTagContainer LevelCutsceneTags = StringTagsToContainer(
       {FName(FString::Printf(TEXT("Cutscene.%s"), *UEnum::GetDisplayValueAsText(Level).ToString()))});
   if (CutsceneManager->PlayPotentialCutscene(LevelCutsceneTags)) return;

@@ -431,8 +431,10 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
 
     if (TrySpawnUniqueNpc(SpawnPoint, SpawnParams)) continue;
 
-    ANpc* Npc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnPoint->GetActorLocation(), SpawnPoint->GetActorRotation(),
-                                             SpawnParams);
+    FVector SpawnLocation = SpawnPoint->GetActorLocation() +
+                            FVector(FMath::RandRange(-SpawnPoint->SpawnRadius, SpawnPoint->SpawnRadius),
+                                    FMath::RandRange(-SpawnPoint->SpawnRadius, SpawnPoint->SpawnRadius), 0.0f);
+    ANpc* Npc = GetWorld()->SpawnActor<ANpc>(NpcClass, SpawnLocation, SpawnPoint->GetActorRotation(), SpawnParams);
     Npc->SpawnPointId = SpawnPoint->Id;
     Npc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
 

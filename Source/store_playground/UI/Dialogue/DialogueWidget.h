@@ -37,7 +37,7 @@ public:
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
 
-  void UpdateDialogueText(const FText& SpeakerName, const FString& NewDialogueContent, bool IsLast = false);
+  void UpdateDialogueText(const FText& SpeakerName, const FText& NewDialogueContent, bool IsLast = false);
 
   UFUNCTION()
   void Next();

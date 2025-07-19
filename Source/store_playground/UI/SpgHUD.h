@@ -242,4 +242,11 @@ public:
   class ULevelLoadingTransitionWidget* LevelLoadingTransitionWidget;
   void StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc);
   void EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc = nullptr);
+
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UInitLoadTransitionWidget> InitLoadTransitionWidgetClass;
+  UPROPERTY()
+  class UInitLoadTransitionWidget* InitLoadTransitionWidget;
+  void InitGameStartTransition();
+  void InitGameEndTransition();
 };

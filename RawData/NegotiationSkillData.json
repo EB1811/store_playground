@@ -1,0 +1,12 @@
+[
+	{
+		"Name": "NewRow",
+		"ID": "a_ns_1",
+		"EffectType": "AcceptancePercentage",
+		"Multi": 2,
+		"TextData":
+		{
+			"Name": "NSLOCTEXT(\"[BC891511C1818A03CE8A0BF27B6F268F]\", \"B88E0E304031F04D080FE5B6FC39CB8C\", \"Respect\")"
+		}
+	}
+]

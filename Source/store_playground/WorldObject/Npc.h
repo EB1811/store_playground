@@ -6,8 +6,6 @@
 #include "PaperZDCharacter.h"
 #include "Npc.generated.h"
 
-// ? Combine with customer?
-
 UCLASS()
 class STORE_PLAYGROUND_API ANpc : public APaperZDCharacter {
   GENERATED_BODY()

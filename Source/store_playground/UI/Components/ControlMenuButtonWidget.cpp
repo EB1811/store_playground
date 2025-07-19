@@ -2,11 +2,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
-void UControlMenuButtonWidget::NativeOnInitialized() {
-  Super::NativeOnInitialized();
-
-  // check(ClickedSound); // ! This is failing but the value is set?
-}
+void UControlMenuButtonWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
 
 void UControlMenuButtonWidget::SetActiveStyle(bool bActive) {
   if (bActive) ControlButton->SetBackgroundColor(ActiveColor);

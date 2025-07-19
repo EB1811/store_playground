@@ -28,6 +28,9 @@ public:
   class UControlMenuButtonWidget* BackButton;
 
   UPROPERTY(EditAnywhere)
+  const class AStore* Store;
+
+  UPROPERTY(EditAnywhere)
   class AAbilityManager* AbilityManager;
 
   UPROPERTY(EditAnywhere)
@@ -44,6 +47,7 @@ public:
 
   void RefreshUI();
   void InitUI(FInUIInputActions InUIInputActions,
+              const class AStore* _Store,
               class AAbilityManager* _AbilityManager,
               std::function<void()> _CloseWidgetFunc);
 
