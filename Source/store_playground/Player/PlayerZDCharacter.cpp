@@ -435,7 +435,7 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
       if (StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode) return false;
       break;
     case EInteractionType::StockDisplay:
-      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning ||
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning &&
           StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
         return false;
       break;

@@ -425,13 +425,6 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
   SpawnParams.bNoFail = true;
   SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-  TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
-  for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
-    const auto PopData = *MarketEconomy->PopEconDataArray.FindByPredicate(
-        [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
-    WeightedCustomers.Add({GenericCustomer, PopData.Population});  // * Only looking at population.
-  }
-
   for (ANpcSpawnPoint* SpawnPoint : SpawnPoints) {
     if (FMath::FRand() * 100 >= SpawnPoint->SpawnChance * (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f))
       continue;
@@ -443,6 +436,12 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     Npc->SpawnPointId = SpawnPoint->Id;
     Npc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
 
+    TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
+    for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
+      const auto PopData = *MarketEconomy->PopEconDataArray.FindByPredicate(
+          [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
+      WeightedCustomers.Add({GenericCustomer, PopData.Population});  // * Only looking at population.
+    }
     const FGenericCustomerData RandomNpcData =
         GetWeightedRandomItem<TTuple<FGenericCustomerData, float>>(WeightedCustomers, [](const auto& Item) {
           return Item.Value;
@@ -453,53 +452,55 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     Npc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
     Npc->DialogueComponent->SpeakerName = RandomNpcData.CustomerName;
+    Npc->DialogueComponent->DialogueComponentType = EDialogueComponentType::Random;
+    int32 RandomDialogueCount = FMath::RandRange(2, 3);
 
     if (FMath::FRand() < 0.1) Npc->DynamicTalkingWidgetComponent->SetVisibility(true, true);
 
     if (Market->TodaysEconEvents.Num() <= 0) {
-      Npc->DialogueComponent->DialogueArray =
-          GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
+      TArray<FDialogueData> RandomDialogues =
+          GlobalStaticDataManager->GetRandomMarketNpcDialogues(RandomDialogueCount, [&](const FDialogueData& Dialogue) {
             FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
             if (!EventTags.IsEmpty()) return false;
 
-            FGameplayTagContainer NpcDialogueTags =
-                Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc.Dialogue"}));
+            FGameplayTagContainer NpcDialogueTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc"}));
             if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
 
             return true;
           });
+      Npc->DialogueComponent->DialogueArray = RandomDialogues;
       continue;
     }
 
     const TArray<FEconEvent>& CatastrophicEvents = Market->TodaysEconEvents.FilterByPredicate(
         [](const auto& Event) { return Event.Severity == EEconEventSeverity::Catastrophic; });
     if (CatastrophicEvents.Num() > 0 && FMath::FRand() * 100 < LevelParams.CatastrophicReactionChance) {
-      Npc->DialogueComponent->DialogueArray =
-          GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
+      TArray<FDialogueData> RandomDialogues =
+          GlobalStaticDataManager->GetRandomMarketNpcDialogues(RandomDialogueCount, [&](const FDialogueData& Dialogue) {
             FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
             if (!EventTags.HasAny(CatastrophicEvents[0].Tags)) return false;
 
-            FGameplayTagContainer NpcDialogueTags =
-                Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc.Dialogue"}));
+            FGameplayTagContainer NpcDialogueTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc"}));
             if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
 
             return true;
           });
+      Npc->DialogueComponent->DialogueArray = RandomDialogues;
       continue;
     }
     const FEconEvent& RandomEconEvent = GetWeightedRandomItem<FEconEvent>(
         Market->TodaysEconEvents, [](const auto& Event) { return Event.StartChance; });
-    // ? Use rolling or random dialogue component type?
-    Npc->DialogueComponent->DialogueArray =
-        GlobalStaticDataManager->GetRandomMarketNpcDialogue([&](const FDialogueData& Dialogue) {
+    TArray<FDialogueData> RandomDialogues =
+        GlobalStaticDataManager->GetRandomMarketNpcDialogues(RandomDialogueCount, [&](const FDialogueData& Dialogue) {
           FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
           if (!EventTags.IsEmpty() && !EventTags.HasAny(RandomEconEvent.Tags)) return false;
 
-          FGameplayTagContainer NpcDialogueTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc.Dialogue"}));
+          FGameplayTagContainer NpcDialogueTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc"}));
           if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
 
           return true;
         });
+    Npc->DialogueComponent->DialogueArray = RandomDialogues;
   }
 }
 

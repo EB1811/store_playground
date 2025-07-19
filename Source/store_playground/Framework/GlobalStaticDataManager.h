@@ -138,7 +138,8 @@ public:
   TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
   TArray<struct FDialogueData> GetRandomCustomerDialogue(
       std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
-  TArray<struct FDialogueData> GetRandomMarketNpcDialogue(
+  TArray<struct FDialogueData> GetRandomMarketNpcDialogues(
+      int32 Amount,
       std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
   TArray<struct FDialogueData> GetRandomNpcStoreDialogue(
       std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;

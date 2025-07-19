@@ -233,11 +233,11 @@ void ASpgHUD::OpenFocusedMenu(UUserWidget* Widget) {
 void ASpgHUD::CloseWidget(UUserWidget* Widget) {
   check(Widget);
 
-  HideWidget(Widget, nullptr);
-
-  OpenedWidgets.RemoveSingle(Widget);
-  if (!OpenedWidgets.IsEmpty()) return;
-  LeaveHUD();
+  HideWidget(Widget, [this, Widget]() {
+    OpenedWidgets.RemoveSingle(Widget);
+    if (!OpenedWidgets.IsEmpty()) return;
+    LeaveHUD();
+  });
 }
 // Callback just for dialogue widget since other widgets are shown on the dialogue's callback.
 void ASpgHUD::CloseWidget(UUserWidget* Widget, std::function<void()> PostCloseFunc) {
@@ -260,7 +260,7 @@ inline FUIActionable* GetUIActionable(UUserWidget* Widget) {
 }
 void ASpgHUD::AdvanceUI() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -270,7 +270,7 @@ void ASpgHUD::AdvanceUI() {
 }
 void ASpgHUD::RetractUIAction() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -280,7 +280,7 @@ void ASpgHUD::RetractUIAction() {
 }
 void ASpgHUD::QuitUIAction() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -290,7 +290,7 @@ void ASpgHUD::QuitUIAction() {
 }
 void ASpgHUD::UINumericInputAction(float Value) {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -300,7 +300,7 @@ void ASpgHUD::UINumericInputAction(float Value) {
 }
 void ASpgHUD::UIDirectionalInputAction(FVector2D Direction) {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -310,7 +310,7 @@ void ASpgHUD::UIDirectionalInputAction(FVector2D Direction) {
 }
 void ASpgHUD::UISideButton1Action() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -320,7 +320,7 @@ void ASpgHUD::UISideButton1Action() {
 }
 void ASpgHUD::UISideButton2Action() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -330,7 +330,7 @@ void ASpgHUD::UISideButton2Action() {
 }
 void ASpgHUD::UISideButton3Action() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -340,7 +340,7 @@ void ASpgHUD::UISideButton3Action() {
 }
 void ASpgHUD::UISideButton4Action() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -350,7 +350,7 @@ void ASpgHUD::UISideButton4Action() {
 }
 void ASpgHUD::UICycleLeftAction() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
@@ -360,7 +360,7 @@ void ASpgHUD::UICycleLeftAction() {
 }
 void ASpgHUD::UICycleRightAction() {
   if (HUDState == EHUDState::PlayingAnim) return;
-  check(!OpenedWidgets.IsEmpty());
+  if (OpenedWidgets.IsEmpty()) return;
 
   UUserWidget* TopWidget = OpenedWidgets.Last();
   FUIActionable* ActionableWidget = GetUIActionable(TopWidget);

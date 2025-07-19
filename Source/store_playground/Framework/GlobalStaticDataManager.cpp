@@ -196,14 +196,27 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomCustomerDialogue
 
   return GetRandomDialogue(Filtered);
 }
-TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomMarketNpcDialogue(
+TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomMarketNpcDialogues(
+    int32 Amount,
     std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {
   TArray<FDialogueData> Filtered =
       !FilterFunc
           ? MarketNpcDialogues
           : MarketNpcDialogues.FilterByPredicate([&](const FDialogueData& Dialogue) { return FilterFunc(Dialogue); });
 
-  return GetRandomDialogue(Filtered);
+  TArray<FDialogueData> RandDialogues = {};
+  for (int32 i = 0; i < Amount; i++) {
+    TArray<FDialogueData> Unique = Filtered.FilterByPredicate([&](const FDialogueData& Dialogue) {
+      return !RandDialogues.ContainsByPredicate([&](const FDialogueData& D) {
+        return D.DialogueChainID == Dialogue.DialogueChainID && D.DialogueID == Dialogue.DialogueID;
+      });
+    });
+    if (Unique.Num() <= 0) break;
+
+    RandDialogues.Append(GetRandomDialogue(Unique));
+  }
+
+  return RandDialogues;
 }
 TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcStoreDialogue(
     std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {

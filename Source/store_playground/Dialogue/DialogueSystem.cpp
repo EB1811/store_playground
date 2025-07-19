@@ -49,7 +49,7 @@ FNextDialogueRes UDialogueSystem::StartDialogue(class UDialogueComponent* _Dialo
                                               ? EDialogueAction::NPCNext
                                               : EDialogueAction::PlayerNext);
   SpeakerName = DialogueC->SpeakerName;
-  DialogueDataArr = DialogueC->DialogueArray;
+  DialogueDataArr = DialogueC->GetNextDialogueChain();
   CurrentDialogueIndex = 0;
   ChoiceDialoguesSelectedIDs.Empty();
 

@@ -236,7 +236,6 @@ void ACustomerAIManager::SpawnCustomers() {
   }
 
   int32 CustomersToSpawn = FMath::RandRange(0, BehaviorParams.MaxCustomers - AllCustomers.Num());
-  UE_LOG(LogTemp, Warning, TEXT("Spawning %d customers."), CustomersToSpawn);
   for (int32 i = 0; i < CustomersToSpawn; i++) {
     if (BehaviorParams.CustomerSpawnChance < FMath::FRand() * 100) continue;
 

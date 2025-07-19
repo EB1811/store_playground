@@ -1,4 +1,5 @@
 #include "DialogueComponent.h"
+#include "Containers/Array.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "Engine/DataTable.h"
 
@@ -24,7 +25,10 @@ auto UDialogueComponent::GetNextDialogueChain() -> TArray<FDialogueData> {
     case EDialogueComponentType::Random: {
       if (DialogueArray.Num() == 0) return {};
 
-      CurrentDialogueChainId = DialogueArray[FMath::RandRange(0, DialogueArray.Num() - 1)].DialogueChainID;
+      TArray<struct FDialogueData> Unique = DialogueArray.FilterByPredicate(
+          [this](const FDialogueData& Dialogue) { return Dialogue.DialogueChainID != CurrentDialogueChainId; });
+      CurrentDialogueChainId =
+          !Unique.IsEmpty() ? Unique[FMath::RandRange(0, Unique.Num() - 1)].DialogueChainID : CurrentDialogueChainId;
 
       TArray<FDialogueData> NextDialogueChain;
       for (int32 i = 0; i < DialogueArray.Num(); i++)
