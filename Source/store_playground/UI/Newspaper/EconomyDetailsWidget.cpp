@@ -1,6 +1,7 @@
 #include "EconomyDetailsWidget.h"
 #include "Components/WrapBoxSlot.h"
 #include "HAL/Platform.h"
+#include "Logging/LogVerbosity.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
@@ -20,21 +21,21 @@ inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconD
   for (auto& Pop : PopEconDataArray) TotalGoodsBoughtPerCapita += Pop.GoodsBoughtPerCapita;
 
   float GivenPopGoodsBoughtPercentage = GivenPop.GoodsBoughtPerCapita / TotalGoodsBoughtPerCapita * 100.0f;
-  UE_LOG(LogTemp, Log, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
+  UE_LOG(LogTemp, Verbose, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
          GivenPopGoodsBoughtPercentage);
 
   if (GivenPopGoodsBoughtPercentage <= 0.0f) return "None";
-  if (GivenPopGoodsBoughtPercentage < 5.0f) return "Very Low";
-  if (GivenPopGoodsBoughtPercentage < 10.0f) return "Low";
-  if (GivenPopGoodsBoughtPercentage < 20.0f) return "Middle";
-  if (GivenPopGoodsBoughtPercentage < 40.0f) return "High";
-  if (GivenPopGoodsBoughtPercentage < 60.0f) return "Immense";
+  if (GivenPopGoodsBoughtPercentage < 0.5f) return "Very Low";
+  if (GivenPopGoodsBoughtPercentage < 1.5f) return "Low";
+  if (GivenPopGoodsBoughtPercentage < 3.0f) return "Middle";
+  if (GivenPopGoodsBoughtPercentage < 6.0f) return "High";
+  if (GivenPopGoodsBoughtPercentage < 12.0f) return "Very High";
   return "Immense";
 }
 inline auto GetItemSpendText(TMap<EItemWealthType, float> ItemSpendPercent) -> FString {
   TArray<FString> SpendStrings;
   for (const auto& Spend : ItemSpendPercent)
-    if (Spend.Value > 40.0f) SpendStrings.Add(UEnum::GetDisplayValueAsText(Spend.Key).ToString());
+    if (Spend.Value >= 40.0f) SpendStrings.Add(UEnum::GetDisplayValueAsText(Spend.Key).ToString());
 
   return FString::Join(SpendStrings, TEXT(" & "));
 }
@@ -89,6 +90,8 @@ void UEconomyDetailsWidget::RefreshUI() {
   for (auto PopType : TEnumRange<EPopType>()) {
     TArray<TTuple<FCustomerPop, FPopEconData>>& PopDataArray = PopTypeToDataMap[PopType];
     PopDataArray.Sort([](const TTuple<FCustomerPop, FPopEconData>& A, const TTuple<FCustomerPop, FPopEconData>& B) {
+      if (A.Get<0>().WealthType == B.Get<0>().WealthType) return A.Get<0>().PopName.CompareTo(B.Get<0>().PopName) < 0;
+
       return static_cast<int32>(A.Get<0>().WealthType) < static_cast<int32>(B.Get<0>().WealthType);
     });
   }
@@ -110,9 +113,10 @@ void UEconomyDetailsWidget::RefreshUI() {
       PopDetailsWidget->Name->SetText(Pop.PopName);
       PopDetailsWidget->WealthText->SetText(
           FText::FromString("Wealth: " + GetWealthText(MarketEconomy->PopEconDataArray, PopEconData)));
+      float PopulationPercent = float(PopEconData.Population) / float(MarketEconomy->TotalPopulation) * 100.0f;
       PopDetailsWidget->PopulationText->SetText(FText::FromString(
-          FString::Printf(TEXT("Population: %.0f"),
-                          float(PopEconData.Population) / float(MarketEconomy->TotalPopulation) * 100.0f) +
+          FString::Printf(PopulationPercent < 1.0f ? TEXT("Population: %.1f") : TEXT("Population: %.0f"),
+                          PopulationPercent) +
           "%"));
       PopDetailsWidget->ItemSpendText->SetText(
           FText::FromString("Spends On: " + GetItemSpendText(Pop.ItemSpendPercent)));

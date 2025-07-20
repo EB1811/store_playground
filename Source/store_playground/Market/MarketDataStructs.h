@@ -17,9 +17,8 @@ enum class EPopType : uint8 {
   Nobility UMETA(DisplayName = "Nobility"),
   Mystic UMETA(DisplayName = "Mystic"),
   Criminal UMETA(DisplayName = "Criminal"),
-  Financial UMETA(DisplayName = "Financial"),
 };
-ENUM_RANGE_BY_COUNT(EPopType, 6);
+ENUM_RANGE_BY_COUNT(EPopType, 5);
 UENUM()
 enum class EPopWealthType : uint8 {
   Poorer UMETA(DisplayName = "Poorer"),
@@ -106,6 +105,7 @@ struct FCustomerPop {
   UPROPERTY(EditAnywhere)
   EPopWealthType WealthType;
 
+  // TODO: Move to pop econ data.
   UPROPERTY(EditAnywhere)
   int32 MGen;
   UPROPERTY(EditAnywhere)

@@ -27,12 +27,12 @@ void UNewsAndEconomyViewWidget::SwitchTab(ENewsAndEconomyViewTab Tab) {
   ActiveTab = Tab;
   switch (ActiveTab) {
     case ENewsAndEconomyViewTab::Articles:
-      NewspaperWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+      NewspaperWidget->SetVisibility(ESlateVisibility::Visible);
       EconomyDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
       break;
     case ENewsAndEconomyViewTab::Economy:
       NewspaperWidget->SetVisibility(ESlateVisibility::Collapsed);
-      EconomyDetailsWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+      EconomyDetailsWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     default: checkNoEntry();
   }
