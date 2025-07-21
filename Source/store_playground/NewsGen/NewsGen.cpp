@@ -43,48 +43,54 @@ void ANewsGen::GenDaysRandomArticles() {
 
   // * Create a layout given the article size.
   // e.g, if chosen random article is large, the rest should be smaller to fit.
-  int32 TotalLayoutSpace = 9;
+  int32 NumColumns = 3;
 
-  for (const auto& GuaranteedArticle : GuaranteedArticles) {
-    if (TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size] < 0) continue;
+  for (int32 i = 0; i < NumColumns; i++) {
+    int32 TotalLayoutSpace = 3;
 
-    PublishedArticles.Add(GuaranteedArticle.ArticleID);
-    RecentArticlesMap.Add(GuaranteedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
-    DaysArticles.Add(GuaranteedArticle);
+    for (const auto& GuaranteedArticle : GuaranteedArticles) {
+      if (TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size] < 0) continue;
 
-    PossibleArticles.RemoveAllSwap(
-        [&GuaranteedArticle](const FArticle& Article) { return Article.ArticleID == GuaranteedArticle.ArticleID; });
-    TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size];
-  }
+      PublishedArticles.Add(GuaranteedArticle.ArticleID);
+      RecentArticlesMap.Add(GuaranteedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
+      DaysArticles.Add(GuaranteedArticle);
 
-  PossibleArticles.RemoveAllSwap([this](const FArticle& Article) {
-    return Article.AppearWeight <= 0 || RecentArticlesMap.Contains(Article.ArticleID);
-  });
-  if (PossibleArticles.Num() <= 0) return;
+      PossibleArticles.RemoveAllSwap(
+          [&GuaranteedArticle](const FArticle& Article) { return Article.ArticleID == GuaranteedArticle.ArticleID; });
+      TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[GuaranteedArticle.Size];
+    }
+    GuaranteedArticles.RemoveAllSwap([this](const FArticle& Article) {
+      return PublishedArticles.ContainsByPredicate(
+          [&](FName& PublishedID) { return PublishedID == Article.ArticleID; });
+    });
 
-  UE_LOG(LogTemp, Warning, TEXT("Possible articles count: %d"), PossibleArticles.Num());
-  while (TotalLayoutSpace > 0 && PossibleArticles.Num() > 0) {
-    TArray<FArticle> SizedArticles =
-        PossibleArticles.FilterByPredicate([this, TotalLayoutSpace](const FArticle& Article) {
-          return TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[Article.Size] >= 0;
-        });
-    UE_LOG(LogTemp, Warning, TEXT("SizedArticles articles count: %d"), SizedArticles.Num());
-    if (SizedArticles.Num() <= 0) break;
+    PossibleArticles.RemoveAllSwap([this](const FArticle& Article) {
+      return Article.AppearWeight <= 0 || RecentArticlesMap.Contains(Article.ArticleID);
+    });
+    if (PossibleArticles.Num() <= 0) return;
 
-    FArticle SelectedArticle =
-        GetWeightedRandomItem<FArticle>(SizedArticles, [](const auto& Article) { return Article.AppearWeight; });
+    while (TotalLayoutSpace > 0 && PossibleArticles.Num() > 0) {
+      TArray<FArticle> SizedArticles =
+          PossibleArticles.FilterByPredicate([this, TotalLayoutSpace](const FArticle& Article) {
+            return TotalLayoutSpace - NewsGenParams.ArticleSizeToSpaceMap[Article.Size] >= 0;
+          });
+      if (SizedArticles.Num() <= 0) break;
 
-    PublishedArticles.Add(SelectedArticle.ArticleID);
-    RecentArticlesMap.Add(SelectedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
-    DaysArticles.Add(SelectedArticle);
+      FArticle SelectedArticle =
+          GetWeightedRandomItem<FArticle>(SizedArticles, [](const auto& Article) { return Article.AppearWeight; });
 
-    PossibleArticles.RemoveAllSwap(
-        [&SelectedArticle](const FArticle& Article) { return Article.ArticleID == SelectedArticle.ArticleID; });
+      PublishedArticles.Add(SelectedArticle.ArticleID);
+      RecentArticlesMap.Add(SelectedArticle.ArticleID, NewsGenParams.RecentArticlesKeepTime);
+      DaysArticles.Add(SelectedArticle);
 
-    TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
-    UE_LOG(LogTemp, Warning, TEXT("Selected article: %s, size: %d, space left: %d"),
-           *SelectedArticle.ArticleID.ToString(), NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size],
-           TotalLayoutSpace);
+      PossibleArticles.RemoveAllSwap(
+          [&SelectedArticle](const FArticle& Article) { return Article.ArticleID == SelectedArticle.ArticleID; });
+
+      TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
+      UE_LOG(LogTemp, Log, TEXT("Selected article: %s, size: %d, space left: %d"),
+             *SelectedArticle.ArticleID.ToString(), NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size],
+             TotalLayoutSpace);
+    }
   }
 }
 

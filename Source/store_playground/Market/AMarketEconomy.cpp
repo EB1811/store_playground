@@ -378,6 +378,8 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
   TArray<FPopEffect> PopEffectsToRemove;
 
   for (auto& PriceEffect : ActivePriceEffects) {
+    if (PriceEffect.DurationType == EEffectDurationType::Permanent) continue;
+
     if (PriceEffect.DurationLeft <= 1) {
       PriceEffectsToRemove.Add(PriceEffect);
     } else {
@@ -387,6 +389,8 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
     }
   }
   for (auto& PopEffect : ActivePopEffects) {
+    if (PopEffect.DurationType == EEffectDurationType::Permanent) continue;
+
     if (PopEffect.DurationLeft <= 1) {
       PopEffectsToRemove.Add(PopEffect);
     } else {

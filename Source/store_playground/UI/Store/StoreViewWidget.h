@@ -53,10 +53,10 @@ public:
               const class AStorePhaseManager* StorePhaseManager,
               const class AMarketEconomy* MarketEconomy,
               const class AMarket* Market,
-              const class AStatisticsGen* StatisticsGen,
               const class AUpgradeManager* UpgradeManager,
               const class AAbilityManager* AbilityManager,
               const class UInventoryComponent* PlayerInventoryC,
+              class AStatisticsGen* StatisticsGen,
               class AStore* Store,
               class AStoreExpansionManager* StoreExpansionManager,
               std::function<void()> _CloseWidgetFunc);

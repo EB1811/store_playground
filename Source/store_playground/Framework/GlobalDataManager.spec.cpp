@@ -207,6 +207,15 @@ void AGlobalDataManagerSpec::Define() {
       TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [Quest1, Quest2])"),
                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
 
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [d_1, d_2])"),
+                                           ARRAY_NAMES(FName("d_1"), FName("d_2"), FName("Quest3"))));
+
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, geopol_civil_war_1)"),
+                                           ARRAY_NAMES(FName("geopol_civil_war_1"), FName("Quest2"), FName("Quest3"))));
+
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [geopol_civil_war_1])"),
+                                           ARRAY_NAMES(FName("geopol_civil_war_1"), FName("Quest2"), FName("Quest3"))));
+
       TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest4)"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
     });

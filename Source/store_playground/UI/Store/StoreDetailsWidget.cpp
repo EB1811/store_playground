@@ -59,7 +59,7 @@ void UStoreDetailsWidget::RefreshUI() {
   for (const auto& StockItem : Store->StoreStockItems)
     OnDisplayValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
   NetWorthCardWidget->InitUI(
-      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue)),
+      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), StatisticsGen->CalcNetWorth())),
       {{
            FText::FromString("Money:"),
            Money,
@@ -85,10 +85,10 @@ void UStoreDetailsWidget::InitUI(const class ADayManager* _DayManager,
                                  const class AStorePhaseManager* _StorePhaseManager,
                                  const class AMarketEconomy* _MarketEconomy,
                                  const class AMarket* _Market,
-                                 const class AStatisticsGen* _StatisticsGen,
                                  const class AUpgradeManager* _UpgradeManager,
                                  const class AAbilityManager* _AbilityManager,
                                  const class UInventoryComponent* _PlayerInventoryC,
+                                 class AStatisticsGen* _StatisticsGen,
                                  class AStore* _Store) {
   check(_DayManager && _StorePhaseManager && _MarketEconomy && _Market && _StatisticsGen && _UpgradeManager &&
         _AbilityManager && _PlayerInventoryC && _Store);
@@ -97,9 +97,9 @@ void UStoreDetailsWidget::InitUI(const class ADayManager* _DayManager,
   StorePhaseManager = _StorePhaseManager;
   MarketEconomy = _MarketEconomy;
   Market = _Market;
-  StatisticsGen = _StatisticsGen;
   UpgradeManager = _UpgradeManager;
   AbilityManager = _AbilityManager;
   PlayerInventoryC = _PlayerInventoryC;
+  StatisticsGen = _StatisticsGen;
   Store = _Store;
 }

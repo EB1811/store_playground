@@ -9,6 +9,7 @@
 			"Poorer"
 		],
 		"PopChangeMulti": 1.5,
+		"DurationType": "Temporary",
 		"Duration": 2,
 		"PopChangeMultiFalloff": 0.01
 	}

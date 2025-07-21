@@ -1,9 +1,9 @@
 [
 	{
-		"Name": "cpd1",
-		"ID": "cpc1",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"E70387E5494F01E1509F4C98B22B9707\", \"Farmer\")",
-		"InitPopulation": 70,
+		"Name": "cp1",
+		"ID": "cp1",
+		"PopName": "Villager",
+		"InitPopulation": 500,
 		"PopType": "Common",
 		"WealthType": "Poorer",
 		"ItemEconTypes": [
@@ -15,10 +15,10 @@
 		}
 	},
 	{
-		"Name": "cpd1_0",
-		"ID": "cmc1",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"9BC1E9194AF67CE45F76E4977A558762\", \"Clerk\")",
-		"InitPopulation": 15,
+		"Name": "cm1",
+		"ID": "cm1",
+		"PopName": "Craftsmen",
+		"InitPopulation": 200,
 		"PopType": "Common",
 		"WealthType": "Middle",
 		"ItemEconTypes": [
@@ -30,25 +30,57 @@
 		}
 	},
 	{
-		"Name": "nmc",
-		"ID": "nmc1",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"D4918AF645CD01656A1D7A9147859868\", \"Aristocrat\")",
-		"InitPopulation": 5,
-		"PopType": "Nobility",
+		"Name": "cm2",
+		"ID": "cm2",
+		"PopName": "Merchant",
+		"InitPopulation": 120,
+		"PopType": "Common",
 		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Consumer",
+      "Finance"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character076_Sprite_1.Character076_Sprite_1'"
+		}
+	},
+	{
+		"Name": "cu1",
+		"ID": "cu1",
+		"PopName": "Scholar",
+		"InitPopulation": 90,
+		"PopType": "Common",
+		"WealthType": "Upper",
 		"ItemEconTypes": [
 			"Consumer"
 		],
 		"AssetData":
 		{
-			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character132_Sprite_1.Character132_Sprite_1'"
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character076_Sprite_1.Character076_Sprite_1'"
 		}
 	},
 	{
-		"Name": "ap01",
-		"ID": "merc",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"5AD38FC5465F2F5D2F57B0B6AF1D575C\", \"Mercenary\")",
-		"InitPopulation": 10,
+		"Name": "cu2",
+		"ID": "cu2",
+		"PopName": "Guildmaster",
+		"InitPopulation": 30,
+		"PopType": "Common",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Consumer",
+      "Finance"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character076_Sprite_1.Character076_Sprite_1'"
+		}
+	},
+	{
+		"Name": "ap1",
+		"ID": "ap1",
+		"PopName": "Mercenary",
+		"InitPopulation": 300,
 		"PopType": "Adventurer",
 		"WealthType": "Poorer",
 		"ItemEconTypes": [
@@ -61,26 +93,26 @@
 		}
 	},
 	{
-		"Name": "nuc2",
-		"ID": "nuc1",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"C8207C54472F9C55E8C175A4EDF29C57\", \"Royalty\")",
-		"InitPopulation": 1,
-		"PopType": "Nobility",
-		"WealthType": "Upper",
+		"Name": "ap3",
+		"ID": "ap3",
+		"PopName": "Ranger",
+		"InitPopulation": 250,
+		"PopType": "Adventurer",
+		"WealthType": "Poorer",
 		"ItemEconTypes": [
-			"Consumer"
+			"Adventurer"
 		],
 		"AssetData":
 		{
-			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character133_Sprite_1.Character133_Sprite_1'"
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
 		}
 	},
 	{
-		"Name": "mm",
-		"ID": "mm1",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"575572604F3C43F60FD520A85941B302\", \"Mage\")",
-		"InitPopulation": 10,
-		"PopType": "Mystic",
+		"Name": "am1",
+		"ID": "am1",
+		"PopName": "Hero",
+		"InitPopulation": 100,
+		"PopType": "Adventurer",
 		"WealthType": "Middle",
 		"ItemEconTypes": [
 			"Adventurer",
@@ -88,16 +120,278 @@
 		],
 		"AssetData":
 		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
+		}
+	},
+	{
+		"Name": "am2",
+		"ID": "ma2",
+		"PopName": "Swordmaster",
+		"InitPopulation": 50,
+		"PopType": "Adventurer",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
+		}
+	},
+	{
+		"Name": "au1",
+		"ID": "au1",
+		"PopName": "Paladin",
+		"InitPopulation": 40,
+		"PopType": "Adventurer",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Adventurer",
+      "Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
+		}
+	},
+	{
+		"Name": "au2",
+		"ID": "au2",
+		"PopName": "Dragonlord",
+		"InitPopulation": 20,
+		"PopType": "Adventurer",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
+		}
+	},
+	{
+		"Name": "au3",
+		"ID": "au3",
+		"PopName": "Death-Knight",
+		"InitPopulation": 15,
+		"PopType": "Adventurer",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character104_Sprite_1.Character104_Sprite_1'"
+		}
+	},
+	{
+		"Name": "np1",
+		"ID": "np1",
+		"PopName": "Bard",
+		"InitPopulation": 210,
+		"PopType": "Nobility",
+		"WealthType": "Poorer",
+		"ItemEconTypes": [
+			"Consumer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character132_Sprite_1.Character132_Sprite_1'"
+		}
+	},
+	{
+		"Name": "nm1",
+		"ID": "nm1",
+		"PopName": "Knight",
+		"InitPopulation": 80,
+		"PopType": "Nobility",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+      "Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character132_Sprite_1.Character132_Sprite_1'"
+		}
+	},
+	{
+		"Name": "nm2",
+		"ID": "nm2",
+		"PopName": "Aristocrat",
+		"InitPopulation": 30,
+		"PopType": "Nobility",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Consumer",
+      "Finance"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character132_Sprite_1.Character132_Sprite_1'"
+		}
+	},
+	{
+		"Name": "nu1",
+		"ID": "nu1",
+		"PopName": "Royalty",
+		"InitPopulation": 8,
+		"PopType": "Nobility",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Consumer",
+      "Finance"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character133_Sprite_1.Character133_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mp1",
+		"ID": "mp1",
+		"PopName": "Apprentice",
+		"InitPopulation": 400,
+		"PopType": "Mystic",
+		"WealthType": "Poorer",
+		"ItemEconTypes": [
+			"Magic"
+		],
+		"AssetData":
+		{
 			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
 		}
 	},
 	{
-		"Name": "cm",
-		"ID": "cm1",
-		"PopName": "NSLOCTEXT(\"[8DB5024C042D9306448A92FA7B830825]\", \"3D1718F24804A3FF8BC463B0EE082E8B\", \"Assassin\")",
-		"InitPopulation": 10,
+		"Name": "mp3",
+		"ID": "mp3",
+		"PopName": "Druid",
+		"InitPopulation": 150,
+		"PopType": "Mystic",
+		"WealthType": "Poorer",
+		"ItemEconTypes": [
+			"Consumer",
+      "Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mm1",
+		"ID": "mm1",
+		"PopName": "Cleric",
+		"InitPopulation": 50,
+		"PopType": "Mystic",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Consumer",
+      "Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mm2",
+		"ID": "mm2",
+		"PopName": "Mage",
+		"InitPopulation": 200,
+		"PopType": "Mystic",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mm3",
+		"ID": "mm3",
+		"PopName": "Necromancer",
+		"InitPopulation": 80,
+		"PopType": "Mystic",
+		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Adventurer",
+			"Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mu1",
+		"ID": "mu1",
+		"PopName": "Arch-Mage",
+		"InitPopulation": 12,
+		"PopType": "Mystic",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "mu2",
+		"ID": "mu2",
+		"PopName": "Warlock",
+		"InitPopulation": 18,
+		"PopType": "Mystic",
+		"WealthType": "Upper",
+		"ItemEconTypes": [
+			"Adventurer",
+			"Magic"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character140_Sprite_1.Character140_Sprite_1'"
+		}
+	},
+	{
+		"Name": "crl1",
+		"ID": "crl1",
+		"PopName": "Brigand",
+		"InitPopulation": 200,
+		"PopType": "Criminal",
+		"WealthType": "Poorer",
+		"ItemEconTypes": [
+			"Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character145_Sprite_1.Character145_Sprite_1'"
+		}
+	},
+	{
+		"Name": "crm1",
+		"ID": "crm1",
+		"PopName": "Rogue",
+		"InitPopulation": 80,
 		"PopType": "Criminal",
 		"WealthType": "Middle",
+		"ItemEconTypes": [
+			"Adventurer"
+		],
+		"AssetData":
+		{
+			"Sprite": "/Script/Paper2D.PaperSprite'/Game/Assets/Character/Sprites/Npcs/Generic/Character145_Sprite_1.Character145_Sprite_1'"
+		}
+	},
+	{
+		"Name": "cru1",
+		"ID": "cru1",
+		"PopName": "Assassin",
+		"InitPopulation": 20,
+		"PopType": "Criminal",
+		"WealthType": "Upper",
 		"ItemEconTypes": [
 			"Adventurer"
 		],

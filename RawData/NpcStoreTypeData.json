@@ -2,7 +2,7 @@
 	{
 		"Name": "s_0",
 		"ID": "gs01",
-		"StoreTypeName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"AEBA88E24CC54BAEC136049887730173\", \"General Store\")",
+		"StoreTypeName": "General Store",
 		"StoreSpawnWeight": 10,
 		"StockCountRange": [ 6, 12 ],
 		"StoreMarkup": 0.25,
@@ -10,14 +10,16 @@
 		{
 			"Consumable": 9,
 			"Jewellery": 1,
-			"Weapon": 4
+			"Weapon": 4,
+      "Clothing": 2,
+      "Objects": 3
 		},
 		"ItemEconTypeWeightMap":
 		{
 			"Consumer": 5,
 			"Adventurer": 5
 		},
-		"DisplayName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"9957754E4278BD224B1AD1B6DCD9A33D\", \"General Store\")",
+		"DisplayName": "General Store",
 		"AssetData":
 		{
 			"Avatar": "None",
@@ -31,10 +33,10 @@
 	{
 		"Name": "s_1",
 		"ID": "ws01",
-		"StoreTypeName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"0B9F896F4A8CC1CFF4613D8858E4881E\", \"Weapon Store\")",
+		"StoreTypeName": "Weapon Store",
 		"StoreSpawnWeight": 5,
-		"StockCountRange": [ 2, 4 ],
-		"StoreMarkup": 0.4,
+		"StockCountRange": [ 6, 12 ],
+		"StoreMarkup": 0.3,
 		"ItemTypeWeightMap":
 		{
 			"Weapon": 1
@@ -43,7 +45,7 @@
 		{
 			"Adventurer": 5
 		},
-		"DisplayName": "NSLOCTEXT(\"[A0A27F0E53642D853BD2A88B930981D1]\", \"50EF2D51453135E07D9847841E64AD2B\", \"Weapon Store\")",
+		"DisplayName": "Weapon Store",
 		"AssetData":
 		{
 			"Avatar": "None",
@@ -51,6 +53,264 @@
 			"Sprites":
 			{
 				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_Merc_Idle_Down.FB_Merc_Idle_Down'"
+			}
+		}
+	},
+	{
+		"Name": "s_2",
+		"ID": "as01",
+		"StoreTypeName": "Armor Shop",
+		"StoreSpawnWeight": 6,
+		"StockCountRange": [ 4, 10 ],
+		"StoreMarkup": 0.3,
+		"ItemTypeWeightMap":
+		{
+			"Armor": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Adventurer": 8,
+			"Consumer": 2
+		},
+		"DisplayName": "Armor Shop",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Idle_Down.FB_OldMan_Idle_Down'"
+			}
+		}
+	},
+	{
+		"Name": "s_3",
+		"ID": "js01",
+		"StoreTypeName": "Jeweller",
+		"StoreSpawnWeight": 4,
+		"StockCountRange": [ 3, 8 ],
+		"StoreMarkup": 0.3,
+		"ItemTypeWeightMap":
+		{
+			"Jewellery": 8,
+			"Valuables": 2
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Consumer": 6,
+			"Magic": 3,
+			"Finance": 1
+		},
+		"DisplayName": "Jeweller",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_FemAristocrat_Idle_Down.FB_FemAristocrat_Idle_Down'"
+			}
+		}
+	},
+	{
+		"Name": "s_4",
+		"ID": "cs01",
+		"StoreTypeName": "Clothier",
+		"StoreSpawnWeight": 7,
+		"StockCountRange": [ 5, 14 ],
+		"StoreMarkup": 0.25,
+		"ItemTypeWeightMap":
+		{
+			"Clothing": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Consumer": 1,
+      "Adventurer": 1,
+      "Magic": 1
+		},
+		"DisplayName": "Clothier",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C103_Idle_A.FB_C103_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_5",
+		"ID": "ms01",
+		"StoreTypeName": "Magic Shop",
+		"StoreSpawnWeight": 3,
+		"StockCountRange": [ 3, 7 ],
+		"StoreMarkup": 0.3,
+		"ItemTypeWeightMap":
+		{
+			"Consumable": 4,
+			"Objects": 3,
+			"Jewellery": 2,
+			"Valuables": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Magic": 1
+		},
+		"DisplayName": "Magic Shop",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C140_Idle_A.FB_C140_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_6",
+		"ID": "als01",
+		"StoreTypeName": "Alchemist",
+		"StoreSpawnWeight": 4,
+		"StockCountRange": [ 4, 9 ],
+		"StoreMarkup": 0.3,
+		"ItemTypeWeightMap":
+		{
+			"Consumable": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Magic": 6,
+			"Consumer": 3,
+			"Adventurer": 1
+		},
+		"DisplayName": "Alchemist",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C139_Idle_A.FB_C139_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_7",
+		"ID": "ts01",
+		"StoreTypeName": "Treasure Dealer",
+		"StoreSpawnWeight": 2,
+		"StockCountRange": [ 2, 5 ],
+		"StoreMarkup": 0.5,
+		"ItemTypeWeightMap":
+		{
+			"Valuables": 6,
+			"Objects": 3,
+			"Jewellery": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Finance": 5,
+			"Consumer": 3,
+			"Magic": 2
+		},
+		"DisplayName": "Treasure Dealer",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C132_Idle_A.FB_C132_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_8",
+		"ID": "bs01",
+		"StoreTypeName": "Black Market",
+		"StoreSpawnWeight": 1,
+		"StockCountRange": [ 2, 6 ],
+		"StoreMarkup": 0.7,
+		"ItemTypeWeightMap":
+		{
+			"Weapon": 3,
+			"Valuables": 3,
+			"Objects": 2,
+			"Consumable": 2
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Adventurer": 4,
+			"Magic": 3,
+			"Finance": 3
+		},
+		"DisplayName": "Black Market",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C121_Idle_A.FB_C121_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_9",
+		"ID": "fs01",
+		"StoreTypeName": "Financial Services",
+		"StoreSpawnWeight": 3,
+		"StockCountRange": [ 1, 4 ],
+		"StoreMarkup": 0.3,
+		"ItemTypeWeightMap":
+		{
+			"Financial": 8,
+			"Objects": 2
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Finance": 1
+		},
+		"DisplayName": "Financial Services",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_C118_Idle_A.FB_C118_Idle_A'"
+			}
+		}
+	},
+	{
+		"Name": "s_10",
+		"ID": "tas01",
+		"StoreTypeName": "Tavern & Supplies",
+		"StoreSpawnWeight": 8,
+		"StockCountRange": [ 6, 15 ],
+		"StoreMarkup": 0.2,
+		"ItemTypeWeightMap":
+		{
+			"Consumable": 7,
+			"Objects": 2,
+			"Clothing": 1
+		},
+		"ItemEconTypeWeightMap":
+		{
+			"Consumer": 7,
+			"Adventurer": 3
+		},
+		"DisplayName": "Tavern & Supplies",
+		"AssetData":
+		{
+			"Avatar": "None",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Assets/CustomMeshes/Merged/SM_MERGED_Cart02.SM_MERGED_Cart02'",
+			"Sprites":
+			{
+				"Down": "/Script/Paper2D.PaperFlipbook'/Game/Assets/Character/Flipbooks/Npcs/Generic/FB_OldMan_Idle_Down.FB_OldMan_Idle_Down'"
 			}
 		}
 	}

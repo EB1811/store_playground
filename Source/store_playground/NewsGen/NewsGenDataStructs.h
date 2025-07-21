@@ -46,6 +46,8 @@ struct FArticle {
   bool bIsRepeatable;
   UPROPERTY(EditAnywhere, SaveGame)
   bool bIsSpecial;  // * Econ event articles, etc.
+  UPROPERTY(EditAnywhere)
+  bool bIsTriggered;
 
   UPROPERTY(EditAnywhere, SaveGame)
   EArticleSize Size;
@@ -72,6 +74,8 @@ struct FArticleRow : public FTableRowBase {
   bool bIsRepeatable;
   UPROPERTY(EditAnywhere)
   bool bIsSpecial;  // * Econ event articles, etc.
+  UPROPERTY(EditAnywhere)
+  bool bIsTriggered;
 
   UPROPERTY(EditAnywhere)
   EArticleSize Size;

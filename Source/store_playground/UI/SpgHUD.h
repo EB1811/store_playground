@@ -64,8 +64,6 @@ public:
   TSubclassOf<class UGameOverViewWidget> GameOverViewWidgetClass;
 
   UPROPERTY(EditAnywhere)
-  const class AStatisticsGen* StatisticsGen;
-  UPROPERTY(EditAnywhere)
   const class ADayManager* DayManager;
   UPROPERTY(EditAnywhere)
   const class AStorePhaseManager* StorePhaseManager;
@@ -80,6 +78,8 @@ public:
   class ASettingsManager* SettingsManager;
   UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
+  UPROPERTY(EditAnywhere)
+  class AStatisticsGen* StatisticsGen;
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;
   UPROPERTY(EditAnywhere)

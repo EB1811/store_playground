@@ -19,8 +19,9 @@ enum class EReqFilterOperand : uint8 {
   QuestsCompleted UMETA(DisplayName = "QuestsCompleted"),          // * Using quest ids.
   MadeDialogueChoices UMETA(DisplayName = "MadeDialogueChoices"),  // * Using dialogue chain ids.
   RecentEconEvents UMETA(DisplayName = "RecentEconEvents"),        // * Using econ event ids.
+  NewsArticles UMETA(DisplayName = "NewsArticles"),                // * Using article ids.
 };
-ENUM_RANGE_BY_COUNT(EReqFilterOperand, 5);
+ENUM_RANGE_BY_COUNT(EReqFilterOperand, 7);
 
 bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags, const class UTagsComponent* PlayerTagsC);
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap);

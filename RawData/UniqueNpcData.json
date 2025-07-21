@@ -2,7 +2,7 @@
 	{
 		"Name": "v",
 		"ID": "rune",
-		"LinkedPopID": "merc",
+		"LinkedPopID": "ap1",
 		"NpcName": "NSLOCTEXT(\"[C8249AF30EFA4FDC334FAC742910C366]\", \"59469C9249EDE97CF8BEFF8BD536340A\", \"Rune\")",
 		"SpawnRequirementsFilter": "None",
 		"SpawnWeight": 100,

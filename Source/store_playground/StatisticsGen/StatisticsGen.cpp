@@ -43,13 +43,15 @@ auto AStatisticsGen::CalcTodaysStoreProfit() const -> float {
   return TodaysStoreMoneyActivity.AllIncome - TodaysStoreMoneyActivity.AllExpenses;
 }
 
-auto AStatisticsGen::CalcNetWorth() const -> float {
+auto AStatisticsGen::CalcNetWorth() -> float {
   float TotalValue = 0.0f;
   TotalValue += Store->Money;
   for (const auto& Item : PlayerInventoryC->ItemsArray)
     TotalValue += Item->Quantity * MarketEconomy->GetMarketPrice(Item->ItemID);
   for (const FStockItem& StockItem : Store->StoreStockItems)
     TotalValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
+
+  CachedDetails.PlayerNetWorth = TotalValue;
 
   return TotalValue;
 }

@@ -96,6 +96,17 @@ UItemBase* AMarket::GetRandomItem(const TArray<FName> ItemIds) const {
   FName RandomId = ItemIdsEligible[FMath::RandRange(0, ItemIds.Num() - 1)];
   return AllItemsMap[RandomId]->CreateItemCopy();
 }
+UItemBase* AMarket::GetRandomItemWeighted(const TArray<FName> ItemIds,
+                                          std::function<float(const UItemBase* Item)> WeightFunc) const {
+  const TArray<FName> ItemIdsEligible =
+      EligibleItemIds.FilterByPredicate([ItemIds](const FName& Id) { return ItemIds.Contains(Id); });
+  if (ItemIdsEligible.Num() <= 0) return nullptr;
+
+  FName RandomId = GetWeightedRandomItem<FName>(
+      ItemIdsEligible, [this, WeightFunc](const FName& Id) { return WeightFunc(AllItemsMap[Id]); });
+  return AllItemsMap[RandomId]->CreateItemCopy();
+}
+
 UItemBase* AMarket::GetItem(const FName& ItemID) const {
   const UItemBase* Item = AllItemsMap[ItemID];
   return Item->CreateItemCopy();

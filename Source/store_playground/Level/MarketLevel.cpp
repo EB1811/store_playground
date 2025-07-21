@@ -20,6 +20,7 @@
 #include "store_playground/WorldObject/MobileNPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/Market/NpcStoreComponent.h"
@@ -364,6 +365,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     NpcStoreComponents.Add({NPCStore->NpcStoreComponent, NPCStore->InventoryComponent});
   }
 
+  float PlayerNetWorth = StatisticsGen->CachedDetails.PlayerNetWorth;
   for (TTuple<UNpcStoreComponent*, UInventoryComponent*> StoreComponents : NpcStoreComponents) {
     UNpcStoreComponent* NpcStoreC = StoreComponents.Key;
     UInventoryComponent* InventoryC = StoreComponents.Value;
@@ -406,7 +408,15 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
       if (!PossibleItemIdsMap.Contains(Pair.Key)) continue;
 
       TArray<FName> ItemIds = PossibleItemIdsMap[Pair.Key];
-      for (int32 i = 0; i < Pair.Value; i++) InventoryC->AddItem(Market->GetRandomItem(ItemIds));
+      for (int32 i = 0; i < Pair.Value; i++)
+        InventoryC->AddItem(Market->GetRandomItemWeighted(ItemIds, [this, PlayerNetWorth](const UItemBase* Item) {
+          return 1;  // temp
+          // float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
+          // Higher difference means lower weight.
+          // return int32(
+          //     FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - PlayerNetWorth) + 1.0f) / PlayerNetWorth), 0.1f, 1.0f) *
+          //     100.0f);
+        }));
 
       UE_LOG(LogTemp, Log, TEXT("NpcStore %s has %d items for type %s and econ type %s"),
              *NpcStoreC->NpcStoreType.DisplayName.ToString(), ItemIds.Num(), *UEnum::GetValueAsString(Pair.Key.Key),

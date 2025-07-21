@@ -80,6 +80,8 @@ public:
                          std::function<bool(const FName& ItemId)> FilterFunc = nullptr) const
       -> TArray<class UItemBase*>;
   auto GetRandomItem(const TArray<FName> ItemIds) const -> class UItemBase*;
+  auto GetRandomItemWeighted(const TArray<FName> ItemIds,
+                             std::function<float(const class UItemBase* Item)> WeightFunc) const -> class UItemBase*;
   auto GetItem(const FName& ItemID) const -> class UItemBase*;
 
   auto GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float;

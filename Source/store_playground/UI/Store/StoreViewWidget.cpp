@@ -47,10 +47,10 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                               const AStorePhaseManager* StorePhaseManager,
                               const AMarketEconomy* MarketEconomy,
                               const AMarket* Market,
-                              const AStatisticsGen* StatisticsGen,
                               const AUpgradeManager* UpgradeManager,
                               const AAbilityManager* AbilityManager,
                               const UInventoryComponent* PlayerInventoryC,
+                              AStatisticsGen* StatisticsGen,
                               AStore* Store,
                               AStoreExpansionManager* StoreExpansionManager,
                               std::function<void()> _CloseWidgetFunc) {
@@ -73,8 +73,8 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
   MenuHeaderWidget->SetComponentUI(TopBarTabs, TabSelectedFunc);
   SwitchTab(EStoreViewTab::Details);
 
-  StoreDetailsWidget->InitUI(DayManager, StorePhaseManager, MarketEconomy, Market, StatisticsGen, UpgradeManager,
-                             AbilityManager, PlayerInventoryC, Store);
+  StoreDetailsWidget->InitUI(DayManager, StorePhaseManager, MarketEconomy, Market, UpgradeManager, AbilityManager,
+                             PlayerInventoryC, StatisticsGen, Store);
 
   BackButton->ActionText->SetText(FText::FromString("Back"));
   BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);

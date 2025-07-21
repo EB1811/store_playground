@@ -2,9 +2,9 @@
 	{
 		"Name": "farmer01",
 		"CustomerID": "c_farmer01",
-		"LinkedPopID": "cpc1",
-		"CustomerName": "NSLOCTEXT(\"DT_CustomerData [0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"farmer01_CustomerName\", \"Farmer\")",
-		"LinkedPopName": "NSLOCTEXT(\"DT_CustomerData [0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"farmer01_LinkedPopName\", \"Farmer\")",
+		"LinkedPopID": "cp1",
+		"CustomerName": "Villager",
+		"LinkedPopName": "Villager",
 		"InitAttitude": "Neutral",
 		"AssetData":
 		{
@@ -33,7 +33,7 @@
 	{
 		"Name": "merc01",
 		"CustomerID": "c_merc01",
-		"LinkedPopID": "merc",
+		"LinkedPopID": "ap1",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mercenary\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mercenary\")",
 		"InitAttitude": "Neutral",
@@ -75,7 +75,7 @@
 	{
 		"Name": "merc02",
 		"CustomerID": "c_merc02",
-		"LinkedPopID": "merc",
+		"LinkedPopID": "ap1",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mercenary\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mercenary\")",
 		"InitAttitude": "Neutral",
@@ -114,7 +114,7 @@
 	{
 		"Name": "merc03",
 		"CustomerID": "c_merc03",
-		"LinkedPopID": "merc",
+		"LinkedPopID": "ap1",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mercenary\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mercenary\")",
 		"InitAttitude": "Neutral",
@@ -153,7 +153,7 @@
 	{
 		"Name": "aristo01",
 		"CustomerID": "c_aristo01",
-		"LinkedPopID": "nmc1",
+		"LinkedPopID": "nm2",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"14DBA0F54EABEEED35132C81AC6D4E19\", \"Aristocrat\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"7EE86A6C45AD1AC5A6F4409A7DBAFC73\", \"Aristocrat\")",
 		"InitAttitude": "Neutral",
@@ -195,7 +195,7 @@
 	{
 		"Name": "aristo02",
 		"CustomerID": "c_aristo02",
-		"LinkedPopID": "nmc1",
+		"LinkedPopID": "nm2",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"14DBA0F54EABEEED35132C81AC6D4E19\", \"Aristocrat\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"7EE86A6C45AD1AC5A6F4409A7DBAFC73\", \"Aristocrat\")",
 		"InitAttitude": "Hostile",
@@ -237,7 +237,7 @@
 	{
 		"Name": "mage01",
 		"CustomerID": "c_mage01",
-		"LinkedPopID": "mm1",
+		"LinkedPopID": "mm2",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mage\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mage\")",
 		"InitAttitude": "Neutral",
@@ -279,7 +279,7 @@
 	{
 		"Name": "mage02",
 		"CustomerID": "c_mage02",
-		"LinkedPopID": "mm1",
+		"LinkedPopID": "mm2",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Mage\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Mage\")",
 		"InitAttitude": "Neutral",
@@ -321,7 +321,7 @@
 	{
 		"Name": "assassin01",
 		"CustomerID": "c_assassin01",
-		"LinkedPopID": "cm1",
+		"LinkedPopID": "cru1",
 		"CustomerName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"39810DD344FF4D072A71C6B0E86C2189\", \"Assassin\")",
 		"LinkedPopName": "NSLOCTEXT(\"[0BEAA6B3D7EED913ADB97D7F9B7848E9]\", \"F1E616284B2BE8CFA2738180B15489CB\", \"Assassin\")",
 		"InitAttitude": "Neutral",

@@ -64,6 +64,14 @@ struct FPopStatistics {
   TArray<float> GoodsBoughtPerCapitaHistory;
 };
 
+USTRUCT()
+struct FCachedDetails {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  float PlayerNetWorth;
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AStatisticsGen : public AInfo {
   GENERATED_BODY()
@@ -99,12 +107,15 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   FStoreMoneyActivity TodaysStoreMoneyActivity;  // * Money spent, money made.
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  FCachedDetails CachedDetails;
+
   void ItemDeal(const FItemDeal ItemDeal);
   void StoreMoneyGained(float Amount);
   void StoreMoneySpent(float Amount);
 
   auto CalcTodaysStoreProfit() const -> float;
-  auto CalcNetWorth() const -> float;
+  auto CalcNetWorth() -> float;
 
   void ItemPriceChange(const FName ItemId, const float NewPrice);
   void PopChange(const FName PopId, float NewPopulation, float NewGoodsBoughtPerCapita);

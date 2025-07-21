@@ -212,6 +212,7 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->SaveManager = SaveManager;
   MarketLevel->GlobalDataManager = GlobalDataManager;
   MarketLevel->GlobalStaticDataManager = GlobalStaticDataManager;
+  MarketLevel->StatisticsGen = StatisticsGen;
   MarketLevel->QuestManager = QuestManager;
   MarketLevel->MiniGameManager = MiniGameManager;
   MarketLevel->Market = Market;

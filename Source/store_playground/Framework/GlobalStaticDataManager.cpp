@@ -261,7 +261,7 @@ TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleGeneralArticles(
   const auto GameDataMap = GlobalDataManager->GetGameDataMap();
   return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
     return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) && !Article.bIsSpecial &&
-           EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
+           !Article.bIsTriggered && EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
   });
 }
 TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleSpecialArticles(
@@ -271,7 +271,8 @@ TArray<struct FArticle> AGlobalStaticDataManager::GetEligibleSpecialArticles(
 
   return ArticlesArray.FilterByPredicate([&](const FArticle& Article) {
     return (Article.bIsRepeatable || !PublishedArticles.Contains(Article.ArticleID)) && Article.bIsSpecial &&
-           Article.Tags.HasAny(AnyTagsContainer) && EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
+           !Article.bIsTriggered && Article.Tags.HasAny(AnyTagsContainer) &&
+           EvaluateRequirementsFilter(Article.RequirementsFilter, GameDataMap);
   });
 }
 FArticle AGlobalStaticDataManager::GetArticle(const FName& ArticleID) const {
@@ -494,6 +495,7 @@ void AGlobalStaticDataManager::InitializeMarketData() {
         Row->ItemWealthTypes,
         Row->ItemTypes,
         Row->PriceMultiPercent,
+        Row->DurationType,
         Row->Duration,
         Row->PriceMultiPercentFalloff,
     });
@@ -506,6 +508,7 @@ void AGlobalStaticDataManager::InitializeMarketData() {
         Row->PopTypes,
         Row->PopWealthTypes,
         Row->PopChangeMulti,
+        Row->DurationType,
         Row->Duration,
         Row->PopChangeMultiFalloff,
     });
@@ -526,6 +529,7 @@ void AGlobalStaticDataManager::InitializeNewsData() {
         Row->AppearWeight,
         Row->bIsRepeatable,
         Row->bIsSpecial,
+        Row->bIsTriggered,
         Row->Size,
         Row->TextData,
         Row->AssetData,

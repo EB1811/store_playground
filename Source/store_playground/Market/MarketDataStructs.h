@@ -235,6 +235,12 @@ struct FNpcStoreTypeRow : public FTableRowBase {
   FNpcStoreAssetData AssetData;
 };
 
+UENUM()
+enum class EEffectDurationType : uint8 {
+  Permanent UMETA(DisplayName = "Permanent"),  // * Effect lasts until removed.
+  Temporary UMETA(DisplayName = "Temporary"),  // * Effect lasts for a set duration
+};
+
 // * Economic events.
 USTRUCT()
 struct FPriceEffect {
@@ -253,6 +259,8 @@ struct FPriceEffect {
   UPROPERTY(EditAnywhere, SaveGame)
   float PriceMultiPercent;  // * Positive and negative, additive.
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere, SaveGame)
   int32 DurationLeft;  // * Duration in days.
   UPROPERTY(EditAnywhere, SaveGame)
@@ -275,6 +283,8 @@ struct FPriceEffectRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   float PriceMultiPercent;  // * Positive and negative, additive.
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere)
   int32 Duration;  // * Duration in days.
   UPROPERTY(EditAnywhere)
@@ -297,6 +307,8 @@ struct FPopEffect {
   float PopChangeMulti;  // * Chance to change pop.
 
   UPROPERTY(EditAnywhere, SaveGame)
+  EEffectDurationType DurationType;
+  UPROPERTY(EditAnywhere, SaveGame)
   int32 DurationLeft;  // * Duration in days.
   UPROPERTY(EditAnywhere, SaveGame)
   float PopChangeMultiFalloff;  // * Falloff each day, if any.
@@ -316,6 +328,8 @@ struct FPopEffectRow : public FTableRowBase {
   UPROPERTY(EditAnywhere, SaveGame)
   float PopChangeMulti;  // * Chance to change pop.
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere, SaveGame)
   int32 Duration;  // * Duration in days.
   UPROPERTY(EditAnywhere, SaveGame)

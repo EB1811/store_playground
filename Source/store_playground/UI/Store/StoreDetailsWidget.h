@@ -34,14 +34,14 @@ public:
   UPROPERTY(EditAnywhere)
   const class AMarket* Market;
   UPROPERTY(EditAnywhere)
-  const class AStatisticsGen* StatisticsGen;
-  UPROPERTY(EditAnywhere)
   const class AUpgradeManager* UpgradeManager;
   UPROPERTY(EditAnywhere)
   const class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere)
   const class UInventoryComponent* PlayerInventoryC;
 
+  UPROPERTY(EditAnywhere)
+  class AStatisticsGen* StatisticsGen;
   UPROPERTY(EditAnywhere)
   class AStore* Store;
 
@@ -50,9 +50,9 @@ public:
               const class AStorePhaseManager* _StorePhaseManager,
               const class AMarketEconomy* _MarketEconomy,
               const class AMarket* _Market,
-              const class AStatisticsGen* _StatisticsGen,
               const class AUpgradeManager* _UpgradeManager,
               const class AAbilityManager* _AbilityManager,
               const class UInventoryComponent* _PlayerInventoryC,
+              class AStatisticsGen* _StatisticsGen,
               class AStore* _Store);
 };

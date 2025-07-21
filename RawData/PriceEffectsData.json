@@ -12,7 +12,8 @@
 			"Consumable"
 		],
 		"PriceMultiPercent": 100,
-		"Duration": 1,
+		"DurationType": "Temporary",
+    "Duration": 1,
 		"PriceMultiPercentFalloff": 10
 	},
 	{
@@ -28,7 +29,90 @@
 			"Consumable"
 		],
 		"PriceMultiPercent": -20,
+		"DurationType": "Temporary",
 		"Duration": 1,
 		"PriceMultiPercentFalloff": 10
-	}
+	},
+	{
+		"Name": "magic_essmid_smallrise_1",
+		"ID": "magic_essmid_smallrise_1",
+		"ItemEconTypes": [
+			"Magic"
+		],
+		"ItemWealthTypes": [
+			"Essential",
+      "Mid"
+		],
+		"ItemTypes": [
+			"Jewellery",
+      "Clothing",
+      "Consumable",
+      "Objects"
+		],
+		"PriceMultiPercent": 10,
+		"DurationType": "Temporary",
+		"Duration": 4,
+		"PriceMultiPercentFalloff": 10
+	},
+	{
+		"Name": "magic_essmid_massiverise_1",
+		"ID": "magic_essmid_massiverise_1",
+		"ItemEconTypes": [
+			"Magic"
+		],
+		"ItemWealthTypes": [
+			"Essential",
+      "Mid"
+		],
+		"ItemTypes": [
+      "Jewellery",
+      "Clothing",
+      "Consumable",
+			"Valuables",
+      "Objects",
+      "Financial"
+		],
+		"PriceMultiPercent": 80,
+		"DurationType": "Permanent",
+		"Duration": -1,
+		"PriceMultiPercentFalloff": 0
+	},
+  {
+    "Name": "magic_essmid_weapon_midrise_1",
+    "ID": "magic_essmid_weapon_midrise_1",
+    "ItemEconTypes": [
+      "Magic"
+    ],
+    "ItemWealthTypes": [
+      "Essential",
+      "Mid"
+    ],
+    "ItemTypes": [
+      "Weapon",
+      "Armor"
+    ],
+    "PriceMultiPercent": 30,
+		"DurationType": "Temporary",
+    "Duration": 10,
+    "PriceMultiPercentFalloff": 10
+  },
+  {
+    "Name": "adventurer_essmid_weapon_midrise_1",
+    "ID": "adventurer_essmid_weapon_midrise_1",
+    "ItemEconTypes": [
+      "Adventurer"
+    ],
+    "ItemWealthTypes": [
+      "Essential",
+      "Mid"
+    ],
+    "ItemTypes": [
+      "Weapon",
+      "Armor"
+    ],
+    "PriceMultiPercent": 30,
+		"DurationType": "Temporary",
+    "Duration": 10,
+    "PriceMultiPercentFalloff": 10
+  }
 ]

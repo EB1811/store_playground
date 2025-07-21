@@ -58,6 +58,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "Market Level")
+  const class AStatisticsGen* StatisticsGen;
+  UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   const class AMarketEconomy* MarketEconomy;

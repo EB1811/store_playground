@@ -3,12 +3,12 @@
 		"Name": "cp",
 		"PopType": "Common",
 		"WealthType": "Poorer",
-		"MGen": 100,
-		"MSharePercent": 15,
+		"MGen": 150,
+		"MSharePercent": 1,
 		"ItemSpendPercent":
 		{
-			"Essential": 70,
-			"Mid": 25,
+			"Essential": 75,
+			"Mid": 20,
 			"Luxury": 5
 		},
 		"ItemNeeds":
@@ -23,64 +23,83 @@
 		"PopType": "Common",
 		"WealthType": "Middle",
 		"MGen": 150,
-		"MSharePercent": 20,
+		"MSharePercent": 4,
 		"ItemSpendPercent":
 		{
-			"Essential": 50,
-			"Mid": 40,
+			"Essential": 60,
+			"Mid": 30,
 			"Luxury": 10
 		},
 		"ItemNeeds":
 		{
-			"Essential": 20,
+			"Essential": 30,
 			"Mid": 30,
-			"Luxury": 40
+			"Luxury": 30
 		}
 	},
 	{
-		"Name": "nm",
-		"PopType": "Nobility",
-		"WealthType": "Middle",
-		"MGen": 50,
-		"MSharePercent": 20,
+		"Name": "cu",
+		"PopType": "Common",
+		"WealthType": "Upper",
+		"MGen": 150,
+		"MSharePercent": 7,
 		"ItemSpendPercent":
 		{
-			"Essential": 10,
-			"Mid": 35,
-			"Luxury": 55
+			"Essential": 40,
+			"Mid": 45,
+			"Luxury": 15
 		},
 		"ItemNeeds":
 		{
-			"Essential": 20,
-			"Mid": 20,
-			"Luxury": 70
+			"Essential": 40,
+			"Mid": 40,
+			"Luxury": 40
 		}
 	},
 	{
 		"Name": "ap",
 		"PopType": "Adventurer",
 		"WealthType": "Poorer",
-		"MGen": 150,
-		"MSharePercent": 5,
+		"MGen": 100,
+		"MSharePercent": 1.5,
 		"ItemSpendPercent":
 		{
-			"Essential": 50,
-			"Mid": 50,
+			"Essential": 75,
+			"Mid": 25,
 			"Luxury": 0
 		},
 		"ItemNeeds":
 		{
-			"Essential": 10,
-			"Mid": 15,
-			"Luxury": 10
+			"Essential": 20,
+			"Mid": 20,
+			"Luxury": 20
 		}
 	},
 	{
-		"Name": "nu",
-		"PopType": "Nobility",
+		"Name": "am",
+		"PopType": "Adventurer",
+		"WealthType": "Middle",
+		"MGen": 200,
+		"MSharePercent": 6,
+		"ItemSpendPercent":
+		{
+			"Essential": 50,
+			"Mid": 49,
+			"Luxury": 1
+		},
+		"ItemNeeds":
+		{
+			"Essential": 20,
+			"Mid": 20,
+			"Luxury": 80
+		}
+	},
+	{
+		"Name": "au",
+		"PopType": "Adventurer",
 		"WealthType": "Upper",
-		"MGen": 100,
-		"MSharePercent": 30,
+		"MGen": 300,
+		"MSharePercent": 12,
 		"ItemSpendPercent":
 		{
 			"Essential": 5,
@@ -89,28 +108,142 @@
 		},
 		"ItemNeeds":
 		{
-			"Essential": 20,
-			"Mid": 30,
+			"Essential": 40,
+			"Mid": 20,
+			"Luxury": 80
+		}
+	},
+	{
+		"Name": "np",
+		"PopType": "Nobility",
+		"WealthType": "Poorer",
+		"MGen": 140,
+		"MSharePercent": 3,
+		"ItemSpendPercent":
+		{
+			"Essential": 30,
+			"Mid": 20,
+			"Luxury": 60
+		},
+		"ItemNeeds":
+		{
+			"Essential": 40,
+			"Mid": 20,
 			"Luxury": 100
+		}
+	},
+	{
+		"Name": "nm",
+		"PopType": "Nobility",
+		"WealthType": "Middle",
+		"MGen": 20,
+		"MSharePercent": 8,
+		"ItemSpendPercent":
+		{
+			"Essential": 5,
+			"Mid": 20,
+			"Luxury": 75
+		},
+		"ItemNeeds":
+		{
+			"Essential": 40,
+			"Mid": 40,
+			"Luxury": 200
+		}
+	},
+	{
+		"Name": "nu",
+		"PopType": "Nobility",
+		"WealthType": "Upper",
+		"MGen": 40,
+		"MSharePercent": 20,
+		"ItemSpendPercent":
+		{
+			"Essential": 30,
+			"Mid": 30,
+			"Luxury": 40
+		},
+		"ItemNeeds":
+		{
+			"Essential": 50,
+			"Mid": 50,
+			"Luxury": 100
+		}
+	},
+	{
+		"Name": "mp",
+		"PopType": "Mystic",
+		"WealthType": "Poorer",
+		"MGen": 50,
+		"MSharePercent": 2,
+		"ItemSpendPercent":
+		{
+			"Essential": 25,
+			"Mid": 50,
+			"Luxury": 25
+		},
+		"ItemNeeds":
+		{
+			"Essential": 50,
+			"Mid": 20,
+			"Luxury": 20
 		}
 	},
 	{
 		"Name": "mm",
 		"PopType": "Mystic",
 		"WealthType": "Middle",
-		"MGen": 100,
-		"MSharePercent": 30,
+		"MGen": 200,
+		"MSharePercent": 6.5,
 		"ItemSpendPercent":
 		{
-			"Essential": 5,
-			"Mid": 90,
-			"Luxury": 5
+			"Essential": 20,
+			"Mid": 60,
+			"Luxury": 20
 		},
 		"ItemNeeds":
 		{
-			"Essential": 10,
-			"Mid": 25,
-			"Luxury": 15
+			"Essential": 20,
+			"Mid": 50,
+			"Luxury": 100
+		}
+	},
+	{
+		"Name": "mu",
+		"PopType": "Mystic",
+		"WealthType": "Upper",
+		"MGen": 400,
+		"MSharePercent": 13,
+		"ItemSpendPercent":
+		{
+			"Essential": 1,
+			"Mid": 59,
+			"Luxury": 40
+		},
+		"ItemNeeds":
+		{
+			"Essential": 1,
+			"Mid": 100,
+			"Luxury": 100
+		}
+	},
+	{
+		"Name": "crp",
+		"PopType": "Criminal",
+		"WealthType": "Poorer",
+		"MGen": 25,
+		"MSharePercent": 0.5,
+		"ItemSpendPercent":
+		{
+			"Essential": 98,
+			"Mid": 1,
+			"Luxury": 1
+		},
+		"ItemNeeds":
+		{
+			"Essential": 20,
+			"Mid": 20,
+			"Luxury": 20
 		}
 	},
 	{
@@ -118,18 +251,37 @@
 		"PopType": "Criminal",
 		"WealthType": "Middle",
 		"MGen": 100,
-		"MSharePercent": 30,
+		"MSharePercent": 5.5,
 		"ItemSpendPercent":
 		{
-			"Essential": 50,
-			"Mid": 5,
-			"Luxury": 45
+			"Essential": 1,
+			"Mid": 98,
+			"Luxury": 1
 		},
 		"ItemNeeds":
 		{
-			"Essential": 10,
-			"Mid": 25,
-			"Luxury": 15
+			"Essential": 30,
+			"Mid": 30,
+			"Luxury": 30
+		}
+	},
+	{
+		"Name": "cru",
+		"PopType": "Criminal",
+		"WealthType": "Upper",
+		"MGen": 175,
+		"MSharePercent": 10,
+		"ItemSpendPercent":
+		{
+			"Essential": 1,
+			"Mid": 1,
+			"Luxury": 98
+		},
+		"ItemNeeds":
+		{
+			"Essential": 1,
+			"Mid": 40,
+			"Luxury": 40
 		}
 	}
 ]

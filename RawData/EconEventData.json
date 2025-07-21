@@ -78,5 +78,91 @@
 				}
 			]
 		}
+	},
+	{
+		"Name": "geopol_civil_war_1",
+		"ID": "geopol_civil_war_1",
+		"Severity": "Major",
+		"bIsUnlockable": false,
+		"RequirementsFilter": "None",
+		"StartChance": 10,
+		"bIsRepeatable": false,
+		"PriceEffectIDs": [
+			"magic_essmid_smallrise_1"
+		],
+		"PopEffectIDs": [],
+		"ArticleID": "geopol_civilwar_1",
+		"TextData":
+		{
+			"Name": "NSLOCTEXT(\"DT_EconEventData [DF380E8B592F112ADB386F3ACE720496]\", \"geopol_civil_war_1_TextData_Name\", \"Tension in Ocrela Federation\")",
+			"Description": "NSLOCTEXT(\"DT_EconEventData [DF380E8B592F112ADB386F3ACE720496]\", \"geopol_civil_war_1_TextData_Description\", \"Tension in Ocrela Federation\")"
+		},
+		"AssetData":
+		{
+			"Icon": "/Script/Engine.Texture2D'/Engine/EditorMaterials/Cascade/CASC_Normal.CASC_Normal'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Negative"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
+	},
+	{
+		"Name": "geopol_civil_war_2",
+		"ID": "geopol_civil_war_2",
+		"Severity": "Catastrophic",
+		"bIsUnlockable": false,
+		"RequirementsFilter": "contains(RecentEconEvents, geopol_civil_war_1)",
+		"StartChance": 25,
+		"bIsRepeatable": false,
+		"PriceEffectIDs": [
+			"magic_essmid_massiverise_1",
+			"magic_essmid_weapon_midrise_1",
+			"adventurer_essmid_weapon_midrise_1"
+		],
+		"PopEffectIDs": [],
+		"ArticleID": "geopol_civilwar_2",
+		"TextData":
+		{
+			"Name": "NSLOCTEXT(\"DT_EconEventData [DF380E8B592F112ADB386F3ACE720496]\", \"geopol_civil_war_2_TextData_Name\", \"OCRELA FEDERATION FACES CIVIL WAR\")",
+			"Description": "NSLOCTEXT(\"DT_EconEventData [DF380E8B592F112ADB386F3ACE720496]\", \"geopol_civil_war_2_TextData_Description\", \"OCRELA FEDERATION FACES CIVIL WAR\")"
+		},
+		"AssetData":
+		{
+			"Icon": "/Script/Engine.Texture2D'/Engine/EditorMaterials/Cascade/CASC_Normal.CASC_Normal'"
+		},
+		"Tags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Event.Considered.Negative.Severity.High"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Event.Considered.Negative.Severity"
+				},
+				{
+					"TagName": "Event.Considered.Negative"
+				},
+				{
+					"TagName": "Event.Considered"
+				},
+				{
+					"TagName": "Event"
+				}
+			]
+		}
 	}
 ]

@@ -444,8 +444,8 @@ void ASpgHUD::SetAndOpenStoreView(const UInventoryComponent* PlayerInventory) {
   check(StoreViewWidget);
   if (OpenedWidgets.Contains(StoreViewWidget)) return CloseWidget(StoreViewWidget);
 
-  StoreViewWidget->InitUI(InUIInputActions, DayManager, StorePhaseManager, MarketEconomy, Market, StatisticsGen,
-                          UpgradeManager, AbilityManager, PlayerInventory, Store, StoreExpansionManager,
+  StoreViewWidget->InitUI(InUIInputActions, DayManager, StorePhaseManager, MarketEconomy, Market, UpgradeManager,
+                          AbilityManager, PlayerInventory, StatisticsGen, Store, StoreExpansionManager,
                           [this] { CloseWidget(StoreViewWidget); });
   StoreViewWidget->RefreshUI();
 
