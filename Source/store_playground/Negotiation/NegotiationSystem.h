@@ -8,6 +8,8 @@
 #include "store_playground/AI/CustomerDataStructs.h"
 #include "NegotiationSystem.generated.h"
 
+// TODO: Call customer ai manager rather that customerai.
+
 UENUM()
 enum class Negotiator : uint8 {
   Player,

@@ -66,6 +66,21 @@ inline void SetStructPropertyValue(FStructProperty* StructProp,
     *PropValuePtr = static_cast<int32>(FMath::Max(*PropValuePtr, 1) * PropValue);
   }
 }
+inline void AddToStructPropertyValue(FStructProperty* StructProp,
+                                     void* StructPtr,
+                                     const FName& PropName,
+                                     float PropValue) {
+  auto Prop = StructProp->Struct->FindPropertyByName(PropName);
+  check(Prop);
+
+  if (Prop->IsA<FFloatProperty>()) {
+    float* PropValuePtr = Prop->ContainerPtrToValuePtr<float>(StructPtr);
+    *PropValuePtr += PropValue;
+  } else if (Prop->IsA<FIntProperty>()) {
+    int32* PropValuePtr = Prop->ContainerPtrToValuePtr<int32>(StructPtr);
+    *PropValuePtr += static_cast<int32>(PropValue);
+  }
+}
 
 inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
   TArray<FGameplayTag> TagsArray;

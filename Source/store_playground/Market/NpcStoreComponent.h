@@ -24,4 +24,7 @@ public:
 
   UPROPERTY(EditAnywhere, SaveGame)
   FNpcStoreType NpcStoreType;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<FName, float> StockItemMarkups;  // * From NpcStoreType base markups + randomization.
 };

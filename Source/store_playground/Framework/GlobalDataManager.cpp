@@ -296,6 +296,7 @@ void AGlobalDataManager::InitializeNpcStoreData() {
         Row->StoreSpawnWeight,
         Row->StockCountRange,
         Row->StoreMarkup,
+        Row->StoreMarkupVariation,
         Row->ItemTypeWeightMap,
         Row->ItemEconTypeWeightMap,
         Row->DisplayName,

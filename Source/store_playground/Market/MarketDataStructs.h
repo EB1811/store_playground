@@ -196,6 +196,8 @@ struct FNpcStoreType {
 
   UPROPERTY(EditAnywhere)
   float StoreMarkup;
+  UPROPERTY(EditAnywhere)
+  float StoreMarkupVariation;  // * Randomized markup for each item above and beyond the base markup.
 
   UPROPERTY(EditAnywhere)
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.
@@ -223,6 +225,8 @@ struct FNpcStoreTypeRow : public FTableRowBase {
 
   UPROPERTY(EditAnywhere)
   float StoreMarkup;
+  UPROPERTY(EditAnywhere)
+  float StoreMarkupVariation;  // * Randomized markup for each item above and beyond the base markup.
 
   UPROPERTY(EditAnywhere)
   TMap<EItemType, float> ItemTypeWeightMap;  // * Item types sold, weighted.

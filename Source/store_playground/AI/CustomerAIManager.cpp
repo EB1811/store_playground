@@ -43,7 +43,6 @@ ACustomerAIManager::ACustomerAIManager() {
   ManagerParams.RecentNpcSpawnedKeepTime = 2.0f;
   ManagerParams.UNpcMaxSpawnPerDay = 1;
   ManagerParams.PickItemFrequency = 5.0f;
-  ManagerParams.MaxCustomersPickingAtOnce = 2;
 
   BehaviorParams.MaxCustomers = 1;
   BehaviorParams.CustomerSpawnChance = 50.0f;
@@ -130,7 +129,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
   // ? Use a random dialogue component type?
   UniqueCustomer->DialogueComponent->DialogueArray =
-      GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
+      GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs, {"Level.Store"});
 
   UniqueCustomer->CustomerAIComponent->CustomerName = UniqueNpcData.NpcName;
   UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
@@ -282,7 +281,6 @@ void ACustomerAIManager::SpawnCustomers() {
 }
 
 void ACustomerAIManager::PerformCustomerAILoop() {
-  check(Store);
   LastPickItemCheckTime = GetWorld()->GetTimeSeconds();
 
   UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
@@ -292,14 +290,12 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   for (ACustomer* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
-        if (PickingItemIdsMap.Num() < ManagerParams.MaxCustomersPickingAtOnce) {
-          if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
-            CustomerPerformAction(Customer);
-            break;
-          }
+        if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
+          CustomerPerformAction(Customer);
+          break;
         }
 
-        MoveCustomerRandom(NavSystem, Customer);
+        if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
         break;
       }
       case (ECustomerState::BrowsingTalking): {
@@ -313,14 +309,15 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         }
         break;
       }
+      case (ECustomerState::PerformingQuest): {
+        if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
+        break;
+      }
       case (ECustomerState::Negotiating): {
         break;
       }
       case (ECustomerState::Leaving): {
         CustomersToExit.Add(Customer);
-        break;
-      }
-      case (ECustomerState::PerformingQuest): {
         break;
       }
       default: checkNoEntry();
@@ -636,7 +633,7 @@ void ACustomerAIManager::ChangeBehaviorParam(const TMap<FName, float>& ParamValu
   for (const auto& ParamPair : ParamValues) {
     auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
     auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
-    SetStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+    AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }
 

@@ -31,8 +31,6 @@ struct FCustomerAIManagerParams {
 
   UPROPERTY(EditAnywhere)
   float PickItemFrequency;
-  UPROPERTY(EditAnywhere)
-  int32 MaxCustomersPickingAtOnce;
 
   UPROPERTY(EditAnywhere)
   TMap<ECustomerAttitude, float> AttitudeBaseAcceptMinMap;

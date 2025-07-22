@@ -342,6 +342,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     FNpcStoreType NpcStoreType = GetWeightedRandomItem<FNpcStoreType>(
         GlobalDataManager->NpcStoreTypesArray, [](const auto& StoreType) { return StoreType.StoreSpawnWeight; });
     MobileNPCStore->NpcStoreComponent->NpcStoreType = NpcStoreType;
+    MobileNPCStore->NpcStoreComponent->StockItemMarkups.Empty();
 
     MobileNPCStore->Mesh->SetStaticMesh(NpcStoreType.AssetData.Mesh);
     MobileNPCStore->Sprite->SetFlipbook(NpcStoreType.AssetData.Sprites[ESimpleSpriteDirection::Down]);
@@ -355,6 +356,7 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* NPCStore : FoundStores) {
+    NPCStore->NpcStoreComponent->StockItemMarkups.Empty();
     NPCStore->InventoryComponent->ItemsArray.Empty();
     NPCStore->DialogueComponent->DialogueArray.Empty();
 
@@ -408,19 +410,32 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
       if (!PossibleItemIdsMap.Contains(Pair.Key)) continue;
 
       TArray<FName> ItemIds = PossibleItemIdsMap[Pair.Key];
-      for (int32 i = 0; i < Pair.Value; i++)
-        InventoryC->AddItem(Market->GetRandomItemWeighted(ItemIds, [this, PlayerNetWorth](const UItemBase* Item) {
-          return 1;  // temp
-          // float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
-          // Higher difference means lower weight.
-          // return int32(
-          //     FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - PlayerNetWorth) + 1.0f) / PlayerNetWorth), 0.1f, 1.0f) *
-          //     100.0f);
-        }));
+      for (int32 i = 0; i < Pair.Value; i++) {
+        const auto* RandItem =
+            Market->GetRandomItemWeighted(ItemIds, [this, InventoryC, PlayerNetWorth](const UItemBase* Item) {
+              if (InventoryC->ItemsArray.Contains(Item)) return 1;
+
+              float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
+              // Higher difference from wealth means lower weight.
+              return int32(FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - PlayerNetWorth) + 1.0f) / PlayerNetWorth),
+                                        0.1f, 1.0f) *
+                           100.0f);
+            });
+        InventoryC->AddItem(RandItem);
+      }
 
       UE_LOG(LogTemp, Log, TEXT("NpcStore %s has %d items for type %s and econ type %s"),
              *NpcStoreC->NpcStoreType.DisplayName.ToString(), ItemIds.Num(), *UEnum::GetValueAsString(Pair.Key.Key),
              *UEnum::GetValueAsString(Pair.Key.Value));
+    }
+
+    // Calc random markups.
+    for (const auto& Item : InventoryC->ItemsArray) {
+      float RandomMarkup = FMath::Max(
+          NpcStoreC->NpcStoreType.StoreMarkup + FMath::FRandRange(-NpcStoreC->NpcStoreType.StoreMarkupVariation,
+                                                                  NpcStoreC->NpcStoreType.StoreMarkupVariation),
+          0.0f);
+      NpcStoreC->StockItemMarkups.Add(Item->ItemID, RandomMarkup);
     }
   }
 }
@@ -537,12 +552,12 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
 
   UniqueNpc->SimpleSpriteAnimComponent->IdleSprites = UniqueNpcData.AssetData.IdleSprites;
   UniqueNpc->SimpleSpriteAnimComponent->WalkSprites = UniqueNpcData.AssetData.WalkSprites;
-
   UniqueNpc->SimpleSpriteAnimComponent->Idle(static_cast<ESimpleSpriteDirection>(FMath::RandRange(0, 3)));
 
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::NPCDialogue;
+  UniqueNpc->DialogueComponent->SpeakerName = UniqueNpcData.NpcName;
   UniqueNpc->DialogueComponent->DialogueArray =
-      GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs);
+      GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs, {"Level.Market"});
 
   // Quest override.
   auto MarketQuestChains =
@@ -559,7 +574,6 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
   UniqueNpc->QuestComponent->CustomerAction = RandomQuestChainData.CustomerAction;
   UniqueNpc->QuestComponent->QuestOutcomeType = RandomQuestChainData.QuestOutcomeType;
   UniqueNpc->InteractionComponent->InteractionType = EInteractionType::UniqueNPCQuest;
-  UniqueNpc->DialogueComponent->SpeakerName = UniqueNpcData.NpcName;
   UniqueNpc->DialogueComponent->DialogueArray =
       GlobalStaticDataManager->GetQuestDialogue(RandomQuestChainData.DialogueChainID);
 

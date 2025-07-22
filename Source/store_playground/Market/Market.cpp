@@ -119,8 +119,9 @@ auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, co
       [ItemID](const FEconItem& EconItem) { return EconItem.ItemID == ItemID; });
   check(EconItem);
 
-  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
-  float TotalPrice = EconItem->CurrentPrice * (1.0f + StoreMarkup);
+  float ItemMarkup = NpcStoreC->StockItemMarkups.Contains(ItemID) ? NpcStoreC->StockItemMarkups[ItemID]
+                                                                  : NpcStoreC->NpcStoreType.StoreMarkup;
+  float TotalPrice = EconItem->CurrentPrice * (1.0f + ItemMarkup * BehaviorParams.StoreMarkupMulti);
   return TotalPrice;
 }
 auto AMarket::GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float {
@@ -130,8 +131,9 @@ auto AMarket::GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, con
       [ItemID](const FEconItem& EconItem) { return EconItem.ItemID == ItemID; });
   check(EconItem);
 
-  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
-  float TotalPrice = EconItem->CurrentPrice * (1.0f - StoreMarkup);
+  float ItemMarkup = NpcStoreC->StockItemMarkups.Contains(ItemID) ? NpcStoreC->StockItemMarkups[ItemID]
+                                                                  : NpcStoreC->NpcStoreType.StoreMarkup;
+  float TotalPrice = EconItem->CurrentPrice * (1.0f - ItemMarkup * BehaviorParams.StoreMarkupMulti);
   return TotalPrice;
 }
 
@@ -242,7 +244,7 @@ void AMarket::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
   for (const auto& ParamPair : ParamValues) {
     auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
     auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
-    SetStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+    AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }
 

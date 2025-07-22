@@ -173,6 +173,7 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetQuestDialogue(const FN
   check(QuestDialoguesMap.Contains(DialogueChainID));
   return QuestDialoguesMap[DialogueChainID].Dialogues;
 }
+
 TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomPlayerMiscDialogue(
     const TArray<FName>& DialogueTags) const {
   const auto TagsContainer = StringTagsToContainer(DialogueTags);
@@ -181,12 +182,24 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomPlayerMiscDialog
       [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAll(TagsContainer); });
   return GetRandomDialogue(Filtered);
 }
-TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcDialogue(
-    const TArray<FName>& DialogueChainIDs) const {
-  FName RandomDialogueChainID = DialogueChainIDs[FMath::RandRange(0, DialogueChainIDs.Num() - 1)];
 
+TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs,
+                                                                            const TArray<FName>& DialogueTags) const {
+  const auto TagsContainer = StringTagsToContainer(DialogueTags);
+  TArray<FName> FilteredIds = DialogueChainIDs.FilterByPredicate([this, TagsContainer](const FName& DialogueId) {
+    return UniqueNpcDialoguesMap[DialogueId]
+               .Dialogues
+               .FilterByPredicate(
+                   [&](const FDialogueData& Dialogue) { return Dialogue.DialogueTags.HasAll(TagsContainer); })
+               .Num() > 0;
+  });
+  check(FilteredIds.Num() > 0);
+
+  FName RandomDialogueChainID =
+      FilteredIds.Num() == 1 ? FilteredIds[0] : FilteredIds[FMath::RandRange(0, FilteredIds.Num() - 1)];
   return UniqueNpcDialoguesMap[RandomDialogueChainID].Dialogues;
 }
+
 TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomCustomerDialogue(
     std::function<bool(const FDialogueData& Dialogue)> FilterFunc) const {
   TArray<FDialogueData> Filtered =

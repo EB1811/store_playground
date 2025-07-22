@@ -152,7 +152,7 @@ struct FNegotiationSkillRow : public FTableRowBase {
 // ! Currently 3 different ways to keep track of unlocked ids.
 UENUM()
 enum class EUpgradeEffectType : uint8 {
-  ChangeBehaviorParam UMETA(DisplayName = "ChangeBehaviorParam"),  // * Changes a parameter value.
+  ChangeBehaviorParam UMETA(DisplayName = "ChangeBehaviorParam"),  // * Changes a parameter value. + or -.
   ChangeData UMETA(DisplayName = "ChangeData"),                    // * Changes a parameter value in data manager.
   UnlockIDs UMETA(DisplayName = "UnlockIDs"),                      // * Function to unlock ids.
   FeatureUnlock UMETA(DisplayName = "FeatureUnlock"),              // * Unlocks a feature.

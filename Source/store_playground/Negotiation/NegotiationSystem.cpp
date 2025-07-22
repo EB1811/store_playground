@@ -65,8 +65,6 @@ ENegotiationState UNegotiationSystem::GetNextNegotiationState(ENegotiationState 
 }
 
 auto UNegotiationSystem::AddVarsToDialogueText(const FText& DialogueText) -> FText {
-  UE_LOG(LogTemp, Warning, TEXT("Adding vars to dialogue text: %s"), *DialogueText.ToString());
-  UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetDisplayValueAsText(NegDialogueVars::WantedItemType).ToString());
   FString NewDialogue = DialogueText.ToString();
   NewDialogue = NewDialogue.Replace(
       *FString::Printf(TEXT("{%s}"), *UEnum::GetDisplayValueAsText(NegDialogueVars::WantedItemType).ToString()),
@@ -74,7 +72,6 @@ auto UNegotiationSystem::AddVarsToDialogueText(const FText& DialogueText) -> FTe
   NewDialogue =
       NewDialogue.Replace(*FString::Printf(TEXT("{%s}"), *UEnum::GetValueAsString(NegDialogueVars::ItemPrice)),
                           *FString::Printf(TEXT("%.0f¬"), MarketPrice));
-  UE_LOG(LogTemp, Warning, TEXT("Added vars to dialogue text: %s"), *NewDialogue);
 
   return FText::FromString(*NewDialogue);
 }
@@ -213,7 +210,6 @@ void UNegotiationSystem::RejectOffer() {
   if (NegotiationState == ENegotiationState::Rejected) NegotiationFailure();
 }
 
-// Note: Move to actual object (player, npc) if fine grain functionality needed.
 void UNegotiationSystem::NegotiationSuccess() {
   if (Type == NegotiationType::PlayerSell) {
     check(FromInventory);

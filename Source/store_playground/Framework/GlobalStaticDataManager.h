@@ -135,7 +135,8 @@ public:
 
   TArray<struct FDialogueData> GetQuestDialogue(const FName& DialogueChainID) const;
   TArray<struct FDialogueData> GetRandomPlayerMiscDialogue(const TArray<FName>& DialogueTags) const;
-  TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs) const;
+  TArray<struct FDialogueData> GetRandomNpcDialogue(const TArray<FName>& DialogueChainIDs,
+                                                    const TArray<FName>& DialogueTags) const;
   TArray<struct FDialogueData> GetRandomCustomerDialogue(
       std::function<bool(const FDialogueData& Dialogue)> FilterFunc = nullptr) const;
   TArray<struct FDialogueData> GetRandomMarketNpcDialogues(

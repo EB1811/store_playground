@@ -21,7 +21,7 @@ inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconD
   for (auto& Pop : PopEconDataArray) TotalGoodsBoughtPerCapita += Pop.GoodsBoughtPerCapita;
 
   float GivenPopGoodsBoughtPercentage = GivenPop.GoodsBoughtPerCapita / TotalGoodsBoughtPerCapita * 100.0f;
-  UE_LOG(LogTemp, Verbose, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
+  UE_LOG(LogTemp, Log, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
          GivenPopGoodsBoughtPercentage);
 
   if (GivenPopGoodsBoughtPercentage <= 0.0f) return "None";
