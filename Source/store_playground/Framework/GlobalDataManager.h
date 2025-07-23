@@ -19,9 +19,10 @@ enum class EReqFilterOperand : uint8 {
   QuestsCompleted UMETA(DisplayName = "QuestsCompleted"),          // * Using quest ids.
   MadeDialogueChoices UMETA(DisplayName = "MadeDialogueChoices"),  // * Using dialogue chain ids.
   RecentEconEvents UMETA(DisplayName = "RecentEconEvents"),        // * Using econ event ids.
-  NewsArticles UMETA(DisplayName = "NewsArticles"),                // * Using article ids.
+  PublishedArticles UMETA(DisplayName = "PublishedArticles"),      // * Using article ids.
+  SelectedUpgradeIDs UMETA(DisplayName = "SelectedUpgradeIDs"),    // * Using upgrade ids.
 };
-ENUM_RANGE_BY_COUNT(EReqFilterOperand, 7);
+ENUM_RANGE_BY_COUNT(EReqFilterOperand, 8);
 
 bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags, const class UTagsComponent* PlayerTagsC);
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap);
@@ -39,6 +40,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class APlayerZDCharacter* PlayerCharacter;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
+  const class AUpgradeManager* UpgradeManager;
+  UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class ADayManager* DayManager;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class AStore* Store;
@@ -46,6 +49,8 @@ public:
   const class AQuestManager* QuestManager;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class AMarket* Market;
+  UPROPERTY(EditAnywhere, Category = "GameDataMap")
+  const class ANewsGen* NewsGen;
   // todo-low: Allow getting only specific operands.
   const TMap<EReqFilterOperand, std::any> GetGameDataMap() const;
 

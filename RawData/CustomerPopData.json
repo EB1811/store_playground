@@ -188,7 +188,7 @@
 		"Name": "np1",
 		"ID": "np1",
 		"PopName": "Bard",
-		"InitPopulation": 210,
+		"InitPopulation": 170,
 		"PopType": "Nobility",
 		"WealthType": "Poorer",
 		"ItemEconTypes": [
@@ -202,10 +202,10 @@
 	{
 		"Name": "nm1",
 		"ID": "nm1",
-		"PopName": "Knight",
+		"PopName": "Royal Guard",
 		"InitPopulation": 80,
 		"PopType": "Nobility",
-		"WealthType": "Middle",
+		"WealthType": "Poorer",
 		"ItemEconTypes": [
       "Adventurer"
 		],

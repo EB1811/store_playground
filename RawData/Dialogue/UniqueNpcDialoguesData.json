@@ -4,7 +4,7 @@
 		"DialogueChainID": "unpc_01",
 		"DialogueID": "1",
 		"DialogueType": "Dialogue",
-		"DialogueText": "Im just browsing as a UNIQUE",
+		"DialogueText": "I just came back from an expidition to the mountains.",
 		"Action": "End",
 		"DialogueSpeaker": "NPC",
 		"SpeakerName": "",
@@ -12,8 +12,54 @@
 		"ChoiceIndex": 0,
 		"DialogueTags":
 		{
-			"GameplayTags": [],
-			"ParentTags": []
+			"GameplayTags": [
+        "Level.Store"
+      ],
+			"ParentTags": [
+				"Level"
+      ]
+		}
+	},
+	{
+		"Name": "2",
+		"DialogueChainID": "unpc_02",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Didn't expect to see you here.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+        "Level.Market"
+      ],
+			"ParentTags": [
+				"Level"
+      ]
+		}
+	},
+	{
+		"Name": "3",
+		"DialogueChainID": "unpc_03",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "Be careful here.",
+		"Action": "End",
+		"DialogueSpeaker": "NPC",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+        "Level.Church"
+      ],
+			"ParentTags": [
+				"Level"
+      ]
 		}
 	}
 ]

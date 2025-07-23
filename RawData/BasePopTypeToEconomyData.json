@@ -118,7 +118,7 @@
 		"PopType": "Nobility",
 		"WealthType": "Poorer",
 		"MGen": 140,
-		"MSharePercent": 3,
+		"MSharePercent": 4,
 		"ItemSpendPercent":
 		{
 			"Essential": 30,
@@ -127,7 +127,7 @@
 		},
 		"ItemNeeds":
 		{
-			"Essential": 40,
+			"Essential": 50,
 			"Mid": 20,
 			"Luxury": 100
 		}
@@ -270,7 +270,7 @@
 		"PopType": "Criminal",
 		"WealthType": "Upper",
 		"MGen": 175,
-		"MSharePercent": 10,
+		"MSharePercent": 9,
 		"ItemSpendPercent":
 		{
 			"Essential": 1,

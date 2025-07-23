@@ -2,15 +2,85 @@
 	{
 		"Name": "a_ee_1",
 		"ID": "a_ee_1",
-		"EconEventId": "ff02",
-		"Cost": 500,
+		"EconEventId": "ff01",
+		"Cost": 1000,
 		"Duration": 1,
 		"Cooldown": 10,
 		"UpgradeClass": "Demonic",
 		"TextData":
 		{
 			"Name": "Farm Failure",
-			"Description": "Trigger the \"Farm Failure\" event."
+			"Description": "Crops turn to ash, livestock dies, and the poor suffer; but no one can deny that business is booming."
 		}
+	},
+	{
+		"Name": "a_ee_2",
+		"ID": "a_ee_2",
+		"EconEventId": "dragon_attack_1",
+		"Cost": 2500,
+		"Duration": 1,
+		"Cooldown": 15,
+		"UpgradeClass": "Eldritch",
+		"TextData":
+		{
+			"Name": "Dragon Summoning",
+			"Description": "Through forbidden knowledge, you call forth ancient wyrms to terrorize the countryside. Fear drives demand for protective equipment."
+		}
+	},
+	{
+		"Name": "a_ee_3",
+		"ID": "a_ee_3",
+		"EconEventId": "magic_academy_collapse_1",
+		"Cost": 3000,
+		"Duration": 1,
+		"Cooldown": 20,
+		"UpgradeClass": "Eldritch",
+		"TextData":
+		{
+			"Name": "Academy Sabotage",
+			"Description": "Whisper dark secrets to unstable apprentices, causing magical experiments to go catastrophically wrong."
+		}
+	},
+	{
+		"Name": "a_ee_4",
+		"ID": "a_ee_4",
+		"EconEventId": "ore_dries_up_1",
+		"Cost": 1800,
+		"Duration": 1,
+		"Cooldown": 12,
+		"UpgradeClass": "Demonic",
+		"TextData":
+		{
+			"Name": "Metallurgical Manipulation",
+      "Description": "Manipulate the flow of ore, causing shortages of key metals that make weapons and armor. Adventurers will be suprised but thankful for your extensive stock of gear."
+		}
+	},
+	{
+		"Name": "a_ee_5",
+		"ID": "a_ee_5",
+		"EconEventId": "farmsucc_1",
+		"Cost": 2200,
+		"Duration": 1,
+		"Cooldown": 18,
+		"UpgradeClass": "Holy",
+		"TextData":
+		{
+			"Name": "Divine Harvest",
+			"Description": "Channel holy energy to bless the fields with abundant harvests. Your divine influence creates prosperity that flows back to your store."
+		}
+	},
+	{
+		"Name": "a_ee_6",
+		"ID": "a_ee_6",
+		"EconEventId": "psychology_minimalism_1",
+		"Cost": 2500,
+		"Duration": 1,
+		"Cooldown": 30,
+		"UpgradeClass": "Holy",
+		"TextData":
+		{
+			"Name": "Minimalist Mindset",
+      "Description": "Channel peoples minds towards minimalism, reducing global demand for luxury goods and bending producers to cut price."
+    }
 	}
 ]

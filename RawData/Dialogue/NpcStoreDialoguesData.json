@@ -1,6 +1,6 @@
 [
 	{
-		"Name": "NewRow",
+		"Name": "ns_01",
 		"DialogueChainID": "ns_01",
 		"DialogueID": "1",
 		"DialogueType": "Dialogue",
@@ -17,7 +17,7 @@
 		}
 	},
 	{
-		"Name": "NewRow_0",
+		"Name": "ns_02",
 		"DialogueChainID": "ns_02",
 		"DialogueID": "2",
 		"DialogueType": "Dialogue",
@@ -34,11 +34,11 @@
 		}
 	},
 	{
-		"Name": "NewRow_1",
+		"Name": "ns_03",
 		"DialogueChainID": "ns_03",
 		"DialogueID": "3",
 		"DialogueType": "Dialogue",
-		"DialogueText": "Hey.",
+		"DialogueText": "Hey! I have some new items.",
 		"Action": "End",
 		"DialogueSpeaker": "NPC",
 		"SpeakerName": "",
@@ -49,5 +49,124 @@
 			"GameplayTags": [],
 			"ParentTags": []
 		}
-	}
+	},
+  {
+    "Name": "ns_04",
+    "DialogueChainID": "ns_04",
+    "DialogueID": "4",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Welcome! Take a look at my wares.",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  },
+  {
+    "Name": "ns_05",
+    "DialogueChainID": "ns_05",
+    "DialogueID": "5",
+    "DialogueType": "Dialogue",
+    "DialogueText": "I have some great deals for you today!",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  },
+  {
+    "Name": "ns_06",
+    "DialogueChainID": "ns_06",
+    "DialogueID": "6",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Feel free to browse my collection.",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  },
+  {
+    "Name": "ns_07",
+    "DialogueChainID": "ns_07",
+    "DialogueID": "7",
+    "DialogueType": "Dialogue",
+    "DialogueText": "I have some unique items just for you.",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  },
+  {
+    "Name": "ns_08",
+    "DialogueChainID": "ns_08",
+    "DialogueID": "8",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Welcome back! Check out my latest stock.",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  },
+  {
+    "Name": "ns_09",
+    "DialogueChainID": "ns_09",
+    "DialogueID": "9",
+    "DialogueType": "Dialogue",
+    "DialogueText": "I have some special offers today.",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  },
+  {
+    "Name": "ns_10",
+    "DialogueChainID": "ns_10",
+    "DialogueID": "10",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Take your time and look around.",
+    "Action": "End",
+    "DialogueSpeaker": "NPC",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [],
+      "ParentTags": []
+    }
+  }
 ]

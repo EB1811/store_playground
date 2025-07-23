@@ -198,10 +198,12 @@ void AStorePGGameMode::BeginPlay() {
   StatisticsGen->UpgradeManager = UpgradeManager;
 
   GlobalDataManager->PlayerCharacter = PlayerCharacter;
+  GlobalDataManager->UpgradeManager = UpgradeManager;
   GlobalDataManager->DayManager = DayManager;
   GlobalDataManager->Store = Store;
   GlobalDataManager->QuestManager = QuestManager;
   GlobalDataManager->Market = Market;
+  GlobalDataManager->NewsGen = NewsGen;
 
   GlobalStaticDataManager->GlobalDataManager = GlobalDataManager;
 

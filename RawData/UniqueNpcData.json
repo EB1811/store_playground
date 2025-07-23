@@ -10,7 +10,9 @@
 			"vm_q01"
 		],
 		"DialogueChainIDs": [
-			"unpc_01"
+			"unpc_01",
+      "unpc_02",
+      "unpc_03"
 		],
 		"NegotiationData":
 		{

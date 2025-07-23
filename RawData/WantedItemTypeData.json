@@ -2,10 +2,24 @@
 	{
 		"Name": "wa001",
 		"WantedItemTypeID": "wa001",
-		"WantedItemTypeName": "Weapon",
+		"WantedItemTypeName": "Weapons",
 		"ItemType": "Weapon",
 		"ItemEconType": "Adventurer"
 	},
+  {
+    "Name": "wa002",
+    "WantedItemTypeID": "wa002",
+    "WantedItemTypeName": "Preemptive Defense",
+    "ItemType": "Weapon",
+    "ItemEconType": "Consumer"
+  },
+  {
+    "Name": "cc002",
+    "WantedItemTypeID": "cc002",
+    "WantedItemTypeName": "Snacks",
+    "ItemType": "Consumable",
+    "ItemEconType": "Consumer"
+  },
 	{
 		"Name": "cc001",
 		"WantedItemTypeID": "cc001",
@@ -48,6 +62,20 @@
 		"ItemType": "Consumable",
 		"ItemEconType": "Magic"
 	},
+  {
+    "Name": "ar003",
+    "WantedItemTypeID": "ar003",
+    "WantedItemTypeName": "Heavy Armor",
+    "ItemType": "Armor",
+    "ItemEconType": "Consumer"
+  },
+  {
+    "Name": "ar004",
+    "WantedItemTypeID": "ar004",
+    "WantedItemTypeName": "Medium Armor",
+    "ItemType": "Armor",
+    "ItemEconType": "Consumer"
+  },
 	{
 		"Name": "ob001",
 		"WantedItemTypeID": "ob001",
@@ -55,6 +83,20 @@
 		"ItemType": "Objects",
 		"ItemEconType": "Consumer"
 	},
+  {
+    "Name": "ob002",
+    "WantedItemTypeID": "ob002",
+    "WantedItemTypeName": "Crafting Materials",
+    "ItemType": "Objects",
+    "ItemEconType": "Consumer"
+  },
+  {
+    "Name": "ob003",
+    "WantedItemTypeID": "ob003",
+    "WantedItemTypeName": "Miscellaneous Items",
+    "ItemType": "Objects",
+    "ItemEconType": "Consumer"
+  },
 	{
 		"Name": "fi001",
 		"WantedItemTypeID": "fi001",
@@ -83,17 +125,31 @@
 		"ItemType": "Jewellery",
 		"ItemEconType": "Magic"
 	},
+  {
+    "Name": "mc001",
+    "WantedItemTypeID": "mc001",
+    "WantedItemTypeName": "Magical Clothing",
+    "ItemType": "Clothing",
+    "ItemEconType": "Magic"
+  },
+  {
+    "Name": "mp002",
+    "WantedItemTypeID": "mp002",
+    "WantedItemTypeName": "Mystical Potions",
+    "ItemType": "Consumable",
+    "ItemEconType": "Magic"
+  },
 	{
 		"Name": "ap001",
 		"WantedItemTypeID": "ap001",
-		"WantedItemTypeName": "Adventuring Gear",
+		"WantedItemTypeName": "Adventure Gear",
 		"ItemType": "Objects",
 		"ItemEconType": "Adventurer"
 	},
 	{
 		"Name": "ac001",
 		"WantedItemTypeID": "ac001",
-		"WantedItemTypeName": "Adventuring Supplies",
+		"WantedItemTypeName": "Adventure Supplies",
 		"ItemType": "Consumable",
 		"ItemEconType": "Adventurer"
 	},
@@ -118,6 +174,20 @@
 		"ItemType": "Financial",
 		"ItemEconType": "Finance"
 	},
+  {
+    "Name": "tr001",
+    "WantedItemTypeID": "tr001",
+    "WantedItemTypeName": "Trade Goods",
+    "ItemType": "Objects",
+    "ItemEconType": "Consumer"
+  },
+  {
+    "Name": "co001",
+    "WantedItemTypeID": "co001",
+    "WantedItemTypeName": "Collectibles",
+    "ItemType": "Valuables",
+    "ItemEconType": "Consumer"
+  },
 	{
 		"Name": "vl001",
 		"WantedItemTypeID": "vl001",

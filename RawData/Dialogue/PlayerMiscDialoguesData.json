@@ -93,6 +93,37 @@
 		}
 	},
 	{
+		"Name": "pm_4",
+		"DialogueChainID": "pm_4",
+		"DialogueID": "1",
+		"DialogueType": "Dialogue",
+		"DialogueText": "I'm hungry.",
+		"Action": "End",
+		"DialogueSpeaker": "Player",
+		"SpeakerName": "",
+		"ChoicesAmount": 0,
+		"ChoiceIndex": 0,
+		"DialogueTags":
+		{
+			"GameplayTags": [
+				{
+					"TagName": "Dialogue.Idle"
+				},
+				{
+					"TagName": "Dialogue.Level.Market"
+				}
+			],
+			"ParentTags": [
+				{
+					"TagName": "Dialogue"
+				},
+				{
+					"TagName": "Dialogue.Level"
+				}
+			]
+		}
+	},
+	{
 		"Name": "pm_3",
 		"DialogueChainID": "pm_3",
 		"DialogueID": "1",
@@ -122,5 +153,191 @@
 				}
 			]
 		}
-	}
+	},
+  {
+    "Name": "pm_5",
+    "DialogueChainID": "pm_5",
+    "DialogueID": "1",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Will my bags be big enough?",
+    "Action": "End",
+    "DialogueSpeaker": "Player",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [
+        {
+          "TagName": "Dialogue.Idle"
+        },
+        {
+          "TagName": "Dialogue.Level.Market"
+        }
+      ],
+      "ParentTags": [
+        {
+          "TagName": "Dialogue"
+        },
+        {
+          "TagName": "Dialogue.Level"
+        }
+      ]
+    }
+  },
+  {
+    "Name": "pm_6",
+    "DialogueChainID": "pm_6",
+    "DialogueID": "1",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Wonder if they're selling bread again.",
+    "Action": "End",
+    "DialogueSpeaker": "Player",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [
+        {
+          "TagName": "Dialogue.Idle"
+        },
+        {
+          "TagName": "Dialogue.Level.Market"
+        }
+      ],
+      "ParentTags": [
+        {
+          "TagName": "Dialogue"
+        },
+        {
+          "TagName": "Dialogue.Level"
+        }
+      ]
+    }
+  },
+  {
+    "Name": "pm_7",
+    "DialogueChainID": "pm_7",
+    "DialogueID": "1",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Scary.",
+    "Action": "End",
+    "DialogueSpeaker": "Player",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [
+        {
+          "TagName": "Dialogue.Idle"
+        },
+        {
+          "TagName": "Dialogue.Level.Church"
+        }
+      ],
+      "ParentTags": [
+        {
+          "TagName": "Dialogue"
+        },
+        {
+          "TagName": "Dialogue.Level"
+        }
+      ]
+    }
+  },
+  {
+    "Name": "pm_8",
+    "DialogueChainID": "pm_8",
+    "DialogueID": "1",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Ready?",
+    "Action": "End",
+    "DialogueSpeaker": "Player",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [
+        {
+          "TagName": "Dialogue.Idle"
+        },
+        {
+          "TagName": "Dialogue.Level.Store"
+        }
+      ],
+      "ParentTags": [
+        {
+          "TagName": "Dialogue"
+        },
+        {
+          "TagName": "Dialogue.Level"
+        }
+      ]
+    }
+  },
+  {
+    "Name": "pm_9",
+    "DialogueChainID": "pm_9",
+    "DialogueID": "1",
+    "DialogueType": "Dialogue",
+    "DialogueText": "Money!",
+    "Action": "End",
+    "DialogueSpeaker": "Player",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [
+        {
+          "TagName": "Dialogue.Idle"
+        },
+        {
+          "TagName": "Dialogue.Level.Store"
+        }
+      ],
+      "ParentTags": [
+        {
+          "TagName": "Dialogue"
+        },
+        {
+          "TagName": "Dialogue.Level"
+        }
+      ]
+    }
+  },
+  {
+    "Name": "pm_10",
+    "DialogueChainID": "pm_10",
+    "DialogueID": "1",
+    "DialogueType": "Dialogue",
+    "DialogueText": "I thought this place was bigger?",
+    "Action": "End",
+    "DialogueSpeaker": "Player",
+    "SpeakerName": "",
+    "ChoicesAmount": 0,
+    "ChoiceIndex": 0,
+    "DialogueTags":
+    {
+      "GameplayTags": [
+        {
+          "TagName": "Dialogue.Idle"
+        },
+        {
+          "TagName": "Dialogue.Level.Store"
+        }
+      ],
+      "ParentTags": [
+        {
+          "TagName": "Dialogue"
+        },
+        {
+          "TagName": "Dialogue.Level"
+        }
+      ]
+    }
+  }
 ]

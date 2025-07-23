@@ -1,7 +1,7 @@
 [
 	{
 		"Name": "ue_0",
-		"ID": "ue_0",
+		"ID": "ue_0_negotiation_skill_1",
 		"EffectType": "UnlockIDs",
 		"EffectSystem": "Ability",
 		"RelevantIDs": [
@@ -11,59 +11,399 @@
 		"RelevantName": "NegotiationSkill",
 		"TextData":
 		{
-			"Description": "Increased likelihood of customers accepting higher prices."
+			"Description": "Unlock Negotiation Skill, which increases the range of prices customers are willing to pay."
 		}
 	},
 	{
 		"Name": "ue_1",
-		"ID": "ue_1",
+		"ID": "ue_1_store_markup_1",
 		"EffectType": "ChangeBehaviorParam",
 		"EffectSystem": "Market",
 		"RelevantIDs": [
-			"wla001"
 		],
 		"RelevantValues":
 		{
-			"StoreMarkupMulti": 0.5
+			"StoreMarkupMulti": -0.05
 		},
-		"RelevantName": "Items",
+		"RelevantName": "None",
 		"TextData":
 		{
-			"Description": "Further increased likelihood of customers accepting higher prices."
+			"Description": "Reduce the markup for items sold by npc stores by 5%."
 		}
 	},
 	{
 		"Name": "ue_2",
-		"ID": "ue_2",
+		"ID": "ue_2_econ_event_1",
 		"EffectType": "UnlockIDs",
 		"EffectSystem": "Ability",
 		"RelevantIDs": [
 			"a_ee_1"
 		],
-		"RelevantValues":
-		{
-		},
+		"RelevantValues": {},
 		"RelevantName": "EconEventAbility",
 		"TextData":
 		{
-			"Description": "Increased likelihood of richer customers."
+			"Description": "Unlock the ability to trigger the \"Farm Failure\" event, which causes a temporary increase in essential, consumer prices."
 		}
 	},
 	{
 		"Name": "ue_3",
-		"ID": "ue_3",
+		"ID": "ue_3_waiting_time_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"CustomerWaitingTime": 5.0
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Increase the time customers are willing to wait while requesting your attention by 5 seconds."
+		}
+	},
+	{
+		"Name": "ue_4",
+		"ID": "ue_4_customer_spawn_increase_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"CustomerSpawnChance": 0.1
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Increase customer spawn rate by 10%, bringing more potential buyers to your store."
+		}
+	},
+	{
+		"Name": "ue_5",
+		"ID": "ue_5_acceptance_range_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"AcceptanceMaxMulti": 0.05
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Increase the maximum price customers are willing to accept by 5%."
+		}
+	},
+	{
+		"Name": "ue_6",
+		"ID": "ue_6_haggling_bonus_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"InitHagglingCount": 1
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Give customers one additional haggling attempt, allowing for more negotiation opportunities."
+		}
+	},
+	{
+		"Name": "ue_7",
+		"ID": "ue_7_economy_stability_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "MarketEconomy",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"PromotionChance": -2.0,
+			"DemotionChance": -2.0
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Reduce economic volatility by decreasing wealth promotion and demotion chances by 2%."
+		}
+	},
+	{
+		"Name": "ue_8",
+		"ID": "ue_8_dragon_event_ability_1",
 		"EffectType": "UnlockIDs",
 		"EffectSystem": "Ability",
 		"RelevantIDs": [
-			"a_ee_1"
+			"a_ee_2"
 		],
-		"RelevantValues":
-		{
-		},
+		"RelevantValues": {},
 		"RelevantName": "EconEventAbility",
 		"TextData":
 		{
-			"Description": "Unlock econ event."
+			"Description": "Unlock the ability to attract dragons to nearby settlements, causing market disruption and increased demand for protective items."
+		}
+	},
+	{
+		"Name": "ue_9",
+		"ID": "ue_9_academy_collapse_ability_1",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ee_3"
+		],
+		"RelevantValues": {},
+		"RelevantName": "EconEventAbility",
+		"TextData":
+		{
+			"Description": "Unlock the ability to cause magical academy instability, disrupting magic item supply and causing mystic population exodus."
+		}
+	},
+	{
+		"Name": "ue_10",
+		"ID": "ue_10_negotiation_skill_2",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ns_2"
+		],
+		"RelevantValues": {},
+		"RelevantName": "NegotiationSkill",
+		"TextData":
+		{
+			"Description": "Unlock advanced negotiation techniques that further increase customer acceptance rates."
+		}
+	},
+	{
+		"Name": "ue_11",
+		"ID": "ue_11_max_customers_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"MaxCustomers": 2
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Increase the maximum number of customers that can be in your store simultaneously by 2."
+		}
+	},
+	{
+		"Name": "ue_12",
+		"ID": "ue_12_waiting_time_2",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"CustomerWaitingTime": 8.0
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Further increase customer patience, extending waiting time by 8 seconds."
+		}
+	},
+	{
+		"Name": "ue_13",
+		"ID": "ue_13_civil_war_ability_1",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ee_4"
+		],
+		"RelevantValues": {},
+		"RelevantName": "EconEventAbility",
+		"TextData":
+		{
+			"Description": "Unlock the \"Metallurgical Manipulation\" ability, causing shortages that drive up demand for your stock of weapons and armor."
+		}
+	},
+	{
+		"Name": "ue_14",
+		"ID": "ue_14_charm_skill_1",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ns_3"
+		],
+		"RelevantValues": {},
+		"RelevantName": "NegotiationSkill",
+		"TextData":
+		{
+			"Description": "Unlock charm techniques that increase the money customers are willing to spend."
+		}
+	},
+	{
+		"Name": "ue_15",
+		"ID": "ue_15_acceptance_falloff_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"AcceptanceFalloffMulti": -0.1
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Reduce how quickly customer acceptance decreases during negotiations by 10%."
+		}
+	},
+	{
+		"Name": "ue_16",
+		"ID": "ue_16_store_markup_2",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "Market",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"StoreMarkupMulti": -0.08
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Further reduce store markup penalties by 8%, allowing for better profit margins."
+		}
+	},
+	{
+		"Name": "ue_17",
+		"ID": "ue_17_customer_spawn_increase_2",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"CustomerSpawnChance": 0.15
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Significantly increase customer spawn rate by 15%, creating a bustling marketplace atmosphere."
+		}
+	},
+	{
+		"Name": "ue_18",
+		"ID": "ue_18_promotion_chance_1",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "MarketEconomy",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"PromotionChance": 3.0
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Increase wealth promotion chances by 3%, helping the local economy prosper."
+		}
+	},
+	{
+		"Name": "ue_19",
+		"ID": "ue_19_max_customers_2",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"MaxCustomers": 3
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Further increase maximum customer capacity by 3, allowing for larger crowds."
+		}
+	},
+	{
+		"Name": "ue_20",
+		"ID": "ue_20_acceptance_range_2",
+		"EffectType": "ChangeBehaviorParam",
+		"EffectSystem": "CustomerAI",
+		"RelevantIDs": [],
+		"RelevantValues":
+		{
+			"AcceptanceMaxMulti": 0.08,
+			"AcceptanceMinMulti": -0.03
+		},
+		"RelevantName": "None",
+		"TextData":
+		{
+			"Description": "Significantly improve customer price acceptance range, making them more flexible in negotiations."
+		}
+	},
+	{
+		"Name": "ue_21",
+		"ID": "ue_21_negotiation_skill_3",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ns_4"
+		],
+		"RelevantValues": {},
+		"RelevantName": "NegotiationSkill",
+		"TextData":
+		{
+			"Description": "Unlock master-level negotiation techniques that significantly improve customer acceptance."
+		}
+	},
+	{
+		"Name": "ue_22",
+		"ID": "ue_22_charisma_skill_2",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ns_5"
+		],
+		"RelevantValues": {},
+		"RelevantName": "NegotiationSkill",
+		"TextData":
+		{
+			"Description": "Unlock irresistible charm that dramatically increases customer spending power."
+		}
+	},
+	{
+		"Name": "ue_23",
+		"ID": "ue_23_eldritch_persuasion_1",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ns_6"
+		],
+		"RelevantValues": {},
+		"RelevantName": "NegotiationSkill",
+		"TextData":
+		{
+			"Description": "Unlock otherworldly persuasion techniques that bend reality itself to your will."
+		}
+	},
+	{
+		"Name": "ue_24",
+		"ID": "ue_24_divine_harvest_ability_1",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ee_5"
+		],
+		"RelevantValues": {},
+		"RelevantName": "EconEventAbility",
+		"TextData":
+		{
+			"Description": "Unlock the ability to bless farmlands with divine prosperity, creating economic abundance."
+		}
+	},
+	{
+		"Name": "ue_25",
+		"ID": "ue_25_minimalist_mindset_ability_1",
+		"EffectType": "UnlockIDs",
+		"EffectSystem": "Ability",
+		"RelevantIDs": [
+			"a_ee_6"
+		],
+		"RelevantValues": {},
+		"RelevantName": "EconEventAbility",
+		"TextData":
+		{
+			"Description": "Unlock the \"Minimalist Mindset\" ability, lowering global demand and prices for luxury goods."
 		}
 	}
 ]

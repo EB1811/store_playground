@@ -14,6 +14,7 @@
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
 
@@ -208,6 +209,8 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
 }
 
 const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() const {
+  check(PlayerCharacter && UpgradeManager && DayManager && Store && QuestManager && Market && NewsGen);
+
   const TArray<FName> InventoryItems = FormIdList<TObjectPtr<UItemBase>>(
       PlayerCharacter->PlayerInventoryComponent->ItemsArray, [](const UItemBase* Item) { return Item->ItemID; });
   TArray<FName> MadeDialogueChoices = {};
@@ -222,23 +225,9 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
       {EReqFilterOperand::QuestsCompleted, QuestManager->QuestsCompleted},
       {EReqFilterOperand::MadeDialogueChoices, MadeDialogueChoices},
       {EReqFilterOperand::RecentEconEvents, RecentEconEvents},
+      {EReqFilterOperand::PublishedArticles, NewsGen->PublishedArticles},
+      {EReqFilterOperand::SelectedUpgradeIDs, UpgradeManager->SelectedUpgradeIDs},
   };
-
-  // UE_LOG(LogTemp, Warning, TEXT("GameDataMap: "));
-  // UE_LOG(LogTemp, Warning, TEXT("Time: %d"), std::any_cast<int32>(GameDataMap[EReqFilterOperand::Time]));
-  // UE_LOG(LogTemp, Warning, TEXT("Money: %f"), std::any_cast<float>(GameDataMap[EReqFilterOperand::Money]));
-  // UE_LOG(LogTemp, Warning, TEXT("Inventory: "));
-  // for (const auto& Item : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::Inventory]))
-  //   UE_LOG(LogTemp, Warning, TEXT("Item: %s"), *Item.ToString());
-  // UE_LOG(LogTemp, Warning, TEXT("QuestsCompleted: "));
-  // for (const auto& Quest : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::QuestsCompleted]))
-  //   UE_LOG(LogTemp, Warning, TEXT("Quest: %s"), *Quest.ToString());
-  // UE_LOG(LogTemp, Warning, TEXT("MadeDialogueChoices: "));
-  // for (const auto& Choice : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::MadeDialogueChoices]))
-  //   UE_LOG(LogTemp, Warning, TEXT("Choice: %s"), *Choice.ToString());
-  // UE_LOG(LogTemp, Warning, TEXT("RecentEconEvents: "));
-  // for (const auto& Event : std::any_cast<const TArray<FName>&>(GameDataMap[EReqFilterOperand::RecentEconEvents]))
-  //   UE_LOG(LogTemp, Warning, TEXT("Event: %s"), *Event.ToString());
 
   return GameDataMap;
 }

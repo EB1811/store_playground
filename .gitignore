@@ -80,6 +80,9 @@ DerivedDataCache/*
 *.code-workspace
 .clangd
 
+# Raw Files and data tables not tracked.
+RawJsonData/*
+
 # Only allow .uasset and .umap files from /Content dir.
 # They're tracked by git-lfs, don't forget to track other
 # files if adding them here.
@@ -90,7 +93,6 @@ Content/**/*
 !/Content/Blueprints/WorldObject/*
 !/Content/Blueprints/WorldObject/**/*.uasset
 !/Content/Data/*
-!/Content/Data/**/*.uasset
 !/Content/Input/*
 !/Content/Input/**/*.uasset
 !/Content/UserInterface/*
