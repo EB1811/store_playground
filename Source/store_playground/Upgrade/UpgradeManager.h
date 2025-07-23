@@ -36,6 +36,8 @@ public:
   const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere)
+  class ASpgHUD* HUD;
+  UPROPERTY(EditAnywhere)
   class ACustomerAIManager* CustomerAIManager;
   UPROPERTY(EditAnywhere)
   class AMarket* Market;

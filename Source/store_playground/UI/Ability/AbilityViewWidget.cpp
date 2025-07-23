@@ -76,7 +76,7 @@ void UAbilityViewWidget::RefreshUI() {
 
   FEconEventAbility SelectedAbility = AbilityManager->GetAbilityById(SelectedAbilityID);
   AbilitySelectWidget->Name->SetText(SelectedAbility.TextData.Name);
-  AbilitySelectWidget->CostText->SetText(FText::FromString(FString::Printf(TEXT("Cost: %d¬"), SelectedAbility.Cost)));
+  AbilitySelectWidget->CostText->SetText(FText::FromString(FString::Printf(TEXT("Cost: %.0f¬"), SelectedAbility.Cost)));
   AbilitySelectWidget->CooldownText->SetText(
       FText::FromString(FString::Printf(TEXT("Cooldown: %d days"), SelectedAbility.Cooldown)));
 }

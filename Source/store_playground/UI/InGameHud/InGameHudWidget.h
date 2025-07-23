@@ -17,6 +17,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UNewsHudSlideWidget* NewsHudSlideWidget;
   UPROPERTY(meta = (BindWidget))
+  class ULeftSlideWidget* NotificationsSlideWidget;
+  UPROPERTY(meta = (BindWidget))
   class UControlsHelpersWidget* ControlsHelpersWidget;
   UPROPERTY(meta = (BindWidget))
   class URightSlideWidget* DaySlideWidget;
@@ -45,6 +47,12 @@ public:
 
   UPROPERTY(EditAnywhere)
   FInGameInputActions InGameInputActions;
+
+  UPROPERTY(EditAnywhere)
+  class USoundBase* NotifySound;
+  UPROPERTY(EditAnywhere)
+  bool bNeedUpgradePointsNotify;  // * If Notify is called shile hidden, need to perform notification upon showing.
+  void NotifyUpgradePointsGained();
 
   void RefreshUI();
   void InitUI(FInGameInputActions _InGameInputActions);

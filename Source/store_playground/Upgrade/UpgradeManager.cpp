@@ -8,6 +8,7 @@
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
+#include "store_playground/UI/SpgHUD.h"
 
 AUpgradeManager::AUpgradeManager() {
   PrimaryActorTick.bCanEverTick = false;
@@ -57,7 +58,11 @@ void AUpgradeManager::ConsiderUpgradePoints() {
     });
   }
 }
-void AUpgradeManager::GainUpgradePoints(int32 Points) { AvailableUpgradePoints += Points; }
+void AUpgradeManager::GainUpgradePoints(int32 Points) {
+  AvailableUpgradePoints += Points;
+
+  HUD->NotifyUpgradePointsGained();
+}
 
 auto AUpgradeManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) const -> TArray<FUpgradeEffect> {
   return GlobalStaticDataManager->GetUpgradeEffectsByIds(EffectIDs);

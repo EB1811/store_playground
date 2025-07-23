@@ -390,6 +390,8 @@ void ASpgHUD::HideInGameHudWidget() {
   bShowingHud = false;
 }
 
+void ASpgHUD::NotifyUpgradePointsGained() { InGameHudWidget->NotifyUpgradePointsGained(); }
+
 void ASpgHUD::OpenPauseMenuView() {
   if (OpenedWidgets.Contains(PauseMenuViewWidget)) return CloseWidget(PauseMenuViewWidget);
 

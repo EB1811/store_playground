@@ -62,6 +62,8 @@ AMarketEconomy::AMarketEconomy() {
   TotalPopulation = 0;
   TotalWealth = 0;
   TotaBought = 0;
+
+  SetupUpgradeable();
 }
 
 void AMarketEconomy::BeginPlay() {
@@ -264,16 +266,16 @@ void AMarketEconomy::PerformEconomyTick() {
   TArray<int32> DemotionPopIndexes;
   TArray<int32> CrossPromotionPopIndexes;
   for (int32 Index : PromotionConsiderPopIndexes)
-    if (FMath::FRand() * 100 < EconomyBehaviorParams.PromotionChance &&
+    if (FMath::FRand() * 100 < BehaviorParams.PromotionChance &&
         GetHigherWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
       PromotionPopIndexes.Add(Index);
-    else if (FMath::FRand() * 100 < EconomyBehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType])
+    else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType])
       CrossPromotionPopIndexes.Add(Index);
   for (int32 Index : DemotionConsiderPopIndexes)
-    if (FMath::FRand() * 100 < EconomyBehaviorParams.DemotionChance &&
+    if (FMath::FRand() * 100 < BehaviorParams.DemotionChance &&
         GetLowerWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
       DemotionPopIndexes.Add(Index);
-    else if (FMath::FRand() * 100 < EconomyBehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType])
+    else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType])
       CrossPromotionPopIndexes.Add(Index);
 
   // Promote / Demote if next wealth type buys more goods than current wealth type.
@@ -297,7 +299,7 @@ void AMarketEconomy::PerformEconomyTick() {
         }).Get<0>();
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
 
-    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
+    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, BehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Log, TEXT("Pop %s promoted to %s"), *CustomerPops[Index].PopName.ToString(),
            *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
@@ -321,7 +323,7 @@ void AMarketEconomy::PerformEconomyTick() {
         }).Get<0>();
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
 
-    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
+    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, BehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Log, TEXT("Pop %s demoted to %s"), *CustomerPops[Index].PopName.ToString(),
            *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
@@ -341,7 +343,7 @@ void AMarketEconomy::PerformEconomyTick() {
                                 return Index.Get<1>();
                               }).Get<0>();
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
-    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, EconomyBehaviorParams.MaxPopChangeAtOnce);
+    MovePopPopulation(PopEconData, RandomNewPop, 0.01f, BehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Log, TEXT("Pop %s cross promoted to %s"), *CustomerPops[Index].PopName.ToString(),
            *CustomerPops[RandomNewPopIndex].PopName.ToString());
@@ -571,4 +573,14 @@ void AMarketEconomy::InitializeEconomyData() {
   BasePopTypeToEconomyTable = nullptr;
   CustomerPopDataTable = nullptr;
   AllItemsTable = nullptr;
+}
+
+void AMarketEconomy::SetupUpgradeable() {
+  Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) {
+    for (const auto& ParamPair : ParamValues) {
+      auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
+      auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
+      AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+    }
+  };
 }

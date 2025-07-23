@@ -147,6 +147,8 @@ public:
   void ShowInGameHudWidget();
   void HideInGameHudWidget();
 
+  void NotifyUpgradePointsGained();
+
   UPROPERTY()
   class UPauseMenuViewWidget* PauseMenuViewWidget;
   UFUNCTION(BlueprintCallable)

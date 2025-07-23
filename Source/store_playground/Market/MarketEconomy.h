@@ -77,7 +77,7 @@ public:
   float TotaBought;
 
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
-  FEconomyBehaviorParams EconomyBehaviorParams;
+  FEconomyBehaviorParams BehaviorParams;
 
   UPROPERTY(EditAnywhere, Category = "Economy")
   TArray<FCustomerPop> CustomerPops;
@@ -107,4 +107,5 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Economy")
   FUpgradeable Upgradeable;
+  void SetupUpgradeable();
 };

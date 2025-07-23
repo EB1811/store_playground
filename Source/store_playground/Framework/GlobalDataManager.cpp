@@ -205,6 +205,9 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
     if (ExprsOperators[i] == TEXT("AND")) Result = Result && FilterExprsRes[i + 1];
     else if (ExprsOperators[i] == TEXT("OR")) Result = Result || FilterExprsRes[i + 1];
 
+  // UE_LOG(LogTemp, Log, TEXT("RequirementsFilter %s evaluated to %s."), *RequirementsFilter.ToString(),
+  //        Result ? TEXT("true") : TEXT("false"));
+
   return Result;
 }
 
@@ -265,7 +268,7 @@ void AGlobalDataManager::ChangeData(const FName DataName,
       auto IdProp = StructProp->Struct->FindPropertyByName("ID");
       check(IdProp);
       FName* IdValuePtr = IdProp->ContainerPtrToValuePtr<FName>(StructPtr);
-      UE_LOG(LogTemp, Warning, TEXT("IdValuePtr: %s"), *IdValuePtr->ToString());
+      UE_LOG(LogTemp, Log, TEXT("IdValuePtr: %s"), *IdValuePtr->ToString());
       if (!FilterIds.Contains(*IdValuePtr)) continue;
     }
 

@@ -184,6 +184,7 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->NewsGen = NewsGen;
   DayManager->Store = Store;
 
+  UpgradeManager->HUD = HUD;
   UpgradeManager->CustomerAIManager = CustomerAIManager;
   UpgradeManager->Market = Market;
   UpgradeManager->MarketEconomy = MarketEconomy;

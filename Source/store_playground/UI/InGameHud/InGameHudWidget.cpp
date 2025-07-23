@@ -2,7 +2,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Internationalization/Text.h"
 #include "Logging/LogVerbosity.h"
+#include "TimerManager.h"
 #include "store_playground/UI/Components/ControlsHelpersWidget.h"
+#include "store_playground/UI/Components/LeftSlideWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
 #include "store_playground/UI/Components/RightSlideSecondaryWidget.h"
 #include "store_playground/UI/Components/RightSlideInvertedWidget.h"
@@ -14,6 +16,7 @@
 #include "store_playground/Level/LevelManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Kismet/GameplayStatics.h"
 
 void UInGameHudWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -21,6 +24,23 @@ void UInGameHudWidget::NativeOnInitialized() {
   FWidgetAnimationDynamicEvent UIAnimEvent;
   UIAnimEvent.BindDynamic(this, &UInGameHudWidget::HideAnimComplete);
   BindToAnimationFinished(HideAnim, UIAnimEvent);
+}
+
+void UInGameHudWidget::NotifyUpgradePointsGained() {
+  if (!bShowingHud) {
+    bNeedUpgradePointsNotify = true;
+    return;
+  }
+
+  NotificationsSlideWidget->SlideText->SetText(FText::FromString("Upgrade Points Gained!"));
+  NotificationsSlideWidget->RightSlideText->SetText(FText::FromString(""));
+  NotificationsSlideWidget->SetVisibility(ESlateVisibility::Visible);
+  UGameplayStatics::PlaySound2D(this, NotifySound, 1.0f);
+
+  FTimerHandle HideTimerHandle;
+  GetWorld()->GetTimerManager().SetTimer(
+      HideTimerHandle, [this]() { NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed); }, 10.0f,
+      false);
 }
 
 void UInGameHudWidget::RefreshUI() {
@@ -66,6 +86,7 @@ void UInGameHudWidget::RefreshUI() {
 void UInGameHudWidget::InitUI(FInGameInputActions _InGameInputActions) {
   InGameInputActions = _InGameInputActions;
 
+  NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed);
   NewsHudSlideWidget->InitUI(NewsGen);
 }
 
@@ -74,6 +95,11 @@ void UInGameHudWidget::Show() {
 
   SetVisibility(ESlateVisibility::Visible);
   PlayAnimation(ShowAnim, 0.0f, 1, EUMGSequencePlayMode::Forward, 1.0f);
+
+  if (bNeedUpgradePointsNotify) {
+    NotifyUpgradePointsGained();
+    bNeedUpgradePointsNotify = false;
+  }
 }
 void UInGameHudWidget::Hide() {
   bShowingHud = false;
