@@ -61,13 +61,6 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> ActiveEffectIDs;
 
-  UPROPERTY(EditAnywhere, SaveGame)
-  TArray<FName> UnlockedEconEventAbilityIDs;
-  UPROPERTY(EditAnywhere, SaveGame)
-  TMap<FName, int32> EconEventAbilityCooldowns;
-  UPROPERTY(EditAnywhere, SaveGame)
-  TArray<FEconEventAbility> ActiveEconEventAbilities;
-
   void ConsiderUpgradePoints();  // ? Maybe tick this? Currently called by StatisticsGen on any change.
   void GainUpgradePoints(int32 Points);
 
@@ -77,9 +70,6 @@ public:
   auto GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade>;
 
   void SelectUpgrade(const FName UpgradeId);
-
-  auto GetAvailableEconEventAbilities() const -> TArray<FEconEventAbility>;
-  void ActivateEconEventAbility(const FName AbilityId);
 
   void TickDaysTimedVars();
 

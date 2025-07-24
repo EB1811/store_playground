@@ -105,8 +105,8 @@ struct FEconEventAbilityRow : public FTableRowBase {
 
 UENUM()
 enum class ECustomerAIEffect : uint8 {
-  MoneyToSpend UMETA(DisplayName = "Money To Spend"),                 // * Money available for negotiation.
-  AcceptancePercentage UMETA(DisplayName = "Acceptance Percentage"),  // * Acceptance percentage for offers
+  AvailableMoney UMETA(DisplayName = "AvailableMoney"),              // * Money available for negotiation.
+  AcceptancePercentage UMETA(DisplayName = "AcceptancePercentage"),  // * Acceptance percentage for offers
 };
 USTRUCT()
 struct FNegotiationSkillTextData {

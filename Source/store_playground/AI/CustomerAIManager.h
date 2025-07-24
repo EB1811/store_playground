@@ -9,6 +9,7 @@
 #include "store_playground/AI/CustomerDataStructs.h"
 #include "store_playground/Npc/NpcDataStructs.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
+#include "store_playground/Market/MarketDataStructs.h"
 #include "store_playground/Store/Store.h"
 #include "AIStructs.h"
 #include "CustomerAIManager.generated.h"
@@ -48,11 +49,18 @@ struct FCustomerAIBehaviorParams {
   int32 MaxCustomers;
   UPROPERTY(EditAnywhere, SaveGame)
   float CustomerSpawnChance;  // * Higher means more customers in the store at once.
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<EPopType, float> PopTypeMultis;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<EPopWealthType, float> PopWealthTypeMultis;
 
   UPROPERTY(EditAnywhere, SaveGame)
   float PerformActionChance;
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<ECustomerAction, float> ActionWeights;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float AvailableMoneyMulti;  // * Multiplier for the available money of the customer.
 
   UPROPERTY(EditAnywhere, SaveGame)
   float AcceptanceMinMulti;
@@ -152,4 +160,7 @@ public:
   struct FUpgradeable Upgradeable;
   void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
   void UpgradeFunction(FName FunctionName, const TArray<FName>& Ids, const TMap<FName, float>& ParamValues);
+  void ChangeActionWeights(const TMap<FName, float>& ParamValues);
+  void ChangePopTypeMultis(const TMap<FName, float>& ParamValues);
+  void ChangePopWealthTypeMultis(const TMap<FName, float>& ParamValues);
 };

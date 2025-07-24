@@ -269,13 +269,15 @@ void AMarketEconomy::PerformEconomyTick() {
     if (FMath::FRand() * 100 < BehaviorParams.PromotionChance &&
         GetHigherWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
       PromotionPopIndexes.Add(Index);
-    else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType])
+    else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType] *
+                                        BehaviorParams.CrossPromotionChanceMulti)
       CrossPromotionPopIndexes.Add(Index);
   for (int32 Index : DemotionConsiderPopIndexes)
     if (FMath::FRand() * 100 < BehaviorParams.DemotionChance &&
         GetLowerWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
       DemotionPopIndexes.Add(Index);
-    else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType])
+    else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType] *
+                                        BehaviorParams.CrossPromotionChanceMulti)
       CrossPromotionPopIndexes.Add(Index);
 
   // Promote / Demote if next wealth type buys more goods than current wealth type.

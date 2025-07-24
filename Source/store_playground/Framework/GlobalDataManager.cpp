@@ -238,7 +238,7 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
 TArray<struct FEconEvent> AGlobalDataManager::GetEligibleEconEvents(const TArray<FName>& OccurredEconEvents) const {
   const auto GameDataMap = GetGameDataMap();
   return EconEventsArray.FilterByPredicate([&](const FEconEvent& Event) {
-    return (Event.bIsRepeatable || !OccurredEconEvents.Contains(Event.ID)) &&
+    return (Event.bIsRepeatable || !OccurredEconEvents.Contains(Event.ID)) && Event.bIsUnlocked &&
            EvaluateRequirementsFilter(Event.RequirementsFilter, GameDataMap);
   });
 }
@@ -273,7 +273,7 @@ void AGlobalDataManager::ChangeData(const FName DataName,
     }
 
     for (const auto& ParamPair : ParamValues)
-      SetStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+      AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }
 

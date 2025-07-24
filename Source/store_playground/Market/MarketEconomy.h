@@ -30,7 +30,9 @@ struct FEconomyBehaviorParams {
   UPROPERTY(EditAnywhere, SaveGame)
   float DemotionChance;  // Demote to a lower wealth type.
   UPROPERTY(EditAnywhere, SaveGame)
-  TMap<EPopWealthType, float> CrossPromotionChanceMap;  // Change to a different economy type.
+  TMap<EPopWealthType, float> CrossPromotionChanceMap;  // Cross promote to a different pop type. For each wealth type.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float CrossPromotionChanceMulti;  // Multiplier for cross promotion chance.
 
   UPROPERTY(EditAnywhere, SaveGame)
   int32 MaxPopChangeAtOnce;  // Max population change per tick.

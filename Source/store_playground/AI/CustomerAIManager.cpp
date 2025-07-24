@@ -4,6 +4,8 @@
 #include "CustomerAIComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/Platform.h"
+#include "Logging/LogVerbosity.h"
+#include "Math/UnrealMathUtility.h"
 #include "Misc/AssertionMacros.h"
 #include "NegotiationAI.h"
 #include "Engine/World.h"
@@ -142,7 +144,8 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
       [UniqueNpcData](const FPopEconData& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
   check(CustomerPopData && PopEconData);
   UniqueCustomer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
-  UniqueCustomer->CustomerAIComponent->AvailableMoney = PopEconData->Money / PopEconData->Population;
+  UniqueCustomer->CustomerAIComponent->AvailableMoney =
+      (PopEconData->Money / PopEconData->Population) * BehaviorParams.AvailableMoneyMulti;
 
   UniqueCustomer->CustomerAIComponent->NegotiationAI->CustomerName = UniqueNpcData.NpcName;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->DialoguesMap = GlobalStaticDataManager->GetRandomNegDialogueMap(
@@ -156,8 +159,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
                                                  UniqueNpcData.NegotiationData.AcceptancePercentageRange[1]);
 
   for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
-    if (Skill.EffectType == ECustomerAIEffect::MoneyToSpend) MoneyToSpend *= Skill.Multi;
-    else if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
+    if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
 
   UniqueCustomer->CustomerAIComponent->NegotiationAI->MoneyToSpend = MoneyToSpend;
   UniqueCustomer->CustomerAIComponent->NegotiationAI->AcceptancePercentage = AcceptancePercentage;
@@ -212,9 +214,15 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
 
 void ACustomerAIManager::SpawnCustomers() {
   check(CustomerClass && GlobalStaticDataManager && MarketEconomy && Store);
-  if (AllCustomers.Num() >= BehaviorParams.MaxCustomers) return;
-
   LastSpawnTime = GetWorld()->GetTimeSeconds();
+
+  float FilledStockPercent =
+      Store->StockDisplayCount > 0
+          ? FMath::Clamp(Store->StoreStockItems.Num() / (float)Store->StockDisplayCount, 0.0f, 1.0f)
+          : 0.0f;
+  int32 MaxCustomers =
+      FMath::RoundToInt(BehaviorParams.MaxCustomers * FMath::Clamp(FilledStockPercent * 1.5f, 0.75f, 1.25f));
+  if (AllCustomers.Num() >= MaxCustomers) return;
 
   ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];
   check(SpawnPoint);
@@ -229,14 +237,21 @@ void ACustomerAIManager::SpawnCustomers() {
 
   TArray<TTuple<FGenericCustomerData, float>> WeightedCustomers;
   for (const auto& GenericCustomer : GlobalStaticDataManager->GenericCustomersArray) {
+    const auto PopCustomerData = *MarketEconomy->CustomerPops.FindByPredicate(
+        [GenericCustomer](const auto& CPop) { return CPop.ID == GenericCustomer.LinkedPopID; });
     const auto PopData = *MarketEconomy->PopEconDataArray.FindByPredicate(
         [GenericCustomer](const auto& Pop) { return Pop.PopID == GenericCustomer.LinkedPopID; });
-    WeightedCustomers.Add({GenericCustomer, PopData.Population * MarketEconomy->GetPopWeightingMulti(PopData)});
+
+    float PopWeightingMulti = MarketEconomy->GetPopWeightingMulti(PopData) *
+                              BehaviorParams.PopTypeMultis[PopCustomerData.PopType] *
+                              BehaviorParams.PopWealthTypeMultis[PopCustomerData.WealthType];
+    WeightedCustomers.Add({GenericCustomer, PopData.Population * PopWeightingMulti});
   }
 
-  int32 CustomersToSpawn = FMath::RandRange(0, BehaviorParams.MaxCustomers - AllCustomers.Num());
+  int32 CustomersToSpawn = FMath::RandRange(0, MaxCustomers - AllCustomers.Num());
   for (int32 i = 0; i < CustomersToSpawn; i++) {
-    if (BehaviorParams.CustomerSpawnChance < FMath::FRand() * 100) continue;
+    float SpawnChance = BehaviorParams.CustomerSpawnChance * FMath::Clamp(FilledStockPercent * 1.5f, 0.75f, 1.25f);
+    if (SpawnChance < FMath::FRand() * 100) continue;
 
     ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
         CustomerClass,
@@ -263,9 +278,10 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
     Customer->CustomerAIComponent->CustomerType = ECustomerType::Generic;
     Customer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
-    Customer->CustomerAIComponent->AvailableMoney = PopMoneySpendData->Money / PopMoneySpendData->Population;
     Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
     Customer->CustomerAIComponent->Tags = RandomCustomerData.Tags;
+    Customer->CustomerAIComponent->AvailableMoney =
+        (PopMoneySpendData->Money / PopMoneySpendData->Population) * BehaviorParams.AvailableMoneyMulti;
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
@@ -531,15 +547,14 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
   float AcceptanceMin =
       ManagerParams.AttitudeBaseAcceptMinMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceMinMulti;
   float AcceptanceMax =
-      ManagerParams.AttitudeBaseAcceptMaxMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceMinMulti;
+      ManagerParams.AttitudeBaseAcceptMaxMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceMaxMulti;
   float AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
   float AcceptanceFalloffMulti =
       ManagerParams.AttitudeBaseAcceptFalloffMultiMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceFalloffMulti;
-  int32 HagglingCount = BehaviorParams.InitHagglingCount;
+  int32 HagglingCount = FMath::Max(BehaviorParams.InitHagglingCount, 1);
 
   for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
-    if (Skill.EffectType == ECustomerAIEffect::MoneyToSpend) MoneyToSpend *= Skill.Multi;
-    else if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
+    if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
 
   CustomerAI->NegotiationAI->MoneyToSpend = MoneyToSpend;
   CustomerAI->NegotiationAI->AcceptancePercentage = AcceptancePercentage;
@@ -640,18 +655,48 @@ void ACustomerAIManager::ChangeBehaviorParam(const TMap<FName, float>& ParamValu
 void ACustomerAIManager::UpgradeFunction(FName FunctionName,
                                          const TArray<FName>& Ids,
                                          const TMap<FName, float>& ParamValues) {
-  check(FunctionName == "ChangeActionWeights");  // Temp: only one function.
-
+  if (FunctionName == "ChangeActionWeights") ChangeActionWeights(ParamValues);
+  else if (FunctionName == "ChangePopTypeMultis") ChangePopTypeMultis(ParamValues);
+  else if (FunctionName == "ChangePopWealthTypeMultis") ChangePopWealthTypeMultis(ParamValues);
+  else checkNoEntry();
+}
+void ACustomerAIManager::ChangeActionWeights(const TMap<FName, float>& ParamValues) {
   for (const auto& ParamPair : ParamValues) {
     ECustomerAction Action = ECustomerAction::None;
-    for (auto A : TEnumRange<ECustomerAction>())
+    for (auto A : TEnumRange<ECustomerAction>()) {
       if (UEnum::GetDisplayValueAsText(A).ToString() == ParamPair.Key) {
         Action = A;
         break;
       }
-    // UE_LOG(LogTemp, Warning, TEXT("ParamPair: %s"), *ParamPair.Key.ToString());
+    }
     check(Action != ECustomerAction::None);
 
     BehaviorParams.ActionWeights[Action] = FMath::Max(BehaviorParams.ActionWeights[Action], 1.0f) * ParamPair.Value;
+  }
+}
+void ACustomerAIManager::ChangePopTypeMultis(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    EPopType PopType = EPopType::Common;
+    for (auto P : TEnumRange<EPopType>()) {
+      if (UEnum::GetDisplayValueAsText(P).ToString() == ParamPair.Key) {
+        PopType = P;
+        break;
+      }
+    }
+
+    BehaviorParams.PopTypeMultis[PopType] += ParamPair.Value;
+  }
+}
+void ACustomerAIManager::ChangePopWealthTypeMultis(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    EPopWealthType WealthType = EPopWealthType::Poorer;
+    for (auto W : TEnumRange<EPopWealthType>()) {
+      if (UEnum::GetDisplayValueAsText(W).ToString() == ParamPair.Key) {
+        WealthType = W;
+        break;
+      }
+    }
+
+    BehaviorParams.PopWealthTypeMultis[WealthType] += ParamPair.Value;
   }
 }

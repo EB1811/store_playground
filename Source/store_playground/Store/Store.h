@@ -77,6 +77,8 @@ public:
   FStoreStats StoreStats;
 
   UPROPERTY(EditAnywhere, Category = "Store")
+  int32 StockDisplayCount;  // * To calculate customer spawning, etc.
+  UPROPERTY(EditAnywhere, Category = "Store")
   TArray<FStockItem> StoreStockItems;
 
   auto BuildStockDisplay(ABuildable* Buildable) -> bool;

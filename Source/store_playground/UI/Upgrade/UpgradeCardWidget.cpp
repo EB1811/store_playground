@@ -36,7 +36,8 @@ void UUpgradeCardWidget::InitUI(const FUpgrade& Upgrade,
   UpgradeCostText->SetText(FText::FromString("Cost: " + FString::FromInt(Upgrade.Cost)));
 
   TArray<FText> UpgradeEffectsTexts;
-  for (const FUpgradeEffect& Effect : UpgradeEffects) UpgradeEffectsTexts.Add(Effect.TextData.Description);
+  for (const FUpgradeEffect& Effect : UpgradeEffects)
+    if (!Effect.TextData.Description.IsEmpty()) UpgradeEffectsTexts.Add(Effect.TextData.Description);
   UpgradeEffectsRichText->SetText(FText::Join(FText::FromString("\n"), UpgradeEffectsTexts));
 }
 

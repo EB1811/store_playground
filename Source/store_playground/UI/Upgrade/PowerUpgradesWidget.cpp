@@ -84,14 +84,12 @@ void UPowerUpgradesWidget::RefreshUI() {
     check(DisabledUpgradeCardWidget);
 
     DisabledUpgradeCardWidget->UpgradeNameText->SetText(Upgrade.TextData.Name);
+    DisabledUpgradeCardWidget->UpgradeCostText->SetText(FText::FromString("Cost: " + FString::FromInt(Upgrade.Cost)));
+    DisabledUpgradeCardWidget->UpgradeCostText->SetVisibility(ESlateVisibility::Visible);
     if (Upgrade.Requirements.IsNone()) {
       DisabledUpgradeCardWidget->ReqsNotMetText->SetText(FText::FromString(""));
       DisabledUpgradeCardWidget->ReqsNotMetText->SetVisibility(ESlateVisibility::Collapsed);
-      DisabledUpgradeCardWidget->UpgradeCostText->SetText(FText::FromString("Cost: " + FString::FromInt(Upgrade.Cost)));
-      DisabledUpgradeCardWidget->UpgradeCostText->SetVisibility(ESlateVisibility::Visible);
     } else {
-      DisabledUpgradeCardWidget->UpgradeCostText->SetText(FText::FromString(""));
-      DisabledUpgradeCardWidget->UpgradeCostText->SetVisibility(ESlateVisibility::Collapsed);
       DisabledUpgradeCardWidget->ReqsNotMetText->SetText(Upgrade.RequirementsFilterDescription);
       DisabledUpgradeCardWidget->ReqsNotMetText->SetVisibility(ESlateVisibility::Visible);
     }

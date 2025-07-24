@@ -13,7 +13,7 @@
 
 UENUM()
 enum class EReqFilterOperand : uint8 {
-  Time UMETA(DisplayName = "Time"),
+  Time UMETA(DisplayName = "Time"),  // * Day
   Money UMETA(DisplayName = "Money"),
   Inventory UMETA(DisplayName = "Inventory"),                      // * Using item ids.
   QuestsCompleted UMETA(DisplayName = "QuestsCompleted"),          // * Using quest ids.

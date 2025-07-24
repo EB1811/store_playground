@@ -40,6 +40,7 @@ auto AStore::BuildStockDisplay(ABuildable* Buildable) -> bool {
   if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
 
   MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay]);
+  StockDisplayCount++;
   return true;
 }
 auto AStore::BuildDecoration(ABuildable* Buildable) -> bool {
@@ -184,9 +185,11 @@ void AStore::LoadStoreLevelState() {
 void AStore::InitStockDisplays() {
   StoreStockItems.Empty();
 
+  StockDisplayCount = 0;
   TArray<ABuildable*> FoundBuildables = GetAllActorsOf<ABuildable>(GetWorld(), BuildableClass);
   for (ABuildable* Buildable : FoundBuildables) {
     if (Buildable->BuildableType != EBuildableType::StockDisplay) continue;
+    StockDisplayCount++;
 
     auto* StockInventory = Buildable->StockInventory;
     for (UItemBase* Item : StockInventory->ItemsArray) {

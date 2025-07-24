@@ -64,6 +64,9 @@ inline void SetStructPropertyValue(FStructProperty* StructProp,
   } else if (Prop->IsA<FIntProperty>()) {
     int32* PropValuePtr = Prop->ContainerPtrToValuePtr<int32>(StructPtr);
     *PropValuePtr = static_cast<int32>(FMath::Max(*PropValuePtr, 1) * PropValue);
+  } else if (Prop->IsA<FBoolProperty>()) {
+    bool* PropValuePtr = Prop->ContainerPtrToValuePtr<bool>(StructPtr);
+    *PropValuePtr = FMath::IsNearlyEqual(PropValue, 1.0f, KINDA_SMALL_NUMBER);
   }
 }
 inline void AddToStructPropertyValue(FStructProperty* StructProp,
@@ -79,6 +82,9 @@ inline void AddToStructPropertyValue(FStructProperty* StructProp,
   } else if (Prop->IsA<FIntProperty>()) {
     int32* PropValuePtr = Prop->ContainerPtrToValuePtr<int32>(StructPtr);
     *PropValuePtr += static_cast<int32>(PropValue);
+  } else if (Prop->IsA<FBoolProperty>()) {
+    bool* PropValuePtr = Prop->ContainerPtrToValuePtr<bool>(StructPtr);
+    *PropValuePtr = FMath::IsNearlyEqual(PropValue, 1.0f, KINDA_SMALL_NUMBER);
   }
 }
 

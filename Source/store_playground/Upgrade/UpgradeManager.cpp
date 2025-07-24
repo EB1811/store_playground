@@ -158,51 +158,6 @@ void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
   SelectedUpgradeIDs.Add(UpgradeId);
 }
 
-auto AUpgradeManager::GetAvailableEconEventAbilities() const -> TArray<FEconEventAbility> {
-  const auto& AvailableEconEventAbilities = GlobalDataManager->GetEconEventAbilitiesByIds(UnlockedEconEventAbilityIDs);
-  return AvailableEconEventAbilities.FilterByPredicate([&](const FEconEventAbility& Ability) {
-    return !EconEventAbilityCooldowns.Contains(Ability.ID) &&
-           !ActiveEconEventAbilities.ContainsByPredicate(
-               [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == Ability.ID; });
-  });
-}
+void AUpgradeManager::TickDaysTimedVars() {}
 
-void AUpgradeManager::ActivateEconEventAbility(const FName AbilityId) {
-  check(!EconEventAbilityCooldowns.Contains(AbilityId));
-  check(!ActiveEconEventAbilities.ContainsByPredicate(
-      [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == AbilityId; }));
-
-  FEconEventAbility Ability = GlobalDataManager->GetEconEventAbilitiesByIds({AbilityId})[0];
-  check(!Ability.EconEventId.IsNone());
-
-  Market->AddGuaranteedEconEvents({Ability.EconEventId});
-  ActiveEconEventAbilities.Add(Ability);
-}
-
-void AUpgradeManager::TickDaysTimedVars() {
-  TArray<FEconEventAbility> EconEventAbilitiesToRemove;
-  for (auto& EconEventAbility : ActiveEconEventAbilities)
-    if (EconEventAbility.DurationLeft <= 1) EconEventAbilitiesToRemove.Add(EconEventAbility);
-    else EconEventAbility.DurationLeft -= 1;
-  for (const auto& EconEventAbility : EconEventAbilitiesToRemove) {
-    ActiveEconEventAbilities.RemoveAllSwap(
-        [&](const FEconEventAbility& Ability) { return Ability.ID == EconEventAbility.ID; });
-
-    EconEventAbilityCooldowns.Add(EconEventAbility.ID, EconEventAbility.Cooldown);
-  }
-
-  TArray<FName> EconEventAbilityCooldownsToRemove;
-  for (auto& Cooldown : EconEventAbilityCooldowns)
-    if (Cooldown.Value <= 1) EconEventAbilityCooldownsToRemove.Add(Cooldown.Key);
-    else Cooldown.Value -= 1;
-  for (const auto& CooldownId : EconEventAbilityCooldownsToRemove) EconEventAbilityCooldowns.Remove(CooldownId);
-}
-
-void AUpgradeManager::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {
-  if (DataName != "EconEventAbility") checkf(false, TEXT("UnlockIDs only supports EconEventAbility IDs."));
-
-  for (const auto& Id : Ids) {
-    if (UnlockedEconEventAbilityIDs.Contains(Id)) continue;
-    UnlockedEconEventAbilityIDs.Add(Id);
-  }
-}
+void AUpgradeManager::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {}
