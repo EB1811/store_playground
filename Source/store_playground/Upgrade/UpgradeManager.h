@@ -42,6 +42,8 @@ public:
   UPROPERTY(EditAnywhere)
   class AMarket* Market;
   UPROPERTY(EditAnywhere)
+  class AMarketLevel* MarketLevel;
+  UPROPERTY(EditAnywhere)
   class AMarketEconomy* MarketEconomy;
   UPROPERTY(EditAnywhere)
   class AGlobalDataManager* GlobalDataManager;

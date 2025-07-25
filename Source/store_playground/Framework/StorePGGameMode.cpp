@@ -188,6 +188,7 @@ void AStorePGGameMode::BeginPlay() {
   UpgradeManager->CustomerAIManager = CustomerAIManager;
   UpgradeManager->Market = Market;
   UpgradeManager->MarketEconomy = MarketEconomy;
+  UpgradeManager->MarketLevel = MarketLevel;
   UpgradeManager->GlobalDataManager = GlobalDataManager;
   UpgradeManager->GlobalStaticDataManager = GlobalStaticDataManager;
   UpgradeManager->AbilityManager = AbilityManager;

@@ -25,6 +25,7 @@ enum class EStorePhaseAction : uint8 {
 };
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action);
 
+// TODO: Add to behavior params.
 USTRUCT()
 struct FStorePhaseManagerParams {
   GENERATED_BODY()

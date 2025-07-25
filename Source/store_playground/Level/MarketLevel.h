@@ -7,6 +7,7 @@
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Market/MarketDataStructs.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "MarketLevel.generated.h"
 
 USTRUCT()
@@ -39,6 +40,14 @@ struct FMarketLevelState {
   TMap<FGuid, FComponentSaveState> ComponentSaveMap;
   UPROPERTY(EditAnywhere)
   TArray<FObjectSaveState> ObjectSaveStates;
+};
+
+USTRUCT()
+struct FMarketLevelBehaviorParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float StockCountMulti;
 };
 
 UCLASS(Blueprintable)
@@ -89,6 +98,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market Level")
   class APlayerCommand* PlayerCommand;
 
+  UPROPERTY(EditAnywhere, Category = "Market Level")
+  FMarketLevelBehaviorParams BehaviorParams;
+
   UPROPERTY(EditAnywhere, Category = "Market Level", SaveGame)
   TMap<FName, int32> RecentlySpawnedUniqueNpcsMap;
 
@@ -108,4 +120,8 @@ public:
                          const FActorSpawnParameters& SpawnParams,
                          bool bIsWeekend = false) -> bool;
   void InitMiniGames(bool bIsWeekend = false);
+
+  UPROPERTY(EditAnywhere, Category = "Market Level")
+  FUpgradeable Upgradeable;
+  void SetupUpgradeable();
 };

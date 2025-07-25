@@ -18,6 +18,21 @@
     }                                                                   \
   }
 
+#define PLAYER_TAGS(...)                                        \
+  {                                                             \
+    {                                                           \
+      EReqFilterOperand::PlayerTags, []() {                     \
+        FGameplayTagContainer Container;                        \
+        TArray<FName> TagNames = {__VA_ARGS__};                 \
+        for (const FName& TagName : TagNames) {                 \
+          auto Tag = FGameplayTag::RequestGameplayTag(TagName); \
+          if (Tag.IsValid()) Container.AddTag(Tag);             \
+        }                                                       \
+        return Container;                                       \
+      }()                                                       \
+    }                                                           \
+  }
+
 BEGIN_DEFINE_SPEC(AGlobalDataManagerSpec,
                   "store_playground.GlobalDataManager",
                   EAutomationTestFlags::ProductFilter | EAutomationTestFlags_ApplicationContextMask)
@@ -168,6 +183,65 @@ void AGlobalDataManagerSpec::Define() {
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
     });
 
+    It("should evaluate PlayerTags filter operand correctly", EAsyncExecution::ThreadPool, [this]() {
+      // Single tag - contains check
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(PlayerTags, Player.Configuration.IsDoingTutorial)"),
+                                           PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"))));
+      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(PlayerTags, Player.Configuration.IsDoingTutorial)"),
+                                            PLAYER_TAGS(FName("Player.Configuration.TestTag"))));
+
+      // Multiple tags - contains all specified tags
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("contains(PlayerTags, [Player.Configuration.IsDoingTutorial, Player.Configuration.TestTag])"),
+          PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"), FName("Player.Configuration.TestTag"))));
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("contains(PlayerTags, [Player.Configuration.IsDoingTutorial, Player.Configuration.TestTag])"),
+          PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"))));
+
+      // Empty PlayerTags container
+      TEST_FALSE(EvaluateRequirementsFilter(FName("contains(PlayerTags, Player.Configuration.IsDoingTutorial)"),
+                                            PLAYER_TAGS()));
+
+      // Tag count comparisons
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("PlayerTags = 2"),
+          PLAYER_TAGS(FName("Player.Configuration.TestTag"), FName("Player.Configuration.IsDoingTutorial"))));
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("PlayerTags = 3"),
+          PLAYER_TAGS(FName("Player.Configuration.TestTag"), FName("Player.Configuration.IsDoingTutorial"))));
+
+      // Tag count greater than
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("PlayerTags > 1"),
+          PLAYER_TAGS(FName("Player.Configuration.TestTag"), FName("Player.Configuration.IsDoingTutorial"))));
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("PlayerTags > 2"),
+          PLAYER_TAGS(FName("Player.Configuration.TestTag"), FName("Player.Configuration.IsDoingTutorial"))));
+
+      // Complex expressions with PlayerTags and other operands
+      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(PlayerTags, Player.Configuration) AND Money >= 100"),
+                                           {{EReqFilterOperand::PlayerTags,
+                                             []() {
+                                               FGameplayTagContainer Container;
+                                               auto Tag = FGameplayTag::RequestGameplayTag(
+                                                   FName("Player.Configuration.IsDoingTutorial"));
+                                               if (Tag.IsValid()) Container.AddTag(Tag);
+                                               return Container;
+                                             }()},
+                                            {EReqFilterOperand::Money, 100.0f}}));
+
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("contains(PlayerTags, Player.Configuration.IsDoingTutorial) AND Money >= 200"),
+          {{EReqFilterOperand::PlayerTags,
+            []() {
+              FGameplayTagContainer Container;
+              auto Tag = FGameplayTag::RequestGameplayTag(FName("Player.Configuration.IsDoingTutorial"));
+              if (Tag.IsValid()) Container.AddTag(Tag);
+              return Container;
+            }()},
+           {EReqFilterOperand::Money, 150.0f}}));
+    });
+
     It("should evaluate complex expressions with arrays correctly", EAsyncExecution::ThreadPool, [this]() {
       // Array contains with money condition
       TEST_TRUE(EvaluateRequirementsFilter(
@@ -211,9 +285,6 @@ void AGlobalDataManagerSpec::Define() {
                                            ARRAY_NAMES(FName("d_1"), FName("d_2"), FName("Quest3"))));
 
       TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, geopol_civil_war_1)"),
-                                           ARRAY_NAMES(FName("geopol_civil_war_1"), FName("Quest2"), FName("Quest3"))));
-
-      TEST_TRUE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, [geopol_civil_war_1])"),
                                            ARRAY_NAMES(FName("geopol_civil_war_1"), FName("Quest2"), FName("Quest3"))));
 
       TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest4)"),

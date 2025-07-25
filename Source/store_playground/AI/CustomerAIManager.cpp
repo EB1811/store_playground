@@ -671,7 +671,7 @@ void ACustomerAIManager::ChangeActionWeights(const TMap<FName, float>& ParamValu
     }
     check(Action != ECustomerAction::None);
 
-    BehaviorParams.ActionWeights[Action] = FMath::Max(BehaviorParams.ActionWeights[Action], 1.0f) * ParamPair.Value;
+    BehaviorParams.ActionWeights[Action] += ParamPair.Value;
   }
 }
 void ACustomerAIManager::ChangePopTypeMultis(const TMap<FName, float>& ParamValues) {

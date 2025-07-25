@@ -166,6 +166,7 @@ enum class EUpgradeEffectSystem : uint8 {
   GlobalData UMETA(DisplayName = "GlobalData"),        // * GlobalData changes.
   Market UMETA(DisplayName = "Market"),                // * Market / behavior changes.
   MarketEconomy UMETA(DisplayName = "MarketEconomy"),  // * MarketEconomy changes.
+  MarketLevel UMETA(DisplayName = "MarketLevel"),      // * MarketLevel changes.
 };
 ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 5);
 

@@ -7,6 +7,7 @@
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Market/MarketEconomy.h"
+#include "store_playground/Level/MarketLevel.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/UI/SpgHUD.h"
 
@@ -95,14 +96,16 @@ auto AUpgradeManager::GetSelectedUpgrades(EUpgradeClass UpgradeClass) const -> T
 void AUpgradeManager::SelectUpgrade(const FName UpgradeId) {
   if (AvailableUpgradePoints <= 0) return;
 
+  // TODO: Move to game mode.
   const TMap<EUpgradeEffectSystem, FUpgradeable> UpgradeableMap = {
       {EUpgradeEffectSystem::Ability, AbilityManager->Upgradeable},
       {EUpgradeEffectSystem::CustomerAI, CustomerAIManager->Upgradeable},
       {EUpgradeEffectSystem::GlobalData, GlobalDataManager->Upgradeable},
       {EUpgradeEffectSystem::Market, Market->Upgradeable},
       {EUpgradeEffectSystem::MarketEconomy, MarketEconomy->Upgradeable},
+      {EUpgradeEffectSystem::MarketLevel, MarketLevel->Upgradeable},
   };
-  UE_LOG(LogTemp, Warning, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
+  UE_LOG(LogTemp, Log, TEXT("Selected upgrade: %s"), *UpgradeId.ToString());
 
   FUpgrade Upgrade = GlobalStaticDataManager->GetUpgradeById(UpgradeId);
   check(Upgrade.Cost <= AvailableUpgradePoints);

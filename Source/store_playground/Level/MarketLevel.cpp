@@ -42,7 +42,11 @@
 #include "PaperZDAnimationComponent.h"
 #include "Components/WidgetComponent.h"
 
-AMarketLevel::AMarketLevel() { PrimaryActorTick.bCanEverTick = false; }
+AMarketLevel::AMarketLevel() {
+  PrimaryActorTick.bCanEverTick = false;
+
+  SetupUpgradeable();
+}
 
 void AMarketLevel::BeginPlay() {
   Super::BeginPlay();
@@ -380,8 +384,9 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
     // TArray<UItemBase*> RandomItems = Market->GetNewRandomItems(RandomStockCount, ItemTypes, {}, ItemEconType);
 
     // Get random joined item + econ types using their weights.
-    int32 RandomStockCount =
-        FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0], NpcStoreC->NpcStoreType.StockCountRange[1]);
+    int32 RandomStockCount = FMath::RoundToInt32(
+        FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0], NpcStoreC->NpcStoreType.StockCountRange[1]) *
+        BehaviorParams.StockCountMulti);
     TMap<TTuple<EItemType, EItemEconType>, int32> RandomTypesCountMap = {};
     for (int32 i = 0; i < RandomStockCount; i++) {
       EItemType RandomItemType =
@@ -621,4 +626,14 @@ void AMarketLevel::InitMiniGames(bool bIsWeekend) {
 
     SpawnedMiniGameTypes.Add(SpawnableMiniGame->MiniGame);
   }
+}
+
+void AMarketLevel::SetupUpgradeable() {
+  Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) {
+    for (const auto& ParamPair : ParamValues) {
+      auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
+      auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
+      AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+    }
+  };
 }

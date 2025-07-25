@@ -88,7 +88,6 @@ inline bool ApplyOperator<const TArray<FName>>(const FString& Operator,
 
   return false;
 }
-
 inline bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, const FString& ValueString) {
   if (Operator == TEXT("contains")) {
     TArray<FString> ValueArray;
@@ -103,6 +102,28 @@ inline bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Arra
   }
 
   return ApplyOperator<int32>(Operator, Array.Num(), FCString::Atoi(*ValueString));
+}
+inline bool ApplyFuncOperator(const FString& Operator,
+                              const FGameplayTagContainer& Container,
+                              const FString& ValueString) {
+  if (Operator == TEXT("contains")) {
+    TArray<FString> ValueArray;
+    if (ValueString.Contains("[") && ValueString.Contains(",") && ValueString.Contains("]"))
+      ValueString.LeftChop(1).RightChop(1).ParseIntoArray(ValueArray, TEXT(","), true);
+    if (ValueArray.Num() <= 0) ValueArray.Add(ValueString);
+
+    FGameplayTagContainer ValueNameContainer;
+    for (const FString& Value : ValueArray) {
+      auto Tag = FGameplayTag::RequestGameplayTag(FName(*Value.TrimStartAndEnd()));
+      check(Tag.IsValid());
+      ValueNameContainer.AddTag(Tag);
+    }
+
+    if (Operator == TEXT("contains")) return Container.HasAll(ValueNameContainer);
+    return false;
+  }
+
+  return ApplyOperator<int32>(Operator, Container.Num(), FCString::Atoi(*ValueString));
 }
 
 // ! Simplified inorder parser works due to no operator precedence.
@@ -194,6 +215,9 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
       EvalResult = ApplyOperator(Operator, std::any_cast<FString>(GameDataMap[OperandE]), ValueStr);
     else if (GameDataMap[OperandE].type() == typeid(TArray<FName>))
       EvalResult = ApplyFuncOperator(Operator, std::any_cast<const TArray<FName>&>(GameDataMap[OperandE]), ValueStr);
+    else if (GameDataMap[OperandE].type() == typeid(FGameplayTagContainer))
+      EvalResult =
+          ApplyFuncOperator(Operator, std::any_cast<const FGameplayTagContainer&>(GameDataMap[OperandE]), ValueStr);
     else checkf(false, TEXT("FilterExpr %s does not contain a valid value."), *FilterExpr);
 
     FilterExprsRes.Add(EvalResult);
@@ -214,6 +238,7 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
 const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() const {
   check(PlayerCharacter && UpgradeManager && DayManager && Store && QuestManager && Market && NewsGen);
 
+  const FGameplayTagContainer PlayerTags = PlayerCharacter->PlayerTagsComponent->GetAllTags();
   const TArray<FName> InventoryItems = FormIdList<TObjectPtr<UItemBase>>(
       PlayerCharacter->PlayerInventoryComponent->ItemsArray, [](const UItemBase* Item) { return Item->ItemID; });
   TArray<FName> MadeDialogueChoices = {};
@@ -224,6 +249,7 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
   const TMap<EReqFilterOperand, std::any> GameDataMap = {
       {EReqFilterOperand::Time, DayManager->CurrentDay},
       {EReqFilterOperand::Money, Store->Money},
+      {EReqFilterOperand::PlayerTags, PlayerTags},
       {EReqFilterOperand::Inventory, InventoryItems},
       {EReqFilterOperand::QuestsCompleted, QuestManager->QuestsCompleted},
       {EReqFilterOperand::MadeDialogueChoices, MadeDialogueChoices},

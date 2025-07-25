@@ -23,4 +23,6 @@ public:
   FGameplayTagContainer QuestTags;
   UPROPERTY(EditAnywhere, SaveGame)
   FGameplayTagContainer CutsceneTags;
+
+  auto GetAllTags() const -> FGameplayTagContainer;
 };
