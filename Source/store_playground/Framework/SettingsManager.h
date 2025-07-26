@@ -16,7 +16,9 @@ public:
 
   virtual void BeginPlay() override;
 
-  UPROPERTY()
+  UPROPERTY(EditAnywhere)
+  class UGameUserSettings* UnrealSettings;
+  UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
 
   UPROPERTY(EditAnywhere, Category = "Sound")
@@ -33,6 +35,12 @@ public:
   void SetMasterVolume(float Volume);
   void SetMusicVolume(float Volume);
   void SetSFXVolume(float Volume);
+
+  void SetAntiAliasingMethod(int32 Method);
+  void SetGlobalIlluminationMethod(int32 Method);
+  void SetReflectionMethod(int32 Method);
+  void SetMotionBlurEnabled(bool bEnabled);
+  void SetBloomEnabled(bool bEnabled);
 
   void SaveSettings() const;
   void LoadSettings();

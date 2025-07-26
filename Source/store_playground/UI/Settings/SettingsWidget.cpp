@@ -3,6 +3,8 @@
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/UI/Settings/SoundSettingsWidget.h"
+#include "store_playground/UI/Settings/DisplaySettingsWidget.h"
+#include "store_playground/UI/Settings/GraphicsSettingsWidget.h"
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -56,7 +58,11 @@ void USettingsWidget::ControlsSettings() {
   RefreshUI();
 }
 
-void USettingsWidget::Back() { CloseWidgetFunc(); }
+void USettingsWidget::Back() {
+  CurrentCategory = ESettingsCategory::None;
+
+  CloseWidgetFunc();
+}
 
 void USettingsWidget::RefreshUI() {
   switch (CurrentCategory) {
@@ -71,10 +77,18 @@ void USettingsWidget::RefreshUI() {
     case ESettingsCategory::Display:
       SettingsOverlay->SetVisibility(ESlateVisibility::Hidden);
       if (OpenedWidget) OpenedWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+      OpenedWidget = DisplaySettingsWidget;
+      DisplaySettingsWidget->RefreshUI();
+      DisplaySettingsWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     case ESettingsCategory::Graphics:
       SettingsOverlay->SetVisibility(ESlateVisibility::Hidden);
       if (OpenedWidget) OpenedWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+      OpenedWidget = GraphicsSettingsWidget;
+      GraphicsSettingsWidget->RefreshUI();
+      GraphicsSettingsWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     case ESettingsCategory::Sound:
       SettingsOverlay->SetVisibility(ESlateVisibility::Hidden);
@@ -108,4 +122,16 @@ void USettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
     RefreshUI();
   });
   SoundSettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  DisplaySettingsWidget->InitUI(_InUIInputActions, SettingsManager, [this]() {
+    CurrentCategory = ESettingsCategory::None;
+    RefreshUI();
+  });
+  DisplaySettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  GraphicsSettingsWidget->InitUI(_InUIInputActions, SettingsManager, [this]() {
+    CurrentCategory = ESettingsCategory::None;
+    RefreshUI();
+  });
+  GraphicsSettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
 }

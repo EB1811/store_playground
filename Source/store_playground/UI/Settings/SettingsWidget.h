@@ -28,6 +28,10 @@ public:
   class UOverlay* SettingsOverlay;
   UPROPERTY(meta = (BindWidget))
   class USoundSettingsWidget* SoundSettingsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UDisplaySettingsWidget* DisplaySettingsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UGraphicsSettingsWidget* GraphicsSettingsWidget;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* GameSettingsButton;

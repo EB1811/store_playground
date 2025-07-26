@@ -45,6 +45,7 @@ void UPauseMenuViewWidget::LoadMenu() {
 void UPauseMenuViewWidget::SettingsMenu() {
   auto BackFunc = [this]() { SettingsWidget->SetVisibility(ESlateVisibility::Collapsed); };
   SettingsWidget->InitUI(InUIInputActions, SettingsManager, BackFunc);
+  SettingsWidget->RefreshUI();
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
