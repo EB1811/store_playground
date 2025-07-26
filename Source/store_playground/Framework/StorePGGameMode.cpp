@@ -102,6 +102,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->UpgradeManager = UpgradeManager;
   PlayerCharacter->AbilityManager = AbilityManager;
   PlayerCharacter->MiniGameManager = MiniGameManager;
+  PlayerCharacter->StorePhaseLightingManager = StorePhaseLightingManager;
 
   HUD->DayManager = DayManager;
   HUD->StorePhaseManager = StorePhaseManager;

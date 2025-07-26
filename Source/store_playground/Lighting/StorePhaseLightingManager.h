@@ -31,4 +31,11 @@ public:
   void OnOpenShopLightingCalled();
   UFUNCTION(BlueprintImplementableEvent)
   void OnCloseShopLightingCalled();
+
+  UFUNCTION(BlueprintImplementableEvent)
+  void SetupMarketLevelLighting();
+  UFUNCTION(BlueprintImplementableEvent)
+  void SetupStoreLevelDayLighting();
+  UFUNCTION(BlueprintImplementableEvent)
+  void SetupStoreLevelNightLighting();
 };

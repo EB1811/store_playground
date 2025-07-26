@@ -67,4 +67,4 @@ void AMainMenuGameMode::LoadGame(int32 SlotIndex) {
       [this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); });
 }
 
-void AMainMenuGameMode::Exit() {}
+void AMainMenuGameMode::Exit() { UKismetSystemLibrary::QuitGame(GetWorld(), nullptr, EQuitPreference::Quit, true); }

@@ -46,6 +46,7 @@
 #include "store_playground/Minigame/MiniGameManager.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
 #include "store_playground/Cutscene/CutsceneStructs.h"
+#include "store_playground/Lighting/StorePhaseLightingManager.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Tags/TagsComponent.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
@@ -708,6 +709,14 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
+
+  // ? Put in level manager?
+  if (LevelChangeC->LevelToLoad == ELevel::Market && StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
+    StorePhaseLightingManager->SetupMarketLevelLighting();
+  if (LevelChangeC->LevelToLoad == ELevel::Store && StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
+    StorePhaseLightingManager->SetupStoreLevelDayLighting();
+  if (LevelChangeC->LevelToLoad == ELevel::Store && StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
+    StorePhaseLightingManager->SetupStoreLevelNightLighting();
 }
 void APlayerZDCharacter::LeaveStore() {
   ELevel LevelToLoad = ELevel::Market;
@@ -735,6 +744,10 @@ void APlayerZDCharacter::LeaveStore() {
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
+
+  // ? Put in level manager?
+  if (LevelToLoad == ELevel::Market && StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
+    StorePhaseLightingManager->SetupMarketLevelLighting();
 }
 
 void APlayerZDCharacter::GameOverReset() {

@@ -93,6 +93,7 @@ public:
   void MoneyGained(float Amount);
   void MoneySpent(float Amount);
 
+  void EnterLevel();
   void SetupStoreEnvironment();
 
   UPROPERTY(EditAnywhere, Category = "Store")

@@ -143,7 +143,7 @@ void ALevelManager::EnterLevel(ELevel Level) {
   if (CutsceneManager->PlayPotentialCutscene(LevelCutsceneTags)) return;
 
   switch (Level) {
-    case ELevel::Store: break;
+    case ELevel::Store: Store->EnterLevel(); break;
     case ELevel::Market: MarketLevel->EnterLevel(); break;
   }
 }

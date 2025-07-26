@@ -157,6 +157,8 @@ public:
   class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AMiniGameManager* MiniGameManager;
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  class AStorePhaseLightingManager* StorePhaseLightingManager;
 
   // * Player systems.
   UPROPERTY(EditAnywhere, Category = "Character | Systems")

@@ -79,6 +79,7 @@ void AStorePhaseManager::Start() {
 
     MusicManager->MorningMusicCalled();
     Store->SetupStoreEnvironment();
+    Store->EnterLevel();
 
     DayManager->StartNewDay();
     return;

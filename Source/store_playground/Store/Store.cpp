@@ -98,6 +98,15 @@ void AStore::MoneySpent(float Amount) {
   StatisticsGen->StoreMoneySpent(Amount);
 }
 
+void AStore::EnterLevel() {
+  switch (StorePhaseManager->StorePhaseState) {
+    case EStorePhaseState::None: break;
+    case EStorePhaseState::Morning: StorePhaseLightingManager->SetupStoreLevelDayLighting(); break;
+    case EStorePhaseState::ShopOpen: StorePhaseLightingManager->SetupStoreLevelDayLighting(); break;
+    case EStorePhaseState::Night: StorePhaseLightingManager->SetupStoreLevelNightLighting(); break;
+    default: checkNoEntry();
+  }
+}
 void AStore::SetupStoreEnvironment() {
   switch (StorePhaseManager->StorePhaseState) {
     case EStorePhaseState::None: break;
