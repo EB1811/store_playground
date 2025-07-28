@@ -296,8 +296,8 @@ void AMarketEconomy::PerformEconomyTick() {
     if (NewWealthTypePopIndexes.Num() <= 0) break;
 
     int32 RandomNewPopIndex =
-        GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const auto& Index) {
-          return Index.Get<1>();
+        GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const TTuple<int, float>& Index) {
+          return Index.Get<0>();
         }).Get<0>();
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
 
@@ -320,7 +320,7 @@ void AMarketEconomy::PerformEconomyTick() {
     if (NewWealthTypePopIndexes.Num() <= 0) break;
 
     int32 RandomNewPopIndex =
-        GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const auto& Index) {
+        GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const TTuple<int, float>& Index) {
           return Index.Get<1>();
         }).Get<0>();
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
@@ -341,9 +341,10 @@ void AMarketEconomy::PerformEconomyTick() {
         NewPopIndexes.Add({i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
     if (NewPopIndexes.Num() <= 0) break;
 
-    int32 RandomNewPopIndex = GetWeightedRandomItem<TTuple<int32, float>>(NewPopIndexes, [](const auto& Index) {
-                                return Index.Get<1>();
-                              }).Get<0>();
+    int32 RandomNewPopIndex =
+        GetWeightedRandomItem<TTuple<int32, float>>(NewPopIndexes, [](const TTuple<int, float>& Index) {
+          return Index.Get<1>();
+        }).Get<0>();
     auto& RandomNewPop = PopEconDataArray[RandomNewPopIndex];
     MovePopPopulation(PopEconData, RandomNewPop, 0.01f, BehaviorParams.MaxPopChangeAtOnce);
 

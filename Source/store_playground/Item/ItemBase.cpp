@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ItemBase.h"
 #include "CoreMinimal.h"
 #include "ItemDataStructs.h"

@@ -215,6 +215,6 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
 
   ReflectionMethodComboBox->ClearOptions();
   ReflectionMethodComboBox->AddOption(TEXT("None"));
-  ReflectionMethodComboBox->AddOption(TEXT("Screen Space"));
   ReflectionMethodComboBox->AddOption(TEXT("Lumen"));
+  ReflectionMethodComboBox->AddOption(TEXT("Screen Space"));
 }

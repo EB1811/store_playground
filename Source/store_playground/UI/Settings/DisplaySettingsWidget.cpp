@@ -44,6 +44,7 @@ void UDisplaySettingsWidget::Back() { BackFunc(); }
 
 void UDisplaySettingsWidget::OnFrameRateLimitChanged(float Value) {
   if (Value >= 999.0f) FrameRateLimitText->SetText(FText::FromString(TEXT("Unlimited")));
+  else if (Value < 1.0f) FrameRateLimitText->SetText(FText::FromString(TEXT("Unlimited")));
   else FrameRateLimitText->SetText(FText::FromString(FString::Printf(TEXT("%.0f FPS"), Value)));
 }
 

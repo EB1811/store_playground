@@ -51,24 +51,57 @@ void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
   UE_LOG(LogTemp, Log, TEXT("Setting Global Illumination Method to: %d"), Method);
   static IConsoleVariable* SetGI =
       IConsoleManager::Get().FindConsoleVariable(TEXT("r.DynamicGlobalIlluminationMethod"));
-  check(SetGI);
+  static IConsoleVariable* SetDiffuseGI =
+      IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.DiffuseIndirect.Allow"));
+  static IConsoleVariable* SetNaniteGI = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Nanite"));
+  static IConsoleVariable* SetVSM = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Shadow.Virtual.Enable"));
+  static IConsoleVariable* SetAllRT =
+      IConsoleManager::Get().FindConsoleVariable(TEXT("r.RayTracing.ForceAllRayTracingEffects"));
+  check(SetGI && SetDiffuseGI && SetNaniteGI && SetVSM && SetAllRT);
 
   UWorld* world = GEngine->GameViewport->GetWorld();
   switch (Method) {
     case 0:  // None
       SetGI->Set(0, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      SetDiffuseGI->Set(0, ECVF_SetByGameSetting);
+      SetNaniteGI->Set(0, ECVF_SetByGameSetting);
+      SetVSM->Set(0, ECVF_SetByGameSetting);
+      SetAllRT->Set(0, ECVF_SetByGameSetting);
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
         PC->ConsoleCommand("r.DynamicGlobalIlluminationMethod 0", true);
+        PC->ConsoleCommand("r.Lumen.DiffuseIndirect.Allow 0", true);
+        PC->ConsoleCommand("r.Nanite 0", true);
+        PC->ConsoleCommand("r.Shadow.Virtual.Enable 0", true);
+        PC->ConsoleCommand("r.RayTracing.ForceAllRayTracingEffects 0", true);
+      }
       break;
     case 1:  // Lumen
       SetGI->Set(1, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      SetDiffuseGI->Set(1, ECVF_SetByGameSetting);
+      SetNaniteGI->Set(1, ECVF_SetByGameSetting);
+      SetVSM->Set(1, ECVF_SetByGameSetting);
+      SetAllRT->Set(-1, ECVF_SetByGameSetting);
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
         PC->ConsoleCommand("r.DynamicGlobalIlluminationMethod 1", true);
+        PC->ConsoleCommand("r.Lumen.DiffuseIndirect.Allow 1", true);
+        PC->ConsoleCommand("r.Nanite 1", true);
+        PC->ConsoleCommand("r.Shadow.Virtual.Enable 1", true);
+        PC->ConsoleCommand("r.RayTracing.ForceAllRayTracingEffects -1", true);
+      }
       break;
     case 2:  // Screen Space
       SetGI->Set(2, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      SetNaniteGI->Set(0, ECVF_SetByGameSetting);
+      SetDiffuseGI->Set(0, ECVF_SetByGameSetting);
+      SetVSM->Set(0, ECVF_SetByGameSetting);
+      SetAllRT->Set(0, ECVF_SetByGameSetting);
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
         PC->ConsoleCommand("r.DynamicGlobalIlluminationMethod 2", true);
+        PC->ConsoleCommand("r.Lumen.DiffuseIndirect.Allow 0", true);
+        PC->ConsoleCommand("r.Nanite 0", true);
+        PC->ConsoleCommand("r.Shadow.Virtual.Enable 0", true);
+        PC->ConsoleCommand("r.RayTracing.ForceAllRayTracingEffects 0", true);
+      }
       break;
   }
 }
