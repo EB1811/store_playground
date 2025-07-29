@@ -39,7 +39,8 @@ void ASettingsManager::SetSFXVolume(float Volume) {
 }
 
 void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
-  if (Method == 5) {  // * DLSS
+  // * DLSS
+  if (Method == 5) {
     static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));
     static IConsoleVariable* SetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
     check(SetAA && SetDLSS);
@@ -51,6 +52,13 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
       PC->ConsoleCommand("r.NGX.DLSS.Enable 1", true);
     }
     return;
+  } else {
+    static IConsoleVariable* SetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
+    check(SetDLSS);
+    SetDLSS->Set(0, ECVF_SetByGameSetting);
+    UWorld* world = GEngine->GameViewport->GetWorld();
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      PC->ConsoleCommand("r.NGX.DLSS.Enable 0", true);
   }
 
   static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));

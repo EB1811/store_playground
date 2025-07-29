@@ -33,9 +33,11 @@ public:
   TMap<EBuildableType, UStaticMesh*> MeshesMap;
   UPROPERTY(EditAnywhere, Category = "Buildable")
   UStaticMeshComponent* Mesh;
-
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
-  class UPaperFlipbookComponent* Sprite;
+  class UPaperFlipbookComponent* Sprite;  // * Items placed on stock display.
+
+  UPROPERTY(EditAnywhere, Category = "Buildable")
+  class UNavModifierComponent* NavModifier;
 
   UPROPERTY(EditAnywhere, Category = "Buildable")
   TMap<EBuildableType, bool> IsBuildableMap;

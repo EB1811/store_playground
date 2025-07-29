@@ -124,6 +124,8 @@ void AStore::SetupStoreEnvironment() {
       break;
     default: checkNoEntry();
   }
+
+  EnterLevel();
 }
 
 void AStore::SaveStoreLevelState() {

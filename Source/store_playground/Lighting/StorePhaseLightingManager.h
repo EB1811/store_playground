@@ -38,4 +38,6 @@ public:
   void SetupStoreLevelDayLighting();
   UFUNCTION(BlueprintImplementableEvent)
   void SetupStoreLevelNightLighting();
+  UFUNCTION(BlueprintImplementableEvent)
+  void SetupChurchLevelNightLighting();
 };

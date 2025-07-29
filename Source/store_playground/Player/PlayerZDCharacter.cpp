@@ -710,7 +710,7 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
 
-  // ? Put in level manager?
+  // TODO: Put in level manager
   if (LevelChangeC->LevelToLoad == ELevel::Market && StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
     StorePhaseLightingManager->SetupMarketLevelLighting();
   if (LevelChangeC->LevelToLoad == ELevel::Store && StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
@@ -745,9 +745,11 @@ void APlayerZDCharacter::LeaveStore() {
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
 
-  // ? Put in level manager?
+  // TODO: Put in level manager
   if (LevelToLoad == ELevel::Market && StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
     StorePhaseLightingManager->SetupMarketLevelLighting();
+  if (LevelToLoad == ELevel::Church && StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
+    StorePhaseLightingManager->SetupChurchLevelNightLighting();
 }
 
 void APlayerZDCharacter::GameOverReset() {

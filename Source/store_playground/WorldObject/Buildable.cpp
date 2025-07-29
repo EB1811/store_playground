@@ -1,9 +1,11 @@
 #include "Buildable.h"
 #include "Components/StaticMeshComponent.h"
+#include "NavAreas/NavArea_Null.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "PaperFlipbookComponent.h"
+#include "NavModifierComponent.h"
 
 ABuildable::ABuildable() {
   PrimaryActorTick.bCanEverTick = true;
@@ -15,10 +17,10 @@ ABuildable::ABuildable() {
 
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   Mesh->SetupAttachment(SceneRoot);
-
   Sprite = CreateDefaultSubobject<UPaperFlipbookComponent>(TEXT("Sprite"));
   Sprite->SetupAttachment(SceneRoot);
 
+  NavModifier = CreateDefaultSubobject<UNavModifierComponent>(TEXT("NavModifier"));
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   StockInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("StockInventory"));
   StockDisplay = CreateDefaultSubobject<UStockDisplayComponent>(TEXT("StockDisplayComponent"));
@@ -51,6 +53,8 @@ void ABuildable::SetToStockDisplay() {
   Mesh->SetVisibility(true);
   Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
+  NavModifier->SetAreaClass(UNavArea_Null::StaticClass());
+
   InteractionComponent->InteractionType = EInteractionType::StockDisplay;
 }
 
@@ -72,6 +76,8 @@ void ABuildable::SetToNone() {
 
   Mesh->SetVisibility(false);
   Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+  NavModifier->SetAreaClass(nullptr);
 
   InteractionComponent->InteractionType = EInteractionType::Buildable;
 }
