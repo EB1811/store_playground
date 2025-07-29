@@ -37,6 +37,11 @@ void UDisplaySettingsWidget::Apply() {
   GameSettings->SetVSyncEnabled(VSyncCheckBox->IsChecked());
   GameSettings->SetFrameRateLimit(FrameRateLimitSlider->GetValue());
 
+  if (HDRCheckBox->IsChecked() && GameSettings->SupportsHDRDisplayOutput() &&
+      WindowModeComboBox->GetSelectedIndex() == 0)
+    GameSettings->EnableHDRDisplayOutput(true);
+  else HDRCheckBox->SetIsChecked(false);
+
   SettingsManager->SaveSettings();
 }
 
@@ -78,6 +83,10 @@ void UDisplaySettingsWidget::RefreshUI() {
   float CurrentFrameRateLimit = GameSettings->GetFrameRateLimit();
   FrameRateLimitSlider->SetValue(CurrentFrameRateLimit);
   OnFrameRateLimitChanged(CurrentFrameRateLimit);
+
+  if (SettingsManager->UnrealSettings->SupportsHDRDisplayOutput())
+    HDRCheckBox->SetIsChecked(GameSettings->IsHDREnabled());
+  else HDRCheckBox->SetIsEnabled(false);
 }
 
 void UDisplaySettingsWidget::InitUI(FInUIInputActions _InUIInputActions,

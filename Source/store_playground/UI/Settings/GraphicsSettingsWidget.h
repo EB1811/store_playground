@@ -47,9 +47,11 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UComboBoxString* ReflectionMethodComboBox;
   UPROPERTY(meta = (BindWidget))
-  class UCheckBox* MotionBlurCheckBox;
-  UPROPERTY(meta = (BindWidget))
   class UCheckBox* BloomCheckBox;
+
+  // DLSS FG settings
+  UPROPERTY(meta = (BindWidget))
+  class UCheckBox* DLSSFrameGenerationCheckBox;
 
   // Resolution scaling
   UPROPERTY(meta = (BindWidget))

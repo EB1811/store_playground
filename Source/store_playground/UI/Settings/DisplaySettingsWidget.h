@@ -24,6 +24,8 @@ public:
   class USlider* FrameRateLimitSlider;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* FrameRateLimitText;
+  UPROPERTY(meta = (BindWidget))
+  class UCheckBox* HDRCheckBox;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* ApplyButton;

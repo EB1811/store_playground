@@ -39,8 +39,9 @@ public:
   void SetAntiAliasingMethod(int32 Method);
   void SetGlobalIlluminationMethod(int32 Method);
   void SetReflectionMethod(int32 Method);
-  void SetMotionBlurEnabled(bool bEnabled);
   void SetBloomEnabled(bool bEnabled);
+
+  void SetDLSSFrameGenerationEnabled(bool bEnabled);
 
   void SaveSettings() const;
   void LoadSettings();

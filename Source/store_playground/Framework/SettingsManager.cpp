@@ -39,6 +39,20 @@ void ASettingsManager::SetSFXVolume(float Volume) {
 }
 
 void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
+  if (Method == 5) {  // * DLSS
+    static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));
+    static IConsoleVariable* SetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
+    check(SetAA && SetDLSS);
+    SetAA->Set(4, ECVF_SetByGameSetting);
+    SetDLSS->Set(1, ECVF_SetByGameSetting);
+    UWorld* world = GEngine->GameViewport->GetWorld();
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
+      PC->ConsoleCommand("r.AntiAliasingMethod 4", true);
+      PC->ConsoleCommand("r.NGX.DLSS.Enable 1", true);
+    }
+    return;
+  }
+
   static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));
   check(SetAA);
   SetAA->Set((uint8)Method, ECVF_SetByGameSetting);
@@ -130,15 +144,6 @@ void ASettingsManager::SetReflectionMethod(int32 Method) {
   }
 }
 
-void ASettingsManager::SetMotionBlurEnabled(bool bEnabled) {
-  static IConsoleVariable* SetMotionBlur = IConsoleManager::Get().FindConsoleVariable(TEXT("r.MotionBlur.Amount"));
-  check(SetMotionBlur);
-  SetMotionBlur->Set(bEnabled ? 1.0f : 0.0f, ECVF_SetByGameSetting);
-  UWorld* world = GEngine->GameViewport->GetWorld();
-  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
-    PC->ConsoleCommand(FString::Printf(TEXT("r.MotionBlur.Amount %d"), bEnabled ? 1 : 0), true);
-}
-
 void ASettingsManager::SetBloomEnabled(bool bEnabled) {
   static IConsoleVariable* SetBloom = IConsoleManager::Get().FindConsoleVariable(TEXT("r.BloomQuality"));
   check(SetBloom);
@@ -146,6 +151,15 @@ void ASettingsManager::SetBloomEnabled(bool bEnabled) {
   UWorld* world = GEngine->GameViewport->GetWorld();
   if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.BloomQuality %d"), bEnabled ? 5 : 0), true);
+}
+
+void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
+  static IConsoleVariable* SetDLSSG = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Streamline.DLSSG.Enable"));
+  check(SetDLSSG);
+  SetDLSSG->Set(bEnabled ? 2 : 0, ECVF_SetByGameSetting);
+  UWorld* world = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+    PC->ConsoleCommand(FString::Printf(TEXT("r.Streamline.DLSSG.Enable %d"), bEnabled ? 2 : 0), true);
 }
 
 void ASettingsManager::SaveSettings() const {

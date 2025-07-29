@@ -63,14 +63,17 @@ void UGraphicsSettingsWidget::Apply() {
     case 0: SettingsManager->SetAntiAliasingMethod(0); break;
     case 1: SettingsManager->SetAntiAliasingMethod(1); break;
     case 2: SettingsManager->SetAntiAliasingMethod(4); break;
+    case 3: SettingsManager->SetAntiAliasingMethod(5); break;
     default: checkNoEntry();
   }
 
+  // TODO: Need customer save for resolution scale above 100%.
   GameSettings->SetResolutionScaleNormalized(ResolutionScaleSlider->GetValue());
   SettingsManager->SetGlobalIlluminationMethod(GlobalIlluminationMethodComboBox->GetSelectedIndex());
   SettingsManager->SetReflectionMethod(ReflectionMethodComboBox->GetSelectedIndex());
-  SettingsManager->SetMotionBlurEnabled(MotionBlurCheckBox->IsChecked());
   SettingsManager->SetBloomEnabled(BloomCheckBox->IsChecked());
+
+  SettingsManager->SetDLSSFrameGenerationEnabled(DLSSFrameGenerationCheckBox->IsChecked());
 
   SettingsManager->SaveSettings();
 }
@@ -97,8 +100,7 @@ void UGraphicsSettingsWidget::OnOverallQualityChanged(FString SelectedItem, ESel
     ReflectionMethodComboBox->SetSelectedIndex(2);          // Screen Space
   else                                                      // Low and Medium use None
     ReflectionMethodComboBox->SetSelectedIndex(0);          // None
-  MotionBlurCheckBox->SetIsChecked(false);
-  BloomCheckBox->SetIsChecked(QualityLevel >= 1);  // Bloom for Medium and above
+  BloomCheckBox->SetIsChecked(QualityLevel >= 1);           // Bloom for Medium and above
 
   PopulateQualityComboBox(ViewDistanceComboBox, QualityLevel);
   PopulateQualityComboBox(ShadowQualityComboBox, QualityLevel);
@@ -158,8 +160,10 @@ void UGraphicsSettingsWidget::RefreshUI() {
     case 1:  // FXAA
       AntiAliasingMethodComboBox->SetSelectedIndex(1);
       break;
-    case 4:  // TSR (Temporal Super Resolution)
-      AntiAliasingMethodComboBox->SetSelectedIndex(2);
+    case 4:  // TSR or DLSS
+      static IConsoleVariable* GetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
+      if (GetDLSS && GetDLSS->GetInt() > 0) AntiAliasingMethodComboBox->SetSelectedIndex(3);  // DLSS
+      else AntiAliasingMethodComboBox->SetSelectedIndex(2);                                   // TSR
       break;
     default:  // Other methods not offered in the UI.
       AntiAliasingMethodComboBox->SetSelectedIndex(1);
@@ -180,11 +184,11 @@ void UGraphicsSettingsWidget::RefreshUI() {
   else if (Refl && Refl->GetInt() == 2) ReflectionMethodComboBox->SetSelectedIndex(2);  // Screen Space
   else ReflectionMethodComboBox->SetSelectedIndex(0);                                   // None
 
-  static IConsoleVariable* MotionBlur = IConsoleManager::Get().FindConsoleVariable(TEXT("r.MotionBlur.Amount"));
-  MotionBlurCheckBox->SetIsChecked(MotionBlur && MotionBlur->GetFloat() > 0.0f);
-
   static IConsoleVariable* Bloom = IConsoleManager::Get().FindConsoleVariable(TEXT("r.BloomQuality"));
   BloomCheckBox->SetIsChecked(Bloom && Bloom->GetInt() > 0);
+
+  static IConsoleVariable* DLSSG = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Streamline.DLSSG.Enable"));
+  DLSSFrameGenerationCheckBox->SetIsChecked(DLSSG && DLSSG->GetInt() > 0);
 }
 
 void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
@@ -207,6 +211,7 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   AntiAliasingMethodComboBox->AddOption(TEXT("None"));
   AntiAliasingMethodComboBox->AddOption(TEXT("FXAA"));
   AntiAliasingMethodComboBox->AddOption(TEXT("TSR"));
+  AntiAliasingMethodComboBox->AddOption(TEXT("DLSS"));
 
   GlobalIlluminationMethodComboBox->ClearOptions();
   GlobalIlluminationMethodComboBox->AddOption(TEXT("None"));
