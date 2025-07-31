@@ -14,6 +14,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UImage* Icon;
   UPROPERTY(meta = (BindWidget))
+  class UImage* Page2Icon;  // ! Workaround for two different asset sizes.
+  UPROPERTY(meta = (BindWidget))
   class UTextBlock* Name;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* WealthText;

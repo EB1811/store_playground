@@ -109,7 +109,17 @@ void UEconomyDetailsWidget::RefreshUI() {
       UPopDetailsWidget* PopDetailsWidget = CreateWidget<UPopDetailsWidget>(this, PopDetailsWidgetClass);
       check(PopDetailsWidget);
 
-      PopDetailsWidget->Icon->SetBrushFromAtlasInterface(Pop.AssetData.Sprite);
+      // ! Workaround for two different asset sizes.
+      if (Pop.AssetData.Sprite->GetSourceSize().Y >= 48) {
+        PopDetailsWidget->Page2Icon->SetBrushFromAtlasInterface(Pop.AssetData.Sprite);
+        PopDetailsWidget->Page2Icon->SetVisibility(ESlateVisibility::Visible);
+        PopDetailsWidget->Icon->SetVisibility(ESlateVisibility::Collapsed);
+      } else {
+        PopDetailsWidget->Icon->SetBrushFromAtlasInterface(Pop.AssetData.Sprite);
+        PopDetailsWidget->Icon->SetVisibility(ESlateVisibility::Visible);
+        PopDetailsWidget->Page2Icon->SetVisibility(ESlateVisibility::Collapsed);
+      }
+
       PopDetailsWidget->Name->SetText(Pop.PopName);
       PopDetailsWidget->WealthText->SetText(
           FText::FromString("Wealth: " + GetWealthText(MarketEconomy->PopEconDataArray, PopEconData)));
