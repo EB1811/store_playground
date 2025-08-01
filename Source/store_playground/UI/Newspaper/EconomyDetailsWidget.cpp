@@ -110,7 +110,7 @@ void UEconomyDetailsWidget::RefreshUI() {
       check(PopDetailsWidget);
 
       // ! Workaround for two different asset sizes.
-      if (Pop.AssetData.Sprite->GetSourceSize().Y >= 48) {
+      if (Pop.AssetData.Sprite->GetSlateAtlasData().GetSourceDimensions().Y >= 48) {
         PopDetailsWidget->Page2Icon->SetBrushFromAtlasInterface(Pop.AssetData.Sprite);
         PopDetailsWidget->Page2Icon->SetVisibility(ESlateVisibility::Visible);
         PopDetailsWidget->Icon->SetVisibility(ESlateVisibility::Collapsed);
