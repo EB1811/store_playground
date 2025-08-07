@@ -130,7 +130,7 @@ void ALevelManager::InitLevel(ELevel Level) {
       break;
     case ELevel::Market:
       check(MarketLevel);
-      // MarketLevel->LoadLevelState(DayManager->bIsWeekend);
+      MarketLevel->LoadLevelState(DayManager->bIsWeekend);
       break;
   }
 }
