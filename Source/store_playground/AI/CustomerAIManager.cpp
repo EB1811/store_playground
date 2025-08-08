@@ -248,7 +248,8 @@ void ACustomerAIManager::SpawnCustomers() {
     WeightedCustomers.Add({GenericCustomer, PopData.Population * PopWeightingMulti});
   }
 
-  int32 CustomersToSpawn = FMath::RandRange(0, MaxCustomers - AllCustomers.Num());
+  int32 MaxCustomersToSpawn = FMath::Min(MaxCustomers, ManagerParams.MaxSpawnCustomersInOneGo);
+  int32 CustomersToSpawn = FMath::RandRange(0, MaxCustomersToSpawn - AllCustomers.Num());
   for (int32 i = 0; i < CustomersToSpawn; i++) {
     float SpawnChance = BehaviorParams.CustomerSpawnChance * FMath::Clamp(FilledStockPercent * 1.5f, 0.75f, 1.25f);
     if (SpawnChance < FMath::FRand() * 100) continue;
@@ -302,12 +303,16 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
   check(NavSystem);
 
+  TMap<ECustomerAction, float> ActionWeights = BehaviorParams.ActionWeights;
+  if (Store->StoreStockItems.Num() < 5.0f)
+    ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
+
   TArray<ACustomer*> CustomersToExit;
   for (ACustomer* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
         if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
-          CustomerPerformAction(Customer);
+          CustomerPerformAction(Customer, ActionWeights);
           break;
         }
 
@@ -322,6 +327,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
           Customer->WidgetComponent->SetVisibility(false, true);
           Customer->InteractionComponent->InteractionType = EInteractionType::None;
           Customer->CustomerAIComponent->CustomerState = ECustomerState::Leaving;
+          CustomersToExit.Add(Customer);
         }
         break;
       }
@@ -340,8 +346,13 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     }
   }
 
+  if (CustomersToExit.Num() <= 0) return;
+
+  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];  // Spawn point is exit.
+  check(SpawnPoint);
+  FVector ExitLocation = SpawnPoint->GetActorLocation();
   for (ACustomer* Customer : CustomersToExit) {
-    MoveCustomerToExit(NavSystem, Customer);
+    MoveCustomerToExit(NavSystem, Customer, ExitLocation);
 
     ExitingCustomers.Add(Customer);
     AllCustomers.RemoveSingleSwap(Customer);
@@ -393,38 +404,28 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
 
   OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, true, false);
 }
-void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem, ACustomer* Customer) {
+void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem, ACustomer* Customer, FVector ExitLocation) {
   check(NavSystem && Customer);
-
-  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];  // Spawn point is exit.
-  check(SpawnPoint);
 
   AAIController* OwnerAIController = Customer->GetController<AAIController>();
   check(OwnerAIController);
   check(OwnerAIController->GetMoveStatus() == EPathFollowingStatus::Idle);
 
-  FVector Direction = (SpawnPoint->GetActorLocation() - Customer->GetActorLocation()).GetSafeNormal();
+  FVector Direction = (ExitLocation - Customer->GetActorLocation()).GetSafeNormal();
   ESimpleSpriteDirection DirectionEnum = ESimpleSpriteDirection::Down;
   if (FMath::Abs(Direction.X) > FMath::Abs(Direction.Y))
     DirectionEnum = Direction.X > 0 ? ESimpleSpriteDirection::Right : ESimpleSpriteDirection::Left;
   else DirectionEnum = Direction.Y > 0 ? ESimpleSpriteDirection::Down : ESimpleSpriteDirection::Up;
   Customer->SimpleSpriteAnimComponent->Walk(DirectionEnum);
 
-  OwnerAIController->MoveToLocation(SpawnPoint->GetActorLocation(), 1.0f, false, true, true, false);
+  OwnerAIController->MoveToLocation(ExitLocation, 1.0f, false, true, true, false);
 }
 
-void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer) {
-  check(Customer);
-
-  TMap<ECustomerAction, float> ActionWeights = BehaviorParams.ActionWeights;
-  if (Store->StoreStockItems.Num() < 5.0f)
-    ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
-
+void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer, TMap<ECustomerAction, float> ActionWeights) {
   ECustomerAction RandomAction =
       GetWeightedRandomItem<TTuple<ECustomerAction, float>>(ActionWeights.Array(), [](const auto& Action) {
         return Action.Value;
       }).Key;
-
   ECustomerAction Action = Customer->CustomerAIComponent->CustomerAction != ECustomerAction::None
                                ? Customer->CustomerAIComponent->CustomerAction
                                : RandomAction;

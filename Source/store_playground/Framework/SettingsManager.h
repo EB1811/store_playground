@@ -39,6 +39,7 @@ public:
   void SetAntiAliasingMethod(int32 Method);
   void SetGlobalIlluminationMethod(int32 Method);
   void SetReflectionMethod(int32 Method);
+  void SetDepthOfFieldEnabled(bool bEnabled);
   void SetBloomEnabled(bool bEnabled);
 
   void SetDLSSFrameGenerationEnabled(bool bEnabled);

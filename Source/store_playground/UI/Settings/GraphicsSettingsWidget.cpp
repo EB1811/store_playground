@@ -71,6 +71,7 @@ void UGraphicsSettingsWidget::Apply() {
   GameSettings->SetResolutionScaleNormalized(ResolutionScaleSlider->GetValue());
   SettingsManager->SetGlobalIlluminationMethod(GlobalIlluminationMethodComboBox->GetSelectedIndex());
   SettingsManager->SetReflectionMethod(ReflectionMethodComboBox->GetSelectedIndex());
+  SettingsManager->SetDepthOfFieldEnabled(DepthOfFieldCheckBox->IsChecked());
   SettingsManager->SetBloomEnabled(BloomCheckBox->IsChecked());
 
   SettingsManager->SetDLSSFrameGenerationEnabled(DLSSFrameGenerationCheckBox->IsChecked());
@@ -100,6 +101,7 @@ void UGraphicsSettingsWidget::OnOverallQualityChanged(FString SelectedItem, ESel
     ReflectionMethodComboBox->SetSelectedIndex(2);          // Screen Space
   else                                                      // Low and Medium use None
     ReflectionMethodComboBox->SetSelectedIndex(0);          // None
+  DepthOfFieldCheckBox->SetIsChecked(QualityLevel >= 2);    // Depth of Field for High and above
   BloomCheckBox->SetIsChecked(QualityLevel >= 1);           // Bloom for Medium and above
 
   PopulateQualityComboBox(ViewDistanceComboBox, QualityLevel);
@@ -183,6 +185,9 @@ void UGraphicsSettingsWidget::RefreshUI() {
   if (Refl && Refl->GetInt() == 1) ReflectionMethodComboBox->SetSelectedIndex(1);       // Lumen
   else if (Refl && Refl->GetInt() == 2) ReflectionMethodComboBox->SetSelectedIndex(2);  // Screen Space
   else ReflectionMethodComboBox->SetSelectedIndex(0);                                   // None
+
+  static IConsoleVariable* DoF = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DepthOfFieldQuality"));
+  DepthOfFieldCheckBox->SetIsChecked(DoF && DoF->GetInt() > 0);
 
   static IConsoleVariable* Bloom = IConsoleManager::Get().FindConsoleVariable(TEXT("r.BloomQuality"));
   BloomCheckBox->SetIsChecked(Bloom && Bloom->GetInt() > 0);

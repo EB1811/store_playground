@@ -43,7 +43,10 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
   if (Method == 5) {
     static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));
     static IConsoleVariable* SetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
-    check(SetAA && SetDLSS);
+
+    check(SetAA);
+    if (!SetDLSS) return;
+
     SetAA->Set(4, ECVF_SetByGameSetting);
     SetDLSS->Set(1, ECVF_SetByGameSetting);
     UWorld* world = GEngine->GameViewport->GetWorld();
@@ -54,7 +57,8 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
     return;
   } else {
     static IConsoleVariable* SetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
-    check(SetDLSS);
+    if (!SetDLSS) return;
+
     SetDLSS->Set(0, ECVF_SetByGameSetting);
     UWorld* world = GEngine->GameViewport->GetWorld();
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
@@ -152,6 +156,15 @@ void ASettingsManager::SetReflectionMethod(int32 Method) {
   }
 }
 
+void ASettingsManager::SetDepthOfFieldEnabled(bool bEnabled) {
+  static IConsoleVariable* SetDoF = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DepthOfFieldQuality"));
+  check(SetDoF);
+  SetDoF->Set(bEnabled ? 2 : 0, ECVF_SetByGameSetting);
+  UWorld* world = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+    PC->ConsoleCommand(FString::Printf(TEXT("r.DepthOfFieldQuality %d"), bEnabled ? 2 : 0), true);
+}
+
 void ASettingsManager::SetBloomEnabled(bool bEnabled) {
   static IConsoleVariable* SetBloom = IConsoleManager::Get().FindConsoleVariable(TEXT("r.BloomQuality"));
   check(SetBloom);
@@ -163,7 +176,8 @@ void ASettingsManager::SetBloomEnabled(bool bEnabled) {
 
 void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
   static IConsoleVariable* SetDLSSG = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Streamline.DLSSG.Enable"));
-  check(SetDLSSG);
+  if (!SetDLSSG) return;
+
   SetDLSSG->Set(bEnabled ? 2 : 0, ECVF_SetByGameSetting);
   UWorld* world = GEngine->GameViewport->GetWorld();
   if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))

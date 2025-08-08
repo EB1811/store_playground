@@ -22,6 +22,8 @@ struct FCustomerAIManagerParams {
   bool bSpawnCustomers;
   UPROPERTY(EditAnywhere)
   float CustomerSpawnInterval;
+  UPROPERTY(EditAnywhere)
+  int32 MaxSpawnCustomersInOneGo;  // Avoid freezing the game by spawning too many customers at once.
 
   UPROPERTY(EditAnywhere)
   float UniqueNpcBaseSpawnChance;
@@ -136,9 +138,9 @@ public:
   void PerformCustomerAILoop();
 
   void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
-  void MoveCustomerToExit(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
+  void MoveCustomerToExit(class UNavigationSystemV1* NavSystem, class ACustomer* Customer, FVector ExitLocation);
 
-  void CustomerPerformAction(class ACustomer* Customer);
+  void CustomerPerformAction(class ACustomer* Customer, TMap<ECustomerAction, float> ActionWeights);
 
   auto CustomerPickItem(class UCustomerAIComponent* CustomerAI,
                         std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr) -> bool;

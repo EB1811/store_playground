@@ -47,6 +47,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UComboBoxString* ReflectionMethodComboBox;
   UPROPERTY(meta = (BindWidget))
+  class UCheckBox* DepthOfFieldCheckBox;
+  UPROPERTY(meta = (BindWidget))
   class UCheckBox* BloomCheckBox;
 
   // DLSS FG settings

@@ -192,14 +192,12 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
     CheckForInteraction();
 
   if (PlayerBehaviourState == EPlayerState::Normal &&
-      GetWorld()->TimeSince(OcclusionCheckData.LastOcclusionCheckTime) > OcclusionCheckData.OcclusionCheckFrequency) {
+      GetWorld()->TimeSince(OcclusionCheckData.LastOcclusionCheckTime) > OcclusionCheckData.OcclusionCheckFrequency)
     HandleOcclusion();
-  }
 
   if (PlayerBehaviourState == EPlayerState::Normal &&
-      GetWorld()->TimeSince(LastCurrentFootstepPhysMatCheckTime) > InteractionData.InteractionCheckFrequency) {
+      GetWorld()->TimeSince(LastCurrentFootstepPhysMatCheckTime) > InteractionData.InteractionCheckFrequency)
     CheckCurrentFootstepPhysMat();
-  }
 }
 
 void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {

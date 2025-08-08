@@ -5,6 +5,7 @@
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 ACustomer::ACustomer() {
   PrimaryActorTick.bCanEverTick = true;
