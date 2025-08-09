@@ -32,6 +32,8 @@ void UCustomerAIComponent::TickComponent(float DeltaTime,
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+// TODO: Add unique npc quest starting and leaving functions.
+
 void UCustomerAIComponent::LeaveRequestDialogue() {
   CustomerState = ECustomerState::Requesting;
 

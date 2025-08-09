@@ -11,6 +11,7 @@
 #include "Engine/World.h"
 #include "Engine/DataTable.h"
 #include "store_playground/WorldObject/Customer.h"
+#include "store_playground/WorldObject/CustomerPC.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -90,13 +91,13 @@ void ACustomerAIManager::EndCustomerAI() {
 
   PickingItemIdsMap.Empty();
 
-  TArray<ACustomer*> CustomersToRemove;
-  for (ACustomer* Customer : AllCustomers) CustomersToRemove.Add(Customer);
-  for (ACustomer* Customer : ExitingCustomers) CustomersToRemove.Add(Customer);
+  TArray<ACustomerPC*> CustomersToRemove;
+  for (ACustomerPC* Customer : AllCustomers) CustomersToRemove.Add(Customer);
+  for (ACustomerPC* Customer : ExitingCustomers) CustomersToRemove.Add(Customer);
   AllCustomers.Empty();
   ExitingCustomers.Empty();
 
-  for (ACustomer* Customer : CustomersToRemove) Customer->Destroy();
+  for (ACustomerPC* Customer : CustomersToRemove) Customer->Destroy();
 }
 
 void ACustomerAIManager::SpawnUniqueNpcs() {
@@ -118,8 +119,8 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.ID, ManagerParams.RecentNpcSpawnedKeepTime);
 
   UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.ID.ToString());
-  ACustomer* UniqueCustomer = GetWorld()->SpawnActor<ACustomer>(CustomerClass, SpawnPoint->GetActorLocation(),
-                                                                SpawnPoint->GetActorRotation(), SpawnParams);
+  ACustomerPC* UniqueCustomer = GetWorld()->SpawnActor<ACustomerPC>(CustomerClass, SpawnPoint->GetActorLocation(),
+                                                                    SpawnPoint->GetActorRotation(), SpawnParams);
 
   UniqueCustomer->SimpleSpriteAnimComponent->IdleSprites = UniqueNpcData.AssetData.IdleSprites;
   UniqueCustomer->SimpleSpriteAnimComponent->WalkSprites = UniqueNpcData.AssetData.WalkSprites;
@@ -198,7 +199,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
     default: break;
   }
 
-  UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::PerformingQuest;
+  UniqueCustomer->CustomerAIComponent->CustomerState = ECustomerState::RequestingQuest;
 
   UniqueCustomer->QuestComponent->ChainID = RandomQuestChainData.ID;
   UniqueCustomer->QuestComponent->CustomerAction = RandomQuestChainData.CustomerAction;
@@ -248,13 +249,13 @@ void ACustomerAIManager::SpawnCustomers() {
     WeightedCustomers.Add({GenericCustomer, PopData.Population * PopWeightingMulti});
   }
 
-  int32 MaxCustomersToSpawn = FMath::Min(MaxCustomers, ManagerParams.MaxSpawnCustomersInOneGo);
-  int32 CustomersToSpawn = FMath::RandRange(0, MaxCustomersToSpawn - AllCustomers.Num());
+  int32 MaxCustomersToSpawn = FMath::Min(MaxCustomers - AllCustomers.Num(), ManagerParams.MaxSpawnCustomersInOneGo);
+  int32 CustomersToSpawn = FMath::RandRange(0, MaxCustomersToSpawn);
   for (int32 i = 0; i < CustomersToSpawn; i++) {
     float SpawnChance = BehaviorParams.CustomerSpawnChance * FMath::Clamp(FilledStockPercent * 1.5f, 0.75f, 1.25f);
     if (SpawnChance < FMath::FRand() * 100) continue;
 
-    ACustomer* Customer = GetWorld()->SpawnActor<ACustomer>(
+    ACustomerPC* Customer = GetWorld()->SpawnActor<ACustomerPC>(
         CustomerClass,
         SpawnPoint->GetActorLocation() +
             FVector(FMath::FRandRange(-50.0f, 50.0f), FMath::FRandRange(-50.0f, 50.0f), 0.0f),
@@ -307,8 +308,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   if (Store->StoreStockItems.Num() < 5.0f)
     ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
 
-  TArray<ACustomer*> CustomersToExit;
-  for (ACustomer* Customer : AllCustomers) {
+  TArray<ACustomerPC*> CustomersToExit;
+  for (ACustomerPC* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
         if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
@@ -331,8 +332,11 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         }
         break;
       }
-      case (ECustomerState::PerformingQuest): {
+      case (ECustomerState::RequestingQuest): {
         if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
+        break;
+      }
+      case (ECustomerState::PerformingQuest): {
         break;
       }
       case (ECustomerState::Negotiating): {
@@ -351,7 +355,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];  // Spawn point is exit.
   check(SpawnPoint);
   FVector ExitLocation = SpawnPoint->GetActorLocation();
-  for (ACustomer* Customer : CustomersToExit) {
+  for (ACustomerPC* Customer : CustomersToExit) {
     MoveCustomerToExit(NavSystem, Customer, ExitLocation);
 
     ExitingCustomers.Add(Customer);
@@ -362,8 +366,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       PickingItemIdsMap.Remove(*ItemID);
   }
 
-  TArray<ACustomer*> CustomersToDestroy;
-  for (ACustomer* Customer : ExitingCustomers) {
+  TArray<ACustomerPC*> CustomersToDestroy;
+  for (ACustomerPC* Customer : ExitingCustomers) {
     if (Customer->GetController<AAIController>()->GetMoveStatus() != EPathFollowingStatus::Idle) continue;
 
     CustomersToDestroy.Add(Customer);
@@ -373,13 +377,13 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       Customer->CustomerAIComponent->NegotiationAI = nullptr;
     }
   }
-  for (ACustomer* Customer : CustomersToDestroy) {
+  for (ACustomerPC* Customer : CustomersToDestroy) {
     ExitingCustomers.RemoveSingleSwap(Customer);
     Customer->Destroy();
   }
 }
 
-void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACustomer* Customer) {
+void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACustomerPC* Customer) {
   check(NavSystem && Customer);
 
   AAIController* OwnerAIController = Customer->GetController<AAIController>();
@@ -402,9 +406,11 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   else DirectionEnum = Direction.Y > 0 ? ESimpleSpriteDirection::Down : ESimpleSpriteDirection::Up;
   Customer->SimpleSpriteAnimComponent->Walk(DirectionEnum);
 
-  OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, true, false);
+  OwnerAIController->MoveToLocation(RandomLocation, 1.0f, false, true, false, false);
 }
-void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem, ACustomer* Customer, FVector ExitLocation) {
+void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem,
+                                            ACustomerPC* Customer,
+                                            FVector ExitLocation) {
   check(NavSystem && Customer);
 
   AAIController* OwnerAIController = Customer->GetController<AAIController>();
@@ -421,7 +427,8 @@ void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem, ACus
   OwnerAIController->MoveToLocation(ExitLocation, 1.0f, false, true, true, false);
 }
 
-void ACustomerAIManager::CustomerPerformAction(class ACustomer* Customer, TMap<ECustomerAction, float> ActionWeights) {
+void ACustomerAIManager::CustomerPerformAction(class ACustomerPC* Customer,
+                                               TMap<ECustomerAction, float> ActionWeights) {
   ECustomerAction RandomAction =
       GetWeightedRandomItem<TTuple<ECustomerAction, float>>(ActionWeights.Array(), [](const auto& Action) {
         return Action.Value;
@@ -515,7 +522,7 @@ auto ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UIte
   return true;
 }
 
-void ACustomerAIManager::MakeCustomerNegotiable(class ACustomer* Customer) {
+void ACustomerAIManager::MakeCustomerNegotiable(class ACustomerPC* Customer) {
   AAIController* OwnerAIController = Customer->GetController<AAIController>();
   if (OwnerAIController) OwnerAIController->StopMovement();
 

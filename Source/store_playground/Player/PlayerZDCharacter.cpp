@@ -520,6 +520,7 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
       auto [Dialogue, QuestC, CustomerAI, Item, SpriteAnimC] = Interactable->InteractUniqueNPCQuest();
 
       SpriteAnimC->TurnToPlayer(GetActorLocation());
+      CustomerAI->CustomerState = ECustomerState::PerformingQuest;
       EnterQuest(QuestC, Dialogue, SpriteAnimC, CustomerAI, Item);
       break;
     }
@@ -620,11 +621,19 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
       check(CustomerAI->NegotiationAI->RelevantItem);
       if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
         EnterDialogue(
-            DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+            DialogueC,
+            [CustomerAI, SpriteAnimC]() {
+              CustomerAI->CustomerState = ECustomerState::RequestingQuest;
+              SpriteAnimC->ReturnToOgRotation();
+            },
             [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
         EnterDialogue(
-            DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+            DialogueC,
+            [CustomerAI, SpriteAnimC]() {
+              CustomerAI->CustomerState = ECustomerState::RequestingQuest;
+              SpriteAnimC->ReturnToOgRotation();
+            },
             [this, QuestC, CustomerAI, Item]() {
               QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
               EnterNegotiation(CustomerAI, Item);
@@ -634,7 +643,11 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::None:
       if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
       EnterDialogue(
-          DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
+          DialogueC,
+          [CustomerAI, SpriteAnimC]() {
+            CustomerAI->CustomerState = ECustomerState::RequestingQuest;
+            SpriteAnimC->ReturnToOgRotation();
+          },
           [this, QuestC, CustomerAI]() {
             QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
             CustomerAI->CustomerState = ECustomerState::Leaving;

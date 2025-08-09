@@ -90,7 +90,7 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
-  TSubclassOf<class ACustomer> CustomerClass;
+  TSubclassOf<class ACustomerPC> CustomerClass;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TSubclassOf<class ASpawnPoint> SpawnPointClass;
 
@@ -126,9 +126,9 @@ public:
   TMap<FGuid, FGuid> PickingItemIdsMap;  // Item ID to Customer ID
 
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
-  TArray<class ACustomer*> AllCustomers;
+  TArray<class ACustomerPC*> AllCustomers;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
-  TArray<class ACustomer*> ExitingCustomers;
+  TArray<class ACustomerPC*> ExitingCustomers;
 
   void StartCustomerAI();
   void EndCustomerAI();
@@ -137,17 +137,17 @@ public:
   void SpawnCustomers();
   void PerformCustomerAILoop();
 
-  void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomer* Customer);
-  void MoveCustomerToExit(class UNavigationSystemV1* NavSystem, class ACustomer* Customer, FVector ExitLocation);
+  void MoveCustomerRandom(class UNavigationSystemV1* NavSystem, class ACustomerPC* Customer);
+  void MoveCustomerToExit(class UNavigationSystemV1* NavSystem, class ACustomerPC* Customer, FVector ExitLocation);
 
-  void CustomerPerformAction(class ACustomer* Customer, TMap<ECustomerAction, float> ActionWeights);
+  void CustomerPerformAction(class ACustomerPC* Customer, TMap<ECustomerAction, float> ActionWeights);
 
   auto CustomerPickItem(class UCustomerAIComponent* CustomerAI,
                         std::function<bool(const FStockItem& StockItem)> FilterFunc = nullptr) -> bool;
   auto CustomerStockCheck(class UCustomerAIComponent* CustomerAI,
                           std::function<bool(const FWantedItemType& ItemType)> FilterFunc = nullptr) -> bool;
   auto CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr) -> bool;
-  void MakeCustomerNegotiable(class ACustomer* Customer);
+  void MakeCustomerNegotiable(class ACustomerPC* Customer);
 
   auto ConsiderOffer(class UNegotiationAI* NegotiationAI,
                      const class UItemBase* Item,
