@@ -15,6 +15,8 @@ void UDisplaySettingsWidget::NativeOnInitialized() {
   BackButton->OnClicked.AddDynamic(this, &UDisplaySettingsWidget::Back);
 
   FrameRateLimitSlider->OnValueChanged.AddDynamic(this, &UDisplaySettingsWidget::OnFrameRateLimitChanged);
+
+  SetupUIActionable();
 }
 
 void UDisplaySettingsWidget::Apply() {
@@ -101,4 +103,9 @@ void UDisplaySettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   WindowModeComboBox->AddOption(TEXT("Fullscreen"));
   WindowModeComboBox->AddOption(TEXT("Windowed Fullscreen"));
   WindowModeComboBox->AddOption(TEXT("Windowed"));
+}
+
+void UDisplaySettingsWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Apply(); };
+  UIActionable.RetractUI = [this]() { Back(); };
 }

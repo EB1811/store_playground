@@ -39,6 +39,8 @@ void UGraphicsSettingsWidget::NativeOnInitialized() {
 
   ResolutionScaleSlider->SetMinValue(0.25f);
   ResolutionScaleSlider->SetMaxValue(1.5f);
+
+  SetupUIActionable();
 }
 
 void UGraphicsSettingsWidget::Apply() {
@@ -227,4 +229,9 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   ReflectionMethodComboBox->AddOption(TEXT("None"));
   ReflectionMethodComboBox->AddOption(TEXT("Lumen"));
   ReflectionMethodComboBox->AddOption(TEXT("Screen Space"));
+}
+
+void UGraphicsSettingsWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Apply(); };
+  UIActionable.RetractUI = [this]() { Back(); };
 }

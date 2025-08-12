@@ -109,43 +109,67 @@ void USaveLoadSlotsWidget::Back() {
   }
 }
 
+void USaveLoadSlotsWidget::SelectSlot(int32 SlotIndex, UUserWidget* Widget) {
+  check(Widget);
+  if (bIsConfirming) return;
+  if (SelectedSlotIndex == SlotIndex) return;
+
+  // Cannot select empty slot in load mode.
+  if (!bIsSaving) {
+    FSaveSlotData SlotData = SaveManagerRef->SaveSlotListSaveGame->SaveSlotList[SlotIndex];
+    if (!SlotData.bIsPopulated) return;
+  }
+
+  if (SelectedSlotIndex >= 0) {
+    FSaveSlotData OldSlotData = SaveManagerRef->SaveSlotListSaveGame->SaveSlotList[SelectedSlotIndex];
+    if (OldSlotData.bIsPopulated) {
+      UPopulatedSaveSlotWidget* OldSelectedPopulated = Cast<UPopulatedSaveSlotWidget>(SelectedSlotWidget);
+      check(OldSelectedPopulated);
+
+      OldSelectedPopulated->SelectButton->SetIsEnabled(true);
+    } else {
+      UEmptySaveSlotWidget* OldSelectedEmpty = Cast<UEmptySaveSlotWidget>(SelectedSlotWidget);
+      check(OldSelectedEmpty);
+
+      OldSelectedEmpty->SelectButton->SetIsEnabled(true);
+    }
+  }
+
+  SelectedSlotIndex = SlotIndex;
+  SelectedSlotWidget = Widget;
+
+  FSaveSlotData SlotData = SaveManagerRef->SaveSlotListSaveGame->SaveSlotList[SlotIndex];
+  if (SlotData.bIsPopulated) {
+    UPopulatedSaveSlotWidget* NewSelectedPopulated = Cast<UPopulatedSaveSlotWidget>(SelectedSlotWidget);
+    check(NewSelectedPopulated);
+
+    NewSelectedPopulated->SelectButton->SetIsEnabled(false);
+    NewSelectedPopulated->SelectButton->SetFocus();
+  } else {
+    UEmptySaveSlotWidget* NewSelectedEmpty = Cast<UEmptySaveSlotWidget>(SelectedSlotWidget);
+    check(NewSelectedEmpty);
+
+    NewSelectedEmpty->SelectButton->SetIsEnabled(false);
+    NewSelectedEmpty->SelectButton->SetFocus();
+  }
+}
+
+void USaveLoadSlotsWidget::HoverNextSlot(FVector2D Direction) {
+  if (Direction.X == 0) return;
+  if (bIsConfirming) return;
+  if (SlotsBox->GetChildrenCount() == 0) return;
+
+  int32 NextIndex = SelectedSlotIndex + (Direction.X > 0 ? 1 : -1);
+  if (NextIndex < 0 || NextIndex >= SlotsBox->GetChildrenCount()) return;
+
+  UUserWidget* NextSlotWidget = Cast<UUserWidget>(SlotsBox->GetChildAt(NextIndex));
+  SelectSlot(NextIndex, NextSlotWidget);
+}
+
 void USaveLoadSlotsWidget::RefreshUI() {
   check(SaveManagerRef && PopulatedSaveSlotWidgetClass && EmptySaveSlotWidgetClass);
 
-  auto SelectSlotFunc = [this](int32 SlotIndex, UUserWidget* Widget) {
-    if (bIsConfirming) return;
-    if (SelectedSlotIndex == SlotIndex) return;
-
-    FSaveSlotData SlotData = SaveManagerRef->SaveSlotListSaveGame->SaveSlotList[SlotIndex];
-    if (SlotData.bIsPopulated) {
-      UPopulatedSaveSlotWidget* NewSelectedPopulated = Cast<UPopulatedSaveSlotWidget>(Widget);
-      check(NewSelectedPopulated);
-
-      NewSelectedPopulated->SelectButton->SetIsEnabled(false);
-    } else {
-      UEmptySaveSlotWidget* NewSelectedEmpty = Cast<UEmptySaveSlotWidget>(Widget);
-      check(NewSelectedEmpty);
-
-      NewSelectedEmpty->SelectButton->SetIsEnabled(false);
-    }
-    if (SelectedSlotIndex >= 0) {
-      FSaveSlotData OldSlotData = SaveManagerRef->SaveSlotListSaveGame->SaveSlotList[SelectedSlotIndex];
-      if (OldSlotData.bIsPopulated) {
-        UPopulatedSaveSlotWidget* OldSelectedPopulated = Cast<UPopulatedSaveSlotWidget>(SelectedSlotWidget);
-        check(OldSelectedPopulated);
-
-        OldSelectedPopulated->SelectButton->SetIsEnabled(true);
-      } else {
-        UEmptySaveSlotWidget* OldSelectedEmpty = Cast<UEmptySaveSlotWidget>(SelectedSlotWidget);
-        check(OldSelectedEmpty);
-
-        OldSelectedEmpty->SelectButton->SetIsEnabled(true);
-      }
-    }
-
-    SelectedSlotIndex = SlotIndex;
-    SelectedSlotWidget = Widget;
-  };
+  auto SelectSlotFunc = [this](int32 SlotIndex, UUserWidget* Widget) { SelectSlot(SlotIndex, Widget); };
 
   SlotsBox->ClearChildren();
   SelectedSlotIndex = -1;
@@ -174,9 +198,11 @@ void USaveLoadSlotsWidget::RefreshUI() {
     }
   }
 
-  // if (SlotsBox->GetChildrenCount() == 0) return;
-  // SelectedSlotIndex = 0;
-  // SelectedSlotWidget = SlotsBox->GetChildAt(0);
+  if (SelectedSlotIndex < 0 && SlotsBox->GetChildrenCount() > 0) {
+    UUserWidget* FirstSlotWidget = Cast<UUserWidget>(SlotsBox->GetChildAt(0));
+    check(FirstSlotWidget);
+    SelectSlot(0, FirstSlotWidget);
+  }
 }
 
 void USaveLoadSlotsWidget::InitUI(FInUIInputActions InUIInputActions,
@@ -211,7 +237,10 @@ void USaveLoadSlotsWidget::SetupUIActionable() {
     if (bIsConfirming) return SaveLoadConfirmWidget->Confirm();
     Select();
   };
-  UIActionable.DirectionalInput = [this](FVector2D Direction) {};
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    if (bIsConfirming) return;
+    HoverNextSlot(Direction);
+  };
   UIActionable.SideButton4 = [this]() {
     if (bIsConfirming) return SaveLoadConfirmWidget->Confirm();
     Delete();

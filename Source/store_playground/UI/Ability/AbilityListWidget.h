@@ -29,6 +29,18 @@ public:
   UPROPERTY(EditAnywhere)
   TArray<FEconEventAbility> NotEnoughMoneyAbilities;
 
+  UPROPERTY(EditAnywhere)
+  class USoundBase* SelectSound;
+
+  UPROPERTY(EditAnywhere)
+  FName HoveredAbilityID;
+  UPROPERTY(EditAnywhere)
+  class UAbilityCardWidget* HoveredAbilityCardWidget;
+
+  void SelectAbility(FName AbilityID);
+  void SelectHoveredAbility();
+  void HoverNextAbility(FVector2D Direction);
+
   void RefreshUI();
   void InitUI(TArray<FEconEventAbility> _AvailableAbilities,
               TArray<FEconEventAbility> _NotEnoughMoneyAbilities,

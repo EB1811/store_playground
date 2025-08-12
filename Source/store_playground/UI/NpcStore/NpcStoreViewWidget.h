@@ -50,6 +50,11 @@ public:
   UPROPERTY(EditAnywhere)
   class USoundBase* HideSound;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* GeneralTradeSound;
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* TradeConfirmSound;
+
   UPROPERTY(EditAnywhere)
   const class AMarketEconomy* MarketEconomy;
   UPROPERTY(EditAnywhere)

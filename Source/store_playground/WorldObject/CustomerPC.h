@@ -33,4 +33,5 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "CustomerPC")
   class UWidgetComponent* WidgetComponent;
+  void ShowWidget();
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "store_playground/Upgrade/UpgradeStructs.h"
 #include "UpgradeViewWidget.generated.h"
 
@@ -29,6 +30,15 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
 
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* ShowAnim;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* HideAnim;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* OpenSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* HideSound;
+
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;
 
@@ -48,6 +58,14 @@ public:
               class AUpgradeManager* _UpgradeManager,
               class UUpgradeSelectComponent* UpgradeSelectC,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
+
+  UPROPERTY(EditAnywhere)
+  FUIBehaviour UIBehaviour;
+  void SetupUIBehaviour();
 
   std::function<void()> CloseWidgetFunc;
 };

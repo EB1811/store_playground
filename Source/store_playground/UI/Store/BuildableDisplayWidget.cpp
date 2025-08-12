@@ -4,6 +4,7 @@
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 
 void UBuildableDisplayWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -17,6 +18,8 @@ void UBuildableDisplayWidget::BuildStockDisplay() {
 
   bool bBuilt = (Store->BuildStockDisplay(Buildable));
   check(bBuilt);
+
+  UGameplayStatics::PlaySound2D(this, BuildSound, 1.0f);
 
   CloseWidgetFunc();
 }

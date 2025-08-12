@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "SettingsWidget.generated.h"
 
 UENUM()
@@ -54,6 +55,15 @@ public:
   UPROPERTY(EditAnywhere)
   UUserWidget* OpenedWidget;
 
+  UPROPERTY(EditAnywhere)
+  class UButton* HoveredButton;
+  void SelectHoveredButton();
+  void HoverButton(UButton* Button);
+  void HoverNextButton(FVector2D Direction);
+
+  UFUNCTION()
+  void UnhoverButton();
+
   UFUNCTION()
   void GameSettings();
   UFUNCTION()
@@ -71,6 +81,10 @@ public:
   void InitUI(FInUIInputActions _InUIInputActions,
               class ASettingsManager* _SettingsManager,
               std::function<void()> _CloseWidgetFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> CloseWidgetFunc;
 };

@@ -23,6 +23,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* BuildSound;
+
   UPROPERTY()
   class ABuildable* Buildable;
   UPROPERTY(EditAnywhere)

@@ -34,3 +34,10 @@ void ACustomerPC::Tick(float DeltaTime) {
   if (WidgetComponent->IsWidgetVisible())
     WidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -35.0f, 110.0f));
 }
+
+void ACustomerPC::ShowWidget() {
+  if (WidgetComponent->IsWidgetVisible()) return;
+
+  WidgetComponent->SetVisibility(true, true);
+  WidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -35.0f, 110.0f));
+}

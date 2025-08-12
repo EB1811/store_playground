@@ -16,6 +16,7 @@ void UBuildableDisplayViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 void UBuildableDisplayViewWidget::RefreshUI() { BuildableDisplayWidget->RefreshUI(); }
@@ -34,4 +35,10 @@ void UBuildableDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
 void UBuildableDisplayViewWidget::SetupUIActionable() {
   UIActionable.AdvanceUI = [this]() { BuildableDisplayWidget->BuildStockDisplay(); };
   UIActionable.RetractUI = [this]() { CloseWidgetFunc(); };
+}
+void UBuildableDisplayViewWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }

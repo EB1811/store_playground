@@ -62,6 +62,8 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
 
   bIsConfirming = false;
   RefreshUI();
+
+  UGameplayStatics::PlaySound2D(this, TradeConfirmSound, 1.0f);
 }
 
 void UNpcStoreViewWidget::SortByPrice() {
@@ -114,6 +116,8 @@ void UNpcStoreViewWidget::Trade() {
 
   bIsConfirming = true;
   TradeConfirmWidget->SetVisibility(ESlateVisibility::Visible);
+
+  UGameplayStatics::PlaySound2D(this, GeneralTradeSound, 1.0f);
 }
 
 void UNpcStoreViewWidget::SwitchTradeType() {
@@ -135,6 +139,8 @@ void UNpcStoreViewWidget::SwitchTradeType() {
   }
 
   RefreshUI();
+
+  UGameplayStatics::PlaySound2D(this, GeneralTradeSound, 1.0f);
 }
 
 void UNpcStoreViewWidget::Back() {

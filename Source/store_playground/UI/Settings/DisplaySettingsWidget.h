@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/Player/InputStructs.h"
+#include "store_playground/UI/UIStructs.h"
 #include "DisplaySettingsWidget.generated.h"
 
 UCLASS()
@@ -45,6 +46,10 @@ public:
   void InitUI(FInUIInputActions _InUIInputActions,
               class ASettingsManager* _SettingsManager,
               std::function<void()> _BackFunc);
+
+  UPROPERTY(EditAnywhere)
+  FUIActionable UIActionable;
+  void SetupUIActionable();
 
   std::function<void()> BackFunc;
 };

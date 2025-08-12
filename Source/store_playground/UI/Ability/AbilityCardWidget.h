@@ -25,9 +25,17 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* SelectButton;
 
+  UPROPERTY(EditAnywhere)
+  FLinearColor DefaultButtonColor;
+  UPROPERTY(EditAnywhere)
+  FLinearColor HoveredButtonColor;
+
   UPROPERTY()
   FName AbilityId;
+  UPROPERTY()
+  bool bIsHovered;
 
+  void RefreshUI();
   void InitUI(FEconEventAbility Ability, std::function<void(FName)> _SelectAbilityFunc);
 
   UFUNCTION()

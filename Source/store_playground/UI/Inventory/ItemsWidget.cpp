@@ -8,6 +8,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
+#include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
 void UItemsWidget::NativeOnInitialized() {
@@ -35,6 +36,7 @@ void UItemsWidget::SelectItem(const UItemBase* Item, UItemSlotWidget* ItemSlotWi
   SelectedItemSlotWidget = ItemSlotWidget;
   ItemSlotWidget->bIsSelected = true;
   ItemSlotWidget->RefreshUI();
+  ItemSlotWidget->SelectItemButton->SetFocus();
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }

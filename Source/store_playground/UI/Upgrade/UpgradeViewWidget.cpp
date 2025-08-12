@@ -12,12 +12,16 @@
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UUpgradeViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   UnlockButton->ControlButton->OnClicked.AddDynamic(this, &UUpgradeViewWidget::Unlock);
   BackButton->ControlButton->OnClicked.AddDynamic(this, &UUpgradeViewWidget::Back);
+
+  SetupUIActionable();
+  SetupUIBehaviour();
 }
 
 void UUpgradeViewWidget::Unlock() {
@@ -58,7 +62,25 @@ void UUpgradeViewWidget::InitUI(FInUIInputActions InUIInputActions,
   RelevantPowerUpgradesWidget->SetVisibility(ESlateVisibility::Visible);
 
   UnlockButton->ActionText->SetText(FText::FromString("Unlock"));
+  UnlockButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
   BackButton->ActionText->SetText(FText::FromString("Back"));
+  BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
 
   CloseWidgetFunc = _CloseWidgetFunc;
+}
+
+void UUpgradeViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Unlock(); };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    RelevantPowerUpgradesWidget->SelectNextUpgrade(Direction);
+  };
+  UIActionable.RetractUI = [this]() { Back(); };
+  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+}
+
+void UUpgradeViewWidget::SetupUIBehaviour() {
+  UIBehaviour.ShowAnim = ShowAnim;
+  UIBehaviour.HideAnim = HideAnim;
+  UIBehaviour.OpenSound = OpenSound;
+  UIBehaviour.HideSound = HideSound;
 }

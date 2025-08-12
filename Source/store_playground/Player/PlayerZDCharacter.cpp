@@ -520,7 +520,7 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
       auto [Dialogue, QuestC, CustomerAI, Item, SpriteAnimC] = Interactable->InteractUniqueNPCQuest();
 
       SpriteAnimC->TurnToPlayer(GetActorLocation());
-      CustomerAI->CustomerState = ECustomerState::PerformingQuest;
+      if (CustomerAI) CustomerAI->CustomerState = ECustomerState::PerformingQuest;
       EnterQuest(QuestC, Dialogue, SpriteAnimC, CustomerAI, Item);
       break;
     }

@@ -37,6 +37,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
 
+  UPROPERTY(EditAnywhere, BlueprintReadWrite)
+  class USoundBase* ChangeQuantitySound;
+
   UPROPERTY()
   ETradeType TradeType;
 

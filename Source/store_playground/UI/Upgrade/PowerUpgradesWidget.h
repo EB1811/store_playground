@@ -23,7 +23,6 @@ public:
   class UTextBlock* TitleText;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* DescText;
-
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* AvailableUpgradePointsText;
   UPROPERTY(meta = (BindWidget))
@@ -32,6 +31,11 @@ public:
   class UVerticalBox* LockedUpgradesBox;
   UPROPERTY(meta = (BindWidget))
   class UVerticalBox* UnlockedUpgradesBox;
+
+  UPROPERTY(EditAnywhere)
+  class USoundBase* SelectSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* UnlockSound;
 
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;
@@ -45,6 +49,7 @@ public:
   class UUpgradeCardWidget* SelectedUpgradeCardWidget;
 
   void SelectUpgrade(FName UpgradeID, UUpgradeCardWidget* UpgradeCardWidget);
+  void SelectNextUpgrade(FVector2D Direction);
 
   UFUNCTION()
   void UnlockUpgrade();

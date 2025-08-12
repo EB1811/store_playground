@@ -10,6 +10,8 @@ void USoundSettingsWidget::NativeOnInitialized() {
 
   ApplyButton->OnClicked.AddDynamic(this, &USoundSettingsWidget::Apply);
   BackButton->OnClicked.AddDynamic(this, &USoundSettingsWidget::Back);
+
+  SetupUIActionable();
 }
 
 void USoundSettingsWidget::Apply() {
@@ -35,4 +37,9 @@ void USoundSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
 
   SettingsManager = _SettingsManager;
   BackFunc = _BackFunc;
+}
+
+void USoundSettingsWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() { Apply(); };
+  UIActionable.RetractUI = [this]() { Back(); };
 }

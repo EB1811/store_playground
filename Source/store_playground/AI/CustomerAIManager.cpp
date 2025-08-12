@@ -350,22 +350,6 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     }
   }
 
-  if (CustomersToExit.Num() <= 0) return;
-
-  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];  // Spawn point is exit.
-  check(SpawnPoint);
-  FVector ExitLocation = SpawnPoint->GetActorLocation();
-  for (ACustomerPC* Customer : CustomersToExit) {
-    MoveCustomerToExit(NavSystem, Customer, ExitLocation);
-
-    ExitingCustomers.Add(Customer);
-    AllCustomers.RemoveSingleSwap(Customer);
-
-    // ? Call function somewhere to remove the picked item on successful negotiation?
-    if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
-      PickingItemIdsMap.Remove(*ItemID);
-  }
-
   TArray<ACustomerPC*> CustomersToDestroy;
   for (ACustomerPC* Customer : ExitingCustomers) {
     if (Customer->GetController<AAIController>()->GetMoveStatus() != EPathFollowingStatus::Idle) continue;
@@ -380,6 +364,21 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   for (ACustomerPC* Customer : CustomersToDestroy) {
     ExitingCustomers.RemoveSingleSwap(Customer);
     Customer->Destroy();
+  }
+
+  if (CustomersToExit.Num() <= 0) return;
+  ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];  // Spawn point is exit.
+  check(SpawnPoint);
+  FVector ExitLocation = SpawnPoint->GetActorLocation();
+  for (ACustomerPC* Customer : CustomersToExit) {
+    MoveCustomerToExit(NavSystem, Customer, ExitLocation);
+
+    ExitingCustomers.Add(Customer);
+    AllCustomers.RemoveSingleSwap(Customer);
+
+    // ? Call function somewhere to remove the picked item on successful negotiation?
+    if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
+      PickingItemIdsMap.Remove(*ItemID);
   }
 }
 
@@ -424,7 +423,7 @@ void ACustomerAIManager::MoveCustomerToExit(UNavigationSystemV1* NavSystem,
   else DirectionEnum = Direction.Y > 0 ? ESimpleSpriteDirection::Down : ESimpleSpriteDirection::Up;
   Customer->SimpleSpriteAnimComponent->Walk(DirectionEnum);
 
-  OwnerAIController->MoveToLocation(ExitLocation, 1.0f, false, true, true, false);
+  OwnerAIController->MoveToLocation(ExitLocation, 1.0f, false, true, false, false);
 }
 
 void ACustomerAIManager::CustomerPerformAction(class ACustomerPC* Customer,
@@ -530,8 +529,7 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomerPC* Customer) {
   CustomerAI->RequestingTime = GetWorld()->GetTimeSeconds();
 
   Customer->InteractionComponent->InteractionType = EInteractionType::WaitingCustomer;
-  Customer->WidgetComponent->SetVisibility(true, true);
-  // Customer->WidgetComponent->SetDrawSize(FVector2D(100.0f, 100.0f));
+  Customer->ShowWidget();
 
   CustomerAI->CustomerState = ECustomerState::Requesting;
 

@@ -9,6 +9,11 @@ void UAbilityCardWidget::NativeOnInitialized() {
   SelectButton->OnClicked.AddDynamic(this, &UAbilityCardWidget::OnSelectButtonClicked);
 }
 
+void UAbilityCardWidget::RefreshUI() {
+  if (bIsHovered) SelectButton->SetBackgroundColor(HoveredButtonColor);
+  else SelectButton->SetBackgroundColor(DefaultButtonColor);
+}
+
 void UAbilityCardWidget::InitUI(FEconEventAbility Ability, std::function<void(FName)> _SelectAbilityFunc) {
   check(_SelectAbilityFunc);
 

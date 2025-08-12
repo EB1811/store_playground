@@ -7,6 +7,7 @@
 #include "Components/Image.h"
 #include "Components/RichTextBlock.h"
 #include "Components/VerticalBox.h"
+#include "Kismet/GameplayStatics.h"
 
 void UPowerUpgradesWidget::SelectUpgrade(FName UpgradeID, UUpgradeCardWidget* UpgradeCardWidget) {
   check(UpgradeCardWidget);
@@ -22,6 +23,28 @@ void UPowerUpgradesWidget::SelectUpgrade(FName UpgradeID, UUpgradeCardWidget* Up
   SelectedUpgradeCardWidget = UpgradeCardWidget;
   SelectedUpgradeCardWidget->bIsSelected = true;
   SelectedUpgradeCardWidget->RefreshUI();
+  SelectedUpgradeCardWidget->SelectButton->SetFocus();
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
+}
+void UPowerUpgradesWidget::SelectNextUpgrade(FVector2D Direction) {
+  if (Direction.X == 0) return;
+  if (UpgradableUpgradesBox->GetChildrenCount() <= 0) return;
+
+  if (!SelectedUpgradeCardWidget) {
+    UUpgradeCardWidget* UpgradeCardWidget = Cast<UUpgradeCardWidget>(UpgradableUpgradesBox->GetChildAt(0));
+    check(UpgradeCardWidget);
+    SelectUpgrade(UpgradeCardWidget->UpgradeID, UpgradeCardWidget);
+    return;
+  }
+
+  int32 CurrentIndex = UpgradableUpgradesBox->GetAllChildren().IndexOfByKey(SelectedUpgradeCardWidget);
+  check(CurrentIndex != INDEX_NONE);
+  int32 NextIndex = CurrentIndex + (Direction.X > 0 ? 1 : -1);
+  if (NextIndex < 0 || NextIndex >= UpgradableUpgradesBox->GetChildrenCount()) return;
+
+  UUpgradeCardWidget* NextUpgradeCardWidget = Cast<UUpgradeCardWidget>(UpgradableUpgradesBox->GetChildAt(NextIndex));
+  SelectUpgrade(NextUpgradeCardWidget->UpgradeID, NextUpgradeCardWidget);
 }
 
 void UPowerUpgradesWidget::UnlockUpgrade() {
@@ -38,6 +61,8 @@ void UPowerUpgradesWidget::UnlockUpgrade() {
   SelectedUpgradeID = FName();
   SelectedUpgradeCardWidget = nullptr;
   RefreshUI();
+
+  UGameplayStatics::PlaySound2D(this, UnlockSound, 1.0f);
 }
 
 void UPowerUpgradesWidget::RefreshUI() {

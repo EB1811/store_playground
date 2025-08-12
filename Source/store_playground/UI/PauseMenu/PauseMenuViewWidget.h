@@ -39,6 +39,15 @@ public:
   UPROPERTY()
   class ASaveManager* SaveManager;
 
+  UPROPERTY(EditAnywhere)
+  class UButton* HoveredButton;
+  void SelectHoveredButton();
+  void HoverButton(UButton* Button);
+  void HoverNextButton(FVector2D Direction);
+
+  UFUNCTION()
+  void UnhoverButton();
+
   UFUNCTION()
   void Resume();
   UFUNCTION()

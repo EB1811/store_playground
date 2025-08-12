@@ -3,6 +3,7 @@
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void UTradeConfirmWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -40,6 +41,7 @@ void UTradeConfirmWidget::IncreaseQuantity() {
   }
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, ChangeQuantitySound, 1.0f);
 }
 void UTradeConfirmWidget::DecreaseQuantity() {
   if (Quantity < 1) {
@@ -49,6 +51,7 @@ void UTradeConfirmWidget::DecreaseQuantity() {
 
   Quantity--;
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, ChangeQuantitySound, 1.0f);
 }
 
 void UTradeConfirmWidget::ConfirmTrade() {

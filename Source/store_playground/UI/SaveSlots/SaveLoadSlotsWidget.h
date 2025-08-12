@@ -51,6 +51,9 @@ public:
   void ConfirmSaveLoad(int32 SlotIndex);
   void ConfirmDelete(int32 SlotIndex);
 
+  void SelectSlot(int32 SlotIndex, UUserWidget* Widget);
+  void HoverNextSlot(FVector2D Direction);
+
   UFUNCTION()
   void Select();
   UFUNCTION()
