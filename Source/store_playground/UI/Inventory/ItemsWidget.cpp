@@ -84,17 +84,19 @@ void UItemsWidget::RefreshUI() {
   check(InventoryRef);
 
   ItemsPanelWrapBox->ClearChildren();
-  ItemDetailsWidget->SetVisibility(ESlateVisibility::Hidden);
+  ItemDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  NoItemsText->SetVisibility(ESlateVisibility::Collapsed);
 
   SortedItems.Empty();
   SortedItems.Reserve(InventoryRef->ItemsArray.Num());
   for (UItemBase* Item : InventoryRef->ItemsArray) SortedItems.Add(Item);
-
   if (FilterData.bFilterByType)
     SortedItems.RemoveAllSwap([this](const UItemBase* Item) { return Item->ItemType != FilterData.ItemType; });
+
   if (SortedItems.IsEmpty()) {
     SelectedItem = nullptr;
     ItemDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
+    NoItemsText->SetVisibility(ESlateVisibility::Visible);
     return;
   }
 

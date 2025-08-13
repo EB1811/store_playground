@@ -92,6 +92,8 @@ void USaveLoadSlotsWidget::Select() {
   if (SelectedSlotIndex < 0) return;
 
   ConfirmSaveLoad(SelectedSlotIndex);
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void USaveLoadSlotsWidget::Delete() {
   if (bIsConfirming) return;
@@ -99,8 +101,12 @@ void USaveLoadSlotsWidget::Delete() {
   if (SelectedSlotIndex >= SaveManagerRef->SaveSlotListSaveGame->SaveSlotList.Num()) return;
 
   ConfirmDelete(SelectedSlotIndex);
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void USaveLoadSlotsWidget::Back() {
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
+
   if (bIsConfirming) {
     SaveLoadConfirmWidget->SetVisibility(ESlateVisibility::Collapsed);
     bIsConfirming = false;
@@ -152,6 +158,8 @@ void USaveLoadSlotsWidget::SelectSlot(int32 SlotIndex, UUserWidget* Widget) {
     NewSelectedEmpty->SelectButton->SetIsEnabled(false);
     NewSelectedEmpty->SelectButton->SetFocus();
   }
+
+  UGameplayStatics::PlaySound2D(this, HoverSound, 1.0f);
 }
 
 void USaveLoadSlotsWidget::HoverNextSlot(FVector2D Direction) {

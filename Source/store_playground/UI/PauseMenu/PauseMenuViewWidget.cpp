@@ -49,7 +49,9 @@ void UPauseMenuViewWidget::HoverButton(UButton* Button) {
   FButtonStyle ButtonStyle = HoveredButton->GetStyle();
   ButtonStyle.SetNormal(ButtonStyle.Hovered);
   HoveredButton->SetStyle(ButtonStyle);
-  HoveredButton->SetFocus();
+  // HoveredButton->SetFocus();
+
+  UGameplayStatics::PlaySound2D(this, HoverSound, 1.0f);
 }
 void UPauseMenuViewWidget::HoverNextButton(FVector2D Direction) {
   if (Direction.X == 0) return;
@@ -90,6 +92,8 @@ void UPauseMenuViewWidget::SaveMenu() {
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UPauseMenuViewWidget::LoadMenu() {
   auto BackFunc = [this]() {
@@ -101,6 +105,8 @@ void UPauseMenuViewWidget::LoadMenu() {
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UPauseMenuViewWidget::SettingsMenu() {
   auto BackFunc = [this]() {
@@ -112,6 +118,8 @@ void UPauseMenuViewWidget::SettingsMenu() {
 
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UPauseMenuViewWidget::Quit() {
   AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));

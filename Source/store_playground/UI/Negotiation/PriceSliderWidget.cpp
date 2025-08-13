@@ -26,6 +26,11 @@ void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
   PlayerPriceText->SetRenderTranslation(
       FVector2D(0.0f, PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize -
                           PlayerPriceText->GetDesiredSize().Y / 2.0f));
+
+  if (Type == NegotiationType::PlayerSell) return;
+
+  if (Value > PlayerMoney) PlayerPriceText->SetColorAndOpacity(PriceErrorColor);
+  else PlayerPriceText->SetColorAndOpacity(PriceNormalColor);
 }
 
 void UPriceSliderWidget::ChangePrice(float Direction) {
@@ -65,6 +70,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
                                 float MarketPrice,
                                 float PlayerPrice,
                                 float NpcPrice,
+                                float _PlayerMoney,
                                 float BoughtAtPrice) {
   Type = _Type;
   switch (Type) {
@@ -82,6 +88,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
       break;
     default: checkNoEntry()
   }
+  PlayerMoney = _PlayerMoney;
 
   float StepSize = FMath::Max(FMath::RoundToInt(MarketPrice * 0.002f), 1.0f);
   MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);

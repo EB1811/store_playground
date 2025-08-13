@@ -196,6 +196,8 @@ void UGraphicsSettingsWidget::RefreshUI() {
 
   static IConsoleVariable* DLSSG = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Streamline.DLSSG.Enable"));
   DLSSFrameGenerationCheckBox->SetIsChecked(DLSSG && DLSSG->GetInt() > 0);
+
+  OverallQualityComboBox->SetFocus();
 }
 
 void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,

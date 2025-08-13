@@ -35,6 +35,11 @@ public:
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class USaveLoadConfirmWidget* SaveLoadConfirmWidget;
 
+  UPROPERTY(EditAnywhere)
+  class USoundBase* HoverSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* SelectSound;
+
   UPROPERTY()
   class ASaveManager* SaveManagerRef;
   UPROPERTY(EditAnywhere)

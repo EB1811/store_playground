@@ -72,6 +72,8 @@ void UStockDisplayViewWidget::AddOrTake() {
         StockDisplayC->SetDisplaySprite(ItemsWidget->SelectedItem->AssetData.Sprite);
         Store->InitStockDisplays();
 
+        UGameplayStatics::PlaySound2D(this, AddOrTakeSound, 1.0f);
+
         return CloseWidgetFunc();
       }
       break;
@@ -86,6 +88,8 @@ void UStockDisplayViewWidget::AddOrTake() {
         // ? Add to function in store?
         StockDisplayC->ClearDisplaySprite();
         Store->InitStockDisplays();
+
+        UGameplayStatics::PlaySound2D(this, AddOrTakeSound, 1.0f);
 
         return CloseWidgetFunc();
       }
@@ -111,6 +115,7 @@ void UStockDisplayViewWidget::SwitchViewType() {
   }
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, SwtichSound, 1.0f);
 }
 
 void UStockDisplayViewWidget::Back() { CloseWidgetFunc(); }

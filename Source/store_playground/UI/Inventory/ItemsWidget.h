@@ -46,6 +46,8 @@ public:
   class UWrapBox* ItemsPanelWrapBox;
   UPROPERTY(meta = (BindWidget))
   class UItemDetailsWidget* ItemDetailsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* NoItemsText;
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UItemSlotWidget> ItemSlotWidgetClass;
 

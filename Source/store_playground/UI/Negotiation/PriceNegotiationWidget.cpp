@@ -76,7 +76,8 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
                        ? NegotiationSystem->CustomerOfferResponse.CounterOffer
                        : MarketPrice;
   float BoughtAtPrice = NegotiationSystem->BoughtAtPrice;
-  PriceSliderWidget->InitUI(NegotiationSystem->Type, NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice, BoughtAtPrice);
+  PriceSliderWidget->InitUI(NegotiationSystem->Type, NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice, Store->Money,
+                            BoughtAtPrice);
 
   CompactItemDetailsWidget->InitUI(NegotiationSystem->NegotiatedItems[0], "Bought At:", MarketPrice, BoughtAtPrice);
 

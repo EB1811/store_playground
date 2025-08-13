@@ -54,6 +54,10 @@ public:
 
   UPROPERTY(EditAnywhere)
   FPriceSliderUIParams PriceSliderUIParams;
+  UPROPERTY(EditAnywhere)
+  FLinearColor PriceNormalColor;
+  UPROPERTY(EditAnywhere)
+  FLinearColor PriceErrorColor;  // * e.g., when the price is too high for the player to afford.
 
   UPROPERTY(EditAnywhere)
   NegotiationType Type;
@@ -61,6 +65,8 @@ public:
   float MaxValue;
   UPROPERTY(EditAnywhere)
   float MinValue;
+  UPROPERTY(EditAnywhere)
+  float PlayerMoney;
 
   UFUNCTION()
   void UpdatePlayerPriceText(float Value);
@@ -74,5 +80,6 @@ public:
               float MarketPrice,
               float PlayerPrice,
               float NpcPrice,
+              float _PlayerMoney,
               float BoughtAtPrice = 0.0f);
 };

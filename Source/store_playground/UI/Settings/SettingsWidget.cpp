@@ -63,7 +63,9 @@ void USettingsWidget::HoverButton(UButton* Button) {
   FButtonStyle ButtonStyle = HoveredButton->GetStyle();
   ButtonStyle.SetNormal(ButtonStyle.Hovered);
   HoveredButton->SetStyle(ButtonStyle);
-  HoveredButton->SetFocus();
+  // HoveredButton->SetFocus();
+
+  UGameplayStatics::PlaySound2D(this, HoverSound, 1.0f);
 }
 void USettingsWidget::HoverNextButton(FVector2D Direction) {
   if (Direction.X == 0) return;
@@ -96,30 +98,37 @@ void USettingsWidget::GameSettings() {
   CurrentCategory = ESettingsCategory::Game;
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void USettingsWidget::DisplaySettings() {
   CurrentCategory = ESettingsCategory::Display;
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void USettingsWidget::GraphicsSettings() {
   CurrentCategory = ESettingsCategory::Graphics;
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void USettingsWidget::SoundSettings() {
   CurrentCategory = ESettingsCategory::Sound;
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void USettingsWidget::ControlsSettings() {
   CurrentCategory = ESettingsCategory::Controls;
 
   RefreshUI();
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 
 void USettingsWidget::Back() {
   CurrentCategory = ESettingsCategory::None;
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 
   CloseWidgetFunc();
 }

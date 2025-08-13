@@ -28,6 +28,8 @@ void USoundSettingsWidget::RefreshUI() {
   MasterVolumeSlider->SetValue(SettingsManager->SoundSettings.MasterVolume);
   MusicVolumeSlider->SetValue(SettingsManager->SoundSettings.MusicVolume);
   SFXVolumeSlider->SetValue(SettingsManager->SoundSettings.SFXVolume);
+
+  MasterVolumeSlider->SetFocus();
 }
 
 void USoundSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,

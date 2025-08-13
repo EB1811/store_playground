@@ -32,6 +32,11 @@ public:
   class UButton* QuitButton;
 
   UPROPERTY(EditAnywhere)
+  class USoundBase* HoverSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* SelectSound;
+
+  UPROPERTY(EditAnywhere)
   FInUIInputActions InUIInputActions;
 
   UPROPERTY(EditAnywhere)

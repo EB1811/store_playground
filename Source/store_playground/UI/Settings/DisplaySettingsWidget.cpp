@@ -89,6 +89,8 @@ void UDisplaySettingsWidget::RefreshUI() {
   if (SettingsManager->UnrealSettings->SupportsHDRDisplayOutput())
     HDRCheckBox->SetIsChecked(GameSettings->IsHDREnabled());
   else HDRCheckBox->SetIsEnabled(false);
+
+  ResolutionComboBox->SetFocus();
 }
 
 void UDisplaySettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
