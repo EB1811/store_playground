@@ -26,6 +26,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Misc/AssertionMacros.h"
 #include "Widgets/Notifications/SProgressBar.h"
+#include "Kismet/GameplayStatics.h"
 
 void UNegotiationViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -53,6 +54,8 @@ void UNegotiationViewWidget::OfferAccept(float Price) {
   NegotiationSystem->OfferPrice(Price);
 
   RefreshUI();
+
+  UGameplayStatics::PlaySound2D(this, OfferSound, 1.0f);
 }
 
 void UNegotiationViewWidget::RejectLeave() {
@@ -96,6 +99,8 @@ void UNegotiationViewWidget::RefreshUI() {
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
+
+      UGameplayStatics::PlaySound2D(this, DialogueWidget->OpenSound, 1.0f);
       break;
     }
     case ENegotiationState::PlayerConsider: {
@@ -114,12 +119,23 @@ void UNegotiationViewWidget::RefreshUI() {
       DialogueWidget->SetVisibility(ESlateVisibility::Visible);
       PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
       NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
+
+      UGameplayStatics::PlaySound2D(this, DialogueWidget->OpenSound, 1.0f);
       break;
     }
     // ? Call NegotiationSuccess and NegotiationFailure?
     case ENegotiationState::Accepted:
+      NegotiationSystem->NegotiationComplete();
+
+      UGameplayStatics::PlaySound2D(this, TradeSound, 1.0f);
+
+      CloseWidgetFunc();
+      break;
     case ENegotiationState::Rejected:
       NegotiationSystem->NegotiationComplete();
+
+      UGameplayStatics::PlaySound2D(this, LeaveSound, 1.0f);
+
       CloseWidgetFunc();
       break;
     default: checkNoEntry();

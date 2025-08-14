@@ -12,6 +12,7 @@
 #include "store_playground/Player/PlayerCommand.h"
 #include "store_playground/Sound/MusicManager.h"
 #include "store_playground/UI/SpgHUD.h"
+#include "Kismet/GameplayStatics.h"
 
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action) {
   switch (CurrentState) {
@@ -163,6 +164,8 @@ void AStorePhaseManager::NextPhase() {
 
     UE_LOG(LogTemp, Log, TEXT("Next phase: %s"), *UEnum::GetDisplayValueAsText(StorePhaseState).ToString());
   });
+
+  if (StorePhaseState != EStorePhaseState::MorningBuildMode) UGameplayStatics::PlaySound2D(this, NextPhaseSound, 1.0f);
 }
 
 void AStorePhaseManager::EnterBuildMode() {

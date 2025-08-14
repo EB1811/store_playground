@@ -15,9 +15,7 @@ void UItemSlotWidget::RefreshUI() {
   check(ItemRef);
 
   Icon->SetBrushFromTexture(ItemRef->AssetData.Icon);
-  if (ItemRef->TextData.Name.ToString().Len() <= 12)
-    Name->SetText(FText::FromString(ItemRef->TextData.Name.ToString()));
-  else Name->SetText(FText::FromString(ItemRef->TextData.Name.ToString().Left(9) + "..."));
+  Name->SetText(FText::FromString(ItemRef->TextData.Name.ToString()));
 
   if (ItemRef->Quantity > 1) Quantity->SetText(FText::FromString(FString::FromInt(ItemRef->Quantity)));
   else Quantity->SetText(FText::GetEmpty());

@@ -47,6 +47,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class TSubclassOf<class AActor> BuildableClass;
 
+  UPROPERTY(EditAnywhere)
+  class USoundBase* NextPhaseSound;
+
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   FStorePhaseManagerParams StorePhaseManagerParams;
 

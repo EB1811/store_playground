@@ -20,7 +20,6 @@ void UPriceSliderWidget::NativeOnInitialized() {
 
 void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
   PlayerPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(Value))));
-
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);
   auto PlayerSliderBoxSize = PlayerSliderBoxAsCanvas->GetSize().Y;
   PlayerPriceText->SetRenderTranslation(

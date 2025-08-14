@@ -23,12 +23,19 @@ public:
   class UNegotiationShowItemWidget* NegotiationShowItemWidget;
 
   UPROPERTY(EditAnywhere)
-  FInUIInputActions InUIInputActions;
+  class USoundBase* OfferSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* TradeSound;
+  UPROPERTY(EditAnywhere)
+  class USoundBase* LeaveSound;
 
   UPROPERTY(EditAnywhere)
   const class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
+
+  UPROPERTY(EditAnywhere)
+  FInUIInputActions InUIInputActions;
 
   UPROPERTY(EditAnywhere)
   class UInventoryComponent* PlayerInventoryC;
