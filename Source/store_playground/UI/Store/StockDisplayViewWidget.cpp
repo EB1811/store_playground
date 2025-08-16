@@ -106,10 +106,12 @@ void UStockDisplayViewWidget::SwitchViewType() {
     case EStockDisplayViewType::Player:
       ItemsWidget->InitUI(PlayerInventory, "Bought At",
                           [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
+      if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
       break;
     case EStockDisplayViewType::Display:
       ItemsWidget->InitUI(DisplayInventory, "Bought At",
                           [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
+      if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
       break;
     default: checkNoEntry();
   }
@@ -183,10 +185,12 @@ void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
     StockDisplayViewType = EStockDisplayViewType::Display;
     ItemsWidget->InitUI(DisplayInventory, "Bought At",
                         [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
+    if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
   } else {
     StockDisplayViewType = EStockDisplayViewType::Player;
     ItemsWidget->InitUI(PlayerInventory, "Bought At",
                         [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
+    if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
   }
 }
 

@@ -23,14 +23,14 @@ public:
   class UVerticalBox* UnavailableAbilityListBox;
 
   UPROPERTY(EditAnywhere)
+  class USoundBase* SelectSound;
+
+  UPROPERTY(EditAnywhere)
   TArray<FEconEventAbility> AvailableAbilities;
   UPROPERTY(EditAnywhere)
   TArray<FEconEventAbility> UnavailableAbilities;
   UPROPERTY(EditAnywhere)
   TArray<FEconEventAbility> NotEnoughMoneyAbilities;
-
-  UPROPERTY(EditAnywhere)
-  class USoundBase* SelectSound;
 
   UPROPERTY(EditAnywhere)
   FName HoveredAbilityID;

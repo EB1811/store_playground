@@ -129,11 +129,13 @@ void UNpcStoreViewWidget::SwitchTradeType() {
       ItemsWidget->InitUI(
           StoreInventory, "Selling At", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
           [this](FName ItemID) -> float { return Market->GetNpcStoreSellPrice(NpcStoreC, ItemID); });
+      if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
       break;
     case ETradeType::Sell:
       ItemsWidget->InitUI(
           PlayerInventory, "Buying At", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
           [this](FName ItemID) -> float { return Market->GetNpcStoreBuyPrice(NpcStoreC, ItemID); });
+      if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
       break;
     default: checkNoEntry();
   }

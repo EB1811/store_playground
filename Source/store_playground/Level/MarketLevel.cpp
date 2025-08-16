@@ -487,7 +487,7 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
     Npc->DialogueComponent->DialogueComponentType = EDialogueComponentType::Random;
     int32 RandomDialogueCount = FMath::RandRange(2, 3);
 
-    if (FMath::FRand() < 0.1) Npc->DynamicTalkingWidgetComponent->SetVisibility(true, true);
+    // if (FMath::FRand() < 0.1) Npc->DynamicTalkingWidgetComponent->SetVisibility(true, true);
 
     if (Market->TodaysEconEvents.Num() <= 0) {
       TArray<FDialogueData> RandomDialogues =

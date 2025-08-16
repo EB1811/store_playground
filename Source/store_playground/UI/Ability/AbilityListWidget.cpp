@@ -51,6 +51,7 @@ void UAbilityListWidget::HoverNextAbility(FVector2D Direction) {
 
 void UAbilityListWidget::RefreshUI() {
   AvailableAbilityListBox->ClearChildren();
+  NotEnoughMoneyAbilityListBox->ClearChildren();
   UnavailableAbilityListBox->ClearChildren();
 
   for (const FEconEventAbility& Ability : AvailableAbilities) {

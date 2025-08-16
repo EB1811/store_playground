@@ -114,6 +114,7 @@ void UNegotiationShowItemWidget::InitUI(FInUIInputActions InUIInputActions,
 
   ItemsWidget->InitUI(InventoryC,
                       "Bought At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
+  if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
 
   SortByPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
   SortByPriceButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.UISideButton1Action);

@@ -185,6 +185,8 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   DialogueWidget->SetVisibility(ESlateVisibility::Visible);
   PriceNegotiationWidget->SetVisibility(ESlateVisibility::Hidden);
   NegotiationShowItemWidget->SetVisibility(ESlateVisibility::Hidden);
+
+  UGameplayStatics::PlaySound2D(this, DialogueWidget->OpenSound, 1.0f);
 }
 
 void UNegotiationViewWidget::SetupUIActionable() {
