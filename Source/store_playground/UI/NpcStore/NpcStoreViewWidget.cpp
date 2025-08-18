@@ -127,13 +127,15 @@ void UNpcStoreViewWidget::SwitchTradeType() {
   switch (TradeType) {
     case ETradeType::Buy:
       ItemsWidget->InitUI(
-          StoreInventory, "Selling At", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
+          StoreInventory, StatisticsGen, "Selling At",
+          [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
           [this](FName ItemID) -> float { return Market->GetNpcStoreSellPrice(NpcStoreC, ItemID); });
       if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
       break;
     case ETradeType::Sell:
       ItemsWidget->InitUI(
-          PlayerInventory, "Buying At", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
+          PlayerInventory, StatisticsGen, "Buying At",
+          [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
           [this](FName ItemID) -> float { return Market->GetNpcStoreBuyPrice(NpcStoreC, ItemID); });
       if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
       break;
@@ -165,17 +167,20 @@ void UNpcStoreViewWidget::RefreshUI() {
 void UNpcStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                  const class AMarketEconomy* _MarketEconomy,
                                  const class AMarket* _Market,
+                                 const class AStatisticsGen* _StatisticsGen,
                                  class AStore* _Store,
                                  class UNpcStoreComponent* _NpcStoreC,
                                  class UInventoryComponent* StoreInventoryC,
                                  class UInventoryComponent* PlayerInventoryC,
                                  std::function<void()> _CloseWidgetFunc) {
-  check(_MarketEconomy && _Market && _Store && _NpcStoreC && PlayerInventoryC && StoreInventoryC && _CloseWidgetFunc);
+  check(_MarketEconomy && _StatisticsGen && _Market && _Store && _NpcStoreC && PlayerInventoryC && StoreInventoryC &&
+        _CloseWidgetFunc);
 
   TradeConfirmWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   MarketEconomy = _MarketEconomy;
   Market = _Market;
+  StatisticsGen = _StatisticsGen;
 
   TradeType = ETradeType::Buy;
   Store = _Store;
@@ -210,7 +215,8 @@ void UNpcStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
   ItemsWidget->InitUI(
-      StoreInventory, "Selling At", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
+      StoreInventory, StatisticsGen, "Selling At",
+      [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
       [this](FName ItemID) -> float { return Market->GetNpcStoreSellPrice(NpcStoreC, ItemID); });
 
   SortByPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));

@@ -59,6 +59,8 @@ public:
   const class AMarketEconomy* MarketEconomy;
   UPROPERTY(EditAnywhere)
   const class AMarket* Market;
+  UPROPERTY(EditAnywhere)
+  const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere)
   ETradeType TradeType;
@@ -92,6 +94,7 @@ public:
   void InitUI(FInUIInputActions InUIInputActions,
               const class AMarketEconomy* _MarketEconomy,
               const class AMarket* _Market,
+              const class AStatisticsGen* _StatisticsGen,
               class AStore* _Store,
               class UNpcStoreComponent* _NpcStoreC,
               class UInventoryComponent* StoreInventoryC,

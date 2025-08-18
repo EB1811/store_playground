@@ -53,6 +53,8 @@ public:
 
   UPROPERTY(EditAnywhere)
   const class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere)
+  const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere)
   EStockDisplayViewType StockDisplayViewType;
@@ -80,6 +82,7 @@ public:
   void RefreshUI();
   void InitUI(FInUIInputActions InUIInputActions,
               const class AMarketEconomy* _MarketEconomy,
+              const class AStatisticsGen* _StatisticsGen,
               class AStore* _Store,
               class UStockDisplayComponent* _StockDisplayC,
               class UInventoryComponent* DisplayInventoryC,

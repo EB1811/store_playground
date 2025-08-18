@@ -424,7 +424,7 @@ void ASpgHUD::SetAndOpenInventoryView(UInventoryComponent* PlayerInventory) {
   check(InventoryViewWidget);
   if (OpenedWidgets.Contains(InventoryViewWidget)) return CloseWidget(InventoryViewWidget);
 
-  InventoryViewWidget->InitUI(InUIInputActions, Store, MarketEconomy, PlayerInventory,
+  InventoryViewWidget->InitUI(InUIInputActions, StatisticsGen, Store, MarketEconomy, PlayerInventory,
                               [this] { CloseWidget(InventoryViewWidget); });
   InventoryViewWidget->RefreshUI();
 
@@ -460,7 +460,7 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
   check(StockDisplayViewWidget);
   if (OpenedWidgets.Contains(StockDisplayViewWidget)) return CloseWidget(StockDisplayViewWidget);
 
-  StockDisplayViewWidget->InitUI(InUIInputActions, MarketEconomy, Store, StockDisplay, DisplayInventory,
+  StockDisplayViewWidget->InitUI(InUIInputActions, MarketEconomy, StatisticsGen, Store, StockDisplay, DisplayInventory,
                                  PlayerInventory, [this] { CloseWidget(StockDisplayViewWidget); });
   StockDisplayViewWidget->RefreshUI();
 
@@ -492,8 +492,8 @@ void ASpgHUD::SetAndOpenNPCStore(UNpcStoreComponent* NpcStoreC,
                                  UInventoryComponent* PlayerInventory) {
   check(NpcStoreC && NPCStoreInventory && PlayerInventory);
 
-  NpcStoreViewWidget->InitUI(InUIInputActions, MarketEconomy, Market, Store, NpcStoreC, NPCStoreInventory,
-                             PlayerInventory, [this] { CloseWidget(NpcStoreViewWidget); });
+  NpcStoreViewWidget->InitUI(InUIInputActions, MarketEconomy, Market, StatisticsGen, Store, NpcStoreC,
+                             NPCStoreInventory, PlayerInventory, [this] { CloseWidget(NpcStoreViewWidget); });
   NpcStoreViewWidget->RefreshUI();
 
   OpenFocusedMenu(NpcStoreViewWidget);
@@ -528,7 +528,7 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
   check(NegotiationViewWidget);
   if (OpenedWidgets.Contains(NegotiationViewWidget)) return CloseWidget(NegotiationViewWidget);
 
-  NegotiationViewWidget->InitUI(InUIInputActions, AbilityManager, Store, MarketEconomy, PlayerInventoryC,
+  NegotiationViewWidget->InitUI(InUIInputActions, AbilityManager, Store, MarketEconomy, StatisticsGen, PlayerInventoryC,
                                 NegotiationSystem, DialogueSystem, [this] { CloseWidget(NegotiationViewWidget); });
   NegotiationViewWidget->RefreshUI();
 

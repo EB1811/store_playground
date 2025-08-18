@@ -56,6 +56,8 @@ public:
 
   UPROPERTY(EditAnywhere)
   const class UInventoryComponent* InventoryRef;
+  UPROPERTY(EditAnywhere)
+  const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere)
   TArray<const class UItemBase*> SortedItems;
@@ -82,6 +84,7 @@ public:
 
   void RefreshUI();
   void InitUI(const class UInventoryComponent* _InventoryRef,
+              const class AStatisticsGen* _StatisticsGen,
               FName _ShowPriceText,
               std::function<float(FName)> _MarketPriceFunc,
               std::function<float(FName)> _ShowPriceFunc = nullptr);

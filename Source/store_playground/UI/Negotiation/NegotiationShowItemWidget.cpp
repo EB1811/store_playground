@@ -73,6 +73,7 @@ void UNegotiationShowItemWidget::RefreshUI() {
 void UNegotiationShowItemWidget::InitUI(FInUIInputActions InUIInputActions,
                                         const class AStore* _Store,
                                         const class AMarketEconomy* _MarketEconomy,
+                                        const class AStatisticsGen* _StatisticsGen,
                                         class UInventoryComponent* _InventoryC,
                                         class UNegotiationSystem* _NegotiationSystem,
                                         std::function<void(class UItemBase*)> _ShowFunc,
@@ -112,7 +113,7 @@ void UNegotiationShowItemWidget::InitUI(FInUIInputActions InUIInputActions,
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
-  ItemsWidget->InitUI(InventoryC,
+  ItemsWidget->InitUI(InventoryC, _StatisticsGen,
                       "Bought At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
   if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
 

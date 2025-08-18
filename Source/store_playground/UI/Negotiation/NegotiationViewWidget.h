@@ -53,6 +53,7 @@ public:
               const class AAbilityManager* _AbilityManager,
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
+              const class AStatisticsGen* _StatisticsGen,
               class UInventoryComponent* _PlayerInventoryC,
               class UNegotiationSystem* _NegotiationSystem,
               class UDialogueSystem* _DialogueSystem,

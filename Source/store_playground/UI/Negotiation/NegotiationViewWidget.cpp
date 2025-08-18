@@ -146,12 +146,13 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
                                     const AAbilityManager* _AbilityManager,
                                     const class AStore* _Store,
                                     const class AMarketEconomy* _MarketEconomy,
+                                    const class AStatisticsGen* _StatisticsGen,
                                     class UInventoryComponent* _PlayerInventoryC,
                                     class UNegotiationSystem* _NegotiationSystem,
                                     class UDialogueSystem* _DialogueSystem,
                                     std::function<void()> _CloseWidgetFunc) {
-  check(_AbilityManager && _Store && _MarketEconomy && _PlayerInventoryC && _NegotiationSystem && _DialogueSystem &&
-        _CloseWidgetFunc);
+  check(_AbilityManager && _Store && _MarketEconomy && _StatisticsGen && _PlayerInventoryC && _NegotiationSystem &&
+        _DialogueSystem && _CloseWidgetFunc);
 
   InUIInputActions = _InUIInputActions;
   AbilityManager = _AbilityManager;
@@ -168,7 +169,7 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   // When starting with a stock check, there is no item to negotiate on.
   if (NegotiationSystem->NegotiationState == ENegotiationState::NpcStockCheckRequest)
     NegotiationShowItemWidget->InitUI(
-        InUIInputActions, Store, _MarketEconomy, PlayerInventoryC, NegotiationSystem,
+        InUIInputActions, Store, _MarketEconomy, _StatisticsGen, PlayerInventoryC, NegotiationSystem,
         [this](UItemBase* Item) { ShowItem(Item); }, [this]() { RejectLeave(); });
   else
     PriceNegotiationWidget->InitUI(

@@ -104,12 +104,12 @@ void UStockDisplayViewWidget::SwitchViewType() {
                                                                                : EStockDisplayViewType::Player;
   switch (StockDisplayViewType) {
     case EStockDisplayViewType::Player:
-      ItemsWidget->InitUI(PlayerInventory, "Bought At",
+      ItemsWidget->InitUI(PlayerInventory, StatisticsGen, "Bought At",
                           [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
       if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
       break;
     case EStockDisplayViewType::Display:
-      ItemsWidget->InitUI(DisplayInventory, "Bought At",
+      ItemsWidget->InitUI(DisplayInventory, StatisticsGen, "Bought At",
                           [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
       if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
       break;
@@ -134,14 +134,17 @@ void UStockDisplayViewWidget::RefreshUI() {
 
 void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
                                      const class AMarketEconomy* _MarketEconomy,
+                                     const class AStatisticsGen* _StatisticsGen,
                                      class AStore* _Store,
                                      class UStockDisplayComponent* _StockDisplayC,
                                      class UInventoryComponent* DisplayInventoryC,
                                      class UInventoryComponent* PlayerInventoryC,
                                      std::function<void()> _CloseWidgetFunc) {
-  check(_MarketEconomy && _Store && _StockDisplayC && DisplayInventoryC && PlayerInventoryC && _CloseWidgetFunc);
+  check(_MarketEconomy && _StatisticsGen && _Store && _StockDisplayC && DisplayInventoryC && PlayerInventoryC &&
+        _CloseWidgetFunc);
 
   MarketEconomy = _MarketEconomy;
+  StatisticsGen = _StatisticsGen;
   Store = _Store;
   StockDisplayC = _StockDisplayC;
   DisplayInventory = DisplayInventoryC;
@@ -183,12 +186,12 @@ void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
 
   if (DisplayInventory->ItemsArray.Num() > 0) {
     StockDisplayViewType = EStockDisplayViewType::Display;
-    ItemsWidget->InitUI(DisplayInventory, "Bought At",
+    ItemsWidget->InitUI(DisplayInventory, StatisticsGen, "Bought At",
                         [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
     if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
   } else {
     StockDisplayViewType = EStockDisplayViewType::Player;
-    ItemsWidget->InitUI(PlayerInventory, "Bought At",
+    ItemsWidget->InitUI(PlayerInventory, StatisticsGen, "Bought At",
                         [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
     if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
   }

@@ -3,6 +3,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/UI/Inventory/ItemSlotWidget.h"
 #include "store_playground/UI/Inventory/ItemDetailsWidget.h"
 #include "Components/Image.h"
@@ -26,7 +27,8 @@ void UItemsWidget::SelectItem(const UItemBase* Item, UItemSlotWidget* ItemSlotWi
   if (SelectedItem == Item) return;
 
   SelectedItem = Item;
-  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, ShowPriceFunc);
+  const TArray<float>* PriceHistory = &StatisticsGen->ItemStatisticsMap[Item->ItemID].PriceHistory;
+  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc);
   ItemDetailsWidget->RefreshUI();
 
   if (SelectedItemSlotWidget) {
@@ -117,7 +119,8 @@ void UItemsWidget::RefreshUI() {
   if (!SelectedItem) SelectedItem = SortedItems[0];
   else if (!SortedItems.Contains(SelectedItem)) SelectedItem = SortedItems[0];
 
-  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, ShowPriceFunc);
+  const TArray<float>* PriceHistory = &StatisticsGen->ItemStatisticsMap[SelectedItem->ItemID].PriceHistory;
+  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc);
   ItemDetailsWidget->RefreshUI();
   ItemDetailsWidget->SetVisibility(ESlateVisibility::Visible);
 
@@ -141,12 +144,14 @@ void UItemsWidget::RefreshUI() {
 }
 
 void UItemsWidget::InitUI(const class UInventoryComponent* _InventoryRef,
+                          const class AStatisticsGen* _StatisticsGen,
                           FName _ShowPriceText,
                           std::function<float(FName)> _MarketPriceFunc,
                           std::function<float(FName)> _ShowPriceFunc) {
-  check(_InventoryRef && _MarketPriceFunc && ItemSlotWidgetClass);
+  check(_InventoryRef && _StatisticsGen && _MarketPriceFunc && ItemSlotWidgetClass);
 
   InventoryRef = _InventoryRef;
+  StatisticsGen = _StatisticsGen;
   ShowPriceText = _ShowPriceText;
   MarketPriceFunc = _MarketPriceFunc;
   ShowPriceFunc = _ShowPriceFunc;

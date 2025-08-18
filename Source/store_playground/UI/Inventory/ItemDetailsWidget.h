@@ -28,6 +28,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* MarketPrice;
 
+  UPROPERTY(meta = (BindWidget))
+  class UPriceGraphWidget* PriceGraphWidget;
+
   UPROPERTY(EditAnywhere)
   const class UItemBase* ItemRef;
 
@@ -38,5 +41,6 @@ public:
   void InitUI(const class UItemBase* _ItemRef,
               FName _ShowPriceText,
               std::function<float(FName)> _MarketPriceFunc,
+              const TArray<float>* PriceHistory,
               std::function<float(FName)> _ShowPriceFunc = nullptr);
 };

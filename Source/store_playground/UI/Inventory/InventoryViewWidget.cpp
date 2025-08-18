@@ -65,11 +65,12 @@ void UInventoryViewWidget::RefreshUI() {
 }
 
 void UInventoryViewWidget::InitUI(FInUIInputActions InUIInputActions,
+                                  const class AStatisticsGen* _StatisticsGen,
                                   const AStore* _Store,
                                   const AMarketEconomy* _MarketEconomy,
                                   const UInventoryComponent* InventoryC,
                                   std::function<void()> _CloseWidgetFunc) {
-  check(_Store && _MarketEconomy && InventoryC);
+  check(_StatisticsGen && _Store && _MarketEconomy && InventoryC);
 
   Store = _Store;
   MarketEconomy = _MarketEconomy;
@@ -101,7 +102,7 @@ void UInventoryViewWidget::InitUI(FInUIInputActions InUIInputActions,
 
   ItemsValueSlideWidget->RightSlideText->SetText(FText::FromString(""));
 
-  ItemsWidget->InitUI(InventoryC,
+  ItemsWidget->InitUI(InventoryC, _StatisticsGen,
                       "Bought At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); });
   if (ItemsWidget->SortData.SortType == ESortType::None) SortByMarketPrice();
 

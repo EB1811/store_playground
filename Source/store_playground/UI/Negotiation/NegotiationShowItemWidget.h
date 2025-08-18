@@ -54,6 +54,7 @@ public:
   void InitUI(FInUIInputActions InUIInputActions,
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
+              const class AStatisticsGen* _StatisticsGen,
               class UInventoryComponent* _InventoryC,
               class UNegotiationSystem* _NegotiationSystem,
               std::function<void(class UItemBase*)> _ShowFunc,

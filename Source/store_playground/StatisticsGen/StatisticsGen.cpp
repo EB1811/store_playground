@@ -57,12 +57,15 @@ auto AStatisticsGen::CalcNetWorth() -> float {
 }
 
 void AStatisticsGen::ItemPriceChange(const FName ItemId, const float NewPrice) {
-  if (!ItemStatisticsMap.Contains(ItemId)) ItemStatisticsMap.Add(ItemId, {});
+  if (!ItemStatisticsMap.Contains(ItemId)) {
+    ItemStatisticsMap.Add(ItemId, {});
+    ItemStatisticsMap[ItemId].PriceHistory.Reserve(StatisticsGenParams.MaxHistoryCount * 2);
+  }
 
   ItemStatisticsMap[ItemId].PriceHistory.Add(NewPrice);
 
   if (ItemStatisticsMap[ItemId].PriceHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
-    ItemStatisticsMap[ItemId].PriceHistory.RemoveAt(0, EAllowShrinking::No);
+    ItemStatisticsMap[ItemId].PriceHistory.RemoveAt(0);
 }
 
 void AStatisticsGen::PopChange(const FName PopId, float NewPopulation, float NewGoodsBoughtPerCapita) {
@@ -73,7 +76,7 @@ void AStatisticsGen::PopChange(const FName PopId, float NewPopulation, float New
   PopStatisticsMap[PopId].GoodsBoughtPerCapitaHistory.Add(NewGoodsBoughtPerCapita);
 
   if (PopStatisticsMap[PopId].PopulationHistory.Num() > StatisticsGenParams.MaxHistoryCount * 2)
-    PopStatisticsMap[PopId].PopulationHistory.RemoveAt(0, EAllowShrinking::No);
+    PopStatisticsMap[PopId].PopulationHistory.RemoveAt(0);
 }
 
 void AStatisticsGen::CalcDayStatistics() {
@@ -89,16 +92,16 @@ void AStatisticsGen::CalcDayStatistics() {
   if (StoreStatistics.CurrentHistoryCount < StatisticsGenParams.MaxHistoryCount) {
     StoreStatistics.CurrentHistoryCount++;
   } else {
-    StoreStatistics.ProfitHistory.RemoveAt(0, EAllowShrinking::No);
-    StoreStatistics.RevenueHistory.RemoveAt(0, EAllowShrinking::No);
-    StoreStatistics.NetWorthHistory.RemoveAt(0, EAllowShrinking::No);
+    StoreStatistics.ProfitHistory.RemoveAt(0);
+    StoreStatistics.RevenueHistory.RemoveAt(0);
+    StoreStatistics.NetWorthHistory.RemoveAt(0);
   }
 
   for (auto& PopStat : PopStatisticsMap) {
     if (PopStat.Value.PopulationHistory.Num() > StatisticsGenParams.MaxHistoryCount * 5)
-      PopStat.Value.PopulationHistory.RemoveAt(0, EAllowShrinking::No);
+      PopStat.Value.PopulationHistory.RemoveAt(0);
     if (PopStat.Value.GoodsBoughtPerCapitaHistory.Num() > StatisticsGenParams.MaxHistoryCount * 5)
-      PopStat.Value.GoodsBoughtPerCapitaHistory.RemoveAt(0, EAllowShrinking::No);
+      PopStat.Value.GoodsBoughtPerCapitaHistory.RemoveAt(0);
   }
 
   // for (auto& ItemStat : ItemStatisticsMap)

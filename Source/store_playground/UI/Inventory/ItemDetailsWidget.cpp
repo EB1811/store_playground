@@ -1,5 +1,6 @@
 #include "ItemDetailsWidget.h"
 #include "store_playground/Item/ItemBase.h"
+#include "store_playground/UI/Graph/PriceGraphWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 
@@ -29,11 +30,14 @@ void UItemDetailsWidget::RefreshUI() {
 void UItemDetailsWidget::InitUI(const UItemBase* _ItemRef,
                                 FName _ShowPriceText,
                                 std::function<float(FName)> _MarketPriceFunc,
+                                const TArray<float>* PriceHistory,
                                 std::function<float(FName)> _ShowPriceFunc) {
-  check(_ItemRef && _MarketPriceFunc);
+  check(_ItemRef && _MarketPriceFunc && PriceHistory);
 
   ItemRef = _ItemRef;
   ShowPriceText->SetText(FText::FromName(_ShowPriceText));
   MarketPriceFunc = _MarketPriceFunc;
   ShowPriceFunc = _ShowPriceFunc;
+
+  PriceGraphWidget->InitUI(PriceHistory, ItemRef->PlayerPriceData.BoughtAt);
 }

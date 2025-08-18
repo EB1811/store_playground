@@ -54,6 +54,7 @@ public:
 
   void RefreshUI();
   void InitUI(FInUIInputActions InUIInputActions,
+              const class AStatisticsGen* _StatisticsGen,
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
               const class UInventoryComponent* InventoryC,
