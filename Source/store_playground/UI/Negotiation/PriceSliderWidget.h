@@ -58,6 +58,8 @@ public:
   FLinearColor PriceNormalColor;
   UPROPERTY(EditAnywhere)
   FLinearColor PriceErrorColor;  // * e.g., when the price is too high for the player to afford.
+  UPROPERTY(EditAnywhere)
+  FLinearColor NpcPriceNormalColor;
 
   UPROPERTY(EditAnywhere)
   NegotiationType Type;
@@ -72,7 +74,11 @@ public:
   void UpdatePlayerPriceText(float Value);
 
   void ChangePrice(float Direction);
-  void UpdateNegotiationPrices(float NpcAcceptance, float MarketPrice, float PlayerPrice, float NpcPrice);
+  void UpdateNegotiationPrices(float NpcAcceptance,
+                               float MarketPrice,
+                               float PlayerPrice,
+                               float NpcPrice,
+                               int32 HagglingCount);
 
   // ? Turn into a struct?
   void InitUI(NegotiationType _Type,

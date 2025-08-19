@@ -14,6 +14,11 @@ struct FPriceGraphUIParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
+  float XSize;
+  UPROPERTY(EditAnywhere)
+  float YSize;
+
+  UPROPERTY(EditAnywhere)
   FLinearColor LineColor;
   UPROPERTY(EditAnywhere)
   float LineThickness;
@@ -33,6 +38,8 @@ struct FPriceGraphUIParams {
   int32 XPoints;  // Number of points on the X-axis.
   UPROPERTY(EditAnywhere)
   float YScaleMulti;  // Percentage of the max and min prices to scale the Y-axis.
+  UPROPERTY(EditAnywhere)
+  float YScaleAddition;  // Additional value to add to the Y-axis scale so small prices are squashed.
 };
 
 UCLASS()
@@ -52,12 +59,17 @@ public:
   UPROPERTY(EditAnywhere)
   FPriceGraphUIParams PriceGraphUIParams;
 
-  UPROPERTY(EditAnywhere)
-  TArray<float> CachedPrices;
-
+  const TArray<float>* Prices;
   UPROPERTY(EditAnywhere)
   float BoughtAtPrice;
-  const TArray<float>* Prices;
 
+  UPROPERTY(EditAnywhere)
+  TArray<FVector2D> Points;
+  UPROPERTY(EditAnywhere)
+  TArray<FVector2f> BoughtAtPoints;
+
+  void CreatePriceGraph();
+
+  void RefreshUI();
   void InitUI(const TArray<float>* _Prices, float _BoughtAtPrice = 0);
 };

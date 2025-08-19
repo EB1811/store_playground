@@ -1,6 +1,11 @@
 #include "ItemsWidget.h"
+#include "Blueprint/WidgetTree.h"
+#include "Delegates/Delegate.h"
+#include "Layout/ArrangedChildren.h"
 #include "Logging/LogVerbosity.h"
 #include "Math/UnrealMathUtility.h"
+#include "store_playground/Framework/UtilFuncs.h"
+#include "TimerManager.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
@@ -141,6 +146,9 @@ void UItemsWidget::RefreshUI() {
 
     ItemsPanelWrapBox->AddChildToWrapBox(ItemSlotWidget);
   }
+
+  GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+  GetWorld()->GetTimerManager().SetTimer(RefreshTimerHandle, this, &UItemsWidget::RefreshTick, 2.0f, true, 2.0f);
 }
 
 void UItemsWidget::InitUI(const class UInventoryComponent* _InventoryRef,
@@ -157,4 +165,19 @@ void UItemsWidget::InitUI(const class UInventoryComponent* _InventoryRef,
   ShowPriceFunc = _ShowPriceFunc;
 
   FilterData = {.ItemType = EItemType::Weapon, .bFilterByType = false};
+}
+
+void UItemsWidget::RefreshTick() {
+  if (!ItemsPanelWrapBox || !ItemDetailsWidget || !CheckWidgetIsActive(this)) {
+    GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+    return;
+  }
+
+  ItemsPanelWrapBox->GetAllChildren();
+  for (UWidget* Widget : ItemsPanelWrapBox->GetAllChildren())
+    if (UItemSlotWidget* ItemSlotWidget = Cast<UItemSlotWidget>(Widget)) ItemSlotWidget->RefreshUI();
+  ItemDetailsWidget->RefreshUI();
+
+  UE_LOG(LogTemp, Log, TEXT("ItemsWidget::RefreshTimer called, visibility: %s"),
+         *UEnum::GetValueAsString(GetParent()->GetVisibility()));
 }

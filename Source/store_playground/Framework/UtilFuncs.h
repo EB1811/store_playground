@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include "Components/Widget.h"
 #include "CoreMinimal.h"
+#include "Blueprint/WidgetTree.h"
 #include "GameplayTagContainer.h"
 #include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
@@ -97,4 +99,35 @@ inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
     TagsArray.Add(Tag);
   }
   return FGameplayTagContainer::CreateFromArray(TagsArray);
+}
+
+inline bool CheckWidgetIsActive(UWidget* Widget) {
+  bool bResultVisibility = true;
+  UWidget* HierarchyWidget = Widget;
+
+  int32 MaxDepth = 10;
+  while (HierarchyWidget) {
+    if (MaxDepth-- <= 0) {
+      bResultVisibility = false;
+      break;
+    }
+
+    bool bIsCurrentVisible = HierarchyWidget->GetVisibility() == ESlateVisibility::Visible ||
+                             HierarchyWidget->GetVisibility() == ESlateVisibility::HitTestInvisible ||
+                             HierarchyWidget->GetVisibility() == ESlateVisibility::SelfHitTestInvisible;
+    bResultVisibility = bResultVisibility && bIsCurrentVisible;
+    if (!bResultVisibility) break;
+
+    UWidget* NextHierarchyWidget = HierarchyWidget->GetParent();
+    if (!NextHierarchyWidget) {
+      if (UWidgetTree* CurrentWidgetTree = Cast<UWidgetTree>(HierarchyWidget->GetOuter())) {
+        if (UUserWidget* CurrentUserWidget = Cast<UUserWidget>(CurrentWidgetTree->GetOuter()))
+          NextHierarchyWidget = CurrentUserWidget;
+      }
+    }
+
+    HierarchyWidget = NextHierarchyWidget;
+  }
+
+  return bResultVisibility;
 }

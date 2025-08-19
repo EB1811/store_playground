@@ -50,7 +50,8 @@ void UPriceNegotiationWidget::RefreshUI() {
   float NpcPrice = NegotiationSystem->CustomerOfferResponse.CounterOffer > 0.0f
                        ? NegotiationSystem->CustomerOfferResponse.CounterOffer
                        : NegotiationSystem->MarketPrice;
-  PriceSliderWidget->UpdateNegotiationPrices(NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice);
+  PriceSliderWidget->UpdateNegotiationPrices(NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice,
+                                             NegotiationSystem->CustomerAI->NegotiationAI->HagglingCount);
 }
 
 void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,

@@ -25,6 +25,8 @@ void UItemDetailsWidget::RefreshUI() {
   ShowPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _ShowPrice)));
   float _MarketPrice = MarketPriceFunc(ItemRef->ItemID);
   MarketPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _MarketPrice)));
+
+  PriceGraphWidget->RefreshUI();
 }
 
 void UItemDetailsWidget::InitUI(const UItemBase* _ItemRef,
@@ -32,7 +34,7 @@ void UItemDetailsWidget::InitUI(const UItemBase* _ItemRef,
                                 std::function<float(FName)> _MarketPriceFunc,
                                 const TArray<float>* PriceHistory,
                                 std::function<float(FName)> _ShowPriceFunc) {
-  check(_ItemRef && _MarketPriceFunc && PriceHistory);
+  check(_ItemRef && _MarketPriceFunc);
 
   ItemRef = _ItemRef;
   ShowPriceText->SetText(FText::FromName(_ShowPriceText));

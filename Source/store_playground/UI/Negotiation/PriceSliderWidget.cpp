@@ -42,9 +42,12 @@ void UPriceSliderWidget::ChangePrice(float Direction) {
 void UPriceSliderWidget::UpdateNegotiationPrices(float NpcAcceptance,
                                                  float MarketPrice,
                                                  float PlayerPrice,
-                                                 float NpcPrice) {
+                                                 float NpcPrice,
+                                                 int32 HagglingCount) {
   NPCPriceSlider->SetValue(NpcPrice);
   NPCPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(NpcPrice))));
+  if (HagglingCount < 1) NPCPriceText->SetColorAndOpacity(PriceErrorColor);
+  else NPCPriceText->SetColorAndOpacity(NpcPriceNormalColor);
 
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);
   auto PlayerSliderBoxSize = PlayerSliderBoxAsCanvas->GetSize().Y;
@@ -150,7 +153,9 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   }
 
   NPCPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(NpcPrice))));
+  NPCPriceText->SetColorAndOpacity(NpcPriceNormalColor);
   PlayerPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(PlayerPrice))));
+  PlayerPriceText->SetColorAndOpacity(PriceNormalColor);
   // ! GetDesiredSize() is not updated yet, so a hardcoded value of 50.0f is used here.
   // Can do a delay, or somehow force it to update.
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);

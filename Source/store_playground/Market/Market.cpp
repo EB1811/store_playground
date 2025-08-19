@@ -152,11 +152,8 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
       [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
   check(EconItem);
 
-  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
-  float SingleItemPrice = EconItem->CurrentPrice * (1.0f + StoreMarkup);
+  float SingleItemPrice = GetNpcStoreSellPrice(NpcStoreC, Item->ItemID);
   float TotalPrice = SingleItemPrice * Quantity;
-  UE_LOG(LogTemp, Log, TEXT("StoreMarkup: %f"), StoreMarkup);
-
   if (PlayerStore->Money < TotalPrice) {
     UE_LOG(LogTemp, Log, TEXT("Not enough money to buy item: %s, TotalPrice: %.0f, Money: %.0f"),
            *Item->TextData.Name.ToString(), TotalPrice, PlayerStore->Money);
@@ -189,8 +186,8 @@ auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
 
   if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
 
-  float StoreMarkup = NpcStoreC->NpcStoreType.StoreMarkup * BehaviorParams.StoreMarkupMulti;
-  PlayerStore->MoneyGained(EconItem->CurrentPrice * Quantity * (1.0f - StoreMarkup));
+  float SingleItemPrice = GetNpcStoreBuyPrice(NpcStoreC, Item->ItemID);
+  PlayerStore->MoneyGained(SingleItemPrice * Quantity);
   return true;
 }
 

@@ -88,4 +88,8 @@ public:
               FName _ShowPriceText,
               std::function<float(FName)> _MarketPriceFunc,
               std::function<float(FName)> _ShowPriceFunc = nullptr);
+
+  UPROPERTY(EditAnywhere)
+  FTimerHandle RefreshTimerHandle;
+  void RefreshTick();
 };

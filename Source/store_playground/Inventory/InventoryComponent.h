@@ -32,8 +32,12 @@ public:
   UPROPERTY(EditAnywhere, Category = "Inventory", SaveGame)
   int32 MaxSlots;
 
+#if WITH_EDITORONLY_DATA
+  UPROPERTY(EditAnywhere, Category = "Inventory TESTING | Init State")
+  bool bInitWithTestItems;
   UPROPERTY(EditAnywhere, Category = "Inventory TESTING | Init State")
   TArray<FDataTableRowHandle> InitItemIds;
+#endif  // WITH_EDITORONLY_DATA
 
   auto AddItem(const UItemBase* Item, int32 Quantity = 1) -> UItemBase*;
   void RemoveItem(const UItemBase* Item, int32 Quantity = 1);

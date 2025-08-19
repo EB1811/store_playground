@@ -59,6 +59,8 @@ AMarketEconomy::AMarketEconomy() {
   EconomyParams.bRunSimulation = true;
   EconomyParams.NeedsfulfilledPercent = 0.6f;
   EconomyParams.SingleUnitPriceMulti = 0.1;
+  EconomyParams.EssentialNeedsPercent = 20.0f;
+  EconomyParams.LuxaryNeedsPercent = 80.0f;
   TotalPopulation = 0;
   TotalWealth = 0;
   TotaBought = 0;
@@ -200,16 +202,23 @@ void AMarketEconomy::PerformEconomyTick() {
 
       // Add a deviation in population's goods bought and check promotion/demotion.
       TArray<float> EssentialBoughtSplit =
-          GetRandomSplit(std::min(PopEconData.Population, 5), PopBoughtMap[EItemWealthType::Essential]);
+          GetRandomSplit(FMath::Min(PopEconData.Population, 5), PopBoughtMap[EItemWealthType::Essential]);
       float EssentialBucketNeeds = CustomerPop.ItemNeeds[EItemWealthType::Essential] * PopEconData.Population / 5;
-      for (float Bought : EssentialBoughtSplit)
-        if (Bought / EssentialBucketNeeds < 0.2f) DemotionConsiderPopIndexes.Add(i);
+      float EssentialNeedsPercent = FMath::Max(EconomyParams.EssentialNeedsPercent / 100.0f, 0.01f);
+      for (float Bought : EssentialBoughtSplit) {
+        // UE_LOG(LogTemp, Warning,
+        //        TEXT("pop id: %s, EssentialBought: %f, EssentialBucketNeeds: %f, EssentialNeedsPercent: %f"),
+        //        *PopEconData.PopID.ToString(), Bought, EssentialBucketNeeds, EssentialNeedsPercent);
+        if (Bought / EssentialBucketNeeds < EssentialNeedsPercent) DemotionConsiderPopIndexes.Add(i);
+      }
 
       TArray<float> LuxuryBoughtSplit =
-          GetRandomSplit(std::min(PopEconData.Population, 5), PopBoughtMap[EItemWealthType::Luxury]);
+          GetRandomSplit(FMath::Min(PopEconData.Population, 5), PopBoughtMap[EItemWealthType::Luxury]);
       float LuxuryBucketNeeds = CustomerPop.ItemNeeds[EItemWealthType::Luxury] * PopEconData.Population / 5;
+      float LuxaryNeedsPercent = FMath::Max(EconomyParams.LuxaryNeedsPercent / 100.0f, 0.01f);
       for (float Bought : LuxuryBoughtSplit)
-        if (std::max(Bought, 0.1f) / std::max(LuxuryBucketNeeds, 1.0f) > 0.8f) PromotionConsiderPopIndexes.Add(i);
+        if (FMath::Max(Bought, 0.1f) / FMath::Max(LuxuryBucketNeeds, 1.0f) > LuxaryNeedsPercent)
+          PromotionConsiderPopIndexes.Add(i);
     }
 
     PopEconData.GoodsBoughtPerCapita = PopTotalBought / PopEconData.Population;
@@ -262,9 +271,9 @@ void AMarketEconomy::PerformEconomyTick() {
             WealthTypePricesSumMap[{EconType, WealthType}] / ItemsCountMap[{EconType, WealthType}];
 
   // * Pop Changes.
-  TArray<int32> PromotionPopIndexes;
-  TArray<int32> DemotionPopIndexes;
-  TArray<int32> CrossPromotionPopIndexes;
+  TArray<int32> PromotionPopIndexes = {};
+  TArray<int32> DemotionPopIndexes = {};
+  TArray<int32> CrossPromotionPopIndexes = {};
   for (int32 Index : PromotionConsiderPopIndexes)
     if (FMath::FRand() * 100 < BehaviorParams.PromotionChance &&
         GetHigherWealthType(CustomerPops[Index].WealthType) != CustomerPops[Index].WealthType)
@@ -293,7 +302,7 @@ void AMarketEconomy::PerformEconomyTick() {
           PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
         NewWealthTypePopIndexes.Add(
             {i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
-    if (NewWealthTypePopIndexes.Num() <= 0) break;
+    if (NewWealthTypePopIndexes.Num() <= 0) continue;
 
     int32 RandomNewPopIndex =
         GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const TTuple<int, float>& Index) {
@@ -307,6 +316,7 @@ void AMarketEconomy::PerformEconomyTick() {
            *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
   }
   for (int32 Index : DemotionPopIndexes) {
+    // UE_LOG(LogTemp, Warning, TEXT("Pop %s considering demotion"), *CustomerPops[Index].PopName.ToString());
     auto& CustomerPop = CustomerPops[Index];
     auto& PopEconData = PopEconDataArray[Index];
 
@@ -317,7 +327,7 @@ void AMarketEconomy::PerformEconomyTick() {
           PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
         NewWealthTypePopIndexes.Add(
             {i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
-    if (NewWealthTypePopIndexes.Num() <= 0) break;
+    if (NewWealthTypePopIndexes.Num() <= 0) continue;
 
     int32 RandomNewPopIndex =
         GetWeightedRandomItem<TTuple<int32, float>>(NewWealthTypePopIndexes, [](const TTuple<int, float>& Index) {
@@ -339,7 +349,7 @@ void AMarketEconomy::PerformEconomyTick() {
       if (CustomerPops[i].WealthType == CustomerPop.WealthType && CustomerPops[i].ID != CustomerPop.ID &&
           PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
         NewPopIndexes.Add({i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
-    if (NewPopIndexes.Num() <= 0) break;
+    if (NewPopIndexes.Num() <= 0) continue;
 
     int32 RandomNewPopIndex =
         GetWeightedRandomItem<TTuple<int32, float>>(NewPopIndexes, [](const TTuple<int, float>& Index) {
@@ -390,7 +400,7 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
     } else {
       PriceEffect.DurationLeft -= 1;
       PriceEffect.PriceMultiPercent =
-          std::max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 1.0f);
+          FMath::Max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 1.0f);
     }
   }
   for (auto& PopEffect : ActivePopEffects) {
@@ -400,7 +410,7 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
       PopEffectsToRemove.Add(PopEffect);
     } else {
       PopEffect.DurationLeft -= 1;
-      PopEffect.PopChangeMulti = std::max(PopEffect.PopChangeMulti - PopEffect.PopChangeMultiFalloff, 1.0f);
+      PopEffect.PopChangeMulti = FMath::Max(PopEffect.PopChangeMulti - PopEffect.PopChangeMultiFalloff, 1.0f);
     }
   }
 
@@ -527,7 +537,7 @@ void AMarketEconomy::InitializeEconomyData() {
     for (auto WealthType : TEnumRange<EItemWealthType>()) {
       TArray<FCustomerPop> RelevantPops = CustomerPops.FilterByPredicate(
           [EconType, WealthType](const auto& Pop) { return Pop.ItemEconTypes.Contains(EconType); });
-      AverageNeedsMap[{EconType, WealthType}] /= float(std::max(RelevantPops.Num(), 1));
+      AverageNeedsMap[{EconType, WealthType}] /= float(FMath::Max(RelevantPops.Num(), 1));
 
       if (AverageUnitPriceMap[{EconType, WealthType}] <= 0 || ItemCountMap[{EconType, WealthType}] <= 0) {
         AverageUnitPriceMap[{EconType, WealthType}] = 1;
@@ -558,9 +568,10 @@ void AMarketEconomy::InitializeEconomyData() {
   for (auto& Item : EconItems) {
     TArray<FCustomerPop> RelevantPops = CustomerPops.FilterByPredicate(
         [Item](const auto& Pop) { return Pop.ItemEconTypes.Contains(Item.ItemEconType); });
-    Item.BoughtToPriceMulti = Item.CurrentPrice / std::max((AverageNeedsMap[{Item.ItemEconType, Item.ItemWealthType}] *
-                                                            RelevantPops.Num() * EconomyParams.NeedsfulfilledPercent),
-                                                           1.0f);
+    Item.BoughtToPriceMulti =
+        Item.CurrentPrice / FMath::Max((AverageNeedsMap[{Item.ItemEconType, Item.ItemWealthType}] * RelevantPops.Num() *
+                                        EconomyParams.NeedsfulfilledPercent),
+                                       1.0f);
   }
 
   // Setting WealthTypePricesMap.

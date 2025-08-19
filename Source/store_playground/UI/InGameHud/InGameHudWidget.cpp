@@ -39,8 +39,11 @@ void UInGameHudWidget::NotifyUpgradePointsGained() {
 
   FTimerHandle HideTimerHandle;
   GetWorld()->GetTimerManager().SetTimer(
-      HideTimerHandle, [this]() { NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed); }, 10.0f,
-      false);
+      HideTimerHandle,
+      [this]() {
+        if (NotificationsSlideWidget) NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed);
+      },
+      10.0f, false);
 }
 
 void UInGameHudWidget::RefreshUI() {

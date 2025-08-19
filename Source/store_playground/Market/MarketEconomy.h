@@ -19,6 +19,11 @@ struct FEconomyParams {
   float NeedsfulfilledPercent;  // Artificially set for 60% of the needs fulfilled at the start of the game.
   UPROPERTY(EditAnywhere)
   float SingleUnitPriceMulti;
+
+  UPROPERTY(EditAnywhere)
+  float EssentialNeedsPercent;  // Percentage of needs that must be at least fulfilled to avoid demotion.
+  UPROPERTY(EditAnywhere)
+  float LuxaryNeedsPercent;  // Percentage of needs that must be at least fulfilled to consider promotion.
 };
 
 USTRUCT()
@@ -86,6 +91,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FPopEconData> PopEconDataArray;
 
+  // TODO: Add price effect ramp up.
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FPriceEffect> ActivePriceEffects;
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)

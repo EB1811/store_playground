@@ -11,23 +11,27 @@ UInventoryComponent::UInventoryComponent() {
 void UInventoryComponent::BeginPlay() {
   Super::BeginPlay();
 
-  for (FDataTableRowHandle ItemRowHandle : InitItemIds) {
-    if (FItemDataRow* Row = ItemRowHandle.GetRow<FItemDataRow>(ItemRowHandle.RowName.ToString())) {
-      UItemBase* Item = NewObject<UItemBase>(this);
+#if WITH_EDITOR
+  if (bInitWithTestItems) {
+    for (FDataTableRowHandle ItemRowHandle : InitItemIds) {
+      if (FItemDataRow* Row = ItemRowHandle.GetRow<FItemDataRow>(ItemRowHandle.RowName.ToString())) {
+        UItemBase* Item = NewObject<UItemBase>(this);
 
-      Item->ItemID = Row->ItemID;
-      Item->UniqueItemID = FGuid::NewGuid();
-      Item->Quantity = 1;
-      Item->ItemType = Row->ItemType;
-      Item->ItemWealthType = Row->ItemWealthType;
-      Item->ItemEconType = Row->ItemEconType;
-      Item->TextData = Row->TextData;
-      Item->AssetData = Row->AssetData;
-      Item->FlavorData = Row->FlavorData;
-      Item->PlayerPriceData.BoughtAt = 0.0f;
-      AddItem(Item, 1);
+        Item->ItemID = Row->ItemID;
+        Item->UniqueItemID = FGuid::NewGuid();
+        Item->Quantity = 1;
+        Item->ItemType = Row->ItemType;
+        Item->ItemWealthType = Row->ItemWealthType;
+        Item->ItemEconType = Row->ItemEconType;
+        Item->TextData = Row->TextData;
+        Item->AssetData = Row->AssetData;
+        Item->FlavorData = Row->FlavorData;
+        Item->PlayerPriceData.BoughtAt = 0.0f;
+        AddItem(Item, 1);
+      }
     }
   }
+#endif  // WITH_EDITOR
 }
 
 auto UInventoryComponent::AddItem(const UItemBase* Item, int32 Quantity) -> UItemBase* {
