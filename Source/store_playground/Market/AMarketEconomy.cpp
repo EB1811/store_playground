@@ -4,6 +4,7 @@
 #include "HAL/Platform.h"
 #include "Logging/LogVerbosity.h"
 #include "MarketEconomy.h"
+#include "Math/UnrealMathUtility.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Item/ItemBase.h"
@@ -240,7 +241,7 @@ void AMarketEconomy::PerformEconomyTick() {
         if (PriceEffect.ItemTypes.Contains(Item.ItemType) &&
             PriceEffect.ItemWealthTypes.Contains(Item.ItemWealthType) &&
             PriceEffect.ItemEconTypes.Contains(Item.ItemEconType))
-          PriceAddition += Item.PerfectPrice * PriceEffect.PriceMultiPercent / 100.0f;
+          PriceAddition += Item.PerfectPrice * PriceEffect.CurrentPriceMultiPercent / 100.0f;
 
       Item.PerfectPrice += PriceAddition;
     }
@@ -362,10 +363,11 @@ void AMarketEconomy::PerformEconomyTick() {
            *CustomerPops[RandomNewPopIndex].PopName.ToString());
   }
 
-  // Update statistics.
+  // * Update statistics.
   for (auto& Item : EconItems) StatisticsGen->ItemPriceChange(Item.ItemID, Item.CurrentPrice);
   for (auto& PopEconData : PopEconDataArray)
     StatisticsGen->PopChange(PopEconData.PopID, PopEconData.Population, PopEconData.GoodsBoughtPerCapita);
+  StatisticsGen->CalcNetWorth();
 }
 
 auto AMarketEconomy::GetPopWeightingMulti(const FCustomerPop& Pop) const -> float {
@@ -388,6 +390,16 @@ auto AMarketEconomy::GetPopWeightingMulti(const FPopEconData& PopEconData) const
   return TotalMulti;
 }
 
+void AMarketEconomy::AddPriceEffect(const FPriceEffect& PriceEffect) {
+  FPriceEffect NewPriceEffect = PriceEffect;
+  NewPriceEffect.CurrentPriceMultiPercent =
+      PriceEffect.PriceMultiPercentBuildup > 0.0f
+          ? PriceEffect.PriceMultiPercent * (PriceEffect.PriceMultiPercentBuildup / 100.0f)
+          : PriceEffect.PriceMultiPercent;
+
+  ActivePriceEffects.Add(NewPriceEffect);
+}
+
 void AMarketEconomy::TickDaysActivePriceEffects() {
   TArray<FPriceEffect> PriceEffectsToRemove;
   TArray<FPopEffect> PopEffectsToRemove;
@@ -395,12 +407,23 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
   for (auto& PriceEffect : ActivePriceEffects) {
     if (PriceEffect.DurationType == EEffectDurationType::Permanent) continue;
 
-    if (PriceEffect.DurationLeft <= 1) {
+    if (PriceEffect.DurationLeft < 1) {
       PriceEffectsToRemove.Add(PriceEffect);
+    } else if (FMath::Abs(PriceEffect.CurrentPriceMultiPercent) <
+               FMath::Abs(PriceEffect.PriceMultiPercent) - KINDA_SMALL_NUMBER) {
+      PriceEffect.CurrentPriceMultiPercent +=
+          PriceEffect.PriceMultiPercent * (PriceEffect.PriceMultiPercentBuildup / 100.0f);
+      PriceEffect.CurrentPriceMultiPercent =
+          PriceEffect.PriceMultiPercent > 0.0f
+              ? FMath::Min(PriceEffect.CurrentPriceMultiPercent, PriceEffect.PriceMultiPercent)
+              : FMath::Max(PriceEffect.CurrentPriceMultiPercent, PriceEffect.PriceMultiPercent);
     } else {
       PriceEffect.DurationLeft -= 1;
       PriceEffect.PriceMultiPercent =
-          FMath::Max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 1.0f);
+          PriceEffect.PriceMultiPercent > 0.0f
+              ? FMath::Max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 0.0f)
+              : FMath::Min(PriceEffect.PriceMultiPercent + PriceEffect.PriceMultiPercentFalloff, -0.0f);
+      PriceEffect.CurrentPriceMultiPercent = PriceEffect.PriceMultiPercent;
     }
   }
   for (auto& PopEffect : ActivePopEffects) {

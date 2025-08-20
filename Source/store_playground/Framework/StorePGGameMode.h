@@ -74,6 +74,8 @@ public:
   class ASaveManager* SaveManager;
   UPROPERTY()
   class AStorePhaseManager* StorePhaseManager;
+  UPROPERTY()
+  class AMarketEconomy* MarketEconomy;
 
   UFUNCTION(BlueprintCallable, Category = "GameMode")
   void GameOverReset();

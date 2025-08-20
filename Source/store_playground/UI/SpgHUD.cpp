@@ -653,6 +653,13 @@ void ASpgHUD::EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc) {
   LevelLoadingTransitionWidget->OnEndLevelLoadingCalled();
 }
 
+void ASpgHUD::StartGameLoadTransition(std::function<void()> _FadeInEndFunc) {
+  LevelLoadingTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
+
+  LevelLoadingTransitionWidget->AddToViewport(100);
+  LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
 void ASpgHUD::InitGameStartTransition() {
   InitLoadTransitionWidget->AddToViewport(100);
   InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Visible);

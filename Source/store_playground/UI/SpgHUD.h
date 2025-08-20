@@ -245,6 +245,8 @@ public:
   void StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc);
   void EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc = nullptr);
 
+  void StartGameLoadTransition(std::function<void()> _FadeInEndFunc);
+
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UInitLoadTransitionWidget> InitLoadTransitionWidgetClass;
   UPROPERTY()

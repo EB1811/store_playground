@@ -43,6 +43,8 @@ AStorePGGameMode::AStorePGGameMode() {}
 void AStorePGGameMode::BeginPlay() {
   Super::BeginPlay();
 
+  UE_LOG(LogTemp, Log, TEXT("Initializing Systems."));
+
   APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   check(PlayerCharacter && HUD && LevelManagerClass && GlobalDataManagerClass && GlobalStaticDataManagerClass &&
@@ -80,7 +82,7 @@ void AStorePGGameMode::BeginPlay() {
   AQuestManager* QuestManager = GetWorld()->SpawnActor<AQuestManager>(QuestManagerClass);
   AMarketLevel* MarketLevel = GetWorld()->SpawnActor<AMarketLevel>(MarketLevelClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
-  AMarketEconomy* MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
+  MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
   AStatisticsGen* StatisticsGen = GetWorld()->SpawnActor<AStatisticsGen>(StatisticsGenClass);
   ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
   AMiniGameManager* MiniGameManager = GetWorld()->SpawnActor<AMiniGameManager>(MiniGameManagerClass);
@@ -258,7 +260,7 @@ void AStorePGGameMode::BeginPlay() {
 
   MiniGameManager->Market = Market;
 
-  UE_LOG(LogTemp, Warning, TEXT("Initializing Game..."));
+  UE_LOG(LogTemp, Log, TEXT("Initializing Game..."));
 
   SettingsManager->LoadSettings();
   SaveManager->LoadSaveGameSlots();
@@ -275,6 +277,8 @@ void AStorePGGameMode::BeginPlay() {
 
     StorePhaseManager->Start();
 
+    MarketEconomy->EconomyParams.bRunSimulation = true;
+
     HUD->SetupInitUIStates();
     HUD->ShowInGameHudWidget();
 
@@ -287,7 +291,7 @@ void AStorePGGameMode::BeginPlay() {
     check(SpawnPoint);
     PlayerCharacter->SetActorLocation(SpawnPoint->GetActorLocation());
 
-    UE_LOG(LogTemp, Warning, TEXT("Game Initialized."));
+    UE_LOG(LogTemp, Log, TEXT("Game Initialized."));
     HUD->InitGameEndTransition();
 
     // * Clearing datatable refs mostly.
@@ -308,7 +312,7 @@ void AStorePGGameMode::ExitToMainMenu() {
   StorePGGameInstance->bFromSaveGame = false;
   StorePGGameInstance->bFromGameOver = false;
 
-  HUD->StartLevelLoadingTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap", true); });
+  HUD->StartGameLoadTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap", true); });
 }
 // * Reopen the game with the selected save slot.
 void AStorePGGameMode::LoadGame(int32 SlotIndex) {
@@ -319,5 +323,5 @@ void AStorePGGameMode::LoadGame(int32 SlotIndex) {
 
   StorePGGameInstance->bFromGameOver = false;
 
-  HUD->StartLevelLoadingTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); });
+  HUD->StartGameLoadTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); });
 }

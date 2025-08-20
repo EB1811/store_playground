@@ -123,11 +123,13 @@ void UEconomyDetailsWidget::RefreshUI() {
       PopDetailsWidget->Name->SetText(Pop.PopName);
       PopDetailsWidget->WealthText->SetText(
           FText::FromString("Wealth: " + GetWealthText(MarketEconomy->PopEconDataArray, PopEconData)));
-      float PopulationPercent = float(PopEconData.Population) / float(MarketEconomy->TotalPopulation) * 100.0f;
-      PopDetailsWidget->PopulationText->SetText(FText::FromString(
-          FString::Printf(PopulationPercent < 1.0f ? TEXT("Population: %.1f") : TEXT("Population: %.0f"),
-                          PopulationPercent) +
-          "%"));
+      // float PopulationPercent = float(PopEconData.Population) / float(MarketEconomy->TotalPopulation) * 100.0f;
+      // PopDetailsWidget->PopulationText->SetText(FText::FromString(
+      //     FString::Printf(PopulationPercent < 1.0f ? TEXT("Population: %.1f") : TEXT("Population: %.0f"),
+      //                     PopulationPercent) +
+      //     "%"));
+      PopDetailsWidget->PopulationText->SetText(
+          FText::FromString(FString::Printf(TEXT("Population: %d"), PopEconData.Population)));
       PopDetailsWidget->ItemSpendText->SetText(
           FText::FromString("Spends On: " + GetItemSpendText(Pop.ItemSpendPercent)));
       PopDetailsWidget->ItemEconTypesText->SetText(FText::FromString(
@@ -135,27 +137,30 @@ void UEconomyDetailsWidget::RefreshUI() {
             return UEnum::GetDisplayValueAsText(EconType).ToString();
           })));
 
-      auto GoodsBoughtPerCapitaHistory = StatisticsGen->PopStatisticsMap[PopEconData.PopID].GoodsBoughtPerCapitaHistory;
-      if (IsWealthTrendUp(GoodsBoughtPerCapitaHistory)) {
-        PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Visible);
-        PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
-      } else if (IsWealthTrendDown(GoodsBoughtPerCapitaHistory)) {
-        PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
-        PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Visible);
-      } else {
-        PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
-        PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
-      }
-      auto PopulationHistory = StatisticsGen->PopStatisticsMap[PopEconData.PopID].PopulationHistory;
-      if (IsPopulationTrendUp(PopulationHistory)) {
-        PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Visible);
-        PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
-      } else if (IsPopulationTrendDown(PopulationHistory)) {
-        PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
-        PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Visible);
-      } else {
-        PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
-        PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+      if (StatisticsGen->PopStatisticsMap.Num() > 0) {
+        auto GoodsBoughtPerCapitaHistory =
+            StatisticsGen->PopStatisticsMap[PopEconData.PopID].GoodsBoughtPerCapitaHistory;
+        if (IsWealthTrendUp(GoodsBoughtPerCapitaHistory)) {
+          PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Visible);
+          PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+        } else if (IsWealthTrendDown(GoodsBoughtPerCapitaHistory)) {
+          PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+          PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Visible);
+        } else {
+          PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+          PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+        }
+        auto PopulationHistory = StatisticsGen->PopStatisticsMap[PopEconData.PopID].PopulationHistory;
+        if (IsPopulationTrendUp(PopulationHistory)) {
+          PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Visible);
+          PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+        } else if (IsPopulationTrendDown(PopulationHistory)) {
+          PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+          PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Visible);
+        } else {
+          PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+          PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+        }
       }
 
       if (!FirstPopDetailsWidget.Key)

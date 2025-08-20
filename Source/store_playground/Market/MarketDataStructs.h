@@ -261,12 +261,16 @@ struct FPriceEffect {
   TArray<EItemType> ItemTypes;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  float PriceMultiPercent;  // * Positive and negative, additive.
+  float PriceMultiPercent;  // * Positive and negative, additive. Includes falloff.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float CurrentPriceMultiPercent;  // * For buildup.
 
   UPROPERTY(EditAnywhere, SaveGame)
   EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere, SaveGame)
   int32 DurationLeft;  // * Duration in days.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PriceMultiPercentBuildup;  // * Buildup each day, if any.
   UPROPERTY(EditAnywhere, SaveGame)
   float PriceMultiPercentFalloff;  // * Falloff each day, if any.
 };
@@ -285,13 +289,15 @@ struct FPriceEffectRow : public FTableRowBase {
   TArray<EItemType> ItemTypes;
 
   UPROPERTY(EditAnywhere)
-  float PriceMultiPercent;  // * Positive and negative, additive.
+  float PriceMultiPercent;  // * Positive and negative, additive. Includes falloff.
 
   UPROPERTY(EditAnywhere, SaveGame)
   EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere)
   int32 Duration;  // * Duration in days.
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PriceMultiPercentBuildup;  // * Buildup to 100% each day, if any.
+  UPROPERTY(EditAnywhere, SaveGame)
   float PriceMultiPercentFalloff;  // * Falloff each day, if any.
 };
 

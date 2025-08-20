@@ -25,6 +25,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UStoreDetailCardWidget* UpgradesCardWidget;
 
+  UPROPERTY(meta = (BindWidget))
+  class UStoreStatsGraphsWidget* StatsGraphsWidget;
+
   UPROPERTY(EditAnywhere)
   const class ADayManager* DayManager;
   UPROPERTY(EditAnywhere)
@@ -55,4 +58,8 @@ public:
               const class UInventoryComponent* _PlayerInventoryC,
               class AStatisticsGen* _StatisticsGen,
               class AStore* _Store);
+
+  UPROPERTY(EditAnywhere)
+  FTimerHandle RefreshTimerHandle;
+  void RefreshTick();
 };

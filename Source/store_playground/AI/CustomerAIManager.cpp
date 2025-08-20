@@ -354,12 +354,12 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   for (ACustomerPC* Customer : ExitingCustomers) {
     if (Customer->GetController<AAIController>()->GetMoveStatus() != EPathFollowingStatus::Idle) continue;
 
+    check(Customer->CustomerAIComponent->CustomerState == ECustomerState::Leaving);
+
     CustomersToDestroy.Add(Customer);
 
-    if (Customer->CustomerAIComponent->NegotiationAI) {
+    if (Customer->CustomerAIComponent->NegotiationAI)
       Customer->CustomerAIComponent->NegotiationAI->RelevantItem = nullptr;
-      Customer->CustomerAIComponent->NegotiationAI = nullptr;
-    }
   }
   for (ACustomerPC* Customer : CustomersToDestroy) {
     ExitingCustomers.RemoveSingleSwap(Customer);

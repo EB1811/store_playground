@@ -14,7 +14,11 @@ struct FStatisticsGenParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  int32 MaxHistoryCount;  // * In days.
+  int32 DayHistoryCount;
+  UPROPERTY(EditAnywhere)
+  int32 ItemPriceHistoryCount;
+  UPROPERTY(EditAnywhere)
+  int32 ValueHistoryCount;  // * e.g., net worth, population, etc.
 };
 
 USTRUCT()
@@ -77,7 +81,15 @@ class STORE_PLAYGROUND_API AStatisticsGen : public AInfo {
   GENERATED_BODY()
 
 public:
-  AStatisticsGen() { PrimaryActorTick.bCanEverTick = false; }
+  AStatisticsGen() {
+    PrimaryActorTick.bCanEverTick = false;
+
+    StatisticsGenParams = {
+        .DayHistoryCount = 30,
+        .ItemPriceHistoryCount = 30,
+        .ValueHistoryCount = 60,
+    };
+  }
 
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
@@ -98,9 +110,9 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   FStoreStatistics StoreStatistics;
   UPROPERTY(EditAnywhere, SaveGame)
-  TMap<FName, FItemStatistics> ItemStatisticsMap;
+  TMap<FName, FItemStatistics> ItemStatisticsMap;  // ! Not populated at game start.
   UPROPERTY(EditAnywhere, SaveGame)
-  TMap<FName, FPopStatistics> PopStatisticsMap;
+  TMap<FName, FPopStatistics> PopStatisticsMap;  // ! Not populated at game start.
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FItemDeal> TodaysItemDeals;  // * Items sold at negotiation or market.

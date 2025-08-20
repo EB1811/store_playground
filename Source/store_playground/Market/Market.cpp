@@ -211,7 +211,7 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
 
   for (auto& Event : EconEvents) {
     TArray<struct FPriceEffect> PriceEffects = GlobalStaticDataManager->GetPriceEffects(Event.PriceEffectIDs);
-    for (const auto& PriceEffect : PriceEffects) MarketEconomy->ActivePriceEffects.Add(PriceEffect);
+    for (const auto& PriceEffect : PriceEffects) MarketEconomy->AddPriceEffect(PriceEffect);
     TArray<struct FPopEffect> PopEffects = GlobalStaticDataManager->GetPopEffects(Event.PopEffectIDs);
     for (const auto& PopEffect : PopEffects) MarketEconomy->ActivePopEffects.Add(PopEffect);
 

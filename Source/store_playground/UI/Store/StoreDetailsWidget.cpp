@@ -1,4 +1,7 @@
 #include "StoreDetailsWidget.h"
+#include "Logging/LogVerbosity.h"
+#include "TimerManager.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/DayManager/DayManager.h"
@@ -12,6 +15,8 @@
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "store_playground/UI/Store/StoreDetailCardWidget.h"
 #include "store_playground/UI/Store/StoreMonetaryDetailCardWidget.h"
+#include "store_playground/UI/Store/StoreStatsGraphsWidget.h"
+#include "store_playground/UI/Graph/StoreStatsGraphWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
@@ -59,7 +64,7 @@ void UStoreDetailsWidget::RefreshUI() {
   for (const auto& StockItem : Store->StoreStockItems)
     OnDisplayValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
   NetWorthCardWidget->InitUI(
-      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), StatisticsGen->CalcNetWorth())),
+      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue)),
       {{
            FText::FromString("Money:"),
            Money,
@@ -79,6 +84,11 @@ void UStoreDetailsWidget::RefreshUI() {
                              FText::FromString(FString::Printf(TEXT("Abilities Available: %d"), AbilitiesAvailable)),
                              FText::FromString("Leave the store during the night."), FText::GetEmpty(),
                              FText::FromString("Earn points by gaining money, speaking to npcs, and finding secrets."));
+
+  StatsGraphsWidget->RefreshUI();
+
+  GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+  GetWorld()->GetTimerManager().SetTimer(RefreshTimerHandle, this, &UStoreDetailsWidget::RefreshTick, 2.0f, true, 2.0f);
 }
 
 void UStoreDetailsWidget::InitUI(const class ADayManager* _DayManager,
@@ -102,4 +112,41 @@ void UStoreDetailsWidget::InitUI(const class ADayManager* _DayManager,
   PlayerInventoryC = _PlayerInventoryC;
   StatisticsGen = _StatisticsGen;
   Store = _Store;
+
+  StatsGraphsWidget->InitUI(StatisticsGen);
+  GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+}
+
+void UStoreDetailsWidget::RefreshTick() {
+  if (!NetWorthCardWidget || !StatsGraphsWidget || !CheckWidgetIsActive(this)) {
+    GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+    return;
+  }
+
+  float Money = Store->Money;
+  float TotalItemsValue = 0.0f;
+  float OnDisplayValue = 0.0f;
+  for (const auto& Item : PlayerInventoryC->ItemsArray)
+    TotalItemsValue += Item->Quantity * MarketEconomy->GetMarketPrice(Item->ItemID);
+  for (const auto& StockItem : Store->StoreStockItems)
+    OnDisplayValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
+  NetWorthCardWidget->InitUI(
+      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue)),
+      {{
+           FText::FromString("Money:"),
+           Money,
+       },
+       {
+           FText::FromString("Items:"),
+           TotalItemsValue,
+       },
+       {
+           FText::FromString("On Display:"),
+           OnDisplayValue,
+       }});
+
+  StatsGraphsWidget->RefreshUI();
+
+  UE_LOG(LogTemp, Log, TEXT("UStoreDetailsWidget::RefreshTimer called, visibility: %s"),
+         *UEnum::GetValueAsString(GetParent()->GetVisibility()));
 }

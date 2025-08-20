@@ -508,8 +508,10 @@ void AGlobalStaticDataManager::InitializeMarketData() {
         Row->ItemWealthTypes,
         Row->ItemTypes,
         Row->PriceMultiPercent,
+        0.0f,
         Row->DurationType,
         Row->Duration,
+        Row->PriceMultiPercentBuildup,
         Row->PriceMultiPercentFalloff,
     });
   PopEffectsArray.Empty();

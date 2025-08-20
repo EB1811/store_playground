@@ -165,6 +165,8 @@ void UItemsWidget::InitUI(const class UInventoryComponent* _InventoryRef,
   ShowPriceFunc = _ShowPriceFunc;
 
   FilterData = {.ItemType = EItemType::Weapon, .bFilterByType = false};
+
+  GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
 }
 
 void UItemsWidget::RefreshTick() {
