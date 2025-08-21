@@ -5,6 +5,7 @@
 #include "store_playground/UI/Settings/SoundSettingsWidget.h"
 #include "store_playground/UI/Settings/DisplaySettingsWidget.h"
 #include "store_playground/UI/Settings/GraphicsSettingsWidget.h"
+#include "store_playground/UI/Settings/ControlsSettingsWidget.h"
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -172,6 +173,10 @@ void USettingsWidget::RefreshUI() {
     case ESettingsCategory::Controls:
       SettingsOverlay->SetVisibility(ESlateVisibility::Hidden);
       if (OpenedWidget) OpenedWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+      OpenedWidget = ControlsSettingsWidget;
+      ControlsSettingsWidget->RefreshUI();
+      ControlsSettingsWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     default: checkNoEntry(); break;
   }
@@ -206,6 +211,12 @@ void USettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   });
   GraphicsSettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
+  ControlsSettingsWidget->InitUI(_InUIInputActions, SettingsManager, [this]() {
+    CurrentCategory = ESettingsCategory::None;
+    RefreshUI();
+  });
+  ControlsSettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
   HoverButton(GameSettingsButton);
 }
 
@@ -215,6 +226,7 @@ void USettingsWidget::SetupUIActionable() {
     else if (CurrentCategory == ESettingsCategory::Display) DisplaySettingsWidget->UIActionable.AdvanceUI();
     else if (CurrentCategory == ESettingsCategory::Graphics) GraphicsSettingsWidget->UIActionable.AdvanceUI();
     else if (CurrentCategory == ESettingsCategory::Sound) SoundSettingsWidget->UIActionable.AdvanceUI();
+    else if (CurrentCategory == ESettingsCategory::Controls) ControlsSettingsWidget->UIActionable.AdvanceUI();
   };
   UIActionable.DirectionalInput = [this](FVector2D Direction) {
     if (CurrentCategory == ESettingsCategory::None) HoverNextButton(Direction);
@@ -225,5 +237,6 @@ void USettingsWidget::SetupUIActionable() {
     else if (CurrentCategory == ESettingsCategory::Display) DisplaySettingsWidget->UIActionable.RetractUI();
     else if (CurrentCategory == ESettingsCategory::Graphics) GraphicsSettingsWidget->UIActionable.RetractUI();
     else if (CurrentCategory == ESettingsCategory::Sound) SoundSettingsWidget->UIActionable.RetractUI();
+    else if (CurrentCategory == ESettingsCategory::Controls) ControlsSettingsWidget->UIActionable.RetractUI();
   };
 }

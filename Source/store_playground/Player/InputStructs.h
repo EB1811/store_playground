@@ -7,9 +7,19 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputStructs.generated.h"
 
+UENUM()
+enum class EInputTypeNames : uint8 {
+  InGame UMETA(DisplayName = "InGame"),
+  InUI UMETA(DisplayName = "InUI"),
+  InCutscene UMETA(DisplayName = "InCutscene"),
+};
+
 USTRUCT()
 struct FInGameInputActions {
   GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  FName InputName;
 
   // * In Game Actions.
   UPROPERTY(EditAnywhere, Category = "Input")
@@ -31,6 +41,9 @@ struct FInGameInputActions {
 USTRUCT()
 struct FInUIInputActions {
   GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  FName InputName;
 
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* AdvanceUIAction;
@@ -59,6 +72,9 @@ struct FInUIInputActions {
 USTRUCT()
 struct FInCutsceneInputActions {
   GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, Category = "Input")
+  FName InputName;
 
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* AdvanceCutsceneAction;

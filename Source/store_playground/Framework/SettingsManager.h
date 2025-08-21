@@ -19,6 +19,8 @@ public:
   UPROPERTY(EditAnywhere)
   class UGameUserSettings* UnrealSettings;
   UPROPERTY(EditAnywhere)
+  class UEnhancedInputUserSettings* EInputUserSettings;
+  UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
 
   UPROPERTY(EditAnywhere, Category = "Sound")

@@ -33,6 +33,8 @@ public:
   class UDisplaySettingsWidget* DisplaySettingsWidget;
   UPROPERTY(meta = (BindWidget))
   class UGraphicsSettingsWidget* GraphicsSettingsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UControlsSettingsWidget* ControlsSettingsWidget;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* GameSettingsButton;

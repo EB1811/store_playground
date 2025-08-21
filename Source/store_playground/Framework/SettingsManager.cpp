@@ -2,8 +2,10 @@
 #include "SettingsManager.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
+#include "EnhancedInputSubsystems.h"
 #include "Misc/AssertionMacros.h"
 #include "Sound/SoundClass.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/SettingsSaveGame.h"
@@ -186,12 +188,19 @@ void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
 
 void ASettingsManager::SaveSettings() const {
   UnrealSettings->ApplySettings(true);
+  EInputUserSettings->SaveSettings();
   SaveManager->SaveSettingsToDisk(SoundSettings);
 }
 void ASettingsManager::LoadSettings() {
   if (!UnrealSettings) UnrealSettings = GEngine->GetGameUserSettings();
   check(UnrealSettings);
   UnrealSettings->LoadSettings(true);
+
+  if (!EInputUserSettings) {
+    UEnhancedInputLocalPlayerSubsystem* EISubsystem =
+        GetWorld()->GetFirstPlayerController()->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+    EInputUserSettings = EISubsystem->GetUserSettings();
+  }
 
   const USettingsSaveGame* SavedSettings = SaveManager->LoadSettingsFromDisk();
   auto SavedSound = SavedSettings->SoundSettings;

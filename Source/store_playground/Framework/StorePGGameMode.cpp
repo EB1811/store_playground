@@ -3,6 +3,7 @@
 #include "store_playground/Framework/StorePGGameMode.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Framework/StorePhaseManager.h"
@@ -262,6 +263,14 @@ void AStorePGGameMode::BeginPlay() {
 
   UE_LOG(LogTemp, Log, TEXT("Initializing Game..."));
 
+  // * Settings and save data.
+  UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+      GetWorld()->GetFirstPlayerController()->GetLocalPlayer());
+  check(Subsystem);
+  UEnhancedInputUserSettings* EISettings = Subsystem->GetUserSettings();
+  check(EISettings);
+  for (const auto& StateContext : PlayerCharacter->InputContexts)
+    EISettings->RegisterInputMappingContext(StateContext.Value);
   SettingsManager->LoadSettings();
   SaveManager->LoadSaveGameSlots();
 
