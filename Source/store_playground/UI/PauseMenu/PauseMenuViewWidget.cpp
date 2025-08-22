@@ -8,6 +8,7 @@
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/Overlay.h"
 #include "Kismet/GameplayStatics.h"
 
 void UPauseMenuViewWidget::NativeOnInitialized() {
@@ -84,12 +85,14 @@ void UPauseMenuViewWidget::SaveMenu() {
   if (!SaveManager->CanSave()) return;
 
   auto BackFunc = [this]() {
+    MainOverlay->SetVisibility(ESlateVisibility::Visible);
     SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
     HoverButton(SaveButton);
   };
   SaveLoadSlotsWidget->InitUI(InUIInputActions, true, SaveManager, BackFunc);
   SaveLoadSlotsWidget->RefreshUI();
 
+  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
@@ -97,12 +100,14 @@ void UPauseMenuViewWidget::SaveMenu() {
 }
 void UPauseMenuViewWidget::LoadMenu() {
   auto BackFunc = [this]() {
+    MainOverlay->SetVisibility(ESlateVisibility::Visible);
     SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
     HoverButton(LoadButton);
   };
   SaveLoadSlotsWidget->InitUI(InUIInputActions, false, SaveManager, BackFunc);
   SaveLoadSlotsWidget->RefreshUI();
 
+  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
@@ -110,12 +115,14 @@ void UPauseMenuViewWidget::LoadMenu() {
 }
 void UPauseMenuViewWidget::SettingsMenu() {
   auto BackFunc = [this]() {
+    MainOverlay->SetVisibility(ESlateVisibility::Visible);
     SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
     HoverButton(SettingsButton);
   };
   SettingsWidget->InitUI(InUIInputActions, SettingsManager, BackFunc);
   SettingsWidget->RefreshUI();
 
+  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
 
@@ -130,6 +137,8 @@ void UPauseMenuViewWidget::Quit() {
 void UPauseMenuViewWidget::RefreshUI() {
   if (SaveManager->CanSave()) SaveButton->SetIsEnabled(true);
   else SaveButton->SetIsEnabled(false);
+
+  MainOverlay->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UPauseMenuViewWidget::InitUI(FInUIInputActions _InUIInputActions,
@@ -143,6 +152,7 @@ void UPauseMenuViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   SaveManager = _SaveManager;
   CloseWidgetFunc = _CloseWidgetFunc;
 
+  MainOverlay->SetVisibility(ESlateVisibility::Visible);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
 

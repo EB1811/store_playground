@@ -269,18 +269,26 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent);
 }
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
   HUD->SetAndOpenNewsAndEconomyView();
 
   // SaveManager->CreateNewSaveGame();
 }
 void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
   HUD->SetAndOpenStoreView(PlayerInventoryComponent);
 }
 
 void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
   if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning &&
       StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode)
     return;

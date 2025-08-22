@@ -15,6 +15,8 @@ class STORE_PLAYGROUND_API UPauseMenuViewWidget : public UUserWidget {
 public:
   virtual void NativeOnInitialized() override;
 
+  UPROPERTY(meta = (BindWidget))
+  class UOverlay* MainOverlay;
   UPROPERTY(EditAnywhere, meta = (BindWidget))
   class USaveLoadSlotsWidget* SaveLoadSlotsWidget;
   UPROPERTY(meta = (BindWidget))

@@ -2,6 +2,7 @@
 #include "CoreFwd.h"
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
+#include "store_playground/UI/Settings/GameSettingsWidget.h"
 #include "store_playground/UI/Settings/SoundSettingsWidget.h"
 #include "store_playground/UI/Settings/DisplaySettingsWidget.h"
 #include "store_playground/UI/Settings/GraphicsSettingsWidget.h"
@@ -145,6 +146,10 @@ void USettingsWidget::RefreshUI() {
     case ESettingsCategory::Game:
       SettingsOverlay->SetVisibility(ESlateVisibility::Hidden);
       if (OpenedWidget) OpenedWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+      OpenedWidget = GameSettingsWidget;
+      GameSettingsWidget->RefreshUI();
+      GameSettingsWidget->SetVisibility(ESlateVisibility::Visible);
       break;
     case ESettingsCategory::Display:
       SettingsOverlay->SetVisibility(ESlateVisibility::Hidden);
@@ -193,6 +198,12 @@ void USettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   CurrentCategory = ESettingsCategory::None;
   OpenedWidget = nullptr;
 
+  GameSettingsWidget->InitUI(_InUIInputActions, SettingsManager, [this]() {
+    CurrentCategory = ESettingsCategory::None;
+    RefreshUI();
+  });
+  GameSettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
   SoundSettingsWidget->InitUI(_InUIInputActions, SettingsManager, [this]() {
     CurrentCategory = ESettingsCategory::None;
     RefreshUI();
@@ -223,6 +234,7 @@ void USettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
 void USettingsWidget::SetupUIActionable() {
   UIActionable.AdvanceUI = [this]() {
     if (CurrentCategory == ESettingsCategory::None) SelectHoveredButton();
+    else if (CurrentCategory == ESettingsCategory::Game) GameSettingsWidget->UIActionable.AdvanceUI();
     else if (CurrentCategory == ESettingsCategory::Display) DisplaySettingsWidget->UIActionable.AdvanceUI();
     else if (CurrentCategory == ESettingsCategory::Graphics) GraphicsSettingsWidget->UIActionable.AdvanceUI();
     else if (CurrentCategory == ESettingsCategory::Sound) SoundSettingsWidget->UIActionable.AdvanceUI();
@@ -234,6 +246,7 @@ void USettingsWidget::SetupUIActionable() {
   UIActionable.SideButton4 = [this]() {};
   UIActionable.RetractUI = [this]() {
     if (CurrentCategory == ESettingsCategory::None) Back();
+    else if (CurrentCategory == ESettingsCategory::Game) GameSettingsWidget->UIActionable.RetractUI();
     else if (CurrentCategory == ESettingsCategory::Display) DisplaySettingsWidget->UIActionable.RetractUI();
     else if (CurrentCategory == ESettingsCategory::Graphics) GraphicsSettingsWidget->UIActionable.RetractUI();
     else if (CurrentCategory == ESettingsCategory::Sound) SoundSettingsWidget->UIActionable.RetractUI();

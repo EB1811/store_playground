@@ -16,15 +16,11 @@
 inline bool HasDuplicateKeyInCategory(const FKey& Key,
                                       const FText& Category,
                                       const FName& ExcludeMappingName,
-                                      ASettingsManager* SettingsManager) {
-  UEnhancedPlayerMappableKeyProfile* CurrentProfile = SettingsManager->EInputUserSettings->GetCurrentKeyProfile();
-
-  for (const TPair<FName, FKeyMappingRow>& RowPair : CurrentProfile->GetPlayerMappingRows()) {
+                                      UEnhancedPlayerMappableKeyProfile* Profile) {
+  for (const TPair<FName, FKeyMappingRow>& RowPair : Profile->GetPlayerMappingRows()) {
     for (const FPlayerKeyMapping& Mapping : RowPair.Value.Mappings) {
-      // Skip the mapping we're excluding (useful when checking during rebind)
       if (ExcludeMappingName != NAME_None && Mapping.GetMappingName() == ExcludeMappingName) continue;
 
-      // Check if the key matches and the category matches
       if (Mapping.GetCurrentKey() == Key && Mapping.GetDisplayCategory().ToString() == Category.ToString()) return true;
     }
   }
@@ -44,26 +40,17 @@ void UControlsSettingsWidget::NativeOnInitialized() {
 
 void UControlsSettingsWidget::Apply() {
   UEnhancedPlayerMappableKeyProfile* CurrentProfile = SettingsManager->EInputUserSettings->GetCurrentKeyProfile();
-  TMap<FString, TMap<FKey, FText>> CategoryKeyMappings;  // Category -> Key -> MappingName
-
   for (const TPair<FName, FKeyMappingRow>& RowPair : CurrentProfile->GetPlayerMappingRows()) {
     for (const FPlayerKeyMapping& Mapping : RowPair.Value.Mappings) {
-      FString CategoryString = Mapping.GetDisplayCategory().ToString();
       FKey CurrentKey = Mapping.GetCurrentKey();
-
-      if (!CategoryKeyMappings.Contains(CategoryString)) CategoryKeyMappings.Add(CategoryString, TMap<FKey, FText>());
-
-      TMap<FKey, FText>& KeyMappings = CategoryKeyMappings[CategoryString];
-      if (KeyMappings.Contains(CurrentKey)) {
-        ErrorText->SetText(FText::Format(FText::FromString("Key '{0}' is bound to both '{1}' and '{2}'"),
-                                         FText::FromString(CurrentKey.GetDisplayName().ToString()),
-                                         FText::FromString(KeyMappings[CurrentKey].ToString()),
-                                         FText::FromString(Mapping.GetDisplayName().ToString())));
+      if (HasDuplicateKeyInCategory(CurrentKey, Mapping.GetDisplayCategory(), Mapping.GetMappingName(),
+                                    SettingsManager->EInputUserSettings->GetCurrentKeyProfile())) {
+        ErrorText->SetText(FText::Format(FText::FromString("Key '{0}' is already bound to another action"),
+                                         FText::FromString(CurrentKey.GetDisplayName().ToString())));
         ErrorText->SetVisibility(ESlateVisibility::Visible);
+
         return;
       }
-
-      KeyMappings.Add(CurrentKey, Mapping.GetDisplayName());
     }
   }
 
@@ -88,8 +75,9 @@ void UControlsSettingsWidget::Back() { BackFunc(); }
 void UControlsSettingsWidget::RebindKey(FPlayerKeyMapping KeyMapping, FInputChord InputChord) {
   ErrorText->SetVisibility(ESlateVisibility::Hidden);
   FText KeyCategory = KeyMapping.GetDisplayCategory();
-  if (HasDuplicateKeyInCategory(InputChord.Key, KeyCategory, KeyMapping.GetMappingName(), SettingsManager)) {
-    ErrorText->SetText(FText::Format(FText::FromString("Key '{0}' is already bound to another action"),
+  if (HasDuplicateKeyInCategory(InputChord.Key, KeyCategory, KeyMapping.GetMappingName(),
+                                SettingsManager->EInputUserSettings->GetCurrentKeyProfile())) {
+    ErrorText->SetText(FText::Format(FText::FromString("Key '{0}' is already bound to another '{1}' action"),
                                      FText::FromString(InputChord.Key.GetDisplayName().ToString()), KeyCategory));
     ErrorText->SetVisibility(ESlateVisibility::Visible);
   }
@@ -140,8 +128,21 @@ void UControlsSettingsWidget::RefreshUI() {
   InCutsceneControlsPanel->ClearChildren();
 
   UEnhancedPlayerMappableKeyProfile* CurrentProfile = SettingsManager->EInputUserSettings->GetCurrentKeyProfile();
-  for (const TPair<FName, FKeyMappingRow>& RowPair : CurrentProfile->GetPlayerMappingRows()) {
-    for (const FPlayerKeyMapping& Mapping : RowPair.Value.Mappings) {
+
+  const TMap<FName, FKeyMappingRow>& PlayerMappingRows = CurrentProfile->GetPlayerMappingRows();
+  TArray<FKeyMappingRow> SortedKeys;
+  PlayerMappingRows.GenerateValueArray(SortedKeys);
+  SortedKeys.Sort([](const FKeyMappingRow& A, const FKeyMappingRow& B) {
+    TArray<FPlayerKeyMapping> AMappingsArray = A.Mappings.Array();
+    TArray<FPlayerKeyMapping> BMappingsArray = B.Mappings.Array();
+    return AMappingsArray.Num() > BMappingsArray.Num()
+               ? true
+               : (AMappingsArray.Num() < BMappingsArray.Num()
+                      ? false
+                      : AMappingsArray[0].GetMappingName().ToString() < BMappingsArray[0].GetMappingName().ToString());
+  });
+  for (const FKeyMappingRow& KeyRow : SortedKeys) {
+    for (const FPlayerKeyMapping& Mapping : KeyRow.Mappings) {
       UControlsRebindWidget* RebindWidget = CreateWidget<UControlsRebindWidget>(this, ControlsRebindWidgetClass);
       RebindWidget->InitUI(
           Mapping, [this](FPlayerKeyMapping KeyMapping, FInputChord Chord) { RebindKey(KeyMapping, Chord); },
@@ -157,6 +158,21 @@ void UControlsSettingsWidget::RefreshUI() {
       else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InCutscene).ToString())
         InCutsceneControlsPanel->AddChildToVerticalBox(RebindWidget);
       else UE_LOG(LogTemp, Error, TEXT("Unknown input type: %s"), *CategoryString);
+    }
+  }
+
+  // Check for duplicate keys.
+  for (const TPair<FName, FKeyMappingRow>& RowPair : CurrentProfile->GetPlayerMappingRows()) {
+    for (const FPlayerKeyMapping& Mapping : RowPair.Value.Mappings) {
+      FKey CurrentKey = Mapping.GetCurrentKey();
+      if (HasDuplicateKeyInCategory(CurrentKey, Mapping.GetDisplayCategory(), Mapping.GetMappingName(),
+                                    SettingsManager->EInputUserSettings->GetCurrentKeyProfile())) {
+        ErrorText->SetText(FText::Format(FText::FromString("Key '{0}' is already bound to another action"),
+                                         FText::FromString(CurrentKey.GetDisplayName().ToString())));
+        ErrorText->SetVisibility(ESlateVisibility::Visible);
+
+        return;
+      }
     }
   }
 }

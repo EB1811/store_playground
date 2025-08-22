@@ -67,6 +67,7 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* BackButton;
 
+  UPROPERTY(EditAnywhere)
   class ASettingsManager* SettingsManager;
 
   UFUNCTION()
