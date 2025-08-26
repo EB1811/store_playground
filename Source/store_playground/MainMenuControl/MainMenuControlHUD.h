@@ -27,6 +27,11 @@ public:
   UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
 
+  void AdvanceUI();
+  void RetractUIAction();
+  void UIDirectionalInputAction(FVector2D Direction);
+  void UISideButton4Action();
+
   UPROPERTY(EditAnywhere, Category = "Widgets")
   class UMainMenuWidget* MainMenuWidget;
   void OpenMainMenu();

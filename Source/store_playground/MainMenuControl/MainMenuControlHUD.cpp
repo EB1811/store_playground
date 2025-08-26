@@ -26,6 +26,27 @@ void AMainMenuControlHUD::BeginPlay() {
   GetOwningPlayerController()->SetShowMouseCursor(true);
 }
 
+void AMainMenuControlHUD::AdvanceUI() {
+  if (!MainMenuWidget) return;
+
+  MainMenuWidget->UIActionable.AdvanceUI();
+}
+void AMainMenuControlHUD::RetractUIAction() {
+  if (!MainMenuWidget) return;
+
+  MainMenuWidget->UIActionable.RetractUI();
+}
+void AMainMenuControlHUD::UIDirectionalInputAction(FVector2D Direction) {
+  if (!MainMenuWidget) return;
+
+  MainMenuWidget->UIActionable.DirectionalInput(Direction);
+}
+void AMainMenuControlHUD::UISideButton4Action() {
+  if (!MainMenuWidget) return;
+
+  MainMenuWidget->UIActionable.SideButton4();
+}
+
 void AMainMenuControlHUD::OpenMainMenu() {
   MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
   MainMenuWidget->AddToViewport(20);

@@ -31,7 +31,8 @@ void ASettingsManager::BeginPlay() {
 void ASettingsManager::SetGameSettings(const FGameSettings& NewSettings) {
   GameSettings = NewSettings;
 
-  DayManager->RecalculateNextDebt();
+  // * If game already running, apply settings immediately.
+  if (DayManager) DayManager->RecalculateNextDebt();
 }
 
 void ASettingsManager::SetMasterVolume(float Volume) {

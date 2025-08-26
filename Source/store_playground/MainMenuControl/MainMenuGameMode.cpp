@@ -1,8 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "store_playground/MainMenuControl/MainMenuGameMode.h"
+#include "Engine/LocalPlayer.h"
+#include "UserSettings/EnhancedInputUserSettings.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "store_playground/Player/MainMenuPlayer.h"
 #include "store_playground/Framework/SettingsManager.h"
 #include "store_playground/Framework/StorePGGameInstance.h"
 #include "store_playground/SaveManager/SaveManager.h"
@@ -11,6 +14,8 @@
 
 void AMainMenuGameMode::BeginPlay() {
   Super::BeginPlay();
+
+  AMainMenuPlayer* MainMenuPlayer = Cast<AMainMenuPlayer>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
   MainMenuControlHUD = Cast<AMainMenuControlHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   check(MainMenuControlHUD && SettingsManagerClass && SaveManagerClass);
@@ -23,6 +28,14 @@ void AMainMenuGameMode::BeginPlay() {
 
   SettingsManager->SaveManager = SaveManager;
 
+  // * Settings and save data.
+  UEnhancedInputLocalPlayerSubsystem* EISubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+      GetWorld()->GetFirstPlayerController()->GetLocalPlayer());
+  check(EISubsystem);
+  UEnhancedInputUserSettings* EISettings = EISubsystem->GetUserSettings();
+  check(EISettings);
+  for (const auto& StateContext : MainMenuPlayer->InputContexts)
+    EISettings->RegisterInputMappingContext(StateContext.Value);
   SettingsManager->LoadSettings();
   SaveManager->LoadSaveGameSlots();
 

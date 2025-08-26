@@ -51,7 +51,6 @@ public:
   void SelectHoveredButton();
   void HoverButton(UButton* Button);
   void HoverNextButton(FVector2D Direction);
-
   UFUNCTION()
   void UnhoverButton();
 
