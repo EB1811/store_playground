@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "store_playground/UI/UIStructs.h"
+#include "store_playground/Framework/SettingsStructs.h"
 #include "GameSettingsWidget.generated.h"
 
 UCLASS()
@@ -17,6 +18,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UComboBoxString* DifficultyComboBox;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* DifficultyDescriptionText;
+  UPROPERTY(meta = (BindWidget))
   class UCheckBox* ShowTutorialCheckBox;
 
   UPROPERTY(meta = (BindWidget))
@@ -25,8 +28,15 @@ public:
   class UButton* BackButton;
 
   UPROPERTY(EditAnywhere)
+  TMap<EGameDifficulty, FString> DifficultyNamesMap;
+  UPROPERTY(EditAnywhere)
+  TMap<EGameDifficulty, FString> DifficultyDescriptionsMap;
+
+  UPROPERTY(EditAnywhere)
   class ASettingsManager* SettingsManager;
 
+  UFUNCTION()
+  void ChangeDifficulty(FString SelectedItem, ESelectInfo::Type SelectionType);
   UFUNCTION()
   void Apply();
   UFUNCTION()

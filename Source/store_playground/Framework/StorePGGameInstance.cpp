@@ -2,7 +2,4 @@
 
 #include "StorePGGameInstance.h"
 
-UStorePGGameInstance::UStorePGGameInstance() {
-  bFromSaveGame = false;
-  GameSettings.bShowTutorials = true;
-}
+UStorePGGameInstance::UStorePGGameInstance() { bFromSaveGame = false; }

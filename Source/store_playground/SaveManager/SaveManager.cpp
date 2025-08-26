@@ -63,9 +63,10 @@ void ASaveManager::BeginPlay() { Super::BeginPlay(); }
 
 void ASaveManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void ASaveManager::SaveSettingsToDisk(FSavedSoundSettings SoundSettings) {
+void ASaveManager::SaveSettingsToDisk(const FGameSettings NewSettings, const FSavedSoundSettings SoundSettings) {
   check(SettingsSaveGame);
 
+  SettingsSaveGame->GameSettings = NewSettings;
   SettingsSaveGame->SoundSettings = SoundSettings;
   UGameplayStatics::SaveGameToSlot(SettingsSaveGame, SaveManagerParams.SettingsSaveName, 0);
 }
@@ -75,6 +76,10 @@ auto ASaveManager::LoadSettingsFromDisk() -> USettingsSaveGame* {
         Cast<USettingsSaveGame>(UGameplayStatics::CreateSaveGameObject(USettingsSaveGame::StaticClass()));
     check(SettingsSaveGame);
 
+    SettingsSaveGame->GameSettings = {
+        .Difficulty = EGameDifficulty::Normal,
+        .bShowTutorials = true,
+    };
     SettingsSaveGame->SoundSettings = {};
     UGameplayStatics::SaveGameToSlot(SettingsSaveGame, SaveManagerParams.SettingsSaveName, 0);
     UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new settings save game."));

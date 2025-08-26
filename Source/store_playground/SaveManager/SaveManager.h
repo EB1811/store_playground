@@ -3,6 +3,7 @@
 #include <functional>
 #include "Components/MeshComponent.h"
 #include "GameFramework/Info.h"
+#include "store_playground/Framework/StorePGGameInstance.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "SaveManager.generated.h"
 
@@ -69,7 +70,7 @@ public:
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;
 
-  void SaveSettingsToDisk(FSavedSoundSettings SoundSettings);
+  void SaveSettingsToDisk(const FGameSettings NewSettings, const FSavedSoundSettings SoundSettings);
   auto LoadSettingsFromDisk() -> class USettingsSaveGame*;
 
   void LoadSaveGameSlots();

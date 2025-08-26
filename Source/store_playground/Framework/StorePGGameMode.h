@@ -71,6 +71,8 @@ public:
   UPROPERTY()
   class ASpgHUD* HUD;
   UPROPERTY()
+  class ASettingsManager* SettingsManager;
+  UPROPERTY()
   class ASaveManager* SaveManager;
   UPROPERTY()
   class AStorePhaseManager* StorePhaseManager;

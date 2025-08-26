@@ -1,6 +1,7 @@
 #include "DayManager.h"
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Framework/StorePGGameMode.h"
+#include "store_playground/Framework/SettingsManager.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Level/MarketLevel.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -19,7 +20,11 @@ ADayManager::ADayManager() {
   NextDebtAmount = 0.0f;
 }
 
-void ADayManager::BeginPlay() { Super::BeginPlay(); }
+void ADayManager::BeginPlay() {
+  Super::BeginPlay();
+
+  for (auto Type : TEnumRange<EGameDifficulty>()) check(DayManagerParams.DifficultyDebtMultiMap.Contains(Type));
+}
 
 void ADayManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
@@ -55,6 +60,12 @@ void ADayManager::ManageDebt() {
     NextDebtAmount = DayManagerParams.BaseDebtAmount *
                      (DayManagerParams.DebtIncreaseMulti *
                       FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+
+    AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    check(GameMode && GameMode->SettingsManager);
+    EGameDifficulty Difficulty = GameMode->SettingsManager->GameSettings.Difficulty;
+    NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
+
     return;
   }
 
@@ -65,6 +76,12 @@ void ADayManager::ManageDebt() {
     NextDebtAmount = DayManagerParams.BaseDebtAmount *
                      (DayManagerParams.DebtIncreaseMulti *
                       FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+
+    AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    check(GameMode && GameMode->SettingsManager);
+    EGameDifficulty Difficulty = GameMode->SettingsManager->GameSettings.Difficulty;
+    NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
+
     return;
   }
 
@@ -73,4 +90,14 @@ void ADayManager::ManageDebt() {
   AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
   check(GameMode);
   GameMode->GameOverReset();
+}
+void ADayManager::RecalculateNextDebt() {
+  NextDebtAmount = DayManagerParams.BaseDebtAmount *
+                   (DayManagerParams.DebtIncreaseMulti *
+                    FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+
+  AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+  check(GameMode && GameMode->SettingsManager);
+  EGameDifficulty Difficulty = GameMode->SettingsManager->GameSettings.Difficulty;
+  NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
 }

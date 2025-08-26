@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
+#include "store_playground/Framework/SettingsStructs.h"
 #include "DayManager.generated.h"
 
 // * Responsible for tracking the current day, starting new days, tracking times events, etc.
@@ -21,9 +22,10 @@ struct FDayManagerParams {
   UPROPERTY(EditAnywhere)
   float DebtIncreaseMulti;
   UPROPERTY(EditAnywhere)
-  float DifficultyDebtIncreaseMulti;
-  UPROPERTY(EditAnywhere)
   int32 DebtPaymentDayDivisor;
+
+  UPROPERTY(EditAnywhere)
+  TMap<EGameDifficulty, float> DifficultyDebtMultiMap;
 };
 
 UCLASS(Blueprintable)
@@ -70,4 +72,5 @@ public:
   void StartNewDay();
 
   void ManageDebt();  // * Attempt to pay debt. If not enough money, game over.
+  void RecalculateNextDebt();
 };

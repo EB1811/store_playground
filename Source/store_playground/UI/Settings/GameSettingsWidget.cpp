@@ -17,25 +17,50 @@
 void UGameSettingsWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
+  DifficultyComboBox->OnSelectionChanged.AddDynamic(this, &UGameSettingsWidget::ChangeDifficulty);
   ApplyButton->OnClicked.AddDynamic(this, &UGameSettingsWidget::Apply);
   BackButton->OnClicked.AddDynamic(this, &UGameSettingsWidget::Back);
 
   SetupUIActionable();
+
+  for (auto Type : TEnumRange<EGameDifficulty>())
+    check(DifficultyNamesMap.Contains(Type) && DifficultyDescriptionsMap.Contains(Type));
 }
 
-void UGameSettingsWidget::Apply() {
-  UGameUserSettings* GameSettings = SettingsManager->UnrealSettings;
+void UGameSettingsWidget::ChangeDifficulty(FString SelectedItem, ESelectInfo::Type SelectionType) {
+  if (SelectionType == ESelectInfo::Type::Direct || SelectionType == ESelectInfo::Type::OnKeyPress) return;
 
+  for (auto Type : TEnumRange<EGameDifficulty>()) {
+    if (DifficultyNamesMap[Type] == SelectedItem) {
+      DifficultyDescriptionText->SetText(FText::FromString(DifficultyDescriptionsMap[Type]));
+      return;
+    }
+  }
+  checkNoEntry();
+}
+void UGameSettingsWidget::Apply() {
   FString SelectedDifficulty = DifficultyComboBox->GetSelectedOption();
   bool bShowTutorials = ShowTutorialCheckBox->IsChecked();
 
-  // Temp
-
+  FGameSettings NewSettings = {
+      .Difficulty = (EGameDifficulty)DifficultyComboBox->GetSelectedIndex(),
+      .bShowTutorials = bShowTutorials,
+  };
+  SettingsManager->SetGameSettings(NewSettings);
   SettingsManager->SaveSettings();
 }
 void UGameSettingsWidget::Back() { BackFunc(); }
 
-void UGameSettingsWidget::RefreshUI() { UGameUserSettings* GameSettings = SettingsManager->UnrealSettings; }
+void UGameSettingsWidget::RefreshUI() {
+  FGameSettings GameSettings = SettingsManager->GameSettings;
+
+  DifficultyComboBox->ClearOptions();
+  for (auto Type : TEnumRange<EGameDifficulty>()) DifficultyComboBox->AddOption(DifficultyNamesMap[Type]);
+  DifficultyComboBox->SetSelectedIndex((int32)GameSettings.Difficulty);
+  DifficultyDescriptionText->SetText(FText::FromString(DifficultyDescriptionsMap[GameSettings.Difficulty]));
+
+  ShowTutorialCheckBox->SetIsChecked(GameSettings.bShowTutorials);
+}
 
 void UGameSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
                                  ASettingsManager* _SettingsManager,
@@ -44,13 +69,6 @@ void UGameSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
 
   SettingsManager = _SettingsManager;
   BackFunc = _BackFunc;
-
-  DifficultyComboBox->ClearOptions();
-  // Temp
-  DifficultyComboBox->AddOption(TEXT("Easy"));
-  DifficultyComboBox->AddOption(TEXT("Normal"));
-  DifficultyComboBox->AddOption(TEXT("Hard"));
-  DifficultyComboBox->SetSelectedIndex(1);
 }
 
 void UGameSettingsWidget::SetupUIActionable() {

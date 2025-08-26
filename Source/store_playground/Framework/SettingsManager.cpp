@@ -9,6 +9,7 @@
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/SettingsSaveGame.h"
+#include "store_playground/DayManager/DayManager.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Sound/SoundMix.h"
 #include "Sound/SoundClass.h"
@@ -25,6 +26,12 @@ void ASettingsManager::BeginPlay() {
   Super::BeginPlay();
 
   check(MasterSoundMix && MasterSoundClass && MusicSoundClass && SFXSoundClass);
+}
+
+void ASettingsManager::SetGameSettings(const FGameSettings& NewSettings) {
+  GameSettings = NewSettings;
+
+  DayManager->RecalculateNextDebt();
 }
 
 void ASettingsManager::SetMasterVolume(float Volume) {
@@ -51,8 +58,8 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
 
     SetAA->Set(4, ECVF_SetByGameSetting);
     SetDLSS->Set(1, ECVF_SetByGameSetting);
-    UWorld* world = GEngine->GameViewport->GetWorld();
-    if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
+    UWorld* World = GEngine->GameViewport->GetWorld();
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0)) {
       PC->ConsoleCommand("r.AntiAliasingMethod 4", true);
       PC->ConsoleCommand("r.NGX.DLSS.Enable 1", true);
     }
@@ -62,16 +69,16 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
     if (!SetDLSS) return;
 
     SetDLSS->Set(0, ECVF_SetByGameSetting);
-    UWorld* world = GEngine->GameViewport->GetWorld();
-    if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+    UWorld* World = GEngine->GameViewport->GetWorld();
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
       PC->ConsoleCommand("r.NGX.DLSS.Enable 0", true);
   }
 
   static IConsoleVariable* SetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));
   check(SetAA);
   SetAA->Set((uint8)Method, ECVF_SetByGameSetting);
-  UWorld* world = GEngine->GameViewport->GetWorld();
-  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+  UWorld* World = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand("r.AntiAliasingMethod " + FString::FromInt(Method), true);
 }
 
@@ -87,7 +94,7 @@ void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
       IConsoleManager::Get().FindConsoleVariable(TEXT("r.RayTracing.ForceAllRayTracingEffects"));
   check(SetGI && SetDiffuseGI && SetNaniteGI && SetVSM && SetAllRT);
 
-  UWorld* world = GEngine->GameViewport->GetWorld();
+  UWorld* World = GEngine->GameViewport->GetWorld();
   switch (Method) {
     case 0:  // None
       SetGI->Set(0, ECVF_SetByGameSetting);
@@ -95,7 +102,7 @@ void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
       SetNaniteGI->Set(0, ECVF_SetByGameSetting);
       SetVSM->Set(0, ECVF_SetByGameSetting);
       SetAllRT->Set(0, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0)) {
         PC->ConsoleCommand("r.DynamicGlobalIlluminationMethod 0", true);
         PC->ConsoleCommand("r.Lumen.DiffuseIndirect.Allow 0", true);
         PC->ConsoleCommand("r.Nanite 0", true);
@@ -109,7 +116,7 @@ void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
       SetNaniteGI->Set(1, ECVF_SetByGameSetting);
       SetVSM->Set(1, ECVF_SetByGameSetting);
       SetAllRT->Set(-1, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0)) {
         PC->ConsoleCommand("r.DynamicGlobalIlluminationMethod 1", true);
         PC->ConsoleCommand("r.Lumen.DiffuseIndirect.Allow 1", true);
         PC->ConsoleCommand("r.Nanite 1", true);
@@ -123,7 +130,7 @@ void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
       SetDiffuseGI->Set(0, ECVF_SetByGameSetting);
       SetVSM->Set(0, ECVF_SetByGameSetting);
       SetAllRT->Set(0, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0)) {
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0)) {
         PC->ConsoleCommand("r.DynamicGlobalIlluminationMethod 2", true);
         PC->ConsoleCommand("r.Lumen.DiffuseIndirect.Allow 0", true);
         PC->ConsoleCommand("r.Nanite 0", true);
@@ -138,21 +145,21 @@ void ASettingsManager::SetReflectionMethod(int32 Method) {
   static IConsoleVariable* SetRF = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ReflectionMethod"));
   check(SetRF);
 
-  UWorld* world = GEngine->GameViewport->GetWorld();
+  UWorld* World = GEngine->GameViewport->GetWorld();
   switch (Method) {
     case 0:  // None
       SetRF->Set(0, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
         PC->ConsoleCommand("r.ReflectionMethod 0", true);
       break;
     case 1:  // Lumen
       SetRF->Set(1, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
         PC->ConsoleCommand("r.ReflectionMethod 1", true);
       break;
     case 2:  // Screen Space
       SetRF->Set(2, ECVF_SetByGameSetting);
-      if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+      if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
         PC->ConsoleCommand("r.ReflectionMethod 2", true);
       break;
   }
@@ -162,8 +169,8 @@ void ASettingsManager::SetDepthOfFieldEnabled(bool bEnabled) {
   static IConsoleVariable* SetDoF = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DepthOfFieldQuality"));
   check(SetDoF);
   SetDoF->Set(bEnabled ? 2 : 0, ECVF_SetByGameSetting);
-  UWorld* world = GEngine->GameViewport->GetWorld();
-  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+  UWorld* World = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.DepthOfFieldQuality %d"), bEnabled ? 2 : 0), true);
 }
 
@@ -171,8 +178,8 @@ void ASettingsManager::SetBloomEnabled(bool bEnabled) {
   static IConsoleVariable* SetBloom = IConsoleManager::Get().FindConsoleVariable(TEXT("r.BloomQuality"));
   check(SetBloom);
   SetBloom->Set(bEnabled ? 5 : 0, ECVF_SetByGameSetting);
-  UWorld* world = GEngine->GameViewport->GetWorld();
-  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+  UWorld* World = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.BloomQuality %d"), bEnabled ? 5 : 0), true);
 }
 
@@ -181,15 +188,15 @@ void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
   if (!SetDLSSG) return;
 
   SetDLSSG->Set(bEnabled ? 2 : 0, ECVF_SetByGameSetting);
-  UWorld* world = GEngine->GameViewport->GetWorld();
-  if (APlayerController* PC = UGameplayStatics::GetPlayerController(world, 0))
+  UWorld* World = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.Streamline.DLSSG.Enable %d"), bEnabled ? 2 : 0), true);
 }
 
 void ASettingsManager::SaveSettings() const {
   UnrealSettings->ApplySettings(true);
   EInputUserSettings->SaveSettings();
-  SaveManager->SaveSettingsToDisk(SoundSettings);
+  SaveManager->SaveSettingsToDisk(GameSettings, SoundSettings);
 }
 void ASettingsManager::LoadSettings() {
   if (!UnrealSettings) UnrealSettings = GEngine->GetGameUserSettings();
@@ -203,6 +210,10 @@ void ASettingsManager::LoadSettings() {
   }
 
   const USettingsSaveGame* SavedSettings = SaveManager->LoadSettingsFromDisk();
+
+  const FGameSettings& SavedGameSettings = SavedSettings->GameSettings;
+  SetGameSettings(SavedGameSettings);
+
   auto SavedSound = SavedSettings->SoundSettings;
   SetMasterVolume(SavedSound.MasterVolume);
   SetMusicVolume(SavedSound.MusicVolume);

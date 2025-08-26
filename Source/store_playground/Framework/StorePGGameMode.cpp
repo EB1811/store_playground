@@ -55,12 +55,11 @@ void AStorePGGameMode::BeginPlay() {
         AbilityManagerClass && CutsceneManagerClass && StorePhaseLightingManagerClass && MusicManagerClass &&
         AmbientSoundManagerClass);
 
-  // * Initialize the game world and all systems.
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
   UNegotiationSystem* NegotiationSystem = NewObject<UNegotiationSystem>(this);
   UCutsceneSystem* CutsceneSystem = NewObject<UCutsceneSystem>(this);
 
-  ASettingsManager* SettingsManager = GetWorld()->SpawnActor<ASettingsManager>(SettingsManagerClass);
+  SettingsManager = GetWorld()->SpawnActor<ASettingsManager>(SettingsManagerClass);
   SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
   ALevelManager* LevelManager = GetWorld()->SpawnActor<ALevelManager>(LevelManagerClass);
   AUpgradeManager* UpgradeManager = GetWorld()->SpawnActor<AUpgradeManager>(UpgradeManagerClass);
@@ -133,6 +132,7 @@ void AStorePGGameMode::BeginPlay() {
   CutsceneSystem->CutsceneManager = CutsceneManager;
 
   SettingsManager->SaveManager = SaveManager;
+  SettingsManager->DayManager = DayManager;
 
   SaveManager->PlayerCharacter = PlayerCharacter;
   SaveManager->SystemsToSave = {

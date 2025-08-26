@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
+#include "SettingsStructs.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "SettingsManager.generated.h"
 
@@ -17,22 +18,31 @@ public:
   virtual void BeginPlay() override;
 
   UPROPERTY(EditAnywhere)
+  class ASaveManager* SaveManager;
+  // * For changing on difficulty change.
+  UPROPERTY(EditAnywhere)
+  class ADayManager* DayManager;
+
+  UPROPERTY(EditAnywhere)
   class UGameUserSettings* UnrealSettings;
   UPROPERTY(EditAnywhere)
   class UEnhancedInputUserSettings* EInputUserSettings;
-  UPROPERTY(EditAnywhere)
-  class ASaveManager* SaveManager;
 
-  UPROPERTY(EditAnywhere, Category = "Sound")
+  UPROPERTY(EditAnywhere)
+  FGameSettings GameSettings;
+
+  UPROPERTY(EditAnywhere)
   FSavedSoundSettings SoundSettings;
-  UPROPERTY(EditAnywhere, Category = "Sound")
+  UPROPERTY(EditAnywhere)
   class USoundMix* MasterSoundMix;
-  UPROPERTY(EditAnywhere, Category = "Sound")
+  UPROPERTY(EditAnywhere)
   class USoundClass* MasterSoundClass;
-  UPROPERTY(EditAnywhere, Category = "Sound")
+  UPROPERTY(EditAnywhere)
   class USoundClass* MusicSoundClass;
-  UPROPERTY(EditAnywhere, Category = "Sound")
+  UPROPERTY(EditAnywhere)
   class USoundClass* SFXSoundClass;
+
+  void SetGameSettings(const FGameSettings& NewSettings);
 
   void SetMasterVolume(float Volume);
   void SetMusicVolume(float Volume);

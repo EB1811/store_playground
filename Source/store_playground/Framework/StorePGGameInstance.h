@@ -4,15 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "SettingsStructs.h"
 #include "StorePGGameInstance.generated.h"
-
-USTRUCT()
-struct FGameSettings {
-  GENERATED_BODY()
-
-  UPROPERTY(EditAnywhere)
-  bool bShowTutorials;
-};
 
 UCLASS()
 class STORE_PLAYGROUND_API UStorePGGameInstance : public UGameInstance {
@@ -28,7 +21,4 @@ public:
 
   UPROPERTY(EditAnywhere)
   bool bFromGameOver;  // * Whether the game was loaded from a game over or not.
-
-  UPROPERTY(EditAnywhere)
-  FGameSettings GameSettings;
 };

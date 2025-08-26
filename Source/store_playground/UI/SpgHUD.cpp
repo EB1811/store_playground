@@ -603,6 +603,7 @@ void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
 
 void ASpgHUD::StorePhaseTransition(std::function<void()> _FadeInEndFunc) {
   SetPlayerNoControlFunc();
+  HideInGameHudWidget();
 
   StorePhaseTransitionWidget->FadeInEndFunc = _FadeInEndFunc;
   StorePhaseTransitionWidget->FadeOutEndFunc = [this]() {

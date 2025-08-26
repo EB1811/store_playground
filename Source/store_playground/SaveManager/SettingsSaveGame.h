@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameFramework/SaveGame.h"
+#include "store_playground/Framework/SettingsStructs.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "SettingsSaveGame.generated.h"
 
@@ -10,6 +11,9 @@ class STORE_PLAYGROUND_API USettingsSaveGame : public USaveGame {
 
 public:
   USettingsSaveGame() {}
+
+  UPROPERTY()
+  FGameSettings GameSettings;
 
   UPROPERTY()
   FSavedSoundSettings SoundSettings;
