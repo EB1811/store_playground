@@ -7,8 +7,10 @@
 #include "GameFramework/Character.h"
 #include "UObject/Class.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Level/LevelStructs.h"
+#include "store_playground/Lighting/StorePhaseLightingManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/MarketLevel.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
@@ -127,11 +129,24 @@ void ALevelManager::InitLevel(ELevel Level) {
     case ELevel::Store:
       check(Store);
       Store->LoadStoreLevelState();
+
+      if (StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
+        StorePhaseLightingManager->SetupStoreLevelDayLighting();
+      if (StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
+        StorePhaseLightingManager->SetupStoreLevelNightLighting();
       break;
     case ELevel::Market:
       check(MarketLevel);
       MarketLevel->LoadLevelState(DayManager->bIsWeekend);
+
+      if (StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
+        StorePhaseLightingManager->SetupMarketLevelLighting();
       break;
+    case ELevel::Church:
+      if (StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
+        StorePhaseLightingManager->SetupChurchLevelNightLighting();
+      break;
+    default: checkNoEntry();
   }
 }
 

@@ -9,7 +9,6 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
-#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/UI/Inventory/ItemsWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
 #include "store_playground/UI/Components/LeftSlideWidget.h"

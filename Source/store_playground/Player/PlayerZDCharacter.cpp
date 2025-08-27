@@ -2,8 +2,10 @@
 
 #include "store_playground/Player/PlayerZDCharacter.h"
 #include <cstddef>
+#include "Camera/CameraComponent.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/StaticMesh.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Internationalization/Text.h"
 #include "Logging/LogVerbosity.h"
 #include "Materials/MaterialInstance.h"
@@ -20,7 +22,6 @@
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/AIStructs.h"
 #include "store_playground/AI/CustomerDataStructs.h"
-#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
@@ -76,6 +77,11 @@ APlayerZDCharacter::APlayerZDCharacter() {
   InteractionData.InteractionCheckFrequency = 0.0f;
   InteractionData.InteractionCheckDistance = 200.0f;
   InteractionData.InteractionCheckRadius = 50.0f;
+
+  SpringArmC = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
+  SpringArmC->SetupAttachment(RootComponent);
+  CameraC = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+  CameraC->SetupAttachment(SpringArmC);
 
   PlayerInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
   PlayerTagsComponent = CreateDefaultSubobject<UTagsComponent>(TEXT("TagsComponent"));
@@ -179,9 +185,9 @@ void APlayerZDCharacter::BeginPlay() {
 
   CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
-  // !
-  // auto* PlayerController = Cast<APlayerController>(GetController());
-  // PlayerController->SetAudioListenerOverride(GetSprite(), FVector::ZeroVector, FRotator::ZeroRotator);
+  auto* PlayerController = Cast<APlayerController>(GetController());
+  PlayerController->SetAudioListenerOverride(
+      nullptr, GetRootComponent()->GetComponentLocation() + FVector(0, 0, 200.0f), CameraC->GetComponentRotation());
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) {
@@ -198,6 +204,10 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
   if (PlayerBehaviourState == EPlayerState::Normal &&
       GetWorld()->TimeSince(LastCurrentFootstepPhysMatCheckTime) > InteractionData.InteractionCheckFrequency)
     CheckCurrentFootstepPhysMat();
+
+  auto* PlayerController = Cast<APlayerController>(GetController());
+  PlayerController->SetAudioListenerOverride(
+      nullptr, GetRootComponent()->GetComponentLocation() + FVector(0, 0, 200.0f), CameraC->GetComponentRotation());
 }
 
 void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
@@ -500,7 +510,6 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     case EInteractionType::NPCDialogue: {
       auto [DialogueC, SpriteAnimC] = Interactable->InteractNPCDialogue();
 
-      // ? Move to function?
       SpriteAnimC->TurnToPlayer(GetActorLocation());
       EnterDialogue(DialogueC, [this, SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); });
       break;
@@ -509,12 +518,8 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
       auto [DialogueC, CustomerAI, SpriteAnimC] = Interactable->InteractCustomer();
 
       SpriteAnimC->TurnToPlayer(GetActorLocation());
-      // ? Move to function?
-      CustomerAI->CustomerState = ECustomerState::BrowsingTalking;
-      EnterDialogue(DialogueC, [this, CustomerAI, SpriteAnimC]() {
-        CustomerAI->CustomerState = ECustomerState::Browsing;
-        SpriteAnimC->ReturnToOgRotation();
-      });
+      CustomerAI->StartDialogue();
+      EnterDialogue(DialogueC, [this, CustomerAI, SpriteAnimC]() { CustomerAI->LeaveDialogue(); });
       break;
     }
     case EInteractionType::WaitingCustomer: {
@@ -528,7 +533,7 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
       auto [Dialogue, QuestC, CustomerAI, Item, SpriteAnimC] = Interactable->InteractUniqueNPCQuest();
 
       SpriteAnimC->TurnToPlayer(GetActorLocation());
-      if (CustomerAI) CustomerAI->CustomerState = ECustomerState::PerformingQuest;
+      if (CustomerAI) CustomerAI->StartQuest();
       EnterQuest(QuestC, Dialogue, SpriteAnimC, CustomerAI, Item);
       break;
     }
@@ -603,7 +608,7 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
                                           UItemBase* Item,
                                           bool bIsQuestAssociated,
                                           UQuestComponent* QuestComponent) {
-  NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAI->StockDisplayInventory,
+  NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAIDetails.StockDisplayInventory,
                                       bIsQuestAssociated, QuestComponent);
   HUD->SetAndOpenNegotiation(NegotiationSystem, DialogueSystem, PlayerInventoryComponent);
 }
@@ -619,29 +624,20 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
         DialogueC, [SpriteAnimC]() { SpriteAnimC->ReturnToOgRotation(); },
         [this, QuestC, SpriteAnimC, CustomerAI]() {
           QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
-          SpriteAnimC->ReturnToOgRotation();
         });
 
   switch (QuestC->CustomerAction) {
     case ECustomerAction::PickItem:
     case ECustomerAction::StockCheck:
     case ECustomerAction::SellItem:
-      check(CustomerAI->NegotiationAI->RelevantItem);
+      check(CustomerAI->NegotiationAIDetails.RelevantItem);
       if (QuestC->QuestOutcomeType == EQuestOutcomeType::Negotiation)
         EnterDialogue(
-            DialogueC,
-            [CustomerAI, SpriteAnimC]() {
-              CustomerAI->CustomerState = ECustomerState::RequestingQuest;
-              SpriteAnimC->ReturnToOgRotation();
-            },
+            DialogueC, [CustomerAI, SpriteAnimC]() { CustomerAI->LeaveQuest(); },
             [this, Item, CustomerAI, QuestC]() { EnterNegotiation(CustomerAI, Item, true, QuestC); });
       else
         EnterDialogue(
-            DialogueC,
-            [CustomerAI, SpriteAnimC]() {
-              CustomerAI->CustomerState = ECustomerState::RequestingQuest;
-              SpriteAnimC->ReturnToOgRotation();
-            },
+            DialogueC, [CustomerAI, SpriteAnimC]() { CustomerAI->LeaveQuest(); },
             [this, QuestC, CustomerAI, Item]() {
               QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
               EnterNegotiation(CustomerAI, Item);
@@ -651,14 +647,10 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
     case ECustomerAction::None:
       if (CustomerAI->CustomerState == ECustomerState::Leaving) return;
       EnterDialogue(
-          DialogueC,
-          [CustomerAI, SpriteAnimC]() {
-            CustomerAI->CustomerState = ECustomerState::RequestingQuest;
-            SpriteAnimC->ReturnToOgRotation();
-          },
+          DialogueC, [CustomerAI, SpriteAnimC]() { CustomerAI->LeaveQuest(); },
           [this, QuestC, CustomerAI]() {
             QuestManager->CompleteQuestChain(QuestC, DialogueSystem->ChoiceDialoguesSelectedIDs);
-            CustomerAI->CustomerState = ECustomerState::Leaving;
+            CustomerAI->FinishQuest();
           });
       break;
     default: checkNoEntry(); break;
@@ -728,14 +720,6 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
-
-  // TODO: Put in level manager
-  if (LevelChangeC->LevelToLoad == ELevel::Market && StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
-    StorePhaseLightingManager->SetupMarketLevelLighting();
-  if (LevelChangeC->LevelToLoad == ELevel::Store && StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
-    StorePhaseLightingManager->SetupStoreLevelDayLighting();
-  if (LevelChangeC->LevelToLoad == ELevel::Store && StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
-    StorePhaseLightingManager->SetupStoreLevelNightLighting();
 }
 void APlayerZDCharacter::LeaveStore() {
   ELevel LevelToLoad = ELevel::Market;
@@ -763,12 +747,6 @@ void APlayerZDCharacter::LeaveStore() {
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
-
-  // TODO: Put in level manager
-  if (LevelToLoad == ELevel::Market && StorePhaseManager->StorePhaseState == EStorePhaseState::Morning)
-    StorePhaseLightingManager->SetupMarketLevelLighting();
-  if (LevelToLoad == ELevel::Church && StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
-    StorePhaseLightingManager->SetupChurchLevelNightLighting();
 }
 
 void APlayerZDCharacter::GameOverReset() {

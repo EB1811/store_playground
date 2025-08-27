@@ -90,21 +90,12 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->DialogueSystem = DialogueSystem;
   PlayerCharacter->NegotiationSystem = NegotiationSystem;
   PlayerCharacter->CutsceneSystem = CutsceneSystem;
-  PlayerCharacter->Market = Market;
-  PlayerCharacter->CustomerAIManager = CustomerAIManager;
-  PlayerCharacter->NewsGen = NewsGen;
-  PlayerCharacter->StatisticsGen = StatisticsGen;
-  PlayerCharacter->SaveManager = SaveManager;
   PlayerCharacter->StoreExpansionManager = StoreExpansionManager;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
-  PlayerCharacter->DayManager = DayManager;
   PlayerCharacter->LevelManager = LevelManager;
   PlayerCharacter->QuestManager = QuestManager;
-  PlayerCharacter->UpgradeManager = UpgradeManager;
-  PlayerCharacter->AbilityManager = AbilityManager;
   PlayerCharacter->MiniGameManager = MiniGameManager;
-  PlayerCharacter->StorePhaseLightingManager = StorePhaseLightingManager;
 
   HUD->DayManager = DayManager;
   HUD->StorePhaseManager = StorePhaseManager;
@@ -164,8 +155,10 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->Store = Store;
 
   LevelManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
+  LevelManager->StorePhaseManager = StorePhaseManager;
   LevelManager->DayManager = DayManager;
   LevelManager->StoreExpansionManager = StoreExpansionManager;
+  LevelManager->StorePhaseLightingManager = StorePhaseLightingManager;
   LevelManager->CutsceneManager = CutsceneManager;
   LevelManager->Store = Store;
   LevelManager->MarketLevel = MarketLevel;
@@ -188,15 +181,19 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->NewsGen = NewsGen;
   DayManager->Store = Store;
 
+  UpgradeManager->StatisticsGen = StatisticsGen;
   UpgradeManager->HUD = HUD;
-  UpgradeManager->CustomerAIManager = CustomerAIManager;
-  UpgradeManager->Market = Market;
-  UpgradeManager->MarketEconomy = MarketEconomy;
-  UpgradeManager->MarketLevel = MarketLevel;
   UpgradeManager->GlobalDataManager = GlobalDataManager;
   UpgradeManager->GlobalStaticDataManager = GlobalStaticDataManager;
-  UpgradeManager->AbilityManager = AbilityManager;
-  UpgradeManager->StatisticsGen = StatisticsGen;
+  UpgradeManager->UpgradeableMap = {
+      {EUpgradeEffectSystem::Ability, AbilityManager->Upgradeable},
+      {EUpgradeEffectSystem::CustomerAI, CustomerAIManager->Upgradeable},
+      {EUpgradeEffectSystem::GlobalData, GlobalDataManager->Upgradeable},
+      {EUpgradeEffectSystem::Market, Market->Upgradeable},
+      {EUpgradeEffectSystem::MarketEconomy, MarketEconomy->Upgradeable},
+      {EUpgradeEffectSystem::MarketLevel, MarketLevel->Upgradeable},
+      {EUpgradeEffectSystem::StorePhaseManager, StorePhaseManager->Upgradeable},
+  };
 
   StatisticsGen->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;
   StatisticsGen->Store = Store;

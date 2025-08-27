@@ -4,7 +4,6 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/AI/CustomerAIComponent.h"
-#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Market/NpcStoreComponent.h"
 #include "store_playground/Item/ItemBase.h"
@@ -101,7 +100,7 @@ auto UInteractionComponent::InteractWaitingCustomer() const
   check(OwnerCustomerAIC);
   check(OwnerSpriteAnimC);
 
-  return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAI->RelevantItem, OwnerSpriteAnimC};
+  return {OwnerCustomerAIC, OwnerCustomerAIC->NegotiationAIDetails.RelevantItem, OwnerSpriteAnimC};
 }
 
 auto UInteractionComponent::InteractUniqueNPCQuest() const -> TTuple<class UDialogueComponent*,
@@ -117,7 +116,7 @@ auto UInteractionComponent::InteractUniqueNPCQuest() const -> TTuple<class UDial
   check(OwnerQuestC);
   check(OwnerSpriteAnimC);
 
-  class UItemBase* RelevantItem = OwnerCustomerAIC ? OwnerCustomerAIC->NegotiationAI->RelevantItem : nullptr;
+  class UItemBase* RelevantItem = OwnerCustomerAIC ? OwnerCustomerAIC->NegotiationAIDetails.RelevantItem : nullptr;
 
   return {OwnerDialogueC, OwnerQuestC, OwnerCustomerAIC, RelevantItem, OwnerSpriteAnimC};
 }

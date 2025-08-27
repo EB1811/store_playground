@@ -127,18 +127,8 @@ public:
   void SkipCutscene(const FInputActionValue& Value);
 
   // * Const refs.
-  UPROPERTY(EditAnywhere, Category = "Character | Const")
-  const class AMarket* Market;
-  UPROPERTY(EditAnywhere, Category = "Character | Const")
-  const class ACustomerAIManager* CustomerAIManager;
-  UPROPERTY(EditAnywhere, Category = "Character | Const")
-  const class ANewsGen* NewsGen;
-  UPROPERTY(EditAnywhere, Category = "Character | Const")
-  const class AStatisticsGen* StatisticsGen;
 
   // * Modifiable refs.
-  UPROPERTY(EditAnywhere, Category = "Store Phase")
-  class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AStoreExpansionManager* StoreExpansionManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
@@ -146,19 +136,11 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AStorePhaseManager* StorePhaseManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
-  class ADayManager* DayManager;
-  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class ALevelManager* LevelManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AQuestManager* QuestManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
-  class AUpgradeManager* UpgradeManager;
-  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
-  class AAbilityManager* AbilityManager;
-  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AMiniGameManager* MiniGameManager;
-  UPROPERTY(EditAnywhere, Category = "Store Phase")
-  class AStorePhaseLightingManager* StorePhaseLightingManager;
 
   // * Player systems.
   UPROPERTY(EditAnywhere, Category = "Character | Systems")
@@ -167,6 +149,12 @@ public:
   class UNegotiationSystem* NegotiationSystem;
   UPROPERTY(EditAnywhere, Category = "Character | Systems")
   class UCutsceneSystem* CutsceneSystem;
+
+  // * Camera
+  UPROPERTY(EditAnywhere, Category = "Character | Components")
+  class USpringArmComponent* SpringArmC;
+  UPROPERTY(EditAnywhere, Category = "Character | Components")
+  class UCameraComponent* CameraC;
 
   // * Components
   UPROPERTY(EditAnywhere, Category = "Character | Components")

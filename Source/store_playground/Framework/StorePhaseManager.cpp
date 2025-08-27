@@ -38,7 +38,13 @@ EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePha
 AStorePhaseManager::AStorePhaseManager() {
   PrimaryActorTick.bCanEverTick = false;
 
+  BehaviorParams = {
+      .OpenShopDuration = 60.0f,
+  };
+
   StorePhaseState = EStorePhaseState::None;
+
+  Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) { ChangeBehaviorParam(ParamValues); };
 }
 
 void AStorePhaseManager::BeginPlay() {
@@ -124,7 +130,7 @@ void AStorePhaseManager::OpenShop() {
   Store->SetupStoreEnvironment();
 
   GetWorld()->GetTimerManager().SetTimer(OpenShopTimerHandle, this, &AStorePhaseManager::OnOpenShopTimerEnd,
-                                         StorePhaseManagerParams.OpenShopDuration, false);
+                                         BehaviorParams.OpenShopDuration, false);
   CustomerAIManager->StartCustomerAI();
 }
 
@@ -177,4 +183,12 @@ void AStorePhaseManager::EnterBuildMode() {
 
     PlayerCommand->ResetPosition();
   });
+}
+
+void AStorePhaseManager::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
+    auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
+    AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
+  }
 }

@@ -158,17 +158,18 @@ enum class EUpgradeEffectType : uint8 {
   FeatureUnlock UMETA(DisplayName = "FeatureUnlock"),              // * Unlocks a feature.
   UpgradeFunction UMETA(DisplayName = "UpgradeFunction"),          // * Custom named function.
 };
-ENUM_RANGE_BY_COUNT(EUpgradeEffectType, 4);
+ENUM_RANGE_BY_COUNT(EUpgradeEffectType, 5);
 UENUM()
 enum class EUpgradeEffectSystem : uint8 {
-  Ability UMETA(DisplayName = "Ability"),              // * Ability changes.
-  CustomerAI UMETA(DisplayName = "CustomerAI"),        // * Customer / behavior changes.
-  GlobalData UMETA(DisplayName = "GlobalData"),        // * GlobalData changes.
-  Market UMETA(DisplayName = "Market"),                // * Market / behavior changes.
-  MarketEconomy UMETA(DisplayName = "MarketEconomy"),  // * MarketEconomy changes.
-  MarketLevel UMETA(DisplayName = "MarketLevel"),      // * MarketLevel changes.
+  Ability UMETA(DisplayName = "Ability"),                      // * Ability changes.
+  CustomerAI UMETA(DisplayName = "CustomerAI"),                // * Customer / behavior changes.
+  GlobalData UMETA(DisplayName = "GlobalData"),                // * GlobalData changes.
+  Market UMETA(DisplayName = "Market"),                        // * Market / behavior changes.
+  MarketEconomy UMETA(DisplayName = "MarketEconomy"),          // * MarketEconomy changes.
+  MarketLevel UMETA(DisplayName = "MarketLevel"),              // * MarketLevel changes.
+  StorePhaseManager UMETA(DisplayName = "StorePhaseManager"),  // * StorePhaseManager changes.
 };
-ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 5);
+ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 7);
 
 USTRUCT()
 struct FUpgradeEffectTextData {

@@ -22,6 +22,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   const class AStoreExpansionManager* StoreExpansionManager;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
+  const class AStorePhaseManager* StorePhaseManager;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
   const class ADayManager* DayManager;
 
   UPROPERTY()
@@ -38,6 +40,8 @@ public:
   class AStore* Store;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   class AMarketLevel* MarketLevel;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
+  class AStorePhaseLightingManager* StorePhaseLightingManager;
 
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   ELevel CurrentLevel;

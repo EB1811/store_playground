@@ -8,8 +8,6 @@
 #include "store_playground/UI/UIStructs.h"
 #include "PriceNegotiationWidget.generated.h"
 
-// todo-low: Error handling.
-
 UCLASS()
 class STORE_PLAYGROUND_API UPriceNegotiationWidget : public UUserWidget {
   GENERATED_BODY()

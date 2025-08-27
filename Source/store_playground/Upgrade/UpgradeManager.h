@@ -38,19 +38,12 @@ public:
   UPROPERTY(EditAnywhere)
   class ASpgHUD* HUD;
   UPROPERTY(EditAnywhere)
-  class ACustomerAIManager* CustomerAIManager;
-  UPROPERTY(EditAnywhere)
-  class AMarket* Market;
-  UPROPERTY(EditAnywhere)
-  class AMarketLevel* MarketLevel;
-  UPROPERTY(EditAnywhere)
-  class AMarketEconomy* MarketEconomy;
-  UPROPERTY(EditAnywhere)
   class AGlobalDataManager* GlobalDataManager;
   UPROPERTY(EditAnywhere)
   class AGlobalStaticDataManager* GlobalStaticDataManager;
+
   UPROPERTY(EditAnywhere)
-  class AAbilityManager* AbilityManager;
+  TMap<EUpgradeEffectSystem, FUpgradeable> UpgradeableMap;
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FUpgradePointsGen> UpgradePointsGenArrayUsed;

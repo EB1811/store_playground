@@ -91,7 +91,6 @@ public:
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FPopEconData> PopEconDataArray;
 
-  // TODO: Add price effect ramp up.
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TArray<FPriceEffect> ActivePriceEffects;
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)

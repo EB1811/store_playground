@@ -7,7 +7,6 @@
 #include "store_playground/UI/Negotiation/NegotiationSkillsWidget.h"
 #include "store_playground/Negotiation/NegotiationSystem.h"
 #include "store_playground/AI/CustomerAIComponent.h"
-#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -44,14 +43,14 @@ void UPriceNegotiationWidget::RefreshUI() {
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
-  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAI->AcceptancePercentage / 100.0f;
+  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAIDetails.AcceptancePercentage / 100.0f;
   float MarketPrice = NegotiationSystem->MarketPrice;
   float PlayerPrice = NegotiationSystem->OfferedPrice;
   float NpcPrice = NegotiationSystem->CustomerOfferResponse.CounterOffer > 0.0f
                        ? NegotiationSystem->CustomerOfferResponse.CounterOffer
                        : NegotiationSystem->MarketPrice;
   PriceSliderWidget->UpdateNegotiationPrices(NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice,
-                                             NegotiationSystem->CustomerAI->NegotiationAI->HagglingCount);
+                                             NegotiationSystem->CustomerAI->NegotiationAIDetails.HagglingCount);
 }
 
 void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
@@ -70,7 +69,7 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
 
   check(NegotiationSystem->NegotiatedItems.Num() > 0);
 
-  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAI->AcceptancePercentage / 100.0f;
+  float NpcAcceptance = NegotiationSystem->CustomerAI->NegotiationAIDetails.AcceptancePercentage / 100.0f;
   float MarketPrice = NegotiationSystem->MarketPrice;
   float PlayerPrice = NegotiationSystem->OfferedPrice;
   float NpcPrice = NegotiationSystem->CustomerOfferResponse.CounterOffer > 0.0f

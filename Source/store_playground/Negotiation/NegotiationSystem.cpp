@@ -4,7 +4,6 @@
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
-#include "store_playground/AI/NegotiationAI.h"
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Store/Store.h"
@@ -81,13 +80,13 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
                                           UInventoryComponent* _FromInventory,
                                           bool _bIsQuestAssociated,
                                           UQuestComponent* _QuestComponent) {
-  check(_CustomerAI && _CustomerAI->NegotiationAI);
+  check(_CustomerAI && _CustomerAI);
 
   NegotiationState = ENegotiationState::None;
   NegotiatedItems.Empty();
 
-  Type = _CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
-                                                                                   : NegotiationType::PlayerSell;
+  Type = _CustomerAI->NegotiationAIDetails.RequestType == ECustomerRequestType::SellItem ? NegotiationType::PlayerBuy
+                                                                                         : NegotiationType::PlayerSell;
   CustomerAI = _CustomerAI;
   bIsQuestAssociated = _bIsQuestAssociated;
   QuestComponent = _QuestComponent;
@@ -97,8 +96,8 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
   OfferedPrice = 0;
   CustomerOfferResponse = {false, 0, {}};
 
-  switch (CustomerAI->NegotiationAI->RequestType) {
-    case ECustomerRequestType::StockCheck: WantedItemType = CustomerAI->NegotiationAI->WantedItemType; break;
+  switch (CustomerAI->NegotiationAIDetails.RequestType) {
+    case ECustomerRequestType::StockCheck: WantedItemType = CustomerAI->NegotiationAIDetails.WantedItemType; break;
     case ECustomerRequestType::BuyStockItem:
     case ECustomerRequestType::SellItem: {
       NegotiatedItems.Add(Item);
@@ -109,7 +108,7 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
             [NegotiatedItem](const FEconItem& EconItem) { return EconItem.ItemID == NegotiatedItem->ItemID; });
         check(EconItem);
 
-        BoughtAtPrice += CustomerAI->NegotiationAI->RequestType != ECustomerRequestType::SellItem
+        BoughtAtPrice += CustomerAI->NegotiationAIDetails.RequestType != ECustomerRequestType::SellItem
                              ? Item->PlayerPriceData.BoughtAt
                              : 0;
         MarketPrice += EconItem->CurrentPrice;
@@ -125,11 +124,11 @@ void UNegotiationSystem::StartNegotiation(UCustomerAIComponent* _CustomerAI,
 
 // ? Turn FNextDialogueRes into using the dialogue system directly in the ui?
 FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
-  if (CustomerAI->NegotiationAI->RequestType == ECustomerRequestType::StockCheck) {
+  if (CustomerAI->NegotiationAIDetails.RequestType == ECustomerRequestType::StockCheck) {
     NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcStockCheckRequest);
 
     TArray<FDialogueData> StockCheckDialogues =
-        CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues;
+        CustomerAI->NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::StockCheckRequest].Dialogues;
     for (FDialogueData& Dialogue : StockCheckDialogues)
       Dialogue.DialogueText = AddVarsToDialogueText(Dialogue.DialogueText);
 
@@ -139,10 +138,10 @@ FNextDialogueRes UNegotiationSystem::NPCRequestNegotiation() {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::NpcRequest);
   return Type == NegotiationType::PlayerSell
              ? DialogueSystem->StartDialogue(
-                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::BuyItemRequest].Dialogues,
+                   CustomerAI->NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::BuyItemRequest].Dialogues,
                    CustomerAI->CustomerName.ToString())
              : DialogueSystem->StartDialogue(
-                   CustomerAI->NegotiationAI->DialoguesMap[ENegotiationDialogueType::SellItemRequest].Dialogues,
+                   CustomerAI->NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::SellItemRequest].Dialogues,
                    CustomerAI->CustomerName.ToString());
 }
 
@@ -160,7 +159,7 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
 
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::PlayerShowItem);
 
-  CustomerOfferResponse = CustomerAIManager->ConsiderStockCheck(CustomerAI->NegotiationAI, Item);
+  CustomerOfferResponse = CustomerAIManager->ConsiderStockCheck(CustomerAI, Item);
   if (!CustomerOfferResponse.Accepted) return;
 
   NegotiatedItems.Empty();
@@ -192,8 +191,7 @@ void UNegotiationSystem::OfferPrice(float Price) {
   NegotiationState = GetNextNegotiationState(NegotiationState, ENegotiationAction::OfferPrice);
 
   if (NegotiationState == ENegotiationState::NpcConsider)
-    CustomerOfferResponse =
-        CustomerAIManager->ConsiderOffer(CustomerAI->NegotiationAI, NegotiatedItems[0], OfferedPrice, Price);
+    CustomerOfferResponse = CustomerAIManager->ConsiderOffer(CustomerAI, NegotiatedItems[0], OfferedPrice, Price);
 
   OfferedPrice = Price;
 }

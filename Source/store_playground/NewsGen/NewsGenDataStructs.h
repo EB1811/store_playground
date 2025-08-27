@@ -28,7 +28,7 @@ struct FArticleAssetData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, SaveGame)
-  class UTexture2D* Picture;
+  class UMaterialInstance* Picture;
 };
 
 USTRUCT()

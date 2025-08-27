@@ -59,17 +59,22 @@ public:
   TArray<FName> ActionRelevantIDs;  // * Item ids, WantedItemTypeIDs, etc.
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
-  class UNegotiationAI* NegotiationAI;
+  FNegotiationAIDetails NegotiationAIDetails;
 
-  // Temp: No actions for now, directly change state.
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerState CustomerState;
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   float RequestingTime;  // * Time the customer waits.
 
-  void LeaveRequestDialogue();
+  void StartDialogue();
+  void LeaveDialogue();
+
+  void StartQuest();
+  void LeaveQuest();
+  void FinishQuest();
 
   void StartNegotiation();
+  void LeaveRequestDialogue();
   void PostNegotiation();
 };

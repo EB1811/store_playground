@@ -119,7 +119,7 @@ void UNewspaperWidget::RefreshUI() {
 
         ArticleWidget->Title->SetText(Article.TextData.Title);
         ArticleWidget->Text->SetText(Article.TextData.Body);
-        if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromTexture(Article.AssetData.Picture);
+        if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromMaterial(Article.AssetData.Picture);
 
         NewspaperPanelWrapBox->AddChildToWrapBox(ArticleWidget);
         break;
@@ -130,7 +130,7 @@ void UNewspaperWidget::RefreshUI() {
 
         ArticleWidget->Title->SetText(Article.TextData.Title);
         ArticleWidget->Text->SetText(Article.TextData.Body);
-        if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromTexture(Article.AssetData.Picture);
+        if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromMaterial(Article.AssetData.Picture);
 
         NewspaperPanelWrapBox->AddChildToWrapBox(ArticleWidget);
         break;
@@ -141,7 +141,7 @@ void UNewspaperWidget::RefreshUI() {
 
         ArticleWidget->Title->SetText(Article.TextData.Title);
         ArticleWidget->Text->SetText(Article.TextData.Body);
-        if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromTexture(Article.AssetData.Picture);
+        if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromMaterial(Article.AssetData.Picture);
 
         NewspaperPanelWrapBox->AddChildToWrapBox(ArticleWidget);
         break;

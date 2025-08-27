@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "StorePhaseManager.generated.h"
 
 UENUM()
@@ -25,13 +26,17 @@ enum class EStorePhaseAction : uint8 {
 };
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action);
 
-// TODO: Add to behavior params.
 USTRUCT()
 struct FStorePhaseManagerParams {
   GENERATED_BODY()
+};
 
-  UPROPERTY(EditAnywhere)
-  float OpenShopDuration;  // * Duration for the open shop timer.
+USTRUCT()
+struct FStorePhaseBehaviorParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float OpenShopDuration;
 };
 
 UCLASS(Blueprintable)
@@ -54,7 +59,7 @@ public:
   FStorePhaseManagerParams StorePhaseManagerParams;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase", SaveGame)
-  EStorePhaseState StorePhaseState;
+  FStorePhaseBehaviorParams BehaviorParams;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class APlayerCommand* PlayerCommand;
@@ -69,6 +74,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ACustomerAIManager* CustomerAIManager;
 
+  UPROPERTY(EditAnywhere, Category = "Store Phase", SaveGame)
+  EStorePhaseState StorePhaseState;
+
   FTimerHandle OpenShopTimerHandle;
   UFUNCTION()
   void OnOpenShopTimerEnd();
@@ -82,4 +90,8 @@ public:
   void EndDay();
   void NextPhase();
   void EnterBuildMode();
+
+  UPROPERTY(EditAnywhere, Category = "Store Phase")
+  FUpgradeable Upgradeable;
+  void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
 };

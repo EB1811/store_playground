@@ -105,12 +105,6 @@ struct FCustomerPop {
   UPROPERTY(EditAnywhere)
   EPopWealthType WealthType;
 
-  // TODO: Move to pop econ data.
-  UPROPERTY(EditAnywhere)
-  int32 MGen;
-  UPROPERTY(EditAnywhere)
-  float MSharePercent;
-
   UPROPERTY(EditAnywhere)
   TArray<EItemEconType> ItemEconTypes;
   UPROPERTY(EditAnywhere)
@@ -134,6 +128,11 @@ struct FPopEconData {
   int32 Population;
   UPROPERTY(EditAnywhere, SaveGame)
   float Money;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  int32 MGen;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float MSharePercent;
 
   UPROPERTY(EditAnywhere, SaveGame)
   float GoodsBoughtPerCapita;  // * Total goods bought / population.

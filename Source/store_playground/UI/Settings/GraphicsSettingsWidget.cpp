@@ -69,7 +69,7 @@ void UGraphicsSettingsWidget::Apply() {
     default: checkNoEntry();
   }
 
-  // TODO: Need customer save for resolution scale above 100%.
+  // todo-low: Need custom save for resolution scale above 100%.
   GameSettings->SetResolutionScaleNormalized(ResolutionScaleSlider->GetValue());
   SettingsManager->SetGlobalIlluminationMethod(GlobalIlluminationMethodComboBox->GetSelectedIndex());
   SettingsManager->SetReflectionMethod(ReflectionMethodComboBox->GetSelectedIndex());

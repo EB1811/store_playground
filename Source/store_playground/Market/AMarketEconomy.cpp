@@ -101,11 +101,12 @@ void AMarketEconomy::PerformEconomyTick() {
   // * Pop Simulation.
   // Calculate total wealth.
   TotalWealth = 0;
-  for (int32 i = 0; i < CustomerPops.Num(); i++) TotalWealth += CustomerPops[i].MGen * PopEconDataArray[i].Population;
+  for (int32 i = 0; i < CustomerPops.Num(); i++)
+    TotalWealth += PopEconDataArray[i].MGen * PopEconDataArray[i].Population;
   TMap<FName, float> PopWealthMap;
   for (int32 i = 0; i < CustomerPops.Num(); i++)  // %share = diff(pop ratio, base %)
     PopWealthMap.Add(CustomerPops[i].ID, TotalWealth *
-                                             ((CustomerPops[i].MSharePercent / 100.0f) +
+                                             ((PopEconDataArray[i].MSharePercent / 100.0f) +
                                               (float(PopEconDataArray[i].Population) / float(TotalPopulation))) *
                                              0.5f);
 
@@ -501,14 +502,19 @@ void AMarketEconomy::InitializeEconomyData() {
         Row->PopName,
         Row->PopType,
         Row->WealthType,
-        PopEconGenDataMap[Row->PopType][Row->WealthType].MGen,
-        PopEconGenDataMap[Row->PopType][Row->WealthType].MSharePercent,
         Row->ItemEconTypes,
         PopEconGenDataMap[Row->PopType][Row->WealthType].ItemSpendPercent,
         PopEconGenDataMap[Row->PopType][Row->WealthType].ItemNeeds,
         Row->AssetData,
     });
-    PopEconDataArray.Add({Row->ID, Row->InitPopulation, 0, 0});
+    PopEconDataArray.Add({
+        Row->ID,
+        Row->InitPopulation,
+        0,
+        PopEconGenDataMap[Row->PopType][Row->WealthType].MGen,
+        PopEconGenDataMap[Row->PopType][Row->WealthType].MSharePercent,
+        0,
+    });
 
     TotalPopulation += Row->InitPopulation;
   }
@@ -572,7 +578,7 @@ void AMarketEconomy::InitializeEconomyData() {
 
   float BaseTotalMoney = 0;
   for (int32 i = 0; i < CustomerPops.Num(); i++)
-    BaseTotalMoney += CustomerPops[i].MGen * PopEconDataArray[i].Population;
+    BaseTotalMoney += PopEconDataArray[i].MGen * PopEconDataArray[i].Population;
   float ActualTotalMoney = 0;
   for (auto EconType : TEnumRange<EItemEconType>()) {
     for (auto WealthType : TEnumRange<EItemWealthType>()) {
@@ -585,7 +591,7 @@ void AMarketEconomy::InitializeEconomyData() {
   }
   float MGenMulti = (ActualTotalMoney / BaseTotalMoney);
   check(MGenMulti > 0);
-  for (int32 i = 0; i < CustomerPops.Num(); i++) CustomerPops[i].MGen *= MGenMulti;
+  for (int32 i = 0; i < PopEconDataArray.Num(); i++) PopEconDataArray[i].MGen *= MGenMulti;
 
   // Calc BoughtToPriceMulti.
   for (auto& Item : EconItems) {

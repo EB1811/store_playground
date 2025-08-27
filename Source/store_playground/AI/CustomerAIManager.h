@@ -149,11 +149,11 @@ public:
   auto CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr) -> bool;
   void MakeCustomerNegotiable(class ACustomerPC* Customer);
 
-  auto ConsiderOffer(class UNegotiationAI* NegotiationAI,
+  auto ConsiderOffer(class UCustomerAIComponent* CustomerAI,
                      const class UItemBase* Item,
                      float LastOfferedPrice,
                      float PlayerOfferedPrice) const -> FOfferResponse;
-  auto ConsiderStockCheck(const class UNegotiationAI* NegotiationAI,
+  auto ConsiderStockCheck(const class UCustomerAIComponent* CustomerAI,
                           const class UItemBase* Item) const -> FOfferResponse;
 
   void TickDaysTimedVars();

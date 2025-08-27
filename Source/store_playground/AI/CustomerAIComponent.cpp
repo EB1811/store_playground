@@ -3,7 +3,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "NavigationSystem.h"
-#include "NegotiationAI.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
@@ -21,7 +20,6 @@ void UCustomerAIComponent::BeginPlay() {
   Super::BeginPlay();
 
   CustomerAIID = FGuid::NewGuid();
-  NegotiationAI = NewObject<UNegotiationAI>(this);
   Attitude = ECustomerAttitude::Neutral;
   CustomerState = ECustomerState::Browsing;
   CustomerAction = ECustomerAction::None;
@@ -32,18 +30,33 @@ void UCustomerAIComponent::TickComponent(float DeltaTime,
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-// TODO: Add unique npc quest starting and leaving functions.
+void UCustomerAIComponent::StartDialogue() { CustomerState = ECustomerState::BrowsingTalking; }
+void UCustomerAIComponent::LeaveDialogue() { CustomerState = ECustomerState::Browsing; }
 
-void UCustomerAIComponent::LeaveRequestDialogue() {
-  CustomerState = ECustomerState::Requesting;
+void UCustomerAIComponent::StartQuest() {
+  CustomerState = ECustomerState::PerformingQuest;
+
+  UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
+  check(WidgetC);
+  WidgetC->SetVisibility(false, true);
+}
+void UCustomerAIComponent::LeaveQuest() {
+  CustomerState = ECustomerState::RequestingQuest;
 
   UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
   check(WidgetC);
   WidgetC->SetVisibility(true, true);
+}
+void UCustomerAIComponent::FinishQuest() {
+  CustomerState = ECustomerState::Leaving;
 
-  USimpleSpriteAnimComponent* SpriteAnimC = GetOwner()->FindComponentByClass<USimpleSpriteAnimComponent>();
-  check(SpriteAnimC);
-  SpriteAnimC->ReturnToOgRotation();
+  UInteractionComponent* OwnerInteraction = GetOwner()->FindComponentByClass<UInteractionComponent>();
+  check(OwnerInteraction);
+  OwnerInteraction->InteractionType = EInteractionType::None;
+
+  UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
+  check(WidgetC);
+  WidgetC->SetVisibility(false, true);
 }
 
 void UCustomerAIComponent::StartNegotiation() {
@@ -53,7 +66,13 @@ void UCustomerAIComponent::StartNegotiation() {
   check(WidgetC);
   WidgetC->SetVisibility(false, true);
 }
+void UCustomerAIComponent::LeaveRequestDialogue() {
+  CustomerState = ECustomerState::Requesting;
 
+  UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
+  check(WidgetC);
+  WidgetC->SetVisibility(true, true);
+}
 void UCustomerAIComponent::PostNegotiation() {
   CustomerState = ECustomerState::Leaving;
 
