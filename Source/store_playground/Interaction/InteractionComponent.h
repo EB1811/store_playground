@@ -33,6 +33,8 @@ enum class EInteractionType : uint8 {
 
   NpcStore UMETA(DisplayName = "NPC Store"),
   Container UMETA(DisplayName = "Container"),
+
+  Pickup UMETA(DisplayName = "Pickup"),
   MiniGame UMETA(DisplayName = "MiniGame"),
 };
 
@@ -81,5 +83,6 @@ public:
       -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;
   auto InteractContainer() const -> class UInventoryComponent*;
 
+  auto InteractPickup() const -> TOptional<class UPickupComponent*>;
   auto InteractMiniGame() const -> TTuple<class UMiniGameComponent*, class UDialogueComponent*>;
 };

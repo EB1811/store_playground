@@ -127,6 +127,8 @@ public:
   void SkipCutscene(const FInputActionValue& Value);
 
   // * Const refs.
+  UPROPERTY(EditAnywhere, Category = "Character | Const")
+  class AMarket* Market;
 
   // * Modifiable refs.
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
@@ -231,6 +233,8 @@ public:
                   class UCustomerAIComponent* CustomerAI = nullptr,
                   class UItemBase* Item = nullptr);
   void EnterCutscene(const struct FResolvedCutsceneData ResolvedCutsceneData);
+
+  void Pickup(class UPickupComponent* PickupC);
 
   void ExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
   void ResetLocationToSpawnPoint();

@@ -90,6 +90,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->DialogueSystem = DialogueSystem;
   PlayerCharacter->NegotiationSystem = NegotiationSystem;
   PlayerCharacter->CutsceneSystem = CutsceneSystem;
+  PlayerCharacter->Market = Market;
   PlayerCharacter->StoreExpansionManager = StoreExpansionManager;
   PlayerCharacter->Store = Store;
   PlayerCharacter->StorePhaseManager = StorePhaseManager;

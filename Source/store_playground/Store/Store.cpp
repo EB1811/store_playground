@@ -87,6 +87,7 @@ void AStore::ItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quanti
   StatisticsGen->ItemDeal({Item->ItemID, Item->PlayerPriceData.BoughtAt, SingleUnitPrice, Quantity});
   StatisticsGen->StoreMoneyGained(SingleUnitPrice * Quantity);
 }
+
 void AStore::MoneyGained(float Amount) {
   Money += Amount;
 

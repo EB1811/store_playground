@@ -7,6 +7,97 @@
 #include "Components/Button.h"
 #include "Components/Image.h"
 
+inline FString JustifyLine(const TArray<FString>& Words, int32 LineWidth, bool IsLastLine) {
+  if (Words.Num() == 0) return TEXT("");
+  if (Words.Num() == 1 || IsLastLine) return FString::Join(Words, TEXT(" "));
+
+  // Calculate how many extra spaces we need to distribute
+  int32 BaseTextLength = 0;
+  for (const FString& Word : Words) BaseTextLength += Word.Len();
+
+  int32 MinSpaces = Words.Num() - 1;
+  int32 TotalSpacesNeeded = LineWidth - BaseTextLength;
+  int32 ExtraSpaces = TotalSpacesNeeded - MinSpaces;
+  if (ExtraSpaces <= 0) return FString::Join(Words, TEXT(" "));
+
+  int32 GapsCount = Words.Num() - 1;
+  TArray<int32> SpacesPerGap;
+  for (int32 i = 0; i < GapsCount; i++) SpacesPerGap.Add(1);
+
+  // Distribute extra spaces alternating from left and right
+  bool AddFromLeft = true;
+  int32 RemainingSpaces = ExtraSpaces;
+  while (RemainingSpaces > 0) {
+    if (AddFromLeft) {
+      for (int32 i = 0; i < GapsCount && RemainingSpaces > 0; i++) {
+        SpacesPerGap[i]++;
+        RemainingSpaces--;
+      }
+    } else {
+      for (int32 i = GapsCount - 1; i >= 0 && RemainingSpaces > 0; i--) {
+        SpacesPerGap[i]++;
+        RemainingSpaces--;
+      }
+    }
+    AddFromLeft = !AddFromLeft;
+  }
+
+  // Build the justified line
+  FString Result = Words[0];
+  for (int32 i = 1; i < Words.Num(); i++) {
+    for (int32 j = 0; j < SpacesPerGap[i - 1]; j++) Result += TEXT(" ");
+    Result += Words[i];
+  }
+
+  return Result;
+}
+inline FString JustifyText(const FString& Text, int32 LineWidth) {
+  TArray<FString> Words;
+  Text.ParseIntoArray(Words, TEXT(" "), true);
+
+  if (Words.Num() == 0) return Text;
+
+  TArray<FString> JustifiedLines;
+  TArray<FString> CurrentLine;
+  int32 CurrentLineLength = 0;
+
+  // Build lines that fit within the specified width
+  for (const FString& Word : Words) {
+    int32 WordLength =
+        Word.Replace(TEXT("\n"), TEXT("")).Replace(TEXT("\\"), TEXT("")).Replace(TEXT("'"), TEXT("")).Len();
+
+    if (CurrentLine.Num() > 0 && (CurrentLineLength + 1 + WordLength) > LineWidth) {
+      FString JustifiedLine = JustifyLine(CurrentLine, LineWidth, false);
+      JustifiedLines.Add(JustifiedLine);
+
+      CurrentLine.Empty();
+      CurrentLine.Add(Word);
+      CurrentLineLength = WordLength;
+    } else {
+      CurrentLine.Add(Word);
+      CurrentLineLength += (CurrentLine.Num() > 1 ? 1 : 0) + WordLength;  // +1 for space
+    }
+  }
+
+  // Handle the last line (don't justify the last line)
+  if (CurrentLine.Num() > 0) {
+    FString LastLine = FString::Join(CurrentLine, TEXT(" "));
+    JustifiedLines.Add(LastLine);
+  }
+
+  return FString::Join(JustifiedLines, TEXT("  "));
+}
+inline void SetArticleBody(UArticleWidget* Widget, const FString& BodyText, float DefaultWidth = 440.0f) {
+  float BodyWidth = Widget->Text->GetDesiredSize().X > 0 ? Widget->Text->GetDesiredSize().X : DefaultWidth;
+  float FontSize = Widget->Text->GetFont().Size;
+
+  // Rough estimate of characters that can fit in a line with 52% of font size width.
+  int32 EstimatedLineWidth = (int32)((BodyWidth) / (FontSize * 0.52f));
+  FString JustifiedText = JustifyText(BodyText, EstimatedLineWidth);
+
+  Widget->Text->SetText(FText::FromString(JustifiedText));
+}
+
 inline auto GetArticleSizeInt(EArticleSize Size) -> int32 {
   switch (Size) {
     case EArticleSize::Small: return 1;
@@ -118,7 +209,7 @@ void UNewspaperWidget::RefreshUI() {
         check(ArticleWidget);
 
         ArticleWidget->Title->SetText(Article.TextData.Title);
-        ArticleWidget->Text->SetText(Article.TextData.Body);
+        SetArticleBody(ArticleWidget, Article.TextData.Body.ToString(), 460.0f);
         if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromMaterial(Article.AssetData.Picture);
 
         NewspaperPanelWrapBox->AddChildToWrapBox(ArticleWidget);
@@ -129,7 +220,7 @@ void UNewspaperWidget::RefreshUI() {
         check(ArticleWidget);
 
         ArticleWidget->Title->SetText(Article.TextData.Title);
-        ArticleWidget->Text->SetText(Article.TextData.Body);
+        SetArticleBody(ArticleWidget, Article.TextData.Body.ToString());
         if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromMaterial(Article.AssetData.Picture);
 
         NewspaperPanelWrapBox->AddChildToWrapBox(ArticleWidget);
@@ -140,7 +231,7 @@ void UNewspaperWidget::RefreshUI() {
         check(ArticleWidget);
 
         ArticleWidget->Title->SetText(Article.TextData.Title);
-        ArticleWidget->Text->SetText(Article.TextData.Body);
+        SetArticleBody(ArticleWidget, Article.TextData.Body.ToString());
         if (Article.AssetData.Picture) ArticleWidget->Picture->SetBrushFromMaterial(Article.AssetData.Picture);
 
         NewspaperPanelWrapBox->AddChildToWrapBox(ArticleWidget);

@@ -3,6 +3,21 @@
 #include "DialogueComponent.h"
 #include "HAL/Platform.h"
 
+// inline auto AddVarsToDialogueText(const TArray<FDialogueData>& DialogueArray) -> TArray<FDialogueData> {
+//   TArray<FDialogueData> NewDialogueArray = {};
+//   NewDialogueArray.Reserve(DialogueArray.Num());
+//   for (const FDialogueData& Dialogue : DialogueArray) {
+//     FString NewDialogue = Dialogue.DialogueText.ToString();
+//     NewDialogue = NewDialogue.Replace(TEXT("{ItemName}"), *ItemName.ToString());
+
+//     FDialogueData NewDialogueData = Dialogue;
+//     NewDialogueData.DialogueText = FText::FromString(NewDialogue);
+//     NewDialogueArray.Add(NewDialogueData);
+//   }
+
+//   return NewDialogueArray;
+// }
+
 EDialogueState GetNextDialogueState(EDialogueState CurrentState, EDialogueAction Action) {
   switch (Action) {
     case EDialogueAction::NPCNext: return EDialogueState::NPCTalk;

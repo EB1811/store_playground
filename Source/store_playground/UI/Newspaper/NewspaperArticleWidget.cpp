@@ -1,4 +1,5 @@
 #include "NewspaperArticleWidget.h"
+#include "Logging/LogVerbosity.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"

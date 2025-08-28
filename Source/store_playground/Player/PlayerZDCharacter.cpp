@@ -13,9 +13,11 @@
 #include "PaperZDCharacter.h"
 #include "PlayerZDCharacter.h"
 #include "TimerManager.h"
+#include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
+#include "store_playground/Pickup/PickupComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/NpcStoreComponent.h"
@@ -465,6 +467,7 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
   return true;
 }
 
+// ? Move to system?
 void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) {
   HUD->CloseInteractionPopup();
 
@@ -541,6 +544,11 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
       auto [NpcStoreC, StoreInventory, DialogueC] = Interactable->InteractNpcStore();
       EnterDialogue(DialogueC, nullptr,
                     [this, NpcStoreC, StoreInventory]() { EnterNpcStore(NpcStoreC, StoreInventory); });
+      break;
+    }
+    case EInteractionType::Pickup: {
+      auto PickupC = Interactable->InteractPickup();
+      Pickup(PickupC.GetValue());
       break;
     }
     case EInteractionType::MiniGame: {
@@ -666,6 +674,54 @@ void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsc
     ChangePlayerState(EPlayerState::Normal);
   });
   // HUD->SetAndOpenCutscene(CutsceneSystem);
+}
+
+void APlayerZDCharacter::Pickup(UPickupComponent* PickupC) {
+  switch (PickupC->PickupGoodType) {
+    case EPickupGoodType::Item: {
+      UItemBase* Item = Market->GetItem(PickupC->ItemID);
+      PlayerInventoryComponent->AddItem(Item, PickupC->ItemQuantity);
+
+      // ? Move to global data manager?
+      FText ItemName = Item->TextData.Name;
+      TArray<FDialogueData> DialogueArray = PickupC->DialogueArray;
+      TArray<FDialogueData> NewDialogueArray = {};
+      NewDialogueArray.Reserve(DialogueArray.Num());
+      for (const FDialogueData& Dialogue : DialogueArray) {
+        FString NewDialogue = Dialogue.DialogueText.ToString();
+        NewDialogue = NewDialogue.Replace(TEXT("{Pickup}"), *ItemName.ToString());
+
+        FDialogueData NewDialogueData = Dialogue;
+        NewDialogueData.DialogueText = FText::FromString(NewDialogue);
+        NewDialogueArray.Add(NewDialogueData);
+      }
+
+      PickupC->DestroyPickup();
+      EnterDialogue(NewDialogueArray);
+      break;
+    }
+    case EPickupGoodType::Money: {
+      Store->MoneyGained(PickupC->MoneyAmount);
+
+      // ? Move to global data manager?
+      TArray<FDialogueData> DialogueArray = PickupC->DialogueArray;
+      TArray<FDialogueData> NewDialogueArray = {};
+      NewDialogueArray.Reserve(DialogueArray.Num());
+      for (const FDialogueData& Dialogue : DialogueArray) {
+        FString NewDialogue = Dialogue.DialogueText.ToString();
+        NewDialogue = NewDialogue.Replace(TEXT("{Pickup}"), *FString::Printf(TEXT("%0.0f¬"), PickupC->MoneyAmount));
+
+        FDialogueData NewDialogueData = Dialogue;
+        NewDialogueData.DialogueText = FText::FromString(NewDialogue);
+        NewDialogueArray.Add(NewDialogueData);
+      }
+
+      PickupC->DestroyPickup();
+      EnterDialogue(NewDialogueArray);
+      break;
+    }
+    default: checkNoEntry(); break;
+  }
 }
 
 // ? All player states handled?

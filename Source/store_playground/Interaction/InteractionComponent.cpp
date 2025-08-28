@@ -11,6 +11,7 @@
 #include "store_playground/Level/LevelChangeComponent.h"
 #include "store_playground/Quest/QuestComponent.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
+#include "store_playground/Pickup/PickupComponent.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -140,6 +141,12 @@ auto UInteractionComponent::InteractContainer() const -> class UInventoryCompone
   return OwnerInventoryC;
 }
 
+auto UInteractionComponent::InteractPickup() const -> TOptional<class UPickupComponent*> {
+  UPickupComponent* OwnerPickupC = GetOwner()->FindComponentByClass<UPickupComponent>();
+  check(OwnerPickupC);
+
+  return OwnerPickupC;
+}
 auto UInteractionComponent::InteractMiniGame() const -> TTuple<class UMiniGameComponent*, class UDialogueComponent*> {
   UMiniGameComponent* OwnerMiniGameC = GetOwner()->FindComponentByClass<UMiniGameComponent>();
   UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();

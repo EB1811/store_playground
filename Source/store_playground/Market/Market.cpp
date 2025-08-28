@@ -108,6 +108,7 @@ UItemBase* AMarket::GetRandomItemWeighted(const TArray<FName> ItemIds,
 }
 
 UItemBase* AMarket::GetItem(const FName& ItemID) const {
+  check(AllItemsMap.Contains(ItemID));
   const UItemBase* Item = AllItemsMap[ItemID];
   return Item->CreateItemCopy();
 }
