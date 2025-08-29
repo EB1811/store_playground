@@ -1,5 +1,7 @@
 #include "PlayerCommand.h"
+#include "Logging/LogVerbosity.h"
 #include "store_playground/Player/PlayerZDCharacter.h"
+#include "store_playground/UI/SpgHUD.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/AI/CustomerAIComponent.h"
@@ -49,6 +51,18 @@ void APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsce
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
   PlayerCharacter->EnterCutscene(ResolvedCutsceneData);
+}
+
+auto APlayerCommand::CommandTutorial(const TArray<FUITutorialStep>& Steps) -> bool {
+  if (PlayerCharacter->PlayerBehaviourState != EPlayerState::Normal &&
+      PlayerCharacter->PlayerBehaviourState != EPlayerState::FocussedMenu) {
+    UE_LOG(LogTemp, Error, TEXT("Cannot start tutorial, player in state: %s"),
+           *UEnum::GetDisplayValueAsText(PlayerCharacter->PlayerBehaviourState).ToString());
+    return false;
+  }
+
+  HUD->SetAndOpenTutorialView(Steps);
+  return true;
 }
 
 void APlayerCommand::CommandExitCurrentAction() {

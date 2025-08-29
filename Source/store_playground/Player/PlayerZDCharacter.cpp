@@ -14,6 +14,7 @@
 #include "PlayerZDCharacter.h"
 #include "TimerManager.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
+#include "store_playground/Tutorial/TutorialManager.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Interaction/InteractionComponent.h"
@@ -290,7 +291,7 @@ void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
 
   HUD->SetAndOpenNewsAndEconomyView();
 
-  // SaveManager->CreateNewSaveGame();
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.NewsEconomyView"));
 }
 void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
   if (PlayerBehaviourState != EPlayerState::Normal) return;

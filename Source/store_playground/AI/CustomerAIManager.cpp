@@ -346,20 +346,19 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         CustomersToExit.Add(Customer);
         break;
       }
-      default: checkNoEntry();
+      default: checkNoEntry(); break;
     }
   }
 
   TArray<ACustomerPC*> CustomersToDestroy;
-  for (ACustomerPC* Customer : ExitingCustomers) {
-    if (Customer->GetController<AAIController>()->GetMoveStatus() != EPathFollowingStatus::Idle) continue;
+  for (ACustomerPC* ECustomer : ExitingCustomers) {
+    check(ECustomer->CustomerAIComponent->CustomerState == ECustomerState::Leaving);
+    if (ECustomer->GetController<AAIController>()->GetMoveStatus() != EPathFollowingStatus::Idle) continue;
 
-    check(Customer->CustomerAIComponent->CustomerState == ECustomerState::Leaving);
+    CustomersToDestroy.Add(ECustomer);
 
-    CustomersToDestroy.Add(Customer);
-
-    if (Customer->CustomerAIComponent->NegotiationAIDetails.RelevantItem)
-      Customer->CustomerAIComponent->NegotiationAIDetails.RelevantItem = nullptr;
+    if (ECustomer->CustomerAIComponent->NegotiationAIDetails.RelevantItem)
+      ECustomer->CustomerAIComponent->NegotiationAIDetails.RelevantItem = nullptr;
   }
   for (ACustomerPC* Customer : CustomersToDestroy) {
     ExitingCustomers.RemoveSingleSwap(Customer);
@@ -371,10 +370,11 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   check(SpawnPoint);
   FVector ExitLocation = SpawnPoint->GetActorLocation();
   for (ACustomerPC* Customer : CustomersToExit) {
+    check(Customer->CustomerAIComponent->CustomerState == ECustomerState::Leaving);
     MoveCustomerToExit(NavSystem, Customer, ExitLocation);
 
-    ExitingCustomers.Add(Customer);
     AllCustomers.RemoveSingleSwap(Customer);
+    ExitingCustomers.Add(Customer);
 
     // ? Call function somewhere to remove the picked item on successful negotiation?
     if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
@@ -574,7 +574,7 @@ auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
                                        float PlayerOfferedPrice) const -> FOfferResponse {
   check(CustomerAI && Item);
 
-  FNegotiationAIDetails NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
+  FNegotiationAIDetails& NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
 
   // ? Add error margin to prices / round to nearest int?
   bool bNpcBuying = NegotiationAIDetails.RequestType == ECustomerRequestType::BuyStockItem ||

@@ -103,6 +103,7 @@ public:
 
   auto GetMarketPrice(const FName ItemId) const -> float;
 
+  // TODO: Simulate a couple of ticks to get initial economy state.
   void PerformEconomyTick();
 
   auto GetPopWeightingMulti(const FCustomerPop& Pop) const -> float;

@@ -18,10 +18,10 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere)
-  const class UTagsComponent* PlayerTags;
-  UPROPERTY(EditAnywhere)
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
 
+  UPROPERTY(EditAnywhere)
+  class UTagsComponent* PlayerTags;
   UPROPERTY(EditAnywhere)
   class APlayerCommand* PlayerCommand;
 

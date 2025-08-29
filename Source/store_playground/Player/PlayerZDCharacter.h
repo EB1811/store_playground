@@ -142,6 +142,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AQuestManager* QuestManager;
   UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
+  class ATutorialManager* TutorialManager;
+  UPROPERTY(EditAnywhere, Category = "Character | Modifiable")
   class AMiniGameManager* MiniGameManager;
 
   // * Player systems.

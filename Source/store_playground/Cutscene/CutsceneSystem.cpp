@@ -47,7 +47,6 @@ void UCutsceneSystem::StartCutscene(const FResolvedCutsceneData& _ResolvedCutsce
   HandleCutsceneState();
 }
 
-// Trying this without a cutscene widget.
 void UCutsceneSystem::HandleCutsceneState() {
   NextCutsceneChain();
 

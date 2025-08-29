@@ -36,6 +36,7 @@
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "store_playground/WorldObject/Level/SpawnPoint.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
+#include "store_playground/Tutorial/TutorialManager.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
 #include "store_playground/UI/SpgHUD.h"
 
@@ -80,6 +81,7 @@ void AStorePGGameMode::BeginPlay() {
   AAbilityManager* AbilityManager = GetWorld()->SpawnActor<AAbilityManager>(AbilityManagerClass);
   ACustomerAIManager* CustomerAIManager = GetWorld()->SpawnActor<ACustomerAIManager>(CustomerAIManagerClass);
   AQuestManager* QuestManager = GetWorld()->SpawnActor<AQuestManager>(QuestManagerClass);
+  ATutorialManager* TutorialManager = GetWorld()->SpawnActor<ATutorialManager>(TutorialManagerClass);
   AMarketLevel* MarketLevel = GetWorld()->SpawnActor<AMarketLevel>(MarketLevelClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
@@ -96,6 +98,7 @@ void AStorePGGameMode::BeginPlay() {
   PlayerCharacter->StorePhaseManager = StorePhaseManager;
   PlayerCharacter->LevelManager = LevelManager;
   PlayerCharacter->QuestManager = QuestManager;
+  PlayerCharacter->TutorialManager = TutorialManager;
   PlayerCharacter->MiniGameManager = MiniGameManager;
 
   HUD->DayManager = DayManager;
@@ -137,6 +140,7 @@ void AStorePGGameMode::BeginPlay() {
       {"CustomerAIManager", CustomerAIManager},
       {"QuestManager", QuestManager},
       {"CutsceneManager", CutsceneManager},
+      {"TutorialManager", TutorialManager},
       {"MarketLevel", MarketLevel},
       {"Market", Market},
       {"MarketEconomy", MarketEconomy},
@@ -165,6 +169,7 @@ void AStorePGGameMode::BeginPlay() {
   LevelManager->MarketLevel = MarketLevel;
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
+  PlayerCommand->HUD = HUD;
 
   StorePhaseManager->PlayerCommand = PlayerCommand;
   StorePhaseManager->SaveManager = SaveManager;
@@ -211,9 +216,13 @@ void AStorePGGameMode::BeginPlay() {
 
   GlobalStaticDataManager->GlobalDataManager = GlobalDataManager;
 
-  CutsceneManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
   CutsceneManager->GlobalStaticDataManager = GlobalStaticDataManager;
+  CutsceneManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
   CutsceneManager->PlayerCommand = PlayerCommand;
+
+  TutorialManager->SettingsManager = SettingsManager;
+  TutorialManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
+  TutorialManager->PlayerCommand = PlayerCommand;
 
   MarketLevel->SaveManager = SaveManager;
   MarketLevel->GlobalDataManager = GlobalDataManager;

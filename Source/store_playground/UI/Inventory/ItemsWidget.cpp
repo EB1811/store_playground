@@ -126,12 +126,13 @@ void UItemsWidget::RefreshUI() {
   if (!SelectedItem) SelectedItem = SortedItems[0];
   else if (!SortedItems.Contains(SelectedItem)) SelectedItem = SortedItems[0];
 
-  if (StatisticsGen->ItemStatisticsMap.Num() > 0) {
-    const TArray<float>* PriceHistory = &StatisticsGen->ItemStatisticsMap[SelectedItem->ItemID].PriceHistory;
-    ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc);
-    ItemDetailsWidget->RefreshUI();
-    ItemDetailsWidget->SetVisibility(ESlateVisibility::Visible);
-  }
+  const TArray<float>* PriceHistory = StatisticsGen->ItemStatisticsMap.Num() > 0
+                                          ? &StatisticsGen->ItemStatisticsMap[SelectedItem->ItemID].PriceHistory
+                                          : nullptr;
+  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc);
+  ItemDetailsWidget->RefreshUI();
+  ItemDetailsWidget->SetVisibility(ESlateVisibility::Visible);
+
   for (const UItemBase* Item : SortedItems) {
     UItemSlotWidget* ItemSlotWidget = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
     check(ItemSlotWidget);
@@ -177,6 +178,7 @@ void UItemsWidget::RefreshTick() {
     GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
     return;
   }
+  if (SortedItems.IsEmpty()) return;
 
   ItemsPanelWrapBox->GetAllChildren();
   for (UWidget* Widget : ItemsPanelWrapBox->GetAllChildren())

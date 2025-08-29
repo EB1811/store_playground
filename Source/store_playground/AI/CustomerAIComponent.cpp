@@ -20,9 +20,6 @@ void UCustomerAIComponent::BeginPlay() {
   Super::BeginPlay();
 
   CustomerAIID = FGuid::NewGuid();
-  Attitude = ECustomerAttitude::Neutral;
-  CustomerState = ECustomerState::Browsing;
-  CustomerAction = ECustomerAction::None;
 }
 void UCustomerAIComponent::TickComponent(float DeltaTime,
                                          ELevelTick TickType,

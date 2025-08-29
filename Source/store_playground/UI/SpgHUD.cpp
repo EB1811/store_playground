@@ -21,6 +21,7 @@
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/UI/UIStructs.h"
 #include "store_playground/UI/Upgrade/UpgradeViewWidget.h"
+#include "store_playground/UI/Tutorial/TutorialViewWidget.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/Upgrade/UpgradeSelectComponent.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
@@ -72,9 +73,11 @@ void ASpgHUD::BeginPlay() {
   check(NewsAndEconomyViewWidgetClass);
   check(UpgradeViewWidgetClass);
   check(AbilityViewWidgetClass);
+  check(StoreViewWidgetClass);
+  check(TutorialViewWidgetClass);
 
   PauseMenuViewWidget = CreateWidget<UPauseMenuViewWidget>(GetWorld(), PauseMenuViewWidgetClass);
-  PauseMenuViewWidget->AddToViewport(20);
+  PauseMenuViewWidget->AddToViewport(50);
   PauseMenuViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   InteractionPopupWidget = CreateWidget<UInteractionDisplayWidget>(GetWorld(), InteractionDisplayWidgetClass);
@@ -132,6 +135,10 @@ void ASpgHUD::BeginPlay() {
   AbilityViewWidget = CreateWidget<UAbilityViewWidget>(GetWorld(), AbilityViewWidgetClass);
   AbilityViewWidget->AddToViewport(10);
   AbilityViewWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  TutorialViewWidget = CreateWidget<UTutorialViewWidget>(GetWorld(), TutorialViewWidgetClass);
+  TutorialViewWidget->AddToViewport(20);
+  TutorialViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   const FInputModeGameOnly InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
@@ -569,7 +576,6 @@ void ASpgHUD::SetAndOpenNewsAndEconomyView() {
 
 void ASpgHUD::SetAndOpenUpgradeView(UUpgradeSelectComponent* UpgradeSelectC) {
   check(UpgradeViewWidget);
-
   if (OpenedWidgets.Contains(UpgradeViewWidget)) return CloseWidget(UpgradeViewWidget);
 
   UpgradeViewWidget->InitUI(InUIInputActions, UpgradeManager, UpgradeSelectC,
@@ -581,13 +587,21 @@ void ASpgHUD::SetAndOpenUpgradeView(UUpgradeSelectComponent* UpgradeSelectC) {
 
 void ASpgHUD::SetAndOpenAbilityView() {
   check(AbilityViewWidget);
-
   if (OpenedWidgets.Contains(AbilityViewWidget)) return CloseWidget(AbilityViewWidget);
 
   AbilityViewWidget->InitUI(InUIInputActions, Store, AbilityManager, [this] { CloseWidget(AbilityViewWidget); });
   AbilityViewWidget->RefreshUI();
 
   OpenFocusedMenu(AbilityViewWidget);
+}
+
+void ASpgHUD::SetAndOpenTutorialView(TArray<FUITutorialStep> TutorialSteps) {
+  check(TutorialViewWidget);
+
+  TutorialViewWidget->InitUI(InUIInputActions, TutorialSteps, [this] { CloseWidget(TutorialViewWidget); });
+  TutorialViewWidget->RefreshUI();
+
+  OpenFocusedMenu(TutorialViewWidget);
 }
 
 void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
@@ -625,7 +639,7 @@ void ASpgHUD::SetAndOpenGameOverView() {
   HideInGameHudWidget();
 
   GameOverViewWidget = CreateWidget<UGameOverViewWidget>(GetWorld(), GameOverViewWidgetClass);
-  GameOverViewWidget->AddToViewport(20);
+  GameOverViewWidget->AddToViewport(50);
   GameOverViewWidget->InitUI(InUIInputActions);
   GameOverViewWidget->SetVisibility(ESlateVisibility::Visible);
 

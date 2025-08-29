@@ -94,7 +94,7 @@ inline FGameplayTagContainer StringTagsToContainer(const TArray<FName>& Tags) {
   TArray<FGameplayTag> TagsArray;
   TagsArray.Reserve(Tags.Num());
   for (const auto& TagString : Tags) {
-    auto Tag = FGameplayTag::RequestGameplayTag(TagString);
+    auto Tag = FGameplayTag::RequestGameplayTag(TagString, true);
     check(Tag.IsValid());
     TagsArray.Add(Tag);
   }

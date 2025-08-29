@@ -63,6 +63,8 @@ public:
   TSubclassOf<class AAbilityManager> AbilityManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStatisticsGen> StatisticsGenClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class ATutorialManager> TutorialManagerClass;
 
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ASpawnPoint> SpawnPointClass;  // * To spawn the player in the store level.

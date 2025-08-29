@@ -7,6 +7,7 @@
 #include "GameFramework/HUD.h"
 #include "store_playground/Player/InputStructs.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
+#include "store_playground/Tutorial/TutorialStructs.h"
 #include "SPGHUD.generated.h"
 
 UENUM()
@@ -60,6 +61,8 @@ public:
   TSubclassOf<class UAbilityViewWidget> AbilityViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UStoreViewWidget> StoreViewWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UTutorialViewWidget> TutorialViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UGameOverViewWidget> GameOverViewWidgetClass;
 
@@ -221,6 +224,10 @@ public:
   UPROPERTY()
   class UAbilityViewWidget* AbilityViewWidget;
   void SetAndOpenAbilityView();
+
+  UPROPERTY()
+  class UTutorialViewWidget* TutorialViewWidget;
+  void SetAndOpenTutorialView(TArray<FUITutorialStep> TutorialSteps);
 
   void SetAndOpenMiniGame(class AMiniGameManager* MiniGameManager,
                           class UMiniGameComponent* MiniGameC,

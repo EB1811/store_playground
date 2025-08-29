@@ -15,6 +15,9 @@ struct FStoreExpansionData {
   UPROPERTY(EditAnywhere)
   FName Name;
   UPROPERTY(EditAnywhere)
+  class UMaterialInstance* Picture;
+
+  UPROPERTY(EditAnywhere)
   float Price;
   UPROPERTY(EditAnywhere)
   bool bIsLocked;

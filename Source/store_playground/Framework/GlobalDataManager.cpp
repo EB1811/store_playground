@@ -43,11 +43,8 @@ bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags,
                                     const class UTagsComponent* PlayerTagsC) {
   if (RequiredTags.IsEmpty()) return true;
 
-  if (!PlayerTagsC->ConfigurationTags.HasAllExact(RequiredTags) && !PlayerTagsC->QuestTags.HasAllExact(RequiredTags) &&
-      !PlayerTagsC->CutsceneTags.HasAllExact(RequiredTags)) {
-    return false;
-  }
-  return true;
+  if (PlayerTagsC->GetAllTags().HasAllExact(RequiredTags)) return true;
+  return false;
 }
 
 template <typename T>
