@@ -371,6 +371,12 @@ void AMarketEconomy::PerformEconomyTick() {
   StatisticsGen->CalcNetWorth();
 }
 
+void AMarketEconomy::PerformEconomyTicks(int32 NumTicks) {
+  check(CustomerPops.Num() > 0 && PopEconDataArray.Num() > 0 && CustomerPops.Num() == PopEconDataArray.Num());
+
+  for (int32 i = 0; i < NumTicks; i++) PerformEconomyTick();
+}
+
 auto AMarketEconomy::GetPopWeightingMulti(const FCustomerPop& Pop) const -> float {
   float TotalMulti = 1.0f;
   for (auto& PopEffect : ActivePopEffects)

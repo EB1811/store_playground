@@ -19,4 +19,6 @@ public:
   class UTextBlock* BodyText;
   UPROPERTY(meta = (BindWidget))
   class UImage* TutorialImage;
+  UPROPERTY(meta = (BindWidget))
+  class UCommonVideoPlayer* TutorialVideoPlayer;
 };

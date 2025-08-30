@@ -19,7 +19,6 @@ inline void PopulateQualityComboBox(UComboBoxString* ComboBox, int32 CurrentValu
   ComboBox->AddOption(TEXT("Medium"));
   ComboBox->AddOption(TEXT("High"));
   ComboBox->AddOption(TEXT("Epic"));
-  ComboBox->AddOption(TEXT("Cinematic"));
 
   int32 ClampedValue = FMath::Clamp(CurrentValue, 0, 4);
   ComboBox->SetSelectedIndex(ClampedValue);
@@ -46,7 +45,7 @@ void UGraphicsSettingsWidget::NativeOnInitialized() {
 void UGraphicsSettingsWidget::Apply() {
   UGameUserSettings* GameSettings = SettingsManager->UnrealSettings;
 
-  if (OverallQualityComboBox->GetSelectedIndex() != 5)
+  if (OverallQualityComboBox->GetSelectedIndex() != 4)
     GameSettings->SetOverallScalabilityLevel(OverallQualityComboBox->GetSelectedIndex());
 
   GameSettings->SetViewDistanceQuality(ViewDistanceComboBox->GetSelectedIndex());
@@ -88,22 +87,18 @@ void UGraphicsSettingsWidget::OnOverallQualityChanged(FString SelectedItem, ESel
   UE_LOG(LogTemp, Log, TEXT("Overall Quality changed to: %s"), *SelectedItem);
 
   int32 QualityLevel = OverallQualityComboBox->GetSelectedIndex();
-  if (QualityLevel == 5) return;  // Custom quality, do not change anything
+  if (QualityLevel == 4) return;  // Custom quality, do not change anything
 
   // Set advanced settings based on quality level
   if (QualityLevel >= 3)                                    // Epic and Cinematic use Lumen
     GlobalIlluminationMethodComboBox->SetSelectedIndex(1);  // Lumen
-  else if (QualityLevel >= 2)                               // High use Screen Space
-    GlobalIlluminationMethodComboBox->SetSelectedIndex(2);  // Screen Space
   else                                                      // Low and Medium uses None
     GlobalIlluminationMethodComboBox->SetSelectedIndex(0);  // None
-  if (QualityLevel >= 3)                                    // Epic and Cinematic use Lumen
+  if (QualityLevel >= 3)                                    // Epic use Lumen
     ReflectionMethodComboBox->SetSelectedIndex(1);          // Lumen
-  else if (QualityLevel >= 2)                               // High uses Screen Space
-    ReflectionMethodComboBox->SetSelectedIndex(2);          // Screen Space
-  else                                                      // Low and Medium use None
+  else                                                      // Low, Medium, High use None
     ReflectionMethodComboBox->SetSelectedIndex(0);          // None
-  DepthOfFieldCheckBox->SetIsChecked(QualityLevel >= 2);    // Depth of Field for High and above
+  DepthOfFieldCheckBox->SetIsChecked(QualityLevel >= 1);    // Depth of Field for Medium and above
   BloomCheckBox->SetIsChecked(QualityLevel >= 1);           // Bloom for Medium and above
 
   PopulateQualityComboBox(ViewDistanceComboBox, QualityLevel);
@@ -142,7 +137,7 @@ void UGraphicsSettingsWidget::RefreshUI() {
 
   int32 CurrentOverallQuality = GameSettings->GetOverallScalabilityLevel();
   UE_LOG(LogTemp, Log, TEXT("Current Overall Quality: %d"), CurrentOverallQuality);
-  OverallQualityComboBox->SetSelectedIndex(CurrentOverallQuality == -1 ? 5 : CurrentOverallQuality);
+  OverallQualityComboBox->SetSelectedIndex(CurrentOverallQuality == -1 ? 4 : CurrentOverallQuality);
 
   PopulateQualityComboBox(ViewDistanceComboBox, GameSettings->GetViewDistanceQuality());
   PopulateQualityComboBox(ShadowQualityComboBox, GameSettings->GetShadowQuality());
@@ -213,7 +208,6 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   OverallQualityComboBox->AddOption(TEXT("Medium"));
   OverallQualityComboBox->AddOption(TEXT("High"));
   OverallQualityComboBox->AddOption(TEXT("Epic"));
-  OverallQualityComboBox->AddOption(TEXT("Cinematic"));
   OverallQualityComboBox->AddOption(TEXT("Custom"));
 
   AntiAliasingMethodComboBox->ClearOptions();

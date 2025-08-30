@@ -1,4 +1,5 @@
 #include "TutorialViewWidget.h"
+#include "TimerManager.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/UI/Tutorial/TutorialStepWidget.h"
 #include "store_playground/UI/Components/RightSlideWidget.h"
@@ -24,6 +25,7 @@
 #include "Components/HorizontalBox.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
+#include "CommonVideoPlayer.h"
 #include "Logging/LogVerbosity.h"
 #include "Math/UnrealMathUtility.h"
 #include "Misc/AssertionMacros.h"
@@ -49,7 +51,11 @@ void UTutorialViewWidget::Next() {
   UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
 }
 
-void UTutorialViewWidget::Close() { CloseWidgetFunc(); }
+void UTutorialViewWidget::Close() {
+  GetWorld()->GetTimerManager().ClearTimer(VideoTimerHandle);
+
+  CloseWidgetFunc();
+}
 
 void UTutorialViewWidget::RefreshUI() {
   FUITutorialStep CurrentStep = TutorialSteps[CurrentStepIndex];
@@ -59,8 +65,25 @@ void UTutorialViewWidget::RefreshUI() {
   if (CurrentStep.Image) {
     TutorialStepWidget->TutorialImage->SetBrushFromTexture(CurrentStep.Image);
     TutorialStepWidget->TutorialImage->SetVisibility(ESlateVisibility::Visible);
+    TutorialStepWidget->TutorialVideoPlayer->SetVisibility(ESlateVisibility::Collapsed);
+  } else if (CurrentStep.Video) {
+    TutorialStepWidget->TutorialVideoPlayer->SetVideo(CurrentStep.Video);
+    TutorialStepWidget->TutorialVideoPlayer->SetIsMuted(true);
+    TutorialStepWidget->TutorialVideoPlayer->SetLooping(true);
+
+    // ! Only way to wait for the video to be loaded.
+    GetWorld()->GetTimerManager().ClearTimer(VideoTimerHandle);
+    GetWorld()->GetTimerManager().SetTimer(VideoTimerHandle, FTimerDelegate::CreateLambda([this] {
+                                             UE_LOG(LogTemp, Warning, TEXT("Playing video"));
+                                             TutorialStepWidget->TutorialVideoPlayer->PlayFromStart();
+                                           }),
+                                           0.1, false);
+
+    TutorialStepWidget->TutorialImage->SetVisibility(ESlateVisibility::Collapsed);
+    TutorialStepWidget->TutorialVideoPlayer->SetVisibility(ESlateVisibility::Visible);
   } else {
     TutorialStepWidget->TutorialImage->SetVisibility(ESlateVisibility::Collapsed);
+    TutorialStepWidget->TutorialVideoPlayer->SetVisibility(ESlateVisibility::Collapsed);
   }
   StepsScrollBox->ScrollToStart();
 

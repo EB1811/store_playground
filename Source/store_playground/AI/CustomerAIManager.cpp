@@ -634,10 +634,9 @@ auto ACustomerAIManager::ConsiderStockCheck(const UCustomerAIComponent* Customer
   check(CustomerAI && Item);
 
   FNegotiationAIDetails NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
-  float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
+  // float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
   if (Item->ItemType == NegotiationAIDetails.WantedItemType.ItemType &&
-      Item->ItemEconType == NegotiationAIDetails.WantedItemType.ItemEconType &&
-      MarketPrice <= NegotiationAIDetails.MoneyToSpend)
+      Item->ItemEconType == NegotiationAIDetails.WantedItemType.ItemEconType)
     return {true, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues,
             NegotiationAIDetails.CustomerName};
 

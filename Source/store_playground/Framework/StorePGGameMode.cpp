@@ -291,9 +291,10 @@ void AStorePGGameMode::BeginPlay() {
     // ! Enter level post transition blueprint function is not called.
     if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadLevelsAndPlayerFromDisk();
 
-    StorePhaseManager->Start();
-
+    if (!StorePGGameInstance->bFromSaveGame) MarketEconomy->PerformEconomyTicks(35);
     MarketEconomy->EconomyParams.bRunSimulation = true;
+
+    StorePhaseManager->Start();
 
     HUD->SetupInitUIStates();
     HUD->ShowInGameHudWidget();

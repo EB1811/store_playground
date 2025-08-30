@@ -38,6 +38,9 @@ public:
   UPROPERTY(EditAnywhere)
   int32 CurrentStepIndex;
 
+  UPROPERTY(EditAnywhere)
+  FTimerHandle VideoTimerHandle;
+
   UFUNCTION()
   void Next();
   UFUNCTION()

@@ -22,6 +22,8 @@ struct FUITutorialStep {
   FText Body;
   UPROPERTY(EditAnywhere)
   class UTexture2D* Image;
+  UPROPERTY(EditAnywhere)
+  class UMediaSource* Video;
 };
 
 USTRUCT()

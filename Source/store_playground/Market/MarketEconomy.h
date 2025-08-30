@@ -105,6 +105,7 @@ public:
 
   // TODO: Simulate a couple of ticks to get initial economy state.
   void PerformEconomyTick();
+  void PerformEconomyTicks(int32 NumTicks);
 
   auto GetPopWeightingMulti(const FCustomerPop& Pop) const -> float;
   auto GetPopWeightingMulti(const FPopEconData& PopEconData) const -> float;
