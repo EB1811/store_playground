@@ -276,6 +276,17 @@ void ASpgHUD::AdvanceUI() {
 
   ActionableWidget->AdvanceUI();
 }
+void ASpgHUD::AdvanceUIHold() {
+  UE_LOG(LogTemp, Log, TEXT("AdvanceUIHold called in HUD"));
+  if (HUDState == EHUDState::PlayingAnim) return;
+  if (OpenedWidgets.IsEmpty()) return;
+
+  UUserWidget* TopWidget = OpenedWidgets.Last();
+  FUIActionable* ActionableWidget = GetUIActionable(TopWidget);
+  if (!ActionableWidget || !ActionableWidget->AdvanceUIHold) return;
+
+  ActionableWidget->AdvanceUIHold();
+}
 void ASpgHUD::RetractUIAction() {
   if (HUDState == EHUDState::PlayingAnim) return;
   if (OpenedWidgets.IsEmpty()) return;

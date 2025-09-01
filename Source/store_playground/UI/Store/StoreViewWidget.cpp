@@ -86,8 +86,8 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                              PlayerInventoryC, StatisticsGen, Store);
   StoreExpansionsListWidget->InitUI(Store, StoreExpansionManager, [this]() { CloseWidgetFunc(); });
 
-  UnlockButton->ActionText->SetText(FText::FromString("Unlock"));
-  UnlockButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
+  UnlockButton->ActionText->SetText(FText::FromString("Unlock (Hold)"));
+  UnlockButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIHoldAction);
   BackButton->ActionText->SetText(FText::FromString("Back"));
   BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
 
@@ -95,7 +95,7 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
 }
 
 void UStoreViewWidget::SetupUIActionable() {
-  UIActionable.AdvanceUI = [this]() {
+  UIActionable.AdvanceUIHold = [this]() {
     if (ActiveTab == EStoreViewTab::Expansion) StoreExpansionsListWidget->UnlockExpansion();
   };
   UIActionable.DirectionalInput = [this](FVector2D Direction) {

@@ -132,6 +132,7 @@ public:
   void CloseWidget(class UUserWidget* Widget, std::function<void()> PostCloseFunc);
 
   void AdvanceUI();
+  void AdvanceUIHold();
   void RetractUIAction();
   void QuitUIAction();
   void UINumericInputAction(float Value);

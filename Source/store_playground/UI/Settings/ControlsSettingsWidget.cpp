@@ -17,6 +17,9 @@ inline bool HasDuplicateKeyInCategory(const FKey& Key,
                                       const FText& Category,
                                       const FName& ExcludeMappingName,
                                       UEnhancedPlayerMappableKeyProfile* Profile) {
+  FString CategoryString = Category.ToString();
+  if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InUINonExclusive).ToString()) return false;
+
   for (const TPair<FName, FKeyMappingRow>& RowPair : Profile->GetPlayerMappingRows()) {
     for (const FPlayerKeyMapping& Mapping : RowPair.Value.Mappings) {
       if (ExcludeMappingName != NAME_None && Mapping.GetMappingName() == ExcludeMappingName) continue;
@@ -154,6 +157,8 @@ void UControlsSettingsWidget::RefreshUI() {
       if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InGame).ToString())
         InGameControlsPanel->AddChildToVerticalBox(RebindWidget);
       else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InUI).ToString())
+        InUIControlsPanel->AddChildToVerticalBox(RebindWidget);
+      else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InUINonExclusive).ToString())
         InUIControlsPanel->AddChildToVerticalBox(RebindWidget);
       else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InCutscene).ToString())
         InCutsceneControlsPanel->AddChildToVerticalBox(RebindWidget);

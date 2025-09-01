@@ -14,6 +14,7 @@ struct FUIActionable {
   GENERATED_BODY()
 
   std::function<void()> AdvanceUI;
+  std::function<void()> AdvanceUIHold;
   std::function<void()> RetractUI;
   std::function<void()> QuitUI;
 

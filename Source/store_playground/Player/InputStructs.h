@@ -11,6 +11,7 @@ UENUM()
 enum class EInputTypeNames : uint8 {
   InGame UMETA(DisplayName = "InGame"),
   InUI UMETA(DisplayName = "InUI"),
+  InUINonExclusive UMETA(DisplayName = "InUINonExclusive"),  // * When the actions is allowed duplicate key.
   InCutscene UMETA(DisplayName = "InCutscene"),
 };
 
@@ -47,6 +48,8 @@ struct FInUIInputActions {
 
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* AdvanceUIAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* AdvanceUIHoldAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* RetractUIAction;
   UPROPERTY(EditAnywhere, Category = "Input")

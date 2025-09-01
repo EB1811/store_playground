@@ -103,6 +103,8 @@ public:
   UFUNCTION(BlueprintCallable)
   void AdvanceUI(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable)
+  void AdvanceUIHold(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable)
   void RetractUIAction(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable)
   void QuitUIAction(const FInputActionValue& Value);

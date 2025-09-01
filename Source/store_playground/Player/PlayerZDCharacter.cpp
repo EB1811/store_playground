@@ -118,6 +118,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     // In UI
     EnhancedInputComponent->BindAction(InUIInputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::AdvanceUI);
+    EnhancedInputComponent->BindAction(InUIInputActions.AdvanceUIHoldAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::AdvanceUIHold);
     EnhancedInputComponent->BindAction(InUIInputActions.RetractUIAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::RetractUIAction);
     EnhancedInputComponent->BindAction(InUIInputActions.QuitUIAction, ETriggerEvent::Triggered, this,
@@ -320,6 +322,7 @@ void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::AdvanceUI(const FInputActionValue& Value) { HUD->AdvanceUI(); }
+void APlayerZDCharacter::AdvanceUIHold(const FInputActionValue& Value) { HUD->AdvanceUIHold(); }
 void APlayerZDCharacter::RetractUIAction(const FInputActionValue& Value) { HUD->RetractUIAction(); }
 void APlayerZDCharacter::QuitUIAction(const FInputActionValue& Value) { HUD->QuitUIAction(); }
 void APlayerZDCharacter::UINumericInputAction(const FInputActionValue& Value) {
