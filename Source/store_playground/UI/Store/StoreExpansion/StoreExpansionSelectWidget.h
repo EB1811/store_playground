@@ -12,23 +12,25 @@ class STORE_PLAYGROUND_API UStoreExpansionSelectWidget : public UUserWidget {
 public:
   virtual void NativeOnInitialized() override;
 
-  UPROPERTY()
-  EStoreExpansionLevel StoreExpansionLevel;
-
-  // UPROPERTY(meta = (BindWidget))
-  // class UImage* ArticleImage;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* NameText;
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* PriceText;
+  class UImage* PictureImage;
   UPROPERTY(meta = (BindWidget))
-  class UTextBlock* IsLockedText;
+  class UTextBlock* PriceText;
   UPROPERTY(meta = (BindWidget))
   class UButton* SelectButton;
 
-  void SetExpansionData(const FStoreExpansionData& Expansion);
+  UPROPERTY()
+  FName ExpansionID;
+  UPROPERTY()
+  bool bIsSelected;
 
   UFUNCTION()
-  void OnSelectButtonClicked();
-  std::function<void(EStoreExpansionLevel)> SelectExpansionFunc;
+  void Select();
+
+  void RefreshUI();
+  void InitUI(const FStoreExpansionData& ExpansionData, std::function<void(FName)> _SelectUpgradeFunc);
+
+  std::function<void(FName)> SelectFunc;
 };

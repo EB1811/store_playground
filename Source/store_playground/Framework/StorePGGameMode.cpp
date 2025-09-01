@@ -163,6 +163,7 @@ void AStorePGGameMode::BeginPlay() {
   LevelManager->StorePhaseManager = StorePhaseManager;
   LevelManager->DayManager = DayManager;
   LevelManager->StoreExpansionManager = StoreExpansionManager;
+  LevelManager->PlayerCommand = PlayerCommand;
   LevelManager->StorePhaseLightingManager = StorePhaseLightingManager;
   LevelManager->CutsceneManager = CutsceneManager;
   LevelManager->Store = Store;
@@ -201,6 +202,9 @@ void AStorePGGameMode::BeginPlay() {
       {EUpgradeEffectSystem::StorePhaseManager, StorePhaseManager->Upgradeable},
   };
 
+  StoreExpansionManager->LevelManager = LevelManager;
+  StoreExpansionManager->Store = Store;
+
   StatisticsGen->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;
   StatisticsGen->Store = Store;
   StatisticsGen->MarketEconomy = MarketEconomy;
@@ -233,8 +237,6 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->Market = Market;
   MarketLevel->MarketEconomy = MarketEconomy;
   MarketLevel->PlayerCommand = PlayerCommand;
-
-  StoreExpansionManager->Store = Store;
 
   AbilityManager->GlobalDataManager = GlobalDataManager;
   AbilityManager->GlobalStaticDataManager = GlobalStaticDataManager;

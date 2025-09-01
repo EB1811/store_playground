@@ -27,7 +27,11 @@ public:
   class UMenuHeaderWidget* MenuHeaderWidget;
   UPROPERTY(meta = (BindWidget))
   class UStoreDetailsWidget* StoreDetailsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UStoreExpansionsListWidget* StoreExpansionsListWidget;
 
+  UPROPERTY(meta = (BindWidget))
+  class UControlMenuButtonWidget* UnlockButton;
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* BackButton;
 

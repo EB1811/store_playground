@@ -297,6 +297,8 @@ void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
   if (PlayerBehaviourState != EPlayerState::Normal) return;
 
   HUD->SetAndOpenStoreView(PlayerInventoryComponent);
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.StoreView"));
 }
 
 void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
@@ -309,6 +311,8 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
   if (LevelManager->CurrentLevel != ELevel::Store) return;
 
   StorePhaseManager->EnterBuildMode();
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.BuildMode"));
 }
 // Rechecking on input to avoid problems with the interaction frequency not keeping up.
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
@@ -570,13 +574,21 @@ void APlayerZDCharacter::EnterBuildableDisplay(ABuildable* Buildable) { HUD->Set
 void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC,
                                            UInventoryComponent* DisplayInventoryC) {
   HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent);
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.StockDisplay"));
 }
 
 void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {
   HUD->SetAndOpenUpgradeView(UpgradeSelectC);
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.UpgradeSelect"));
 }
 
-void APlayerZDCharacter::EnterAbilitySelect() { HUD->SetAndOpenAbilityView(); }
+void APlayerZDCharacter::EnterAbilitySelect() {
+  HUD->SetAndOpenAbilityView();
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.AbilitySelect"));
+}
 
 void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
   HUD->SetAndOpenMiniGame(MiniGameManager, MiniGameC, Store, PlayerInventoryComponent);
@@ -620,6 +632,8 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
   NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAIDetails.StockDisplayInventory,
                                       bIsQuestAssociated, QuestComponent);
   HUD->SetAndOpenNegotiation(NegotiationSystem, DialogueSystem, PlayerInventoryComponent);
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.NegotiationView"));
 }
 
 void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
@@ -736,13 +750,14 @@ void APlayerZDCharacter::ExitCurrentAction() {
   HUD->QuitUIAction();
 }
 void APlayerZDCharacter::ResetLocationToSpawnPoint() {
-  ASpawnPoint* SpawnPoint =
-      *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([this](const ASpawnPoint* SpawnPoint) {
-        return SpawnPoint->Level == LevelManager->CurrentLevel;
-      });
-  check(SpawnPoint);
+  TArray<ASpawnPoint*> SpawnPoints = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass);
+  check(SpawnPoints.Num() > 0);
+  ASpawnPoint** FoundSpawnPoint = SpawnPoints.FindByPredicate(
+      [this](const ASpawnPoint* SpawnPoint) { return SpawnPoint->Level == LevelManager->CurrentLevel; });
+  check(FoundSpawnPoint);
+  check(*FoundSpawnPoint);
 
-  this->SetActorLocation(SpawnPoint->GetActorLocation());
+  this->SetActorLocation((*FoundSpawnPoint)->GetActorLocation());
 }
 
 // ? Change parameter to ELevel?
@@ -812,23 +827,3 @@ void APlayerZDCharacter::GameOverReset() {
 
   HUD->SetAndOpenGameOverView();
 }
-
-// void APlayerZDCharacter::OpenStoreExpansions(const FInputActionValue& Value) {
-//   auto SelectExpansionFunc = [&](EStoreExpansionLevel ExpansionLevel) {
-//     if (!StoreExpansionManager->SelectExpansion(ExpansionLevel)) return;
-
-//     auto LevelReadyFunc = [&]() {
-//       ASpawnPoint* SpawnPoint =
-//           *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
-//             return SpawnPoint->Level == ELevel::Store;
-//           });
-//       check(SpawnPoint);
-
-//       this->SetActorLocation(SpawnPoint->GetActorLocation());
-//       UE_LOG(LogTemp, Warning, TEXT("Player location set to spawn point: %s"), *SpawnPoint->GetName());
-//     };
-//     LevelManager->ExpandStoreSwitchLevel(LevelReadyFunc);
-//   };
-
-//   HUD->SetAndOpenStoreExpansionsList(StoreExpansionManager, SelectExpansionFunc);
-// }

@@ -17,6 +17,11 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> UITutorialStepTable;
+  UPROPERTY(EditAnywhere, Category = "Data")
+  TObjectPtr<const class UDataTable> UITutorialDataTable;
+
   UPROPERTY(EditAnywhere)
   const class ASettingsManager* SettingsManager;
 

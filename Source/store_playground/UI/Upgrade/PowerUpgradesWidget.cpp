@@ -11,7 +11,6 @@
 
 void UPowerUpgradesWidget::SelectUpgrade(FName UpgradeID, UUpgradeCardWidget* UpgradeCardWidget) {
   check(UpgradeCardWidget);
-
   if (SelectedUpgradeID == UpgradeID) return;
 
   SelectedUpgradeID = UpgradeID;
@@ -58,6 +57,7 @@ void UPowerUpgradesWidget::UnlockUpgrade() {
               "GetAvailableUpgrades returned wrong data."));
 
   UpgradeManager->SelectUpgrade(SelectedUpgradeID);
+
   SelectedUpgradeID = FName();
   SelectedUpgradeCardWidget = nullptr;
   RefreshUI();

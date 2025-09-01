@@ -3,6 +3,7 @@
 #include <functional>
 #include "GameFramework/Info.h"
 #include "store_playground/Level/LevelStructs.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "StoreExpansionManager.generated.h"
 
 USTRUCT()
@@ -10,16 +11,16 @@ struct FStoreExpansionData {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  EStoreExpansionLevel StoreExpansionLevel;
+  FName StoreExpansionLevelID;
 
   UPROPERTY(EditAnywhere)
-  FName Name;
+  FText Name;
   UPROPERTY(EditAnywhere)
   class UMaterialInstance* Picture;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float Price;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   bool bIsLocked;
 };
 
@@ -28,19 +29,29 @@ class STORE_PLAYGROUND_API AStoreExpansionManager : public AInfo {
   GENERATED_BODY()
 
 public:
-  AStoreExpansionManager() { PrimaryActorTick.bCanEverTick = false; }
+  AStoreExpansionManager() {
+    PrimaryActorTick.bCanEverTick = false;
+
+    Upgradeable.UnlockIDs = [this](const FName DataName, const TArray<FName>& Ids) { UnlockIDs(DataName, Ids); };
+  }
 
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere)
+  class ALevelManager* LevelManager;
+  UPROPERTY(EditAnywhere)
   class AStore* Store;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   TArray<FStoreExpansionData> StoreExpansions;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  EStoreExpansionLevel CurrentStoreExpansionLevel;
+  FName CurrentStoreExpansionLevelID;
 
-  auto SelectExpansion(EStoreExpansionLevel StoreExpansionLevel) -> bool;
+  void SelectExpansion(FName StoreExpansionLevelID);
+
+  UPROPERTY(EditAnywhere)
+  FUpgradeable Upgradeable;
+  void UnlockIDs(const FName DataName, const TArray<FName>& Ids);
 };

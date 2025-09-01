@@ -11,6 +11,7 @@
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Level/LevelStructs.h"
 #include "store_playground/Lighting/StorePhaseLightingManager.h"
+#include "store_playground/Player/PlayerCommand.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/MarketLevel.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
@@ -23,8 +24,6 @@ void ALevelManager::BeginPlay() {
   Super::BeginPlay();
 
   for (ELevel Level : TEnumRange<ELevel>()) check(LevelNames.Contains(Level));
-  for (EStoreExpansionLevel Expansion : TEnumRange<EStoreExpansionLevel>())
-    check(StoreExpansionLevelNames.Contains(Expansion));
 
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   check(HUD);
@@ -33,7 +32,7 @@ void ALevelManager::BeginPlay() {
 void ALevelManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void ALevelManager::InitLoadStore(std::function<void()> _LevelReadyFunc) {
-  LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];
+  LevelNames[ELevel::Store] = StoreExpansionLevelMap[StoreExpansionManager->CurrentStoreExpansionLevelID];
 
   if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[ELevel::Store])) {
     LoadedLevel = ELevel::Store;
@@ -69,19 +68,23 @@ void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelRea
   }
 }
 
-void ALevelManager::BeginUnloadLevel(ELevel Level) {
+void ALevelManager::BeginUnloadLevel(ELevel Level, std::function<void()> _LevelUnloadedFunc) {
   UE_LOG(LogTemp, Warning, TEXT("Unloading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
 
-  FLatentActionInfo LatentInfo;
-  UGameplayStatics::UnloadStreamLevel(this, LevelNames[Level], LatentInfo, false);
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[CurrentLevel])) {
+    LevelUnloadedFunc = _LevelUnloadedFunc;
+
+    Streaming->OnLevelUnloaded.Clear();
+    Streaming->OnLevelUnloaded.AddDynamic(this, &ALevelManager::OnLevelUnloaded);
+
+    FLatentActionInfo LatentInfo;
+    LatentInfo.CallbackTarget = this;
+    UGameplayStatics::UnloadStreamLevel(this, LevelNames[Level], LatentInfo, false);
+  }
 }
 
 void ALevelManager::OnLevelShown() {
   UE_LOG(LogTemp, Warning, TEXT("Level shown: %s"), *UEnum::GetDisplayValueAsText(LoadedLevel).ToString());
-
-  InitLevel(LoadedLevel);
-  if (LevelReadyFunc) LevelReadyFunc();
-  LevelReadyFunc = nullptr;
 
   if (CurrentLevel != ELevel::None) {
     SaveLevelState(CurrentLevel);
@@ -89,7 +92,17 @@ void ALevelManager::OnLevelShown() {
   }
   CurrentLevel = LoadedLevel;
 
+  InitLevel(CurrentLevel);
+  if (LevelReadyFunc) LevelReadyFunc();
+  LevelReadyFunc = nullptr;
+
   HUD->EndLevelLoadingTransition([this]() { EnterLevel(CurrentLevel); });
+}
+void ALevelManager::OnLevelUnloaded() {
+  UE_LOG(LogTemp, Warning, TEXT("Level unloaded: %s"), *UEnum::GetDisplayValueAsText(CurrentLevel).ToString());
+
+  if (LevelUnloadedFunc) LevelUnloadedFunc();
+  LevelUnloadedFunc = nullptr;
 }
 
 void ALevelManager::ReloadCurrentLevel(std::function<void()> _LevelReadyFunc) {
@@ -99,14 +112,14 @@ void ALevelManager::ReloadCurrentLevel(std::function<void()> _LevelReadyFunc) {
     LevelReadyFunc = _LevelReadyFunc;
 
     Streaming->OnLevelUnloaded.Clear();
-    Streaming->OnLevelUnloaded.AddDynamic(this, &ALevelManager::OnLevelUnloaded);
+    Streaming->OnLevelUnloaded.AddDynamic(this, &ALevelManager::OnLevelUnloadedReload);
 
     FLatentActionInfo LatentInfo;
     LatentInfo.CallbackTarget = this;
     UGameplayStatics::UnloadStreamLevel(this, LevelNames[CurrentLevel], LatentInfo, false);
   }
 }
-void ALevelManager::OnLevelUnloaded() {
+void ALevelManager::OnLevelUnloadedReload() {
   if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[CurrentLevel])) {
     Streaming->OnLevelShown.Clear();
     Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShownReload);
@@ -176,15 +189,13 @@ void ALevelManager::SaveLevelState(ELevel Level) {
   }
 }
 
-void ALevelManager::ExpandStoreSwitchLevel(std::function<void()> _LevelReadyFunc) {
-  LevelReadyFunc = _LevelReadyFunc;
-  HUD->StartLevelLoadingTransition([this]() {
-    // todo-low: Add on unload callback.
-    BeginUnloadLevel(ELevel::Store);
-
-    LevelNames[ELevel::Store] = StoreExpansionLevelNames[StoreExpansionManager->CurrentStoreExpansionLevel];
+void ALevelManager::ExpandStoreSwitchLevel() {
+  LevelReadyFunc = [this]() { PlayerCommand->ResetPosition(); };
+  LevelUnloadedFunc = [this]() {
+    LevelNames[ELevel::Store] = StoreExpansionLevelMap[StoreExpansionManager->CurrentStoreExpansionLevelID];
 
     CurrentLevel = ELevel::None;
     InitLoadStore(LevelReadyFunc);
-  });
+  };
+  HUD->StartLevelLoadingTransition([this]() { BeginUnloadLevel(ELevel::Store, LevelUnloadedFunc); });
 }

@@ -6,21 +6,24 @@
 void UStoreExpansionSelectWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
-  SelectButton->OnClicked.AddDynamic(this, &UStoreExpansionSelectWidget::OnSelectButtonClicked);
+  SelectButton->OnClicked.AddDynamic(this, &UStoreExpansionSelectWidget::Select);
 }
 
-void UStoreExpansionSelectWidget::SetExpansionData(const FStoreExpansionData& Expansion) {
-  StoreExpansionLevel = Expansion.StoreExpansionLevel;
+void UStoreExpansionSelectWidget::Select() { SelectFunc(ExpansionID); }
 
-  NameText->SetText(FText::FromName(Expansion.Name));
-  PriceText->SetText(FText::FromString(FString::SanitizeFloat((FMath::RoundToInt32(Expansion.Price)))));
-  IsLockedText->SetText(Expansion.bIsLocked ? FText::FromString("Locked") : FText::FromString(""));
-  IsLockedText->SetVisibility(Expansion.bIsLocked ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-  SelectButton->SetIsEnabled(!Expansion.bIsLocked);
+void UStoreExpansionSelectWidget::RefreshUI() {
+  if (bIsSelected) SelectButton->SetIsEnabled(false);
+  else SelectButton->SetIsEnabled(true);
 }
 
-void UStoreExpansionSelectWidget::OnSelectButtonClicked() {
-  check(SelectExpansionFunc);
+void UStoreExpansionSelectWidget::InitUI(const FStoreExpansionData& ExpansionData,
+                                         std::function<void(FName)> _SelectUpgradeFunc) {
+  check(_SelectUpgradeFunc);
 
-  SelectExpansionFunc(StoreExpansionLevel);
+  ExpansionID = ExpansionData.StoreExpansionLevelID;
+  SelectFunc = _SelectUpgradeFunc;
+
+  NameText->SetText(ExpansionData.Name);
+  PictureImage->SetBrushFromMaterial(ExpansionData.Picture);
+  PriceText->SetText(FText::FromString(FString::Printf(TEXT("Cost: %.0f¬"), ExpansionData.Price)));
 }

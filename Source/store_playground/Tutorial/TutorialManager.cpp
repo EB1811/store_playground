@@ -8,7 +8,26 @@
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "store_playground/Tags/TagsComponent.h"
 
-void ATutorialManager::BeginPlay() { Super::BeginPlay(); }
+void ATutorialManager::BeginPlay() {
+  Super::BeginPlay();
+
+  TutorialSteps.Empty();
+  TArray<FUITutorialStepRow*> UITutorialStepRows;
+  UITutorialStepTable->GetAllRows<FUITutorialStepRow>("", UITutorialStepRows);
+  for (auto Row : UITutorialStepRows)
+    TutorialSteps.Add({Row->ID, Row->TutorialID, Row->Title, Row->Body, Row->Image, Row->Video});
+
+  TutorialsData.Empty();
+  TArray<FUITutorialDataRow*> UITutorialDataRows;
+  UITutorialDataTable->GetAllRows<FUITutorialDataRow>("", UITutorialDataRows);
+  for (auto Row : UITutorialDataRows) TutorialsData.Add(Row->IdTag, {Row->ID, Row->IdTag, Row->PlayerTags});
+
+  check(TutorialSteps.Num() > 0);
+  check(TutorialsData.Num() > 0);
+
+  UITutorialStepTable = nullptr;
+  UITutorialDataTable = nullptr;
+}
 
 void ATutorialManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 

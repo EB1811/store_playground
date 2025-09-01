@@ -96,10 +96,6 @@ void ASpgHUD::BeginPlay() {
   StockDisplayViewWidget->AddToViewport(10);
   StockDisplayViewWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  StoreExpansionsListWidget = CreateWidget<UStoreExpansionsListWidget>(GetWorld(), StoreExpansionsListWidgetClass);
-  StoreExpansionsListWidget->AddToViewport(10);
-  StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Collapsed);
-
   // PlayerAndContainerWidget = CreateWidget<UPlayerAndContainerWidget>(GetWorld(), PlayerAndContainerWidgetClass);
   // PlayerAndContainerWidget->AddToViewport(10);
   // PlayerAndContainerWidget->SetVisibility(ESlateVisibility::Collapsed);
@@ -474,23 +470,6 @@ void ASpgHUD::SetAndOpenStockDisplay(UStockDisplayComponent* StockDisplay,
   OpenFocusedMenu(StockDisplayViewWidget);
 }
 
-void ASpgHUD::SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLevel)> SelectExpansionFunc) {
-  if (OpenedWidgets.Contains(StoreExpansionsListWidget)) return CloseWidget(StoreExpansionsListWidget);
-
-  StoreExpansionsListWidget->StoreExpansionManagerRef = StoreExpansionManager;
-  StoreExpansionsListWidget->SelectExpansionFunc = [this, SelectExpansionFunc](EStoreExpansionLevel ExpansionLevel) {
-    SelectExpansionFunc(ExpansionLevel);
-  };
-  StoreExpansionsListWidget->RefreshUI();
-
-  // ShowWidget(StoreExpansionsListWidget, nullptr);
-  const FInputModeGameAndUI InputMode;
-  GetOwningPlayerController()->SetInputMode(InputMode);
-  GetOwningPlayerController()->SetShowMouseCursor(true);
-
-  OpenedWidgets.Add(StoreExpansionsListWidget);
-}
-
 void ASpgHUD::SetAndOpenContainer(const UInventoryComponent* PlayerInventory,
                                   const UInventoryComponent* ContainerInventory) {}
 
@@ -658,7 +637,8 @@ void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) 
 }
 void ASpgHUD::EndLevelLoadingTransition(std::function<void()> _FadeOutEndFunc) {
   LevelLoadingTransitionWidget->FadeOutEndFunc = [this, _FadeOutEndFunc = _FadeOutEndFunc]() {
-    SetPlayerNormalFunc();
+    if (OpenedWidgets.IsEmpty()) SetPlayerNormalFunc();
+    else SetPlayerFocussedFunc();
 
     LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
     LevelLoadingTransitionWidget->RemoveFromParent();

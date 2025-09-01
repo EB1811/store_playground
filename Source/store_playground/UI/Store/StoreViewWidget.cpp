@@ -8,6 +8,7 @@
 #include "store_playground/UI/Components/ControlTextWidget.h"
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
 #include "store_playground/UI/Store/StoreDetailsWidget.h"
+#include "store_playground/UI/Store/StoreExpansion/StoreExpansionsListWidget.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -26,8 +27,16 @@ void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
 
   ActiveTab = Tab;
   switch (ActiveTab) {
-    case EStoreViewTab::Details: StoreDetailsWidget->SetVisibility(ESlateVisibility::Visible); break;
-    case EStoreViewTab::Expansion: StoreDetailsWidget->SetVisibility(ESlateVisibility::Collapsed); break;
+    case EStoreViewTab::Details:
+      StoreDetailsWidget->SetVisibility(ESlateVisibility::Visible);
+      StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Collapsed);
+      UnlockButton->SetVisibility(ESlateVisibility::Hidden);
+      break;
+    case EStoreViewTab::Expansion:
+      StoreDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
+      StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Visible);
+      UnlockButton->SetVisibility(ESlateVisibility::Visible);
+      break;
     default: checkNoEntry();
   }
 }
@@ -37,7 +46,7 @@ void UStoreViewWidget::Back() { CloseWidgetFunc(); }
 void UStoreViewWidget::RefreshUI() {
   switch (ActiveTab) {
     case EStoreViewTab::Details: StoreDetailsWidget->RefreshUI(); break;
-    case EStoreViewTab::Expansion: break;
+    case EStoreViewTab::Expansion: StoreExpansionsListWidget->RefreshUI(); break;
     default: checkNoEntry();
   }
 }
@@ -75,7 +84,10 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
 
   StoreDetailsWidget->InitUI(DayManager, StorePhaseManager, MarketEconomy, Market, UpgradeManager, AbilityManager,
                              PlayerInventoryC, StatisticsGen, Store);
+  StoreExpansionsListWidget->InitUI(Store, StoreExpansionManager, [this]() { CloseWidgetFunc(); });
 
+  UnlockButton->ActionText->SetText(FText::FromString("Unlock"));
+  UnlockButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIAction);
   BackButton->ActionText->SetText(FText::FromString("Back"));
   BackButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.RetractUIAction);
 
@@ -83,6 +95,12 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
 }
 
 void UStoreViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() {
+    if (ActiveTab == EStoreViewTab::Expansion) StoreExpansionsListWidget->UnlockExpansion();
+  };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    if (ActiveTab == EStoreViewTab::Expansion) StoreExpansionsListWidget->SelectNextExpansion(Direction);
+  };
   UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
   UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
   UIActionable.RetractUI = [this]() { Back(); };

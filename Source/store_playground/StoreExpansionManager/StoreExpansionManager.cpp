@@ -1,17 +1,29 @@
 #include "StoreExpansionManager.h"
+#include "store_playground/Level/LevelManager.h"
 #include "store_playground/Store/Store.h"
 
 void AStoreExpansionManager::BeginPlay() { Super::BeginPlay(); }
 
 void AStoreExpansionManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-auto AStoreExpansionManager::SelectExpansion(EStoreExpansionLevel StoreExpansionLevel) -> bool {
+void AStoreExpansionManager::SelectExpansion(FName StoreExpansionLevelID) {
   FStoreExpansionData* ExpansionData = StoreExpansions.FindByPredicate(
-      [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevel == StoreExpansionLevel; });
+      [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevelID == StoreExpansionLevelID; });
   check(ExpansionData);
+  check(Store->Money >= ExpansionData->Price && !ExpansionData->bIsLocked);
 
-  if (!Store->TrySpendMoney(ExpansionData->Price)) return false;
+  CurrentStoreExpansionLevelID = StoreExpansionLevelID;
+  LevelManager->ExpandStoreSwitchLevel();  // TODO: Add post load callback for UI.
+}
 
-  CurrentStoreExpansionLevel = StoreExpansionLevel;
-  return true;
+void AStoreExpansionManager::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {
+  if (DataName != "StoreExpansions") checkf(false, TEXT("UnlockIDs only supports StoreExpansions."));
+
+  if (DataName == "StoreExpansions") {
+    for (const auto& Id : Ids) {
+      FStoreExpansionData* ExpansionData = StoreExpansions.FindByPredicate(
+          [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevelID == Id; });
+      if (ExpansionData) ExpansionData->bIsLocked = false;
+    }
+  }
 }

@@ -180,10 +180,6 @@ public:
                               class UInventoryComponent* DisplayInventory,
                               class UInventoryComponent* PlayerInventory);
 
-  UPROPERTY()
-  class UStoreExpansionsListWidget* StoreExpansionsListWidget;
-  void SetAndOpenStoreExpansionsList(std::function<void(EStoreExpansionLevel)> SelectExpansionFunc);
-
   // UPROPERTY()
   // class UPlayerAndContainerWidget* PlayerAndContainerWidget;
   void SetAndOpenContainer(const class UInventoryComponent* PlayerInventory,

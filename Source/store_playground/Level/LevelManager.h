@@ -32,8 +32,10 @@ public:
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   TMap<ELevel, FName> LevelNames;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
-  TMap<EStoreExpansionLevel, FName> StoreExpansionLevelNames;
+  TMap<FName, FName> StoreExpansionLevelMap;  // * LevelID -> LevelName
 
+  UPROPERTY(EditAnywhere)
+  class APlayerCommand* PlayerCommand;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   class ACutsceneManager* CutsceneManager;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
@@ -51,23 +53,26 @@ public:
   void InitLoadStore(std::function<void()> _LevelReadyFunc);
 
   void BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc = nullptr);
-  void BeginUnloadLevel(ELevel Level);
+  void BeginUnloadLevel(ELevel Level, std::function<void()> _LevelUnloadedFunc = nullptr);
 
   UFUNCTION()
   void OnLevelShown();
+  UFUNCTION()
+  void OnLevelUnloaded();
 
   void InitLevel(ELevel Level);
   void EnterLevel(ELevel Level);
   void SaveLevelState(ELevel Level);
 
-  void ExpandStoreSwitchLevel(std::function<void()> _LevelReadyFunc = nullptr);
+  void ExpandStoreSwitchLevel();
 
   // * Horrible but needed when loading a save while in a level.
   void ReloadCurrentLevel(std::function<void()> _LevelReadyFunc);
   UFUNCTION()
-  void OnLevelUnloaded();
+  void OnLevelUnloadedReload();
   UFUNCTION()
   void OnLevelShownReload();
 
-  std::function<void()> LevelReadyFunc;  // * Callback for the player.
+  std::function<void()> LevelUnloadedFunc;
+  std::function<void()> LevelReadyFunc;
 };
