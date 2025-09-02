@@ -37,6 +37,8 @@ struct FInGameInputActions {
   UInputAction* OpenNewspaperAction;
   UPROPERTY(EditAnywhere, Category = "Input")
   UInputAction* OpenStoreViewAction;
+  UPROPERTY(EditAnywhere, Category = "Input")
+  UInputAction* CinematicViewAction;  // Testing
 };
 
 USTRUCT()

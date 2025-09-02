@@ -425,6 +425,7 @@ void ASpgHUD::OpenPauseMenuView() {
   // SetPlayerPausedFunc();
 }
 
+// TODO: Move to be a player widget.
 void ASpgHUD::OpenInteractionPopup(FText InteractionText) {
   InteractionPopupWidget->InteractionText->SetText(InteractionText);
   InteractionPopupWidget->SetVisibility(ESlateVisibility::Visible);

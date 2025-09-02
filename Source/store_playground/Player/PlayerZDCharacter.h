@@ -51,6 +51,25 @@ struct FInteractionData {
   float InteractionCheckRadius;
 };
 
+USTRUCT()
+struct FCameraCinematicsData {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere)
+  float CamInterpSpeed;  // * Moving, etc.
+
+  UPROPERTY(EditAnywhere)
+  float CinematicInterpSpeed;  // * Toggle to/from cinematic view.
+  UPROPERTY(EditAnywhere)
+  FVector OgSpringArmOffset;
+  UPROPERTY(EditAnywhere)
+  FVector CinematicSpringArmOffset;
+  UPROPERTY(EditAnywhere)
+  FRotator OgCamRotation;
+  UPROPERTY(EditAnywhere)
+  FRotator CinematicCamRotation;
+};
+
 UCLASS()
 class STORE_PLAYGROUND_API APlayerZDCharacter : public APaperZDCharacter {
   GENERATED_BODY()
@@ -99,6 +118,8 @@ public:
   void EnterBuildMode(const FInputActionValue& Value);
   UFUNCTION(BlueprintCallable, Category = "Character | Input")
   void Interact(const FInputActionValue& Value);
+  UFUNCTION(BlueprintCallable, Category = "Character | Input")
+  void CinematicView(const FInputActionValue& Value);
   // In UI
   UFUNCTION(BlueprintCallable)
   void AdvanceUI(const FInputActionValue& Value);
@@ -199,6 +220,16 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | Occlusion")
   TArray<AActor*> OccludedActors;
   void HandleOcclusion();  // Ticked.
+
+  // * Cinematics
+  UPROPERTY(EditAnywhere, Category = "Character | Cinematics")
+  FCameraCinematicsData CameraCinematicsData;
+  UPROPERTY(EditAnywhere, Category = "Character | Cinematics")
+  bool bInterpCamera;
+  UPROPERTY(EditAnywhere, Category = "Character | Cinematics")
+  bool bInCinematicView;
+  void ToggleCinematicView();
+  void InterpCamera(float DeltaTime);  // Ticked.
 
   // * Interaction
   UPROPERTY(EditAnywhere, Category = "Character | Interaction")

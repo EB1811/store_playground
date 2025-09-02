@@ -115,6 +115,8 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
                                        &APlayerZDCharacter::OpenStoreView);
     EnhancedInputComponent->BindAction(InGameInputActions.InteractAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::Interact);
+    EnhancedInputComponent->BindAction(InGameInputActions.CinematicViewAction, ETriggerEvent::Triggered, this,
+                                       &APlayerZDCharacter::CinematicView);
     // In UI
     EnhancedInputComponent->BindAction(InUIInputActions.AdvanceUIAction, ETriggerEvent::Triggered, this,
                                        &APlayerZDCharacter::AdvanceUI);
@@ -193,6 +195,10 @@ void APlayerZDCharacter::BeginPlay() {
   auto* PlayerController = Cast<APlayerController>(GetController());
   PlayerController->SetAudioListenerOverride(
       nullptr, GetRootComponent()->GetComponentLocation() + FVector(0, 0, 200.0f), CameraC->GetComponentRotation());
+
+  // * Cinematics
+  CameraCinematicsData.OgCamRotation = CameraC->GetRelativeRotation();
+  CameraCinematicsData.OgSpringArmOffset = SpringArmC->TargetOffset;
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) {
@@ -209,6 +215,9 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
   if (PlayerBehaviourState == EPlayerState::Normal &&
       GetWorld()->TimeSince(LastCurrentFootstepPhysMatCheckTime) > InteractionData.InteractionCheckFrequency)
     CheckCurrentFootstepPhysMat();
+
+  if (PlayerBehaviourState != EPlayerState::Paused && PlayerBehaviourState != EPlayerState::PausedCutscene)
+    InterpCamera(DeltaTime);
 
   auto* PlayerController = Cast<APlayerController>(GetController());
   PlayerController->SetAudioListenerOverride(
@@ -268,6 +277,8 @@ void APlayerZDCharacter::StopMove(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
+  if (bInCinematicView) ToggleCinematicView();
+
   switch (PlayerBehaviourState) {
     case EPlayerState::Normal: ChangePlayerState(EPlayerState::Paused); break;
     case EPlayerState::Cutscene: ChangePlayerState(EPlayerState::PausedCutscene); break;
@@ -284,11 +295,15 @@ void APlayerZDCharacter::OpenPauseMenu(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
+  if (bInCinematicView) ToggleCinematicView();
+
   if (PlayerBehaviourState != EPlayerState::Normal) return;
 
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent);
 }
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
+  if (bInCinematicView) ToggleCinematicView();
+
   if (PlayerBehaviourState != EPlayerState::Normal) return;
 
   HUD->SetAndOpenNewsAndEconomyView();
@@ -296,6 +311,8 @@ void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
   TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.NewsEconomyView"));
 }
 void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
+  if (bInCinematicView) ToggleCinematicView();
+
   if (PlayerBehaviourState != EPlayerState::Normal) return;
 
   HUD->SetAndOpenStoreView(PlayerInventoryComponent);
@@ -304,6 +321,8 @@ void APlayerZDCharacter::OpenStoreView(const FInputActionValue& Value) {
 }
 
 void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
+  if (bInCinematicView) ToggleCinematicView();
+
   if (PlayerBehaviourState != EPlayerState::Normal) return;
 
   if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning &&
@@ -318,7 +337,17 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 }
 // Rechecking on input to avoid problems with the interaction frequency not keeping up.
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
   if (CheckForInteraction()) HandleInteraction(CurrentInteractableC);
+
+  if (bInCinematicView) ToggleCinematicView();
+}
+
+void APlayerZDCharacter::CinematicView(const FInputActionValue& Value) {
+  if (PlayerBehaviourState != EPlayerState::Normal) return;
+
+  ToggleCinematicView();
 }
 
 void APlayerZDCharacter::AdvanceUI(const FInputActionValue& Value) { HUD->AdvanceUI(); }
@@ -422,6 +451,60 @@ void APlayerZDCharacter::HandleOcclusion() {
   }
 }
 
+void APlayerZDCharacter::ToggleCinematicView() {
+  if (bInCinematicView) {
+    HUD->ShowInGameHudWidget();
+
+    bInCinematicView = false;
+  } else {
+    HUD->HideInGameHudWidget();
+
+    bInCinematicView = true;
+  }
+}
+void APlayerZDCharacter::InterpCamera(float DeltaTime) {
+  if (!bInterpCamera) {
+    SpringArmC->SetRelativeLocation(GetActorLocation());
+    return;
+  }
+
+  // * Camera lag.
+  if (!SpringArmC->GetRelativeLocation().Equals(GetActorLocation(), 0.01f)) {
+    FVector NewLocation = FMath::VInterpTo(SpringArmC->GetRelativeLocation(), GetActorLocation(), DeltaTime,
+                                           CameraCinematicsData.CamInterpSpeed);
+    SpringArmC->SetRelativeLocation(NewLocation);
+  }
+
+  if (bInCinematicView) {
+    FRotator TargetRotation = CameraCinematicsData.OgCamRotation + CameraCinematicsData.CinematicCamRotation;
+    FVector TargetOffset = CameraCinematicsData.OgSpringArmOffset + CameraCinematicsData.CinematicSpringArmOffset;
+    if (CameraC->GetRelativeRotation().Equals(TargetRotation, 0.01f) &&
+        SpringArmC->TargetOffset.Equals(TargetOffset, 0.01f))
+      return;
+
+    FRotator NewRotation = FMath::RInterpTo(CameraC->GetRelativeRotation(), TargetRotation, DeltaTime,
+                                            CameraCinematicsData.CinematicInterpSpeed);
+    CameraC->SetRelativeRotation(NewRotation);
+
+    FVector NewOffset =
+        FMath::VInterpTo(SpringArmC->TargetOffset, TargetOffset, DeltaTime, CameraCinematicsData.CinematicInterpSpeed);
+    SpringArmC->TargetOffset = NewOffset;
+
+  } else {
+    if (CameraC->GetRelativeRotation().Equals(CameraCinematicsData.OgCamRotation, 0.01f) &&
+        SpringArmC->TargetOffset.Equals(CameraCinematicsData.OgSpringArmOffset, 0.01f))
+      return;
+
+    FRotator NewRotation = FMath::RInterpTo(CameraC->GetRelativeRotation(), CameraCinematicsData.OgCamRotation,
+                                            DeltaTime, CameraCinematicsData.CinematicInterpSpeed);
+    CameraC->SetRelativeRotation(NewRotation);
+
+    FVector NewOffset = FMath::VInterpTo(SpringArmC->TargetOffset, CameraCinematicsData.OgSpringArmOffset, DeltaTime,
+                                         CameraCinematicsData.CinematicInterpSpeed);
+    SpringArmC->TargetOffset = NewOffset;
+  }
+}
+
 auto APlayerZDCharacter::CheckForInteraction() -> bool {
   InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 
@@ -442,7 +525,7 @@ auto APlayerZDCharacter::CheckForInteraction() -> bool {
         if (!IsInteractable(Interactable)) return false;
 
         CurrentInteractableC = Interactable;
-        HUD->OpenInteractionPopup(FText::FromName("!"));
+        if (!bInCinematicView) HUD->OpenInteractionPopup(FText::FromName("!"));
         return true;
       }
   }
@@ -691,7 +774,8 @@ void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsc
     UE_LOG(LogTemp, Warning, TEXT("Cutscene finished"));
     ChangePlayerState(EPlayerState::Normal);
   });
-  // HUD->SetAndOpenCutscene(CutsceneSystem);
+
+  if (bInCinematicView) ToggleCinematicView();
 }
 
 void APlayerZDCharacter::Pickup(UPickupComponent* PickupC) {
@@ -751,8 +835,11 @@ void APlayerZDCharacter::ExitCurrentAction() {
   check(PlayerBehaviourState != EPlayerState::Cutscene);
 
   HUD->QuitUIAction();
+  if (bInCinematicView) ToggleCinematicView();
 }
 void APlayerZDCharacter::ResetLocationToSpawnPoint() {
+  if (bInCinematicView) ToggleCinematicView();
+
   TArray<ASpawnPoint*> SpawnPoints = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass);
   check(SpawnPoints.Num() > 0);
   ASpawnPoint** FoundSpawnPoint = SpawnPoints.FindByPredicate(
@@ -761,6 +848,7 @@ void APlayerZDCharacter::ResetLocationToSpawnPoint() {
   check(*FoundSpawnPoint);
 
   this->SetActorLocation((*FoundSpawnPoint)->GetActorLocation());
+  SpringArmC->SetRelativeLocation(GetActorLocation());
 }
 
 // ? Change parameter to ELevel?
@@ -792,6 +880,7 @@ void APlayerZDCharacter::EnterNewLevel(ULevelChangeComponent* LevelChangeC) {
     check(SpawnPoint);
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
+    SpringArmC->SetRelativeLocation(GetActorLocation());
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelChangeC->LevelToLoad, LevelReadyFunc);
@@ -819,6 +908,7 @@ void APlayerZDCharacter::LeaveStore() {
     check(SpawnPoint);
 
     this->SetActorLocation(SpawnPoint->GetActorLocation());
+    SpringArmC->SetRelativeLocation(GetActorLocation());
   };
   HUD->HideInGameHudWidget();
   LevelManager->BeginLoadLevel(LevelToLoad, LevelReadyFunc);
@@ -828,5 +918,6 @@ void APlayerZDCharacter::GameOverReset() {
   ChangePlayerState(EPlayerState::GameOver);
   UGameplayStatics::SetGamePaused(GetWorld(), true);
 
+  if (bInCinematicView) ToggleCinematicView();
   HUD->SetAndOpenGameOverView();
 }

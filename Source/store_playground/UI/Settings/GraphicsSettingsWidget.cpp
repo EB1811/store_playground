@@ -98,6 +98,10 @@ void UGraphicsSettingsWidget::OnOverallQualityChanged(FString SelectedItem, ESel
     ReflectionMethodComboBox->SetSelectedIndex(1);          // Lumen
   else                                                      // Low, Medium, High use None
     ReflectionMethodComboBox->SetSelectedIndex(0);          // None
+  if (QualityLevel >= 3)                                    // Epic use TSR
+    AntiAliasingMethodComboBox->SetSelectedIndex(2);        // TSR
+  else                                                      // Low, Medium, High use None
+    AntiAliasingMethodComboBox->SetSelectedIndex(0);        // None
   DepthOfFieldCheckBox->SetIsChecked(QualityLevel >= 1);    // Depth of Field for Medium and above
   BloomCheckBox->SetIsChecked(QualityLevel >= 1);           // Bloom for Medium and above
 
