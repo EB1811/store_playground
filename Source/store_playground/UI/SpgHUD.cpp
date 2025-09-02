@@ -600,7 +600,7 @@ void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,
                                  AStore* _Store,
                                  UInventoryComponent* PlayerInventory) {
   UUserWidget* MiniGameWidget = MiniGameManager->GetMiniGameWidget(
-      MiniGameC->MiniGameType, _Store, PlayerInventory, [this](UUserWidget* Widget) { CloseWidget(Widget); });
+      InUIInputActions, MiniGameC, PlayerInventory, [this](UUserWidget* Widget) { CloseWidget(Widget); });
 
   MiniGameWidget->AddToViewport(10);
   OpenFocusedMenu(MiniGameWidget);

@@ -33,6 +33,9 @@ public:
   EPickupGoodType PickupGoodType;
 
   UPROPERTY(EditAnywhere)
+  class USoundBase* SpawnSound;
+
+  UPROPERTY(EditAnywhere)
   TArray<FDialogueData> DialogueArray;
 
   UPROPERTY(EditAnywhere)

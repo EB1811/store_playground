@@ -4,6 +4,7 @@
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Minigame/MinigameWidgets/LootboxMinigame.h"
+#include "store_playground/Minigame/MiniGameComponent.h"
 
 AMiniGameManager::AMiniGameManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -18,28 +19,23 @@ void AMiniGameManager::BeginPlay() {
 
 void AMiniGameManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-auto AMiniGameManager::GetMiniGameWidget(EMiniGame MiniGame,
-                                         AStore* Store,
+auto AMiniGameManager::GetMiniGameWidget(FInUIInputActions InUIInputActions,
+                                         class UMiniGameComponent* MiniGameC,
                                          UInventoryComponent* PlayerInventory,
-                                         std::function<void(class UUserWidget*)> CloseMinigameFunc)
+                                         std::function<void(class UUserWidget*)> CloseWidgetFunc)
     -> class UUserWidget* {
-  check(Market && Store && PlayerInventory);
-  check(MiniGameInfoMap.Contains(MiniGame));
+  check(PlayerInventory);
 
-  std::function<void(TMap<FName, float>)> UpdatePersistentDataFunc = [this](TMap<FName, float> AdditionalData) {
-    PersistentData.Append(AdditionalData);
-  };
-  const TMap<EMiniGame, TTuple<UUserWidget*, MiniGameT>> MiniGameMap = {
-      {EMiniGame::Lootbox, {LootboxMinigameWidget, LootboxMinigameWidget}}};
+  auto UpdatePersistentDataFunc = [this](TMap<FName, float> AdditionalData) { PersistentData.Append(AdditionalData); };
 
-  MiniGameMap[MiniGame].Value.InitMiniGame(Market, Store, PlayerInventory, PersistentData, UpdatePersistentDataFunc,
-                                           CloseMinigameFunc);
-  return MiniGameMap[MiniGame].Key;
+  switch (MiniGameC->MiniGameType) {
+    case EMiniGame::Lootbox: {
+      check(LootboxMinigameWidget);
 
-  // FMiniGameInfo& MiniGameInfo = MiniGameInfoMap[MiniGame];
-  // UUserWidget* GameWidget = CreateWidget<UUserWidget>(GetWorld(), MiniGameInfo.GameWidgetClass);
-  // check(GameWidget);
-  // Cast<IMiniGameInterface>(GameWidget)
-  //     ->InitMiniGame(Market, Store, PlayerInventory, PersistentData, UpdatePersistentDataFunc, CloseMinigameFunc);
-  // return GameWidget;
+      LootboxMinigameWidget->InitUI(InUIInputActions, Market, MiniGameC, Store, PlayerInventory, PersistentData,
+                                    UpdatePersistentDataFunc, CloseWidgetFunc);
+      return LootboxMinigameWidget;
+    }
+    default: checkNoEntry(); return nullptr;
+  }
 }

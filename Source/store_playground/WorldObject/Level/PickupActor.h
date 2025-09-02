@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "store_playground/Pickup/PickupComponent.h"
 #include "PickupActor.generated.h"
 
 UCLASS()
@@ -24,4 +25,6 @@ public:
 
   UPROPERTY(EditAnywhere)
   class UPickupComponent* PickupComponent;
+
+  void InitPickup(EPickupGoodType PickupGoodType, float MoneyAmount, FName ItemID, float ItemValue = 0);
 };

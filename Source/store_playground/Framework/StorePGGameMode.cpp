@@ -243,6 +243,10 @@ void AStorePGGameMode::BeginPlay() {
   AbilityManager->Store = Store;
   AbilityManager->Market = Market;
 
+  MiniGameManager->Market = Market;
+  MiniGameManager->MarketEconomy = MarketEconomy;
+  MiniGameManager->Store = Store;
+
   QuestManager->GlobalStaticDataManager = GlobalStaticDataManager;
 
   Store->SaveManager = SaveManager;
@@ -267,8 +271,6 @@ void AStorePGGameMode::BeginPlay() {
 
   NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;
   NewsGen->Market = Market;
-
-  MiniGameManager->Market = Market;
 
   UE_LOG(LogTemp, Log, TEXT("Initializing Game..."));
 
