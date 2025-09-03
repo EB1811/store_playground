@@ -47,4 +47,5 @@ public:
   float MoneyAmount;
 
   void DestroyPickup();
+  void InitPickup(EPickupGoodType _PickupGoodType, float _MoneyAmount, FName _ItemID, float ItemValue = 0.0f);
 };

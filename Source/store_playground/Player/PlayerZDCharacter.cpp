@@ -185,7 +185,7 @@ void APlayerZDCharacter::BeginPlay() {
     if (PlayerBehaviourState == EPlayerState::Cutscene) return ChangePlayerState(EPlayerState::PausedCutscene);
     ChangePlayerState(EPlayerState::Paused);
   };
-
+  // Input actions
   HUD->InGameInputActions = InGameInputActions;
   HUD->InUIInputActions = InUIInputActions;
   HUD->InCutsceneInputActions = InCutsceneInputActions;
@@ -196,13 +196,18 @@ void APlayerZDCharacter::BeginPlay() {
   PlayerController->SetAudioListenerOverride(
       nullptr, GetRootComponent()->GetComponentLocation() + FVector(0, 0, 200.0f), CameraC->GetComponentRotation());
 
-  // * Cinematics
+  // Cinematics
   CameraCinematicsData.OgCamRotation = CameraC->GetRelativeRotation();
   CameraCinematicsData.OgSpringArmOffset = SpringArmC->TargetOffset;
+
+  // Widget Component
+  PlayerWidgetComponent->SetVisibility(false, true);
 }
 
 void APlayerZDCharacter::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
+
+  // ? Could check for movement before, but not worth potentially missing a frame / dealing with input lag.
 
   if (PlayerBehaviourState == EPlayerState::Normal &&
       GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionData.InteractionCheckFrequency)
@@ -218,6 +223,9 @@ void APlayerZDCharacter::Tick(float DeltaTime) {
 
   if (PlayerBehaviourState != EPlayerState::Paused && PlayerBehaviourState != EPlayerState::PausedCutscene)
     InterpCamera(DeltaTime);
+
+  if (PlayerBehaviourState == EPlayerState::Normal && PlayerWidgetComponent->IsWidgetVisible())
+    PlayerWidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -35.0f, 110.0f));
 
   auto* PlayerController = Cast<APlayerController>(GetController());
   PlayerController->SetAudioListenerOverride(
@@ -525,13 +533,16 @@ auto APlayerZDCharacter::CheckForInteraction() -> bool {
         if (!IsInteractable(Interactable)) return false;
 
         CurrentInteractableC = Interactable;
-        if (!bInCinematicView) HUD->OpenInteractionPopup(FText::FromName("!"));
+        if (!bInCinematicView) {
+          PlayerWidgetComponent->SetWorldLocation(GetActorLocation() + FVector(0, -35.0f, 110.0f));
+          PlayerWidgetComponent->SetVisibility(true, true);
+        }
         return true;
       }
   }
 
   if (CurrentInteractableC) CurrentInteractableC = nullptr;
-  HUD->CloseInteractionPopup();
+  PlayerWidgetComponent->SetVisibility(false, true);
 
   return false;
 }
@@ -560,7 +571,7 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
 
 // ? Move to system?
 void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) {
-  HUD->CloseInteractionPopup();
+  PlayerWidgetComponent->SetVisibility(false, true);
 
   Interactable->PlayInteractionSound();
   switch (Interactable->InteractionType) {

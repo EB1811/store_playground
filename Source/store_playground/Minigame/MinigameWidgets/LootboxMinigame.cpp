@@ -7,6 +7,7 @@
 #include "store_playground/Market/Market.h"
 #include "store_playground/Minigame/MiniGameComponent.h"
 #include "store_playground/Pickup/PickupComponent.h"
+#include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/WorldObject/Level/PickupActor.h"
 #include "store_playground/Store/Store.h"
 #include "Components/Image.h"
@@ -50,14 +51,15 @@ void ULootboxMinigame::Open() {
       ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
   NpcStoreSpawnParams.OverrideLevel = MiniGameOwner->GetLevel();
   for (auto& Item : Items) {
-    float SpaceAround = 75.0f;
+    float SpaceAround = 100.0f;
     FVector SpawnLocation =
         MiniGameOwner->GetActorLocation() + FVector(FMath::RandRange(-SpaceAround + -75.0f, 0.0f),
                                                     FMath::RandRange(-SpaceAround + -75.0f, SpaceAround + 75.0f),
                                                     -MiniGameOwner->GetActorLocation().Z);
     APickupActor* Pickup = GetWorld()->SpawnActor<APickupActor>(PickupActorClass, SpawnLocation, FRotator::ZeroRotator,
                                                                 NpcStoreSpawnParams);
-    Pickup->InitPickup(EPickupGoodType::Item, 0, Item->ItemID);
+    Pickup->PickupComponent->InitPickup(EPickupGoodType::Item, 0, Item->ItemID);
+    Pickup->InteractionComponent->InteractionType = EInteractionType::Pickup;
   }
 
   UGameplayStatics::PlaySound2D(GetWorld(), OpenBoxSound);

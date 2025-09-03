@@ -25,6 +25,4 @@ public:
 
   UPROPERTY(EditAnywhere)
   class UPickupComponent* PickupComponent;
-
-  void InitPickup(EPickupGoodType PickupGoodType, float MoneyAmount, FName ItemID, float ItemValue = 0);
 };
