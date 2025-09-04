@@ -20,37 +20,47 @@ void APlayerCommand::ResetPosition() {
   PlayerCharacter->ResetLocationToSpawnPoint();
 }
 
-void APlayerCommand::CommandDialogue(TArray<struct FDialogueData> DialogueArray) {
+auto APlayerCommand::CommandDialogue(TArray<struct FDialogueData> DialogueArray) -> bool {
   check(PlayerCharacter);
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
   PlayerCharacter->EnterDialogue(DialogueArray);
+  return true;
 }
 
-void APlayerCommand::CommandNegotiation(UCustomerAIComponent* CustomerAI,
+auto APlayerCommand::CommandNegotiation(UCustomerAIComponent* CustomerAI,
                                         UItemBase* Item,
                                         bool bIsQuestAssociated,
-                                        UQuestComponent* QuestComponent) {
+                                        UQuestComponent* QuestComponent) -> bool {
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
   PlayerCharacter->EnterNegotiation(CustomerAI, Item, bIsQuestAssociated, QuestComponent);
+  return true;
 }
 
-void APlayerCommand::CommandQuest(UQuestComponent* QuestC,
+auto APlayerCommand::CommandQuest(UQuestComponent* QuestC,
                                   UDialogueComponent* DialogueC,
                                   USimpleSpriteAnimComponent* SpriteAnimC,
                                   UCustomerAIComponent* CustomerAI,
-                                  UItemBase* Item) {
+                                  UItemBase* Item) -> bool {
   check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
 
   PlayerCharacter->EnterQuest(QuestC, DialogueC, SpriteAnimC, CustomerAI, Item);
+  return true;
 }
 
-void APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData) {
+auto APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData) -> bool {
   check(PlayerCharacter);
-  check(PlayerCharacter->PlayerBehaviourState == EPlayerState::Normal);
+  if (PlayerCharacter->PlayerBehaviourState != EPlayerState::Normal &&
+      PlayerCharacter->PlayerBehaviourState != EPlayerState::FocussedMenu) {
+    UE_LOG(LogTemp, Error, TEXT("Cannot enter cutscene, player in state: %s"),
+           *UEnum::GetDisplayValueAsText(PlayerCharacter->PlayerBehaviourState).ToString());
+    return false;
+  }
 
+  CommandExitCurrentAction();
   PlayerCharacter->EnterCutscene(ResolvedCutsceneData);
+  return true;
 }
 
 auto APlayerCommand::CommandTutorial(const TArray<FUITutorialStep>& Steps) -> bool {
@@ -65,8 +75,15 @@ auto APlayerCommand::CommandTutorial(const TArray<FUITutorialStep>& Steps) -> bo
   return true;
 }
 
-void APlayerCommand::CommandExitCurrentAction() {
+auto APlayerCommand::CommandExitCurrentAction() -> bool {
   check(PlayerCharacter);
+  if (PlayerCharacter->PlayerBehaviourState != EPlayerState::Normal &&
+      PlayerCharacter->PlayerBehaviourState != EPlayerState::FocussedMenu) {
+    UE_LOG(LogTemp, Error, TEXT("Cannot exit current action, player in state: %s"),
+           *UEnum::GetDisplayValueAsText(PlayerCharacter->PlayerBehaviourState).ToString());
+    return false;
+  }
 
   PlayerCharacter->ExitCurrentAction();
+  return true;
 }

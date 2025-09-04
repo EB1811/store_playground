@@ -77,7 +77,7 @@ void UTutorialViewWidget::RefreshUI() {
                                              UE_LOG(LogTemp, Warning, TEXT("Playing video"));
                                              TutorialStepWidget->TutorialVideoPlayer->PlayFromStart();
                                            }),
-                                           0.1, false);
+                                           0.2, false);
 
     TutorialStepWidget->TutorialImage->SetVisibility(ESlateVisibility::Collapsed);
     TutorialStepWidget->TutorialVideoPlayer->SetVisibility(ESlateVisibility::Visible);

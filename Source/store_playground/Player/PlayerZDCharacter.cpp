@@ -154,9 +154,7 @@ void APlayerZDCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void APlayerZDCharacter::BeginPlay() {
   Super::BeginPlay();
 
-  // PlayerWidgetComponent->SetVisibility(true);
-  // PlayerWidgetComponent->SetWorldLocation(GetPawnViewLocation());
-  // PlayerWidgetComponent->SetWorldRotation(FRotator(45, 90, 0));  // y, z, x
+  PlayerBehaviourState = EPlayerState::NoControl;
 
   // Make sure all player data is correctly initialized.
   check(PlayerInventoryComponent->InventoryType == EInventoryType::PlayerInventory);
@@ -250,8 +248,15 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
   PlayerBehaviourState = NewState;
   UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
 
+  if (NewState == EPlayerState::Cutscene) {
+    // ToggleCinematicView();
+    HUD->HideInGameHudWidget();
+  }
+
   if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen)
     StorePhaseManager->ShopOpenConsiderPlayerState(PlayerBehaviourState);
+
+  if (NewState == EPlayerState::Normal) TutorialManager->ShowPendingTutorials();
 }
 
 void APlayerZDCharacter::Move(const FInputActionValue& Value) {
@@ -785,8 +790,6 @@ void APlayerZDCharacter::EnterCutscene(const FResolvedCutsceneData ResolvedCutsc
     UE_LOG(LogTemp, Warning, TEXT("Cutscene finished"));
     ChangePlayerState(EPlayerState::Normal);
   });
-
-  if (bInCinematicView) ToggleCinematicView();
 }
 
 void APlayerZDCharacter::Pickup(UPickupComponent* PickupC) {

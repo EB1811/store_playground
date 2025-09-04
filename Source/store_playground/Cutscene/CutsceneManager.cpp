@@ -36,7 +36,10 @@ bool ACutsceneManager::PlayPotentialCutscene(FGameplayTagContainer& CallerCutsce
 
   //
 
+  if (!PlayerCommand->CommandCutscene({CutsceneData, CutsceneChains, DialogueDataArray})) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to start cutscene: %s"), *CutsceneData.ID.ToString());
+    return false;
+  }
   PlayedCutscenes.Add(CutsceneData.ID);
-  PlayerCommand->CommandCutscene({CutsceneData, CutsceneChains, DialogueDataArray});
   return true;
 }

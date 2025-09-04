@@ -69,7 +69,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ASpawnPoint> SpawnPointClass;  // * To spawn the player in the store level.
 
-  // * Storing some properties to be used in the post level load init.
+  // * Storing some properties to be used in the post level load init. Game init, game intro, etc.
+  UPROPERTY()
+  class APlayerZDCharacter* PlayerCharacter;
   UPROPERTY()
   class ASpgHUD* HUD;
   UPROPERTY()
@@ -79,7 +81,11 @@ public:
   UPROPERTY()
   class AStorePhaseManager* StorePhaseManager;
   UPROPERTY()
+  class ACutsceneManager* CutsceneManager;
+  UPROPERTY()
   class AMarketEconomy* MarketEconomy;
+
+  void NewGameIntro();
 
   UFUNCTION(BlueprintCallable, Category = "GameMode")
   void GameOverReset();

@@ -38,5 +38,8 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FName> CompletedTutorials;
 
+  auto CheckTutorial(FGameplayTag TutorialIdTag) const -> bool;
+
   auto CheckAndShowTutorial(FGameplayTag TutorialIdTag) -> bool;
+  auto ShowPendingTutorials() -> bool;
 };

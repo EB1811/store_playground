@@ -29,18 +29,19 @@ public:
 
   void ResetPosition();  // * Reset player position to the last spawn point.
 
-  void CommandDialogue(TArray<struct FDialogueData> DialogueArray);
-  void CommandNegotiation(class UCustomerAIComponent* CustomerAI,
+  // TODO: Make bool returns.
+  auto CommandDialogue(TArray<struct FDialogueData> DialogueArray) -> bool;
+  auto CommandNegotiation(class UCustomerAIComponent* CustomerAI,
                           class UItemBase* Item,
                           bool bIsQuestAssociated = false,
-                          class UQuestComponent* QuestComponent = nullptr);
-  void CommandQuest(class UQuestComponent* QuestC,
+                          class UQuestComponent* QuestComponent = nullptr) -> bool;
+  auto CommandQuest(class UQuestComponent* QuestC,
                     class UDialogueComponent* DialogueC,
                     class USimpleSpriteAnimComponent* SpriteAnimC,
                     class UCustomerAIComponent* CustomerAI = nullptr,
-                    class UItemBase* Item = nullptr);
-  void CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData);
+                    class UItemBase* Item = nullptr) -> bool;
+  auto CommandCutscene(struct FResolvedCutsceneData ResolvedCutsceneData) -> bool;
   auto CommandTutorial(const TArray<FUITutorialStep>& Steps) -> bool;
 
-  void CommandExitCurrentAction();  // * Exit current action (e.g., dialogue, negotiation, etc.).
+  auto CommandExitCurrentAction() -> bool;  // * Exit current action (e.g., dialogue, negotiation, etc.).
 };

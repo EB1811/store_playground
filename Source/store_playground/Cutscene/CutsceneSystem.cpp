@@ -123,7 +123,7 @@ void UCutsceneSystem::PerformCutsceneAction(std::function<void()> ActionFinished
   // Just waiting for a few seconds to simulate the cutscene action.
   FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]() { HandleCutsceneState(); });
   FTimerHandle ActionTimer;
-  GetWorld()->GetTimerManager().SetTimer(ActionTimer, Delegate, 3.0f, false);
+  GetWorld()->GetTimerManager().SetTimer(ActionTimer, Delegate, 2.0f, false);
 }
 
 void UCutsceneSystem::ResetCutscene() {

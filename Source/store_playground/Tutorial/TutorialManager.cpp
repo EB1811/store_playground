@@ -3,6 +3,7 @@
 #include "Logging/LogVerbosity.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Framework/SettingsManager.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Player/PlayerCommand.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Framework/GlobalDataManager.h"
@@ -31,18 +32,25 @@ void ATutorialManager::BeginPlay() {
 
 void ATutorialManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-auto ATutorialManager::CheckAndShowTutorial(FGameplayTag TutorialIdTag) -> bool {
+auto ATutorialManager::CheckTutorial(FGameplayTag TutorialIdTag) const -> bool {
   if (!TutorialsData.Contains(TutorialIdTag)) {
     UE_LOG(LogTemp, Error, TEXT("TutorialManager: Tag %s called, but not found in TutorialsData."),
            *TutorialIdTag.ToString());
     return false;
   }
 
-  const FUITutorialData TutorialData = TutorialsData[TutorialIdTag];
+  const FUITutorialData& TutorialData = TutorialsData[TutorialIdTag];
   if (!SettingsManager->GameSettings.bShowTutorials || !PlayerTags->ConfigurationTags.HasAll(TutorialData.PlayerTags) ||
       CompletedTutorials.Contains(TutorialData.ID))
     return false;
 
+  return true;
+}
+
+auto ATutorialManager::CheckAndShowTutorial(FGameplayTag TutorialIdTag) -> bool {
+  if (!CheckTutorial(TutorialIdTag)) return false;
+
+  const FUITutorialData& TutorialData = TutorialsData[TutorialIdTag];
   const TArray<FUITutorialStep> Steps = TutorialSteps.FilterByPredicate(
       [TutorialData](const FUITutorialStep& Step) { return Step.TutorialID == TutorialData.ID; });
   if (Steps.Num() <= 0) {
@@ -53,5 +61,22 @@ auto ATutorialManager::CheckAndShowTutorial(FGameplayTag TutorialIdTag) -> bool 
   if (!PlayerCommand->CommandTutorial(Steps)) return false;
 
   CompletedTutorials.Add(TutorialData.ID);
+  if (PlayerTags->ConfigurationTags.HasTagExact(TutorialIdTag)) PlayerTags->ConfigurationTags.RemoveTag(TutorialIdTag);
   return true;
+}
+
+auto ATutorialManager::ShowPendingTutorials() -> bool {
+  FGameplayTagContainer TutorialTags = PlayerTags->ConfigurationTags.Filter(StringTagsToContainer({"Tutorial"}));
+  if (TutorialTags.IsEmpty()) return false;
+
+  FGameplayTag Tag = FGameplayTag::EmptyTag;
+  for (const auto& TutTag : TutorialTags) {
+    if (CheckTutorial(TutTag)) {
+      Tag = TutTag;
+      break;
+    }
+  }
+  if (!Tag.IsValid()) return false;
+
+  return CheckAndShowTutorial(Tag);
 }

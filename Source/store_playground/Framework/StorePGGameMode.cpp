@@ -38,6 +38,7 @@
 #include "store_playground/Cutscene/CutsceneSystem.h"
 #include "store_playground/Tutorial/TutorialManager.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
+#include "store_playground/Tags/TagsComponent.h"
 #include "store_playground/UI/SpgHUD.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
@@ -47,7 +48,7 @@ void AStorePGGameMode::BeginPlay() {
 
   UE_LOG(LogTemp, Log, TEXT("Initializing Systems."));
 
-  APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
+  PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   check(PlayerCharacter && HUD && LevelManagerClass && GlobalDataManagerClass && GlobalStaticDataManagerClass &&
         UpgradeManagerClass && SaveManagerClass && PlayerCommandClass && StorePhaseManagerClass && DayManagerClass &&
@@ -74,7 +75,7 @@ void AStorePGGameMode::BeginPlay() {
       GetWorld()->SpawnActor<AStorePhaseLightingManager>(StorePhaseLightingManagerClass);
   AMusicManager* MusicManager = GetWorld()->SpawnActor<AMusicManager>(MusicManagerClass);
   AAmbientSoundManager* AmbientSoundManager = GetWorld()->SpawnActor<AAmbientSoundManager>(AmbientSoundManagerClass);
-  ACutsceneManager* CutsceneManager = GetWorld()->SpawnActor<ACutsceneManager>(CutsceneManagerClass);
+  CutsceneManager = GetWorld()->SpawnActor<ACutsceneManager>(CutsceneManagerClass);
   AStoreExpansionManager* StoreExpansionManager =
       GetWorld()->SpawnActor<AStoreExpansionManager>(StoreExpansionManagerClass);
   AStore* Store = GetWorld()->SpawnActor<AStore>(StoreClass);
@@ -293,37 +294,51 @@ void AStorePGGameMode::BeginPlay() {
 
   LevelManager->InitLoadStore([this, StorePGGameInstance]() {
     // ! Enter level post transition blueprint function is not called.
-    if (StorePGGameInstance->bFromSaveGame) SaveManager->LoadLevelsAndPlayerFromDisk();
+
+    if (StorePGGameInstance->bFromSaveGame) {
+      SaveManager->LoadLevelsAndPlayerFromDisk();
+
+      ASpawnPoint* SpawnPoint =
+          *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
+            return SpawnPoint->Level == ELevel::Store;
+          });
+      check(PlayerCharacter);
+      check(SpawnPoint);
+      PlayerCharacter->SetActorLocation(SpawnPoint->GetActorLocation());
+    }
 
     if (!StorePGGameInstance->bFromSaveGame) MarketEconomy->PerformEconomyTicks(35);
     MarketEconomy->EconomyParams.bRunSimulation = true;
 
     StorePhaseManager->Start();
 
+    UE_LOG(LogTemp, Log, TEXT("Game Initialized."));
+
     HUD->SetupInitUIStates();
     HUD->ShowInGameHudWidget();
-
-    APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
-    ASpawnPoint* SpawnPoint =
-        *GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass).FindByPredicate([](const ASpawnPoint* SpawnPoint) {
-          return SpawnPoint->Level == ELevel::Store;
-        });
-    check(PlayerCharacter);
-    check(SpawnPoint);
-    PlayerCharacter->SetActorLocation(SpawnPoint->GetActorLocation());
-
-    UE_LOG(LogTemp, Log, TEXT("Game Initialized."));
     HUD->InitGameEndTransition();
 
     // * Clearing datatable refs mostly.
     CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+
+    PlayerCharacter->ChangePlayerState(EPlayerState::Normal);
+    if (!StorePGGameInstance->bFromSaveGame) NewGameIntro();
   });
+}
+
+void AStorePGGameMode::NewGameIntro() {
+  if (SettingsManager->GameSettings.bShowTutorials) {
+    auto IntroTutorialTag = StringTagsToContainer({FName("Tutorial.GameIntro")});
+    PlayerCharacter->PlayerTagsComponent->ConfigurationTags.AppendTags(IntroTutorialTag);
+  }
+
+  auto CutsceneTags = StringTagsToContainer({FName("Cutscene.GameIntro")});
+  auto res = CutsceneManager->PlayPotentialCutscene(CutsceneTags);
 }
 
 void AStorePGGameMode::GameOverReset() {
   UE_LOG(LogTemp, Warning, TEXT("Game Over. Resetting game."));
 
-  APlayerZDCharacter* PlayerCharacter = Cast<APlayerZDCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
   check(PlayerCharacter);
   PlayerCharacter->GameOverReset();
 }
