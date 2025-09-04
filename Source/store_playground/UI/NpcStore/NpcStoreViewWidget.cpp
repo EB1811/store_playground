@@ -218,6 +218,7 @@ void UNpcStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
       StoreInventory, StatisticsGen, "Selling At",
       [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
       [this](FName ItemID) -> float { return Market->GetNpcStoreSellPrice(NpcStoreC, ItemID); });
+  if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
 
   SortByPriceButton->ActionText->SetText(FText::FromString("Sort - Price"));
   SortByNameButton->ActionText->SetText(FText::FromString("Sort - Name"));

@@ -39,6 +39,8 @@ void AMainMenuPlayer::BeginPlay() {
   Subsystem->AddMappingContext(UIInputContext, 0);
 
   HUD = Cast<AMainMenuControlHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+  HUD->InUIInputActions = InUIInputActions;
+  HUD->OpenMainMenu();
 }
 
 void AMainMenuPlayer::Tick(float DeltaTime) { Super::Tick(DeltaTime); }

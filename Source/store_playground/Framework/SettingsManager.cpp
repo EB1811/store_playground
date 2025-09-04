@@ -195,6 +195,7 @@ void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
 }
 
 void ASettingsManager::SaveSettings() const {
+  // TODO: Save advanced graphics settings.
   UnrealSettings->ApplySettings(true);
   EInputUserSettings->SaveSettings();
   SaveManager->SaveSettingsToDisk(GameSettings, SoundSettings);
