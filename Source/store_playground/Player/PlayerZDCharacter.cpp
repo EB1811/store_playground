@@ -248,15 +248,17 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
   PlayerBehaviourState = NewState;
   UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
 
-  if (NewState == EPlayerState::Cutscene) {
-    // ToggleCinematicView();
-    HUD->HideInGameHudWidget();
-  }
-
   if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen)
     StorePhaseManager->ShopOpenConsiderPlayerState(PlayerBehaviourState);
 
-  if (NewState == EPlayerState::Normal) TutorialManager->ShowPendingTutorials();
+  if (PlayerBehaviourState == EPlayerState::Cutscene) {
+    // ToggleCinematicView();
+    HUD->HideInGameHudWidget();
+  }
+  if (PlayerBehaviourState == EPlayerState::PausedCutscene) CutsceneSystem->PauseCutscene();
+
+  // Showing tutorials when available.
+  if (PlayerBehaviourState == EPlayerState::Normal) TutorialManager->ShowPendingTutorials();
 }
 
 void APlayerZDCharacter::Move(const FInputActionValue& Value) {
@@ -731,6 +733,8 @@ void APlayerZDCharacter::EnterNegotiation(UCustomerAIComponent* CustomerAI,
                                           UItemBase* Item,
                                           bool bIsQuestAssociated,
                                           UQuestComponent* QuestComponent) {
+  CustomerAI->StartRequestDialogue();
+
   NegotiationSystem->StartNegotiation(CustomerAI, Item, CustomerAI->NegotiationAIDetails.StockDisplayInventory,
                                       bIsQuestAssociated, QuestComponent);
   HUD->SetAndOpenNegotiation(NegotiationSystem, DialogueSystem, PlayerInventoryComponent);

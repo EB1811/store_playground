@@ -65,7 +65,7 @@ void USettingsWidget::HoverButton(UButton* Button) {
   FButtonStyle ButtonStyle = HoveredButton->GetStyle();
   ButtonStyle.SetNormal(ButtonStyle.Hovered);
   HoveredButton->SetStyle(ButtonStyle);
-  // HoveredButton->SetFocus();
+  HoveredButton->SetFocus();
 
   UGameplayStatics::PlaySound2D(this, HoverSound, 1.0f);
 }

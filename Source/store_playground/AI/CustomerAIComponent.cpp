@@ -56,8 +56,8 @@ void UCustomerAIComponent::FinishQuest() {
   WidgetC->SetVisibility(false, true);
 }
 
-void UCustomerAIComponent::StartNegotiation() {
-  CustomerState = ECustomerState::Negotiating;
+void UCustomerAIComponent::StartRequestDialogue() {
+  CustomerState = ECustomerState::RequestingTalking;
 
   UWidgetComponent* WidgetC = GetOwner()->FindComponentByClass<UWidgetComponent>();
   check(WidgetC);
@@ -70,6 +70,7 @@ void UCustomerAIComponent::LeaveRequestDialogue() {
   check(WidgetC);
   WidgetC->SetVisibility(true, true);
 }
+void UCustomerAIComponent::StartNegotiation() { CustomerState = ECustomerState::Negotiating; }
 void UCustomerAIComponent::PostNegotiation() {
   CustomerState = ECustomerState::Leaving;
 

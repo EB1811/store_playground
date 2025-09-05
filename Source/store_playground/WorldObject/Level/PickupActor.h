@@ -17,7 +17,10 @@ public:
   virtual void BeginPlay() override;
   virtual void Tick(float DeltaTime) override;
 
-  UPROPERTY(EditAnywhere, Category = "NextLevelObject")
+  UPROPERTY(EditAnywhere)
+  FGuid Id;
+
+  UPROPERTY(EditAnywhere)
   UStaticMeshComponent* Mesh;
 
   UPROPERTY(EditAnywhere)

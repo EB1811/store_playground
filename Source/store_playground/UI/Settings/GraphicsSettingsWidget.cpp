@@ -59,6 +59,10 @@ void UGraphicsSettingsWidget::Apply() {
   GameSettings->SetFoliageQuality(FoliageQualityComboBox->GetSelectedIndex());
   GameSettings->SetShadingQuality(ShadingQualityComboBox->GetSelectedIndex());
 
+  if (FoliageQualityComboBox->GetSelectedIndex() > 2)  // High or Epic
+    SettingsManager->SetFastGrassSpawning(true);
+  else SettingsManager->SetFastGrassSpawning(false);
+
   int32 AAIndex = AntiAliasingMethodComboBox->GetSelectedIndex();
   switch (AAIndex) {
     case 0: SettingsManager->SetAntiAliasingMethod(0); break;

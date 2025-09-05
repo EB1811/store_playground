@@ -10,6 +10,7 @@
 UENUM()
 enum class EPickupType : uint8 {
   Fixed UMETA(DisplayName = "Fixed"),
+  Spawned UMETA(DisplayName = "Spawned"),
   Random UMETA(DisplayName = "Random"),  // Note: Not used.
 };
 UENUM()
@@ -45,6 +46,9 @@ public:
 
   UPROPERTY(EditAnywhere)
   float MoneyAmount;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  bool bIsPicked;  // * To save the state of fixed pickups.
 
   void DestroyPickup();
   void InitPickup(EPickupGoodType _PickupGoodType, float _MoneyAmount, FName _ItemID, float ItemValue = 0.0f);

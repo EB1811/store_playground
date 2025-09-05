@@ -16,6 +16,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
 #include "store_playground/WorldObject/Level/NpcStoreSpawnPoint.h"
+#include "store_playground/WorldObject/Level/PickupActor.h"
 #include "store_playground/WorldObject/NPCStore.h"
 #include "store_playground/WorldObject/MobileNPCStore.h"
 #include "store_playground/Framework/GlobalDataManager.h"
@@ -181,6 +182,19 @@ void AMarketLevel::SaveLevelState() {
     LevelState.ComponentSaveMap.Add(MeshSaveState.Id, MeshSaveState);
     LevelState.ComponentSaveMap.Add(SpriteSaveState.Id, SpriteSaveState);
   }
+
+  TArray<APickupActor*> PickupActors = GetAllActorsOf<APickupActor>(GetWorld(), PickupActorClass);
+  auto FilteredPickups =
+      PickupActors.FilterByPredicate([](APickupActor* Pickup) { return Pickup->PickupComponent->bIsPicked; });
+  for (APickupActor* Pickup : FilteredPickups) {
+    FActorSavaState ActorSaveState = SaveManager->SaveActor(Pickup, Pickup->Id);
+
+    auto PickupCSaveState = SaveManager->SaveComponent(Pickup->PickupComponent, FGuid::NewGuid());
+    ActorSaveState.ActorComponentsMap.Add("PickupComponent", PickupCSaveState.Id);
+
+    LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
+    LevelState.ComponentSaveMap.Add(PickupCSaveState.Id, PickupCSaveState);
+  }
 }
 
 void AMarketLevel::LoadLevelState(bool bIsWeekend) {
@@ -315,6 +329,19 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
     SaveManager->LoadComponent(SpawnedMiniGame->MiniGameComponent, MiniGameCSaveState);
     SaveManager->LoadMesh(SpawnedMiniGame->Mesh, MiniGameMeshSaveState);
     SaveManager->LoadMesh(SpawnedMiniGame->Sprite, MiniGameSpriteSaveState);
+  }
+
+  TArray<APickupActor*> PickupActors = GetAllActorsOf<APickupActor>(GetWorld(), PickupActorClass);
+  for (APickupActor* Pickup : PickupActors) {
+    if (!LevelState.ActorSaveMap.Contains(Pickup->Id)) continue;
+
+    FActorSavaState ActorSaveState = LevelState.ActorSaveMap[Pickup->Id];
+    auto PickupCSaveState = LevelState.ComponentSaveMap[ActorSaveState.ActorComponentsMap["PickupComponent"]];
+
+    SaveManager->LoadActor(Pickup, ActorSaveState);
+    SaveManager->LoadComponent(Pickup->PickupComponent, PickupCSaveState);
+
+    if (Pickup->PickupComponent->bIsPicked) Pickup->PickupComponent->DestroyPickup();
   }
 }
 

@@ -56,6 +56,9 @@ public:
   UPROPERTY(EditAnywhere)
   int32 CurrentCutsceneChainIndex;
 
+  UPROPERTY(EditAnywhere)
+  FTimerHandle ActionTimer;
+
   void StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData, std::function<void()> _CutsceneFinishedFunc);
   void HandleCutsceneState();  // * Cutscene loop.
 
@@ -65,6 +68,7 @@ public:
   auto PerformCutsceneChainDialogues() -> FNextDialogueRes;
   void PerformCutsceneAction(std::function<void()> ActionFinishedFunc = nullptr);
 
+  void PauseCutscene();
   void ResetCutscene();
 
   std::function<void()> CutsceneFinishedFunc;

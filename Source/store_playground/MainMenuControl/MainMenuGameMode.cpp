@@ -39,8 +39,8 @@ void AMainMenuGameMode::BeginPlay() {
   SettingsManager->LoadSettings();
   SaveManager->LoadSaveGameSlots();
 
-  // Waiting for input actions.
-  // MainMenuControlHUD->OpenMainMenu();
+  MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
+  MainMenuControlHUD->OpenMainMenu();
 }
 
 void AMainMenuGameMode::Continue() {

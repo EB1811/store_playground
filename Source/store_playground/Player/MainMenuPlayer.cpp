@@ -40,7 +40,6 @@ void AMainMenuPlayer::BeginPlay() {
 
   HUD = Cast<AMainMenuControlHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   HUD->InUIInputActions = InUIInputActions;
-  HUD->OpenMainMenu();
 }
 
 void AMainMenuPlayer::Tick(float DeltaTime) { Super::Tick(DeltaTime); }

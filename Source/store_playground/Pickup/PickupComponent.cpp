@@ -14,9 +14,16 @@ void UPickupComponent::BeginPlay() {
   }
 }
 
-void UPickupComponent::DestroyPickup() { GetOwner()->Destroy(); }
+void UPickupComponent::DestroyPickup() {
+  GetOwner()->SetActorHiddenInGame(true);
+  GetOwner()->SetActorEnableCollision(false);
+  GetOwner()->SetActorTickEnabled(false);
+
+  bIsPicked = true;
+}
 
 void UPickupComponent::InitPickup(EPickupGoodType _PickupGoodType, float _MoneyAmount, FName _ItemID, float ItemValue) {
+  PickupType = EPickupType::Spawned;
   PickupGoodType = _PickupGoodType;
   switch (PickupGoodType) {
     case EPickupGoodType::Item: {

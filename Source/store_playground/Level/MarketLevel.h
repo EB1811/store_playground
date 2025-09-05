@@ -91,6 +91,8 @@ public:
   class TSubclassOf<class AMiniGameSpawnPoint> MiniGameSpawnPointClass;
   UPROPERTY(EditAnywhere, Category = "Market Level")
   class TSubclassOf<class AMiniGame> MiniGameClass;
+  UPROPERTY(EditAnywhere, Category = "Market Level")
+  class TSubclassOf<class APickupActor> PickupActorClass;
 
   UPROPERTY(EditAnywhere, Category = "Market Level")
   FMarketLevelParams LevelParams;

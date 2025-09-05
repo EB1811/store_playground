@@ -121,15 +121,22 @@ void UCutsceneSystem::PerformCutsceneAction(std::function<void()> ActionFinished
   // Note: Not implemented.
 
   // Just waiting for a few seconds to simulate the cutscene action.
-  FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]() { HandleCutsceneState(); });
-  FTimerHandle ActionTimer;
+  FTimerDelegate Delegate = FTimerDelegate::CreateLambda([this]() {
+    if (!HUD->DialogueWidget) return;
+
+    HandleCutsceneState();
+  });
   GetWorld()->GetTimerManager().SetTimer(ActionTimer, Delegate, 2.0f, false);
 }
 
+void UCutsceneSystem::PauseCutscene() {
+  if (CutsceneState == ECutsceneState::WaitingForAction) GetWorld()->GetTimerManager().PauseTimer(ActionTimer);
+}
 void UCutsceneSystem::ResetCutscene() {
   CutsceneState = ECutsceneState::None;
   ResolvedCutsceneData.CutsceneChains.Empty();
   ResolvedCutsceneData.Dialogues.Empty();
   CurrentCutsceneChainIndex = -1;
   CutsceneFinishedFunc = nullptr;
+  GetWorld()->GetTimerManager().ClearTimer(ActionTimer);
 }

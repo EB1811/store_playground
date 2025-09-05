@@ -21,6 +21,8 @@ public:
   class UVerticalBox* NotEnoughMoneyAbilityListBox;
   UPROPERTY(meta = (BindWidget))
   class UVerticalBox* UnavailableAbilityListBox;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* NoAbilitiesText;
 
   UPROPERTY(EditAnywhere)
   class USoundBase* SelectSound;

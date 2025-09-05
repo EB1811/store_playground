@@ -336,6 +336,9 @@ void ACustomerAIManager::PerformCustomerAILoop() {
         if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
         break;
       }
+      case (ECustomerState::RequestingTalking): {
+        break;
+      }
       case (ECustomerState::PerformingQuest): {
         break;
       }

@@ -87,6 +87,10 @@ void UAbilityListWidget::RefreshUI() {
     HoveredAbilityCardWidget->bIsHovered = true;
     HoveredAbilityCardWidget->RefreshUI();
   }
+
+  if (AvailableAbilities.Num() == 0 && NotEnoughMoneyAbilities.Num() == 0 && UnavailableAbilities.Num() == 0)
+    NoAbilitiesText->SetVisibility(ESlateVisibility::Visible);
+  else NoAbilitiesText->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UAbilityListWidget::InitUI(TArray<FEconEventAbility> _AvailableAbilities,

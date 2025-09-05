@@ -194,6 +194,22 @@ void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
     PC->ConsoleCommand(FString::Printf(TEXT("r.Streamline.DLSSG.Enable %d"), bEnabled ? 2 : 0), true);
 }
 
+void ASettingsManager::SetFastGrassSpawning(bool bEnabled) {
+  static IConsoleVariable* SetMaxAsyncTasks = IConsoleManager::Get().FindConsoleVariable(TEXT("grass.MaxAsyncTasks"));
+  static IConsoleVariable* SetMaxCreatePerFrame =
+      IConsoleManager::Get().FindConsoleVariable(TEXT("grass.MaxCreatePerFrame"));
+  check(SetMaxAsyncTasks && SetMaxCreatePerFrame);
+
+  // Prefer aggressive spawning.
+  SetMaxAsyncTasks->Set(bEnabled ? 10 : 5, ECVF_SetByGameSetting);
+  SetMaxCreatePerFrame->Set(bEnabled ? 5 : 2, ECVF_SetByGameSetting);
+  UWorld* World = GEngine->GameViewport->GetWorld();
+  if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0)) {
+    PC->ConsoleCommand(FString::Printf(TEXT("grass.MaxAsyncTasks %d"), bEnabled ? 10 : 5), true);
+    PC->ConsoleCommand(FString::Printf(TEXT("grass.MaxCreatePerFrame %d"), bEnabled ? 5 : 2), true);
+  }
+}
+
 void ASettingsManager::SaveSettings() const {
   // TODO: Save advanced graphics settings.
   UnrealSettings->ApplySettings(true);

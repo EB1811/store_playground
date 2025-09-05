@@ -7,6 +7,8 @@
 APickupActor::APickupActor() {
   PrimaryActorTick.bCanEverTick = false;
 
+  if (!Id.IsValid()) Id = FGuid::NewGuid();
+
   Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
   SetRootComponent(Mesh);
 

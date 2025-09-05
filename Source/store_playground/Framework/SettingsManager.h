@@ -53,6 +53,7 @@ public:
   void SetReflectionMethod(int32 Method);
   void SetDepthOfFieldEnabled(bool bEnabled);
   void SetBloomEnabled(bool bEnabled);
+  void SetFastGrassSpawning(bool bEnabled);
 
   void SetDLSSFrameGenerationEnabled(bool bEnabled);
 
