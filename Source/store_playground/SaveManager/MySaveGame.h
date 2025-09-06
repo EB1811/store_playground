@@ -14,7 +14,7 @@ public:
   UPROPERTY()
   FString SlotName;
   UPROPERTY()
-  int32 SlotIndex;
+  int32 SlotIndex;  // * -1 for auto save.
 
   UPROPERTY()
   TArray<FSystemSaveState> SystemSaveStates;

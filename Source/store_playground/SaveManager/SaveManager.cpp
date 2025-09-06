@@ -1,6 +1,8 @@
 #include "SaveManager.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "SaveStructs.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -57,6 +59,7 @@ ASaveManager::ASaveManager() {
   SaveManagerParams.SaveSlotCount = 4;
   SaveManagerParams.SaveSlotNamePrefix = "SaveSlot_";
   CurrentSaveGame = nullptr;
+  AutoSaveGame = nullptr;
 }
 
 void ASaveManager::BeginPlay() { Super::BeginPlay(); }
@@ -102,14 +105,14 @@ void ASaveManager::LoadSaveGameSlots() {
     SaveSlotListSaveGame->SaveSlotList = {};
     for (int32 i = 0; i < SaveManagerParams.SaveSlotCount; i++) {
       FSaveSlotData Data;
-      Data.SlotName = SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(i);
+      Data.SlotName = SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(i + 1);
       Data.bIsPopulated = false;
       Data.LastModified = FDateTime::Now();
       Data.CurrentDay = 0;
       Data.StoreMoney = 0.0f;
       SaveSlotListSaveGame->SaveSlotList.Add(Data);
     }
-    SaveSlotListSaveGame->MostRecentSaveSlotIndex = -1;
+    SaveSlotListSaveGame->MostRecentSaveSlotIndex = 0;
 
     UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
     UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new save slot list."));
@@ -178,32 +181,42 @@ void ASaveManager::SaveCurrentSlotToDisk() {
 void ASaveManager::LoadSystemsFromDisk(int32 SlotIndex) {
   check(SaveSlotListSaveGame && SlotIndex < SaveManagerParams.SaveSlotCount);
 
-  FString SlotName = SaveSlotListSaveGame->SaveSlotList[SlotIndex].SlotName;
-  CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, SlotIndex));
-  check(CurrentSaveGame);
+  if (SlotIndex >= 0) {
+    FString SlotName = SaveSlotListSaveGame->SaveSlotList[SlotIndex].SlotName;
+    CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, SlotIndex));
+    check(CurrentSaveGame);
 
-  LoadAllSystems(CurrentSaveGame->SystemSaveStates);
+    LoadAllSystems(CurrentSaveGame->SystemSaveStates);
+  } else if (SlotIndex == -1) {  // Auto-save
+    AutoSaveGame = Cast<UMySaveGame>(UGameplayStatics::LoadGameFromSlot("AutoSave", -1));
+    check(AutoSaveGame);
+
+    LoadAllSystems(AutoSaveGame->SystemSaveStates);
+  } else {
+    checkNoEntry();
+  }
 
   ApplyLoadedUpgradeEffects();
 }
 void ASaveManager::LoadLevelsAndPlayerFromDisk() {
-  check(CurrentSaveGame);
+  auto SaveGame = CurrentSaveGame ? CurrentSaveGame : AutoSaveGame;
+  check(SaveGame);
 
   FLevelsSaveData LevelsSaveData;
-  for (auto& Pair : CurrentSaveGame->LevelSaveStates) LevelsSaveData.LevelSaveMap.Add(Pair.Name, Pair);
-  for (auto& Pair : CurrentSaveGame->ActorSaveStates) LevelsSaveData.ActorSaveMap.Add(Pair.Id, Pair);
-  for (auto& Pair : CurrentSaveGame->ComponentSaveStates) LevelsSaveData.ComponentSaveMap.Add(Pair.Id, Pair);
-  LevelsSaveData.ObjectSaveStates = CurrentSaveGame->ObjectSaveStates;
+  for (auto& Pair : SaveGame->LevelSaveStates) LevelsSaveData.LevelSaveMap.Add(Pair.Name, Pair);
+  for (auto& Pair : SaveGame->ActorSaveStates) LevelsSaveData.ActorSaveMap.Add(Pair.Id, Pair);
+  for (auto& Pair : SaveGame->ComponentSaveStates) LevelsSaveData.ComponentSaveMap.Add(Pair.Id, Pair);
+  LevelsSaveData.ObjectSaveStates = SaveGame->ObjectSaveStates;
   LoadLevels(LevelsSaveData);
 
-  FPlayerSavaState PlayerSaveState = CurrentSaveGame->PlayerSaveState;
-  TArray<FComponentSaveState> PComponentSaveStates = CurrentSaveGame->ComponentSaveStates.FilterByPredicate(
-      [PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
+  FPlayerSavaState PlayerSaveState = SaveGame->PlayerSaveState;
+  TArray<FComponentSaveState> PComponentSaveStates =
+      SaveGame->ComponentSaveStates.FilterByPredicate([PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
         return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["InventoryComponent"] ||
                ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["TagsComponent"];
       });
-  TArray<FObjectSaveState> PObjectSaveStates = CurrentSaveGame->ObjectSaveStates.FilterByPredicate(
-      [PComponentSaveStates](const FObjectSaveState& ObjectSaveState) {
+  TArray<FObjectSaveState> PObjectSaveStates =
+      SaveGame->ObjectSaveStates.FilterByPredicate([PComponentSaveStates](const FObjectSaveState& ObjectSaveState) {
         return PComponentSaveStates.ContainsByPredicate(
             [ObjectSaveState](const FComponentSaveState& ComponentSaveState) {
               return ComponentSaveState.ComponentObjects.Contains(ObjectSaveState.Id);
@@ -222,6 +235,40 @@ void ASaveManager::DeleteSaveGame(int32 SlotIndex) {
 
   UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
   UE_LOG(LogTemp, Warning, TEXT("SaveManager: Deleted save game at slot %d."), SlotIndex);
+}
+
+void ASaveManager::AutoSave() {
+  if (!CanSave()) return;
+
+  if (!AutoSaveGame) {
+    AutoSaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
+    check(AutoSaveGame);
+
+    AutoSaveGame->Initialize("AutoSave", -1);
+  }
+
+  AutoSaveGame->SystemSaveStates = SaveAllSystems();
+
+  FLevelsSaveData LevelsSaveData = SaveLevels();
+  for (auto& Pair : LevelsSaveData.LevelSaveMap) AutoSaveGame->LevelSaveStates.Add(Pair.Value);
+  for (auto& Pair : LevelsSaveData.ActorSaveMap) AutoSaveGame->ActorSaveStates.Add(Pair.Value);
+  for (auto& Pair : LevelsSaveData.ComponentSaveMap) AutoSaveGame->ComponentSaveStates.Add(Pair.Value);
+  AutoSaveGame->ObjectSaveStates.Append(LevelsSaveData.ObjectSaveStates);
+
+  auto [PlayerSaveState, PComponentSaveStates, PObjectSaveStates] = SavePlayer();
+  AutoSaveGame->PlayerSaveState = PlayerSaveState;
+  AutoSaveGame->ComponentSaveStates.Append(PComponentSaveStates);
+  AutoSaveGame->ObjectSaveStates.Append(PObjectSaveStates);
+
+  WithLog(
+      [this]() {
+        return UGameplayStatics::SaveGameToSlot(AutoSaveGame, AutoSaveGame->SlotName, AutoSaveGame->SlotIndex);
+      },
+      "AutoSave: Auto-saved successfully.", "AutoSave: Auto-save failed.");
+
+  SaveSlotListSaveGame->MostRecentSaveSlotIndex = -1;
+  SaveSlotListSaveGame->bHasAutoSave = true;
+  UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
 }
 
 auto ASaveManager::SaveAllSystems() -> TArray<FSystemSaveState> {
@@ -383,17 +430,16 @@ void ASaveManager::LoadPlayer(FPlayerSavaState PlayerSaveState,
       *ComponentSaveStates.FindByPredicate([PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
         return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["InventoryComponent"];
       });
-  TArray<FObjectSaveState> InvObjectSaveStates = CurrentSaveGame->ObjectSaveStates.FilterByPredicate(
-      [PInventorySaveState](const FObjectSaveState& ObjectSaveState) {
+  TArray<FObjectSaveState> InvObjectSaveStates =
+      ObjectSaveStates.FilterByPredicate([PInventorySaveState](const FObjectSaveState& ObjectSaveState) {
         return PInventorySaveState.ComponentObjects.Contains(ObjectSaveState.Id);
       });
 
   LoadInventoryCSaveState(PlayerCharacter->PlayerInventoryComponent, PInventorySaveState, InvObjectSaveStates);
   LoadComponent(PlayerCharacter->PlayerTagsComponent,
-                *CurrentSaveGame->ComponentSaveStates.FindByPredicate(
-                    [PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
-                      return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["TagsComponent"];
-                    }));
+                *ComponentSaveStates.FindByPredicate([PlayerSaveState](const FComponentSaveState& ComponentSaveState) {
+                  return ComponentSaveState.Id == PlayerSaveState.ActorComponentsMap["TagsComponent"];
+                }));
 }
 
 void ASaveManager::ApplyLoadedUpgradeEffects() {

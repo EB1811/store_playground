@@ -18,4 +18,6 @@ public:
   TArray<FSaveSlotData> SaveSlotList;  // * List of save slots.
   UPROPERTY()
   int32 MostRecentSaveSlotIndex;  // * Most recent save slot to be used for quick load.
+  UPROPERTY()
+  bool bHasAutoSave;  // * Whether an auto-save exists.
 };

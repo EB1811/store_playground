@@ -131,3 +131,12 @@ inline bool CheckWidgetIsActive(UWidget* Widget) {
 
   return bResultVisibility;
 }
+
+inline bool WithLog(TFunction<bool()> BoolFunc, const FString& Success, const FString& Failure) {
+  bool Res = BoolFunc();
+
+  if (Res) UE_LOG(LogTemp, Warning, TEXT("%s"), *Success)
+  else UE_LOG(LogTemp, Error, TEXT("%s"), *Failure)
+
+  return Res;
+}

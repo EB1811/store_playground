@@ -83,7 +83,7 @@ void UMainMenuWidget::UnhoverButton() {
 }
 
 void UMainMenuWidget::Continue() {
-  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == -1 ||
+  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == 0 &&
       SaveManager->SaveSlotListSaveGame->SaveSlotList.Num() <= 0)
     return;
 
@@ -148,7 +148,7 @@ void UMainMenuWidget::Exit() {
 }
 
 void UMainMenuWidget::RefreshUI() {
-  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == -1 ||
+  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == 0 &&
       SaveManager->SaveSlotListSaveGame->SaveSlotList.Num() <= 0)
     ContinueButton->SetIsEnabled(false);
   else ContinueButton->SetIsEnabled(true);

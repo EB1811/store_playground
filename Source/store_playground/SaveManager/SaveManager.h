@@ -69,6 +69,8 @@ public:
   class USaveSlotListSaveGame* SaveSlotListSaveGame;
   UPROPERTY()
   class UMySaveGame* CurrentSaveGame;
+  UPROPERTY()
+  class UMySaveGame* AutoSaveGame;
 
   void SaveSettingsToDisk(const FGameSettings NewSettings, const FSavedSoundSettings SoundSettings);
   auto LoadSettingsFromDisk() -> class USettingsSaveGame*;
@@ -82,6 +84,9 @@ public:
   void LoadSystemsFromDisk(int32 SlotIndex);
   void LoadLevelsAndPlayerFromDisk();
   void DeleteSaveGame(int32 SlotIndex);
+
+  void AutoSave();
+  void LoadAutoSave();
 
   auto SaveAllSystems() -> TArray<FSystemSaveState>;
   void LoadAllSystems(TArray<FSystemSaveState> SystemSaveStates);

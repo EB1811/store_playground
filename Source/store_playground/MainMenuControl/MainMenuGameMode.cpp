@@ -44,7 +44,7 @@ void AMainMenuGameMode::BeginPlay() {
 }
 
 void AMainMenuGameMode::Continue() {
-  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == -1 ||
+  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == 0 &&
       SaveManager->SaveSlotListSaveGame->SaveSlotList.Num() <= 0)
     return;
 

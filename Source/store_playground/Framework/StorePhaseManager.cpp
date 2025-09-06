@@ -151,7 +151,7 @@ void AStorePhaseManager::EndDay() {
   Store->SetupStoreEnvironment();
 
   DayManager->StartNewDay();
-  // SaveManager->CreateNewSaveGame();
+  SaveManager->AutoSave();
 }
 
 void AStorePhaseManager::NextPhase() {
