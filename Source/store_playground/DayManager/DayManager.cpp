@@ -50,7 +50,7 @@ void ADayManager::StartNewDay() {
   Market->ConsiderEconEvents();
   NewsGen->GenDaysRandomArticles();
 
-  MarketLevel->ResetLevelState();
+  MarketLevel->ResetDaysLevelState();
 }
 
 void ADayManager::ManageDebt() {

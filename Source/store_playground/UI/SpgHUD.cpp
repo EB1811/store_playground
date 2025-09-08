@@ -150,7 +150,7 @@ void ASpgHUD::SetupInitUIStates() {
   InGameHudWidget = CreateWidget<UInGameHudWidget>(GetWorld(), InGameHudWidgetClass);
   InGameHudWidget->AddToViewport(0);
   InGameHudWidget->SetVisibility(ESlateVisibility::Hidden);
-  InGameHudWidget->NewsGen = NewsGen;
+  InGameHudWidget->UpgradeManager = UpgradeManager;
   InGameHudWidget->DayManager = DayManager;
   InGameHudWidget->StorePhaseManager = StorePhaseManager;
   InGameHudWidget->Store = Store;

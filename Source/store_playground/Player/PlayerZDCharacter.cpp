@@ -386,7 +386,7 @@ void APlayerZDCharacter::UICycleLeftAction(const FInputActionValue& Value) { HUD
 void APlayerZDCharacter::UICycleRightAction(const FInputActionValue& Value) { HUD->UICycleRightAction(); }
 
 void APlayerZDCharacter::SkipCutscene(const FInputActionValue& Value) {
-  check(PlayerBehaviourState == EPlayerState::Cutscene);
+  if (PlayerBehaviourState != EPlayerState::Cutscene) return;
 
   CutsceneSystem->SkipCutsceneChain();
 }

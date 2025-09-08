@@ -5,6 +5,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
+#include "LandscapeSubsystem.h"
 #include "Sound/SoundClass.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "store_playground/Framework/UtilFuncs.h"
@@ -213,6 +214,12 @@ void ASettingsManager::SetFastGrassSpawning(bool bEnabled) {
     PC->ConsoleCommand(FString::Printf(TEXT("grass.MaxAsyncTasks %d"), bEnabled ? 10 : 5), true);
     PC->ConsoleCommand(FString::Printf(TEXT("grass.MaxCreatePerFrame %d"), bEnabled ? 5 : 2), true);
   }
+
+  // ? Not sure if this makes the previous settings useless.
+  ULandscapeSubsystem* LandscapeSubsystem = World->GetSubsystem<ULandscapeSubsystem>();
+  check(LandscapeSubsystem);
+  if (bEnabled) LandscapeSubsystem->PrioritizeGrassCreation(true);
+  else LandscapeSubsystem->PrioritizeGrassCreation(false);
 }
 
 void ASettingsManager::SetScaleAdvGraphicsSettings() {

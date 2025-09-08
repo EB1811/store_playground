@@ -123,6 +123,7 @@ void ASaveManager::LoadSaveGameSlots() {
       SaveSlotListSaveGame->SaveSlotList.Add(Data);
     }
     SaveSlotListSaveGame->MostRecentSaveSlotIndex = 0;
+    SaveSlotListSaveGame->bHasAutoSave = false;
 
     UGameplayStatics::SaveGameToSlot(SaveSlotListSaveGame, SaveManagerParams.SaveSlotListSaveName, 0);
     UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new save slot list."));

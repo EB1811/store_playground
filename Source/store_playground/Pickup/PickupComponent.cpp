@@ -1,5 +1,6 @@
 #include "PickupComponent.h"
 #include "Components/ActorComponent.h"
+#include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 UPickupComponent::UPickupComponent() { PrimaryComponentTick.bCanEverTick = false; }
@@ -18,6 +19,9 @@ void UPickupComponent::DestroyPickup() {
   GetOwner()->SetActorHiddenInGame(true);
   GetOwner()->SetActorEnableCollision(false);
   GetOwner()->SetActorTickEnabled(false);
+
+  UAudioComponent* AudioC = Cast<UAudioComponent>(GetOwner()->GetComponentByClass(UAudioComponent::StaticClass()));
+  if (AudioC) AudioC->Stop();
 
   bIsPicked = true;
 }

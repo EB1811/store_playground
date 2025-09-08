@@ -15,7 +15,7 @@ public:
   virtual void NativeOnInitialized() override;
 
   UPROPERTY(meta = (BindWidget))
-  class UNewsHudSlideWidget* NewsHudSlideWidget;
+  class ULeftSlideWidget* UpgradePointsSlideWidget;
   UPROPERTY(meta = (BindWidget))
   class ULeftSlideWidget* NotificationsSlideWidget;
   UPROPERTY(meta = (BindWidget))
@@ -35,7 +35,7 @@ public:
   class UWidgetAnimation* HideAnim;
 
   UPROPERTY(EditAnywhere)
-  const class ANewsGen* NewsGen;
+  const class AUpgradeManager* UpgradeManager;
   UPROPERTY(EditAnywhere)
   const class ADayManager* DayManager;
   UPROPERTY(EditAnywhere)
@@ -53,6 +53,10 @@ public:
   UPROPERTY(EditAnywhere)
   bool bNeedUpgradePointsNotify;  // * If Notify is called shile hidden, need to perform notification upon showing.
   void NotifyUpgradePointsGained();
+  UPROPERTY(EditAnywhere)
+  FTimerHandle HideTimerHandle;
+  UFUNCTION()
+  void HideUpgradePointsNotify();
 
   void RefreshUI();
   void InitUI(FInGameInputActions _InGameInputActions);

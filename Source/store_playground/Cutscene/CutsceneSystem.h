@@ -60,6 +60,7 @@ public:
   FTimerHandle ActionTimer;
 
   void StartCutscene(const FResolvedCutsceneData& _ResolvedCutsceneData, std::function<void()> _CutsceneFinishedFunc);
+  UFUNCTION()
   void HandleCutsceneState();  // * Cutscene loop.
 
   auto NextCutsceneChain() -> ECutsceneState;

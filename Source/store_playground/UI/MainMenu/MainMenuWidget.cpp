@@ -148,10 +148,12 @@ void UMainMenuWidget::Exit() {
 }
 
 void UMainMenuWidget::RefreshUI() {
-  if (SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex == 0 &&
-      SaveManager->SaveSlotListSaveGame->SaveSlotList.Num() <= 0)
-    ContinueButton->SetIsEnabled(false);
-  else ContinueButton->SetIsEnabled(true);
+  if (SaveManager->SaveSlotListSaveGame->bHasAutoSave ||
+      (SaveManager->SaveSlotListSaveGame->SaveSlotList.Num() > 0 &&
+       SaveManager->SaveSlotListSaveGame->SaveSlotList[SaveManager->SaveSlotListSaveGame->MostRecentSaveSlotIndex]
+           .bIsPopulated))
+    ContinueButton->SetIsEnabled(true);
+  else ContinueButton->SetIsEnabled(false);
 }
 
 void UMainMenuWidget::InitUI(FInUIInputActions _InUIInputActions,

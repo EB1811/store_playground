@@ -40,6 +40,9 @@ struct FMarketLevelState {
   TMap<FGuid, FComponentSaveState> ComponentSaveMap;
   UPROPERTY(EditAnywhere)
   TArray<FObjectSaveState> ObjectSaveStates;
+
+  UPROPERTY(EditAnywhere)
+  TArray<FGuid> PersistentIds;  // * Since above maps can be cleared each day.
 };
 
 USTRUCT()
@@ -112,9 +115,11 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Market Level")
   FMarketLevelState LevelState;
+  UPROPERTY(EditAnywhere, Category = "Market Level", SaveGame)
+  bool bDaysActorsGenerated;
   void SaveLevelState();
   void LoadLevelState(bool bIsWeekend = false);
-  void ResetLevelState();
+  void ResetDaysLevelState();
 
   void InitNPCStores(bool bIsWeekend = false);
   void InitMarketNpcs(bool bIsWeekend = false);

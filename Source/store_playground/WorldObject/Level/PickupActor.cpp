@@ -3,6 +3,7 @@
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Pickup/PickupComponent.h"
+#include "Components/AudioComponent.h"
 
 APickupActor::APickupActor() {
   PrimaryActorTick.bCanEverTick = false;
@@ -14,6 +15,10 @@ APickupActor::APickupActor() {
 
   InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
   PickupComponent = CreateDefaultSubobject<UPickupComponent>(TEXT("PickupComponent"));
+  AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+
+  AudioComponent->SetupAttachment(RootComponent);
+  AudioComponent->bAutoActivate = true;
 }
 
 void APickupActor::BeginPlay() { Super::BeginPlay(); }

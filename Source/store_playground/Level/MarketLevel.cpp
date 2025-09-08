@@ -79,6 +79,7 @@ void AMarketLevel::SaveLevelState() {
   LevelState.ActorSaveMap.Empty();
   LevelState.ComponentSaveMap.Empty();
   LevelState.ObjectSaveStates.Empty();
+  LevelState.PersistentIds.Empty();
 
   TArray<ANPCStore*> FoundStores = GetAllActorsOf<ANPCStore>(GetWorld(), NPCStoreClass);
   for (ANPCStore* Store : FoundStores) {
@@ -194,14 +195,34 @@ void AMarketLevel::SaveLevelState() {
 
     LevelState.ActorSaveMap.Add(ActorSaveState.Id, ActorSaveState);
     LevelState.ComponentSaveMap.Add(PickupCSaveState.Id, PickupCSaveState);
+
+    LevelState.PersistentIds.Add(ActorSaveState.Id);
+    LevelState.PersistentIds.Add(PickupCSaveState.Id);
   }
 }
 
 void AMarketLevel::LoadLevelState(bool bIsWeekend) {
-  if (LevelState.ActorSaveMap.Num() <= 0) {
+  // * Persistent actors.
+  TArray<APickupActor*> PickupActors = GetAllActorsOf<APickupActor>(GetWorld(), PickupActorClass);
+  for (APickupActor* Pickup : PickupActors) {
+    if (!LevelState.ActorSaveMap.Contains(Pickup->Id)) continue;
+
+    FActorSavaState ActorSaveState = LevelState.ActorSaveMap[Pickup->Id];
+    auto PickupCSaveState = LevelState.ComponentSaveMap[ActorSaveState.ActorComponentsMap["PickupComponent"]];
+
+    SaveManager->LoadActor(Pickup, ActorSaveState);
+    SaveManager->LoadComponent(Pickup->PickupComponent, PickupCSaveState);
+
+    if (Pickup->PickupComponent->bIsPicked) Pickup->PickupComponent->DestroyPickup();
+  }
+
+  // * Dynamic actors.
+  if (!bDaysActorsGenerated) {
     InitNPCStores(bIsWeekend);
     InitMarketNpcs(bIsWeekend);
     InitMiniGames(bIsWeekend);
+
+    bDaysActorsGenerated = true;
     return;
   }
 
@@ -330,25 +351,27 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
     SaveManager->LoadMesh(SpawnedMiniGame->Mesh, MiniGameMeshSaveState);
     SaveManager->LoadMesh(SpawnedMiniGame->Sprite, MiniGameSpriteSaveState);
   }
-
-  TArray<APickupActor*> PickupActors = GetAllActorsOf<APickupActor>(GetWorld(), PickupActorClass);
-  for (APickupActor* Pickup : PickupActors) {
-    if (!LevelState.ActorSaveMap.Contains(Pickup->Id)) continue;
-
-    FActorSavaState ActorSaveState = LevelState.ActorSaveMap[Pickup->Id];
-    auto PickupCSaveState = LevelState.ComponentSaveMap[ActorSaveState.ActorComponentsMap["PickupComponent"]];
-
-    SaveManager->LoadActor(Pickup, ActorSaveState);
-    SaveManager->LoadComponent(Pickup->PickupComponent, PickupCSaveState);
-
-    if (Pickup->PickupComponent->bIsPicked) Pickup->PickupComponent->DestroyPickup();
-  }
 }
 
-void AMarketLevel::ResetLevelState() {
+void AMarketLevel::ResetDaysLevelState() {
+  TMap<FGuid, FActorSavaState> PersistentActors = LevelState.ActorSaveMap.FilterByPredicate(
+      [this](const TPair<FGuid, FActorSavaState>& Pair) { return LevelState.PersistentIds.Contains(Pair.Key); });
+  TMap<FGuid, FComponentSaveState> PersistentComponents = LevelState.ComponentSaveMap.FilterByPredicate(
+      [this](const TPair<FGuid, FComponentSaveState>& Pair) { return LevelState.PersistentIds.Contains(Pair.Key); });
+  TArray<FObjectSaveState> PersistentObjects =
+      LevelState.ObjectSaveStates.FilterByPredicate([this](const FObjectSaveState& ObjectSaveState) {
+        return LevelState.PersistentIds.Contains(ObjectSaveState.Id);
+      });
+
   LevelState.ActorSaveMap.Empty();
   LevelState.ComponentSaveMap.Empty();
   LevelState.ObjectSaveStates.Empty();
+
+  LevelState.ActorSaveMap = PersistentActors;
+  LevelState.ComponentSaveMap = PersistentComponents;
+  LevelState.ObjectSaveStates = PersistentObjects;
+
+  bDaysActorsGenerated = false;
 }
 
 void AMarketLevel::InitNPCStores(bool bIsWeekend) {

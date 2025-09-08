@@ -28,4 +28,7 @@ public:
 
   UPROPERTY(EditAnywhere)
   class UPickupComponent* PickupComponent;
+
+  UPROPERTY(EditAnywhere)
+  class UAudioComponent* AudioComponent;
 };

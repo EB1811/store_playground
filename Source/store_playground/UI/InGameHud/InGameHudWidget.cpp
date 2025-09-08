@@ -10,7 +10,7 @@
 #include "store_playground/UI/Components/RightSlideInvertedWidget.h"
 #include "store_playground/UI/InGameHud/InGameHudWidgets/NewsHudSlideWidget.h"
 #include "store_playground/Store/Store.h"
-#include "store_playground/NewsGen/NewsGen.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Level/LevelManager.h"
@@ -37,20 +37,20 @@ void UInGameHudWidget::NotifyUpgradePointsGained() {
   NotificationsSlideWidget->SetVisibility(ESlateVisibility::Visible);
   UGameplayStatics::PlaySound2D(this, NotifySound, 1.0f);
 
-  FTimerHandle HideTimerHandle;
-  GetWorld()->GetTimerManager().SetTimer(
-      HideTimerHandle,
-      [this]() {
-        if (NotificationsSlideWidget) NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed);
-      },
-      10.0f, false);
+  GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &UInGameHudWidget::HideUpgradePointsNotify, 10.0f,
+                                         false);
+}
+void UInGameHudWidget::HideUpgradePointsNotify() {
+  NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UInGameHudWidget::RefreshUI() {
-  check(NewsGen && DayManager && StorePhaseManager && Store && LevelManager);
+  check(UpgradeManager && DayManager && StorePhaseManager && Store && LevelManager);
   UE_LOG(LogTemp, Log, TEXT("Refreshing InGame HUD UI."));
 
-  NewsHudSlideWidget->RefreshUI();
+  UpgradePointsSlideWidget->SlideText->SetText(
+      FText::FromString(FString::Printf(TEXT("Upgrade Points: %d"), UpgradeManager->AvailableUpgradePoints)));
+  UpgradePointsSlideWidget->RightSlideText->SetText(FText::FromString(""));
 
   FText CurrentPhaseText = UEnum::GetDisplayValueAsText(StorePhaseManager->StorePhaseState);
   int32 CurrentDay = DayManager->CurrentDay;
@@ -90,7 +90,6 @@ void UInGameHudWidget::InitUI(FInGameInputActions _InGameInputActions) {
   InGameInputActions = _InGameInputActions;
 
   NotificationsSlideWidget->SetVisibility(ESlateVisibility::Collapsed);
-  NewsHudSlideWidget->InitUI(NewsGen);
 }
 
 void UInGameHudWidget::Show() {
