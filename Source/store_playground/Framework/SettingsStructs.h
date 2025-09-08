@@ -25,3 +25,21 @@ struct FGameSettings {
   UPROPERTY()
   bool bShowTutorials;
 };
+
+USTRUCT()
+struct FAdvGraphicsSettings {
+  GENERATED_BODY()
+
+  UPROPERTY()
+  int32 AntiAliasingMethod;  // 0: None, 1: FXAA, 4: TSR, 5: DLSS
+  UPROPERTY()
+  int32 GlobalIlluminationMethod;  // 0: None, 1: Lumen, 2: Screen Space
+  UPROPERTY()
+  int32 ReflectionMethod;  // 0: None, 1: Lumen, 2: Screen Space
+  UPROPERTY()
+  bool bDepthOfField;
+  UPROPERTY()
+  bool bBloom;
+  UPROPERTY()
+  bool bDLSSFrameGeneration;
+};

@@ -3,6 +3,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "EnhancedInputSubsystems.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "Sound/SoundClass.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
@@ -64,6 +65,7 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
       PC->ConsoleCommand("r.AntiAliasingMethod 4", true);
       PC->ConsoleCommand("r.NGX.DLSS.Enable 1", true);
     }
+    AdvGraphicsSettings.AntiAliasingMethod = Method;
     return;
   } else {
     static IConsoleVariable* SetDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
@@ -81,6 +83,7 @@ void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
   UWorld* World = GEngine->GameViewport->GetWorld();
   if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand("r.AntiAliasingMethod " + FString::FromInt(Method), true);
+  AdvGraphicsSettings.AntiAliasingMethod = Method;
 }
 
 void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
@@ -140,8 +143,8 @@ void ASettingsManager::SetGlobalIlluminationMethod(int32 Method) {
       }
       break;
   }
+  AdvGraphicsSettings.GlobalIlluminationMethod = Method;
 }
-
 void ASettingsManager::SetReflectionMethod(int32 Method) {
   static IConsoleVariable* SetRF = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ReflectionMethod"));
   check(SetRF);
@@ -164,6 +167,7 @@ void ASettingsManager::SetReflectionMethod(int32 Method) {
         PC->ConsoleCommand("r.ReflectionMethod 2", true);
       break;
   }
+  AdvGraphicsSettings.ReflectionMethod = Method;
 }
 
 void ASettingsManager::SetDepthOfFieldEnabled(bool bEnabled) {
@@ -173,8 +177,8 @@ void ASettingsManager::SetDepthOfFieldEnabled(bool bEnabled) {
   UWorld* World = GEngine->GameViewport->GetWorld();
   if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.DepthOfFieldQuality %d"), bEnabled ? 2 : 0), true);
+  AdvGraphicsSettings.bDepthOfField = bEnabled;
 }
-
 void ASettingsManager::SetBloomEnabled(bool bEnabled) {
   static IConsoleVariable* SetBloom = IConsoleManager::Get().FindConsoleVariable(TEXT("r.BloomQuality"));
   check(SetBloom);
@@ -182,8 +186,8 @@ void ASettingsManager::SetBloomEnabled(bool bEnabled) {
   UWorld* World = GEngine->GameViewport->GetWorld();
   if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.BloomQuality %d"), bEnabled ? 5 : 0), true);
+  AdvGraphicsSettings.bBloom = bEnabled;
 }
-
 void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
   static IConsoleVariable* SetDLSSG = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Streamline.DLSSG.Enable"));
   if (!SetDLSSG) return;
@@ -192,6 +196,7 @@ void ASettingsManager::SetDLSSFrameGenerationEnabled(bool bEnabled) {
   UWorld* World = GEngine->GameViewport->GetWorld();
   if (APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0))
     PC->ConsoleCommand(FString::Printf(TEXT("r.Streamline.DLSSG.Enable %d"), bEnabled ? 2 : 0), true);
+  AdvGraphicsSettings.bDLSSFrameGeneration = bEnabled;
 }
 
 void ASettingsManager::SetFastGrassSpawning(bool bEnabled) {
@@ -210,11 +215,17 @@ void ASettingsManager::SetFastGrassSpawning(bool bEnabled) {
   }
 }
 
+void ASettingsManager::SetScaleAdvGraphicsSettings() {
+  int32 FoliageQuality = UnrealSettings->GetFoliageQuality();
+  if (FoliageQuality >= 2)  // High or Epic
+    SetFastGrassSpawning(true);
+  else SetFastGrassSpawning(false);
+}
+
 void ASettingsManager::SaveSettings() const {
-  // TODO: Save advanced graphics settings.
   UnrealSettings->ApplySettings(true);
   EInputUserSettings->SaveSettings();
-  SaveManager->SaveSettingsToDisk(GameSettings, SoundSettings);
+  SaveManager->SaveSettingsToDisk(GameSettings, SoundSettings, AdvGraphicsSettings);
 }
 void ASettingsManager::LoadSettings() {
   if (!UnrealSettings) UnrealSettings = GEngine->GetGameUserSettings();
@@ -229,11 +240,76 @@ void ASettingsManager::LoadSettings() {
 
   const USettingsSaveGame* SavedSettings = SaveManager->LoadSettingsFromDisk();
 
-  const FGameSettings& SavedGameSettings = SavedSettings->GameSettings;
+  auto& SavedGameSettings = SavedSettings->GameSettings;
   SetGameSettings(SavedGameSettings);
 
-  auto SavedSound = SavedSettings->SoundSettings;
+  auto& SavedSound = SavedSettings->SoundSettings;
   SetMasterVolume(SavedSound.MasterVolume);
   SetMusicVolume(SavedSound.MusicVolume);
   SetSFXVolume(SavedSound.SFXVolume);
+
+  auto& SavedAdvGraphicsSettings = SavedSettings->AdvGraphicsSettings;
+  SetAntiAliasingMethod(SavedAdvGraphicsSettings.AntiAliasingMethod);
+  SetGlobalIlluminationMethod(SavedAdvGraphicsSettings.GlobalIlluminationMethod);
+  SetReflectionMethod(SavedAdvGraphicsSettings.ReflectionMethod);
+  SetDepthOfFieldEnabled(SavedAdvGraphicsSettings.bDepthOfField);
+  SetBloomEnabled(SavedAdvGraphicsSettings.bBloom);
+  SetDLSSFrameGenerationEnabled(SavedAdvGraphicsSettings.bDLSSFrameGeneration);
+  SetScaleAdvGraphicsSettings();
+}
+
+void ASettingsManager::InitSettings() {
+  if (!UnrealSettings) UnrealSettings = GEngine->GetGameUserSettings();
+  check(UnrealSettings);
+  if (!EInputUserSettings) {
+    UEnhancedInputLocalPlayerSubsystem* EISubsystem =
+        GetWorld()->GetFirstPlayerController()->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+    EInputUserSettings = EISubsystem->GetUserSettings();
+  }
+  check(EInputUserSettings);
+
+  // Running a benchmark to set initial graphics settings.
+  UnrealSettings->RunHardwareBenchmark(10, 1.0f, 2.0f);
+  UnrealSettings->ApplyHardwareBenchmarkResults();
+
+  int32 CurrentOverallQuality = UnrealSettings->GetOverallScalabilityLevel();
+  UE_LOG(LogTemp, Warning, TEXT("Benchmark Overall Quality Level: %d"), CurrentOverallQuality);
+  if (CurrentOverallQuality >= 3) {  // Epic
+    SetAntiAliasingMethod(4);        // TSR
+    SetGlobalIlluminationMethod(1);  // Lumen
+    SetReflectionMethod(1);          // Lumen
+    SetDepthOfFieldEnabled(true);
+    SetBloomEnabled(true);
+    SetDLSSFrameGenerationEnabled(false);
+  } else if (CurrentOverallQuality == 2) {  // High
+    SetAntiAliasingMethod(0);
+    SetGlobalIlluminationMethod(0);
+    SetReflectionMethod(0);
+    SetDepthOfFieldEnabled(true);
+    SetBloomEnabled(true);
+    SetDLSSFrameGenerationEnabled(false);
+  } else if (CurrentOverallQuality == 1) {  // Medium
+    SetAntiAliasingMethod(0);
+    SetGlobalIlluminationMethod(0);
+    SetReflectionMethod(0);
+    SetDepthOfFieldEnabled(true);
+    SetBloomEnabled(true);
+    SetDLSSFrameGenerationEnabled(false);
+  } else {  // Low
+    SetAntiAliasingMethod(0);
+    SetGlobalIlluminationMethod(0);
+    SetReflectionMethod(0);
+    SetDepthOfFieldEnabled(false);
+    SetBloomEnabled(false);
+    SetDLSSFrameGenerationEnabled(false);
+  }
+  SetScaleAdvGraphicsSettings();
+
+  GameSettings = {
+      .Difficulty = EGameDifficulty::Normal,
+      .bShowTutorials = true,
+  };
+  SoundSettings = {.MasterVolume = 0.5f, .MusicVolume = 1.0f, .SFXVolume = 1.0f};
+
+  SaveSettings();
 }

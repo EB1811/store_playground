@@ -66,11 +66,15 @@ void ASaveManager::BeginPlay() { Super::BeginPlay(); }
 
 void ASaveManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-void ASaveManager::SaveSettingsToDisk(const FGameSettings NewSettings, const FSavedSoundSettings SoundSettings) {
+void ASaveManager::SaveSettingsToDisk(const FGameSettings NewSettings,
+                                      const FSavedSoundSettings SoundSettings,
+                                      const FAdvGraphicsSettings AdvGraphicsSettings) {
+  if (!UGameplayStatics::DoesSaveGameExist(SaveManagerParams.SettingsSaveName, 0)) LoadSettingsFromDisk();
   check(SettingsSaveGame);
 
   SettingsSaveGame->GameSettings = NewSettings;
   SettingsSaveGame->SoundSettings = SoundSettings;
+  SettingsSaveGame->AdvGraphicsSettings = AdvGraphicsSettings;
   UGameplayStatics::SaveGameToSlot(SettingsSaveGame, SaveManagerParams.SettingsSaveName, 0);
 }
 auto ASaveManager::LoadSettingsFromDisk() -> USettingsSaveGame* {
@@ -84,6 +88,12 @@ auto ASaveManager::LoadSettingsFromDisk() -> USettingsSaveGame* {
         .bShowTutorials = true,
     };
     SettingsSaveGame->SoundSettings = {};
+    SettingsSaveGame->AdvGraphicsSettings = {.AntiAliasingMethod = 0,
+                                             .GlobalIlluminationMethod = 0,
+                                             .ReflectionMethod = 0,
+                                             .bDepthOfField = true,
+                                             .bBloom = true,
+                                             .bDLSSFrameGeneration = false};
     UGameplayStatics::SaveGameToSlot(SettingsSaveGame, SaveManagerParams.SettingsSaveName, 0);
     UE_LOG(LogTemp, Warning, TEXT("SaveManager: Created new settings save game."));
 

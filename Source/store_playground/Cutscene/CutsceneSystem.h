@@ -69,6 +69,7 @@ public:
   void PerformCutsceneAction(std::function<void()> ActionFinishedFunc = nullptr);
 
   void PauseCutscene();
+  void ResumeCutscene();
   void ResetCutscene();
 
   std::function<void()> CutsceneFinishedFunc;

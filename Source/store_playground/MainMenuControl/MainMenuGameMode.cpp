@@ -36,8 +36,11 @@ void AMainMenuGameMode::BeginPlay() {
   check(EISettings);
   for (const auto& StateContext : MainMenuPlayer->InputContexts)
     EISettings->RegisterInputMappingContext(StateContext.Value);
-  SettingsManager->LoadSettings();
   SaveManager->LoadSaveGameSlots();
+
+  if (!UGameplayStatics::DoesSaveGameExist(SaveManager->SaveManagerParams.SettingsSaveName, 0))
+    SettingsManager->InitSettings();
+  else SettingsManager->LoadSettings();
 
   MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
   MainMenuControlHUD->OpenMainMenu();

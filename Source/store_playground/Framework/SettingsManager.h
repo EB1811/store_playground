@@ -42,6 +42,9 @@ public:
   UPROPERTY(EditAnywhere)
   class USoundClass* SFXSoundClass;
 
+  UPROPERTY(EditAnywhere)
+  FAdvGraphicsSettings AdvGraphicsSettings;
+
   void SetGameSettings(const FGameSettings& NewSettings);
 
   void SetMasterVolume(float Volume);
@@ -53,10 +56,13 @@ public:
   void SetReflectionMethod(int32 Method);
   void SetDepthOfFieldEnabled(bool bEnabled);
   void SetBloomEnabled(bool bEnabled);
+  void SetDLSSFrameGenerationEnabled(bool bEnabled);
   void SetFastGrassSpawning(bool bEnabled);
 
-  void SetDLSSFrameGenerationEnabled(bool bEnabled);
+  void SetScaleAdvGraphicsSettings();  // * Based on scalability settings.
 
   void SaveSettings() const;
   void LoadSettings();
+
+  void InitSettings();  // * Init graphics settings based on benchmark.
 };

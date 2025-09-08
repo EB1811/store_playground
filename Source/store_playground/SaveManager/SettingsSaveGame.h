@@ -17,4 +17,7 @@ public:
 
   UPROPERTY()
   FSavedSoundSettings SoundSettings;
+
+  UPROPERTY()
+  FAdvGraphicsSettings AdvGraphicsSettings;
 };

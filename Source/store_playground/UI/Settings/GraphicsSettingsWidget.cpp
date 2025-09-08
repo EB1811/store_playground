@@ -179,7 +179,7 @@ void UGraphicsSettingsWidget::RefreshUI() {
   // Populate advanced settings
   float CurrentScale = GameSettings->GetResolutionScaleNormalized();
   ResolutionScaleSlider->SetValue(CurrentScale > 0.0f ? CurrentScale : 1.0f);
-  OnResolutionScaleChanged(CurrentScale);
+  OnResolutionScaleChanged(CurrentScale > 0.0f ? CurrentScale : 1.0f);
 
   static IConsoleVariable* GI = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DynamicGlobalIlluminationMethod"));
   if (GI && GI->GetInt() == 1) GlobalIlluminationMethodComboBox->SetSelectedIndex(1);       // Lumen

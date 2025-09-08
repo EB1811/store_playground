@@ -245,6 +245,7 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
   Subsystem->RemoveMappingContext(InputContexts[PlayerBehaviourState]);
   Subsystem->AddMappingContext(InputContexts[NewState], 0);
 
+  EPlayerState OldState = PlayerBehaviourState;
   PlayerBehaviourState = NewState;
   UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
 
@@ -255,7 +256,9 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
     // ToggleCinematicView();
     HUD->HideInGameHudWidget();
   }
-  if (PlayerBehaviourState == EPlayerState::PausedCutscene) CutsceneSystem->PauseCutscene();
+  if (NewState == EPlayerState::PausedCutscene) CutsceneSystem->PauseCutscene();
+  else if (NewState == EPlayerState::Cutscene && OldState == EPlayerState::PausedCutscene)
+    CutsceneSystem->ResumeCutscene();
 
   // Showing tutorials when available.
   if (PlayerBehaviourState == EPlayerState::Normal) TutorialManager->ShowPendingTutorials();

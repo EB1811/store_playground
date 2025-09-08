@@ -72,7 +72,9 @@ public:
   UPROPERTY()
   class UMySaveGame* AutoSaveGame;
 
-  void SaveSettingsToDisk(const FGameSettings NewSettings, const FSavedSoundSettings SoundSettings);
+  void SaveSettingsToDisk(const FGameSettings NewSettings,
+                          const FSavedSoundSettings SoundSettings,
+                          const FAdvGraphicsSettings AdvGraphicsSettings);
   auto LoadSettingsFromDisk() -> class USettingsSaveGame*;
 
   void LoadSaveGameSlots();

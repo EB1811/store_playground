@@ -132,6 +132,9 @@ void UCutsceneSystem::PerformCutsceneAction(std::function<void()> ActionFinished
 void UCutsceneSystem::PauseCutscene() {
   if (CutsceneState == ECutsceneState::WaitingForAction) GetWorld()->GetTimerManager().PauseTimer(ActionTimer);
 }
+void UCutsceneSystem::ResumeCutscene() {
+  if (CutsceneState == ECutsceneState::WaitingForAction) GetWorld()->GetTimerManager().UnPauseTimer(ActionTimer);
+}
 void UCutsceneSystem::ResetCutscene() {
   CutsceneState = ECutsceneState::None;
   ResolvedCutsceneData.CutsceneChains.Empty();
