@@ -40,7 +40,7 @@ void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> Ma
       break;
     }
     case EQuestAction::End: {
-      QuestsCompleted.Add(QuestC->ChainID);
+      QuestsCompleted.Add(QuestChainData.QuestID);
       if (QuestInProgressMap.Contains(QuestChainData.QuestID)) QuestInProgressMap.Remove(QuestChainData.QuestID);
       break;
     }

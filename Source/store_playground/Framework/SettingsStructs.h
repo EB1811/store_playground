@@ -31,6 +31,8 @@ struct FAdvGraphicsSettings {
   GENERATED_BODY()
 
   UPROPERTY()
+  int32 RenderMethod;  // 0: Default, 1: DirectX12, 2: Vulkan
+  UPROPERTY()
   int32 AntiAliasingMethod;  // 0: None, 1: FXAA, 4: TSR, 5: DLSS
   UPROPERTY()
   int32 GlobalIlluminationMethod;  // 0: None, 1: Lumen, 2: Screen Space

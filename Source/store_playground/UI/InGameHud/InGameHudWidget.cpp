@@ -70,7 +70,9 @@ void UInGameHudWidget::RefreshUI() {
   FText CurrentLevelText = UEnum::GetDisplayValueAsText(LevelManager->LoadedLevel);
   LocationSlideWidget->SlideText->SetText(CurrentLevelText);
 
-  if (LevelManager->LoadedLevel == ELevel::Store) {
+  if (LevelManager->LoadedLevel == ELevel::Store &&
+      (StorePhaseManager->StorePhaseState == EStorePhaseState::Morning ||
+       StorePhaseManager->StorePhaseState == EStorePhaseState::MorningBuildMode)) {
     ControlsHelpersWidget->SetComponentUI({
         {FText::FromString("News"), InGameInputActions.OpenNewspaperAction},
         {FText::FromString("Store"), InGameInputActions.OpenStoreViewAction},

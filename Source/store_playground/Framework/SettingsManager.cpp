@@ -6,6 +6,7 @@
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "LandscapeSubsystem.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Sound/SoundClass.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "store_playground/Framework/UtilFuncs.h"
@@ -50,6 +51,25 @@ void ASettingsManager::SetSFXVolume(float Volume) {
   UGameplayStatics::SetSoundMixClassOverride(this, MasterSoundMix, SFXSoundClass, Volume);
 }
 
+void ASettingsManager::SetRenderMethod(int32 Method) {
+  UE_LOG(LogTemp, Log, TEXT("Setting Render Method to: %d"), Method);
+  // 0=Default, 1=DirectX12, 2=Vulkan
+  if (Method == 0) {
+    GConfig->SetText(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
+                     FText::FromString("DefaultGraphicsRHI_Default"), GEngineIni);
+  } else if (Method == 1) {
+    GConfig->SetText(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
+                     FText::FromString("DefaultGraphicsRHI_DX12"), GEngineIni);
+  } else if (Method == 2) {
+    GConfig->SetText(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
+                     FText::FromString("DefaultGraphicsRHI_Vulkan"), GEngineIni);
+  } else {
+    checkNoEntry();
+  }
+  GConfig->Flush(true, GEngineIni);
+
+  AdvGraphicsSettings.RenderMethod = Method;
+}
 void ASettingsManager::SetAntiAliasingMethod(int32 Method) {
   // * DLSS
   if (Method == 5) {
@@ -263,6 +283,8 @@ void ASettingsManager::LoadSettings() {
   SetBloomEnabled(SavedAdvGraphicsSettings.bBloom);
   SetDLSSFrameGenerationEnabled(SavedAdvGraphicsSettings.bDLSSFrameGeneration);
   SetScaleAdvGraphicsSettings();
+
+  AdvGraphicsSettings.RenderMethod = SavedAdvGraphicsSettings.RenderMethod;
 }
 
 void ASettingsManager::InitSettings() {
@@ -311,6 +333,7 @@ void ASettingsManager::InitSettings() {
     SetDLSSFrameGenerationEnabled(false);
   }
   SetScaleAdvGraphicsSettings();
+  AdvGraphicsSettings.RenderMethod = 0;  // Default
 
   GameSettings = {
       .Difficulty = EGameDifficulty::Normal,

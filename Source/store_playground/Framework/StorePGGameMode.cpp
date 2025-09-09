@@ -14,6 +14,7 @@
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Level/MarketLevel.h"
+#include "store_playground/Level/ChurchLevel.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Inventory/InventoryComponent.h"
@@ -52,10 +53,10 @@ void AStorePGGameMode::BeginPlay() {
   HUD = Cast<ASpgHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
   check(PlayerCharacter && HUD && LevelManagerClass && GlobalDataManagerClass && GlobalStaticDataManagerClass &&
         UpgradeManagerClass && SaveManagerClass && PlayerCommandClass && StorePhaseManagerClass && DayManagerClass &&
-        CustomerAIManagerClass && QuestManagerClass && MarketLevelClass && MarketClass && MarketEconomyClass &&
-        NewsGenClass && StatisticsGenClass && StoreExpansionManagerClass && StoreClass && MiniGameManagerClass &&
-        AbilityManagerClass && CutsceneManagerClass && StorePhaseLightingManagerClass && MusicManagerClass &&
-        AmbientSoundManagerClass);
+        CustomerAIManagerClass && QuestManagerClass && MarketLevelClass && ChurchLevelClass && MarketClass &&
+        MarketEconomyClass && NewsGenClass && StatisticsGenClass && StoreExpansionManagerClass && StoreClass &&
+        MiniGameManagerClass && AbilityManagerClass && CutsceneManagerClass && StorePhaseLightingManagerClass &&
+        MusicManagerClass && AmbientSoundManagerClass);
 
   UDialogueSystem* DialogueSystem = NewObject<UDialogueSystem>(this);
   UNegotiationSystem* NegotiationSystem = NewObject<UNegotiationSystem>(this);
@@ -84,6 +85,7 @@ void AStorePGGameMode::BeginPlay() {
   AQuestManager* QuestManager = GetWorld()->SpawnActor<AQuestManager>(QuestManagerClass);
   ATutorialManager* TutorialManager = GetWorld()->SpawnActor<ATutorialManager>(TutorialManagerClass);
   AMarketLevel* MarketLevel = GetWorld()->SpawnActor<AMarketLevel>(MarketLevelClass);
+  AChurchLevel* ChurchLevel = GetWorld()->SpawnActor<AChurchLevel>(ChurchLevelClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
   AStatisticsGen* StatisticsGen = GetWorld()->SpawnActor<AStatisticsGen>(StatisticsGenClass);
@@ -158,6 +160,7 @@ void AStorePGGameMode::BeginPlay() {
   SaveManager->StorePhaseManager = StorePhaseManager;
   SaveManager->MarketEconomy = MarketEconomy;
   SaveManager->MarketLevel = MarketLevel;
+  SaveManager->ChurchLevel = ChurchLevel;
   SaveManager->Store = Store;
 
   LevelManager->PlayerTags = PlayerCharacter->PlayerTagsComponent;
@@ -169,6 +172,7 @@ void AStorePGGameMode::BeginPlay() {
   LevelManager->CutsceneManager = CutsceneManager;
   LevelManager->Store = Store;
   LevelManager->MarketLevel = MarketLevel;
+  LevelManager->ChurchLevel = ChurchLevel;
 
   PlayerCommand->PlayerCharacter = PlayerCharacter;
   PlayerCommand->HUD = HUD;
@@ -238,6 +242,9 @@ void AStorePGGameMode::BeginPlay() {
   MarketLevel->Market = Market;
   MarketLevel->MarketEconomy = MarketEconomy;
   MarketLevel->PlayerCommand = PlayerCommand;
+
+  ChurchLevel->SaveManager = SaveManager;
+  ChurchLevel->PlayerCommand = PlayerCommand;
 
   AbilityManager->GlobalDataManager = GlobalDataManager;
   AbilityManager->GlobalStaticDataManager = GlobalStaticDataManager;
@@ -316,7 +323,7 @@ void AStorePGGameMode::BeginPlay() {
 
     HUD->SetupInitUIStates();
     HUD->ShowInGameHudWidget();
-    HUD->InitGameEndTransition();
+    HUD->InitGameEndTransition(!StorePGGameInstance->bFromSaveGame);
 
     // * Clearing datatable refs mostly.
     CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);

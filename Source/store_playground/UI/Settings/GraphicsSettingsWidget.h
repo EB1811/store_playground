@@ -22,6 +22,9 @@ public:
   class UComboBoxString* OverallQualityComboBox;
 
   UPROPERTY(meta = (BindWidget))
+  class UComboBoxString* RenderMethodComboBox;
+
+  UPROPERTY(meta = (BindWidget))
   class UComboBoxString* ViewDistanceComboBox;
   UPROPERTY(meta = (BindWidget))
   class UComboBoxString* ShadowQualityComboBox;
@@ -63,6 +66,9 @@ public:
   class USlider* ResolutionScaleSlider;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* ResolutionScaleText;
+
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* WarningText;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* ApplyButton;

@@ -671,11 +671,12 @@ void ASpgHUD::InitGameStartTransition() {
   InitLoadTransitionWidget->AddToViewport(100);
   InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Visible);
 }
-void ASpgHUD::InitGameEndTransition() {
+void ASpgHUD::InitGameEndTransition(bool bIsNewGame) {
   InitLoadTransitionWidget->FadeOutEndFunc = [this]() {
     InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);
     InitLoadTransitionWidget->RemoveFromParent();
     InitLoadTransitionWidget->SetRenderOpacity(1.0f);
   };
-  InitLoadTransitionWidget->FadeOut();
+  if (bIsNewGame) InitLoadTransitionWidget->NewGameFadeOut();
+  else InitLoadTransitionWidget->FadeOut();
 }

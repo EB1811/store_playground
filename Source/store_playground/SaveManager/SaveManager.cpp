@@ -13,6 +13,7 @@
 #include "store_playground/SaveManager/SettingsSaveGame.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/LevelManager.h"
+#include "store_playground/Level/ChurchLevel.h"
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
@@ -88,7 +89,8 @@ auto ASaveManager::LoadSettingsFromDisk() -> USettingsSaveGame* {
         .bShowTutorials = true,
     };
     SettingsSaveGame->SoundSettings = {};
-    SettingsSaveGame->AdvGraphicsSettings = {.AntiAliasingMethod = 0,
+    SettingsSaveGame->AdvGraphicsSettings = {.RenderMethod = 0,
+                                             .AntiAliasingMethod = 0,
                                              .GlobalIlluminationMethod = 0,
                                              .ReflectionMethod = 0,
                                              .bDepthOfField = true,
@@ -140,7 +142,8 @@ auto ASaveManager::CanSave() const -> bool {
   check(StorePhaseManager);
   return StorePhaseManager->StorePhaseState != EStorePhaseState::None &&
          StorePhaseManager->StorePhaseState != EStorePhaseState::MorningBuildMode &&
-         StorePhaseManager->StorePhaseState != EStorePhaseState::ShopOpen;
+         StorePhaseManager->StorePhaseState != EStorePhaseState::ShopOpen &&
+         PlayerCharacter->PlayerBehaviourState != EPlayerState::GameOver;
 }
 
 void ASaveManager::CreateNewSaveGame(int32 SlotIndex) {
@@ -344,6 +347,7 @@ auto ASaveManager::SaveLevels() -> FLevelsSaveData {
   switch (LevelManager->CurrentLevel) {
     case ELevel::Store: Store->SaveStoreLevelState(); break;
     case ELevel::Market: MarketLevel->SaveLevelState(); break;
+    case ELevel::Church: ChurchLevel->SaveLevelState(); break;
     default: break;
   }
 
@@ -378,6 +382,22 @@ auto ASaveManager::SaveLevels() -> FLevelsSaveData {
     LevelsSaveData.ObjectSaveStates.Add(o);
   }
   LevelsSaveData.LevelSaveMap.Add(MarketLevelSaveState.Name, MarketLevelSaveState);
+
+  FLevelSaveState ChurchLevelSaveState;
+  ChurchLevelSaveState.Name = "ChurchLevel";
+  for (auto& Pair : ChurchLevel->LevelState.ActorSaveMap) {
+    ChurchLevelSaveState.ActorIds.Add(Pair.Key);
+    LevelsSaveData.ActorSaveMap.Add(Pair.Key, Pair.Value);
+  }
+  for (auto& Pair : ChurchLevel->LevelState.ComponentSaveMap) {
+    ChurchLevelSaveState.ActorComponentIds.Add(Pair.Key);
+    LevelsSaveData.ComponentSaveMap.Add(Pair.Key, Pair.Value);
+  }
+  for (auto& o : ChurchLevel->LevelState.ObjectSaveStates) {
+    ChurchLevelSaveState.ComponentObjectIds.Add(o.Id);
+    LevelsSaveData.ObjectSaveStates.Add(o);
+  }
+  LevelsSaveData.LevelSaveMap.Add(ChurchLevelSaveState.Name, ChurchLevelSaveState);
 
   return LevelsSaveData;
 }
@@ -417,6 +437,25 @@ void ASaveManager::LoadLevels(FLevelsSaveData LevelsSaveData) {
     MarketLevel->LevelState = MarketLevelState;
 
     // MarketLevel->LoadLevelState();
+  }
+
+  if (LevelsSaveData.LevelSaveMap.Contains("ChurchLevel")) {
+    FLevelSaveState ChurchLevelSaveState = LevelsSaveData.LevelSaveMap["ChurchLevel"];
+    FChurchLevelState ChurchLevelState;
+    for (auto& Id : ChurchLevelSaveState.ActorIds)
+      ChurchLevelState.ActorSaveMap.Add(Id, LevelsSaveData.ActorSaveMap[Id]);
+    for (auto& Id : ChurchLevelSaveState.ActorComponentIds)
+      ChurchLevelState.ComponentSaveMap.Add(Id, LevelsSaveData.ComponentSaveMap[Id]);
+    for (auto& Id : ChurchLevelSaveState.ComponentObjectIds)
+      ChurchLevelState.ObjectSaveStates.Add(*LevelsSaveData.ObjectSaveStates.FindByPredicate(
+          [Id](const FObjectSaveState& ObjectSaveState) { return ObjectSaveState.Id == Id; }));
+
+    ChurchLevel->LevelState.ActorSaveMap.Empty();
+    ChurchLevel->LevelState.ComponentSaveMap.Empty();
+    ChurchLevel->LevelState.ObjectSaveStates.Empty();
+    ChurchLevel->LevelState = ChurchLevelState;
+
+    // ChurchLevel->LoadLevelState();
   }
 }
 

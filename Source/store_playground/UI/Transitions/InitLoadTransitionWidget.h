@@ -13,6 +13,8 @@ class STORE_PLAYGROUND_API UInitLoadTransitionWidget : public UUserWidget {
 public:
   UFUNCTION(BlueprintImplementableEvent)
   void FadeOut();
+  UFUNCTION(BlueprintImplementableEvent)
+  void NewGameFadeOut();
 
   UFUNCTION(BlueprintCallable)
   void OnFadeOutEnded();

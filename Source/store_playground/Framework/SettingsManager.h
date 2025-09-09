@@ -51,6 +51,7 @@ public:
   void SetMusicVolume(float Volume);
   void SetSFXVolume(float Volume);
 
+  void SetRenderMethod(int32 Method);  // * Needs restart.
   void SetAntiAliasingMethod(int32 Method);
   void SetGlobalIlluminationMethod(int32 Method);
   void SetReflectionMethod(int32 Method);

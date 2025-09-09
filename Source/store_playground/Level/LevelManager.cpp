@@ -14,6 +14,7 @@
 #include "store_playground/Player/PlayerCommand.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Level/MarketLevel.h"
+#include "store_playground/Level/ChurchLevel.h"
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
@@ -156,6 +157,9 @@ void ALevelManager::InitLevel(ELevel Level) {
         StorePhaseLightingManager->SetupMarketLevelLighting();
       break;
     case ELevel::Church:
+      check(ChurchLevel);
+      ChurchLevel->LoadLevelState();
+
       if (StorePhaseManager->StorePhaseState == EStorePhaseState::Night)
         StorePhaseLightingManager->SetupChurchLevelNightLighting();
       break;
@@ -173,6 +177,8 @@ void ALevelManager::EnterLevel(ELevel Level) {
   switch (Level) {
     case ELevel::Store: Store->EnterLevel(); break;
     case ELevel::Market: MarketLevel->EnterLevel(); break;
+    case ELevel::Church: ChurchLevel->EnterLevel(); break;
+    default: checkNoEntry();
   }
 }
 
@@ -186,6 +192,11 @@ void ALevelManager::SaveLevelState(ELevel Level) {
       check(MarketLevel);
       MarketLevel->SaveLevelState();
       break;
+    case ELevel::Church:
+      check(ChurchLevel);
+      ChurchLevel->SaveLevelState();
+      break;
+    default: checkNoEntry();
   }
 }
 

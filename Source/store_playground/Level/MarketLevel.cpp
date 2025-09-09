@@ -53,7 +53,7 @@ void AMarketLevel::BeginPlay() {
   Super::BeginPlay();
 
   check(NpcStoreSpawnPointClass && NPCStoreClass && NpcSpawnPointClass && NpcClass && MiniGameSpawnPointClass &&
-        MiniGameClass);
+        MiniGameClass && PickupActorClass);
 }
 
 void AMarketLevel::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -213,7 +213,7 @@ void AMarketLevel::LoadLevelState(bool bIsWeekend) {
     SaveManager->LoadActor(Pickup, ActorSaveState);
     SaveManager->LoadComponent(Pickup->PickupComponent, PickupCSaveState);
 
-    if (Pickup->PickupComponent->bIsPicked) Pickup->PickupComponent->DestroyPickup();
+    Pickup->PickupComponent->DestroyPickup();
   }
 
   // * Dynamic actors.

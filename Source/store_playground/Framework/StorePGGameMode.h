@@ -60,6 +60,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AMarketLevel> MarketLevelClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AChurchLevel> ChurchLevelClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AAbilityManager> AbilityManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStatisticsGen> StatisticsGenClass;

@@ -43,6 +43,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Level Manager")
   class AMarketLevel* MarketLevel;
   UPROPERTY(EditAnywhere, Category = "Level Manager")
+  class AChurchLevel* ChurchLevel;
+  UPROPERTY(EditAnywhere, Category = "Level Manager")
   class AStorePhaseLightingManager* StorePhaseLightingManager;
 
   UPROPERTY(EditAnywhere, Category = "Level Manager")

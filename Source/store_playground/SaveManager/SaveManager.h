@@ -59,6 +59,8 @@ public:
   UPROPERTY()
   class AMarketLevel* MarketLevel;
   UPROPERTY()
+  class AChurchLevel* ChurchLevel;
+  UPROPERTY()
   class AStore* Store;
   UPROPERTY()
   class AMarketEconomy* MarketEconomy;

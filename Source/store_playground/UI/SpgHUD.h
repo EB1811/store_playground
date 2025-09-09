@@ -256,5 +256,5 @@ public:
   UPROPERTY()
   class UInitLoadTransitionWidget* InitLoadTransitionWidget;
   void InitGameStartTransition();
-  void InitGameEndTransition();
+  void InitGameEndTransition(bool bIsNewGame = false);
 };

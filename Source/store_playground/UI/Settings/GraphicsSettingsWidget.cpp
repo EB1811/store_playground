@@ -1,4 +1,5 @@
 #include "GraphicsSettingsWidget.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Framework/SettingsManager.h"
 #include "Components/ComboBoxString.h"
@@ -81,6 +82,12 @@ void UGraphicsSettingsWidget::Apply() {
 
   SettingsManager->SetDLSSFrameGenerationEnabled(DLSSFrameGenerationCheckBox->IsChecked());
 
+  WarningText->SetVisibility(ESlateVisibility::Hidden);
+  if (RenderMethodComboBox->GetSelectedIndex() != SettingsManager->AdvGraphicsSettings.RenderMethod) {
+    SettingsManager->SetRenderMethod(RenderMethodComboBox->GetSelectedIndex());
+    WarningText->SetVisibility(ESlateVisibility::Visible);
+  }
+
   SettingsManager->SaveSettings();
 }
 
@@ -158,6 +165,8 @@ void UGraphicsSettingsWidget::RefreshUI() {
   PopulateQualityComboBox(ShadingQualityComboBox, GameSettings->GetShadingQuality());
   PopulateQualityComboBox(AntiAliasingComboBox, GameSettings->GetAntiAliasingQuality());
 
+  RenderMethodComboBox->SetSelectedIndex(SettingsManager->AdvGraphicsSettings.RenderMethod);
+
   static IConsoleVariable* GetAA = IConsoleManager::Get().FindConsoleVariable(TEXT("r.AntiAliasingMethod"));
   int32 AAIndex = GetAA->GetInt();
   switch (AAIndex) {
@@ -218,6 +227,11 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   OverallQualityComboBox->AddOption(TEXT("Epic"));
   OverallQualityComboBox->AddOption(TEXT("Custom"));
 
+  RenderMethodComboBox->ClearOptions();
+  RenderMethodComboBox->AddOption(TEXT("Default"));
+  RenderMethodComboBox->AddOption(TEXT("DirectX"));
+  RenderMethodComboBox->AddOption(TEXT("Vulkan"));
+
   AntiAliasingMethodComboBox->ClearOptions();
   AntiAliasingMethodComboBox->AddOption(TEXT("None"));
   AntiAliasingMethodComboBox->AddOption(TEXT("FXAA"));
@@ -233,6 +247,9 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   ReflectionMethodComboBox->AddOption(TEXT("None"));
   ReflectionMethodComboBox->AddOption(TEXT("Lumen"));
   ReflectionMethodComboBox->AddOption(TEXT("Screen Space"));
+
+  WarningText->SetText(FText::FromString(TEXT("Restart required.")));
+  WarningText->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGraphicsSettingsWidget::SetupUIActionable() {
