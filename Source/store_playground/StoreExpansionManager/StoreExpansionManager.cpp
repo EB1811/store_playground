@@ -6,6 +6,7 @@ void AStoreExpansionManager::BeginPlay() { Super::BeginPlay(); }
 
 void AStoreExpansionManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+// TODO: Move all items in displays to inventory upon expansion.
 void AStoreExpansionManager::SelectExpansion(FName StoreExpansionLevelID) {
   FStoreExpansionData* ExpansionData = StoreExpansions.FindByPredicate(
       [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevelID == StoreExpansionLevelID; });
