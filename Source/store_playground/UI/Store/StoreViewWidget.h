@@ -45,6 +45,9 @@ public:
   class USoundBase* HideSound;
 
   UPROPERTY(EditAnywhere)
+  const class ALevelManager* LevelManager;
+
+  UPROPERTY(EditAnywhere)
   EStoreViewTab ActiveTab;
   void SwitchTab(EStoreViewTab Tab);
 
@@ -53,6 +56,7 @@ public:
 
   void RefreshUI();
   void InitUI(FInUIInputActions InUIInputActions,
+              const class ALevelManager* _LevelManager,
               const class ADayManager* DayManager,
               const class AStorePhaseManager* StorePhaseManager,
               const class AMarketEconomy* MarketEconomy,

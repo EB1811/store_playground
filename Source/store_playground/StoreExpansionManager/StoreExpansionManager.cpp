@@ -1,20 +1,28 @@
 #include "StoreExpansionManager.h"
+#include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/Inventory/InventoryComponent.h"
 
 void AStoreExpansionManager::BeginPlay() { Super::BeginPlay(); }
 
 void AStoreExpansionManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-// TODO: Move all items in displays to inventory upon expansion.
 void AStoreExpansionManager::SelectExpansion(FName StoreExpansionLevelID) {
   FStoreExpansionData* ExpansionData = StoreExpansions.FindByPredicate(
       [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevelID == StoreExpansionLevelID; });
   check(ExpansionData);
   check(Store->Money >= ExpansionData->Price && !ExpansionData->bIsLocked);
+  check(LevelManager->CurrentLevel == ELevel::Store);
+
+  Store->MoneySpent(ExpansionData->Price);
+  for (auto StockItem : Store->StoreStockItems)
+    TransferItem(StockItem.BelongingStockInventoryC, PlayerInventoryC, StockItem.Item, StockItem.Item->Quantity);
+
+  if (StorePhaseManager->StorePhaseState == EStorePhaseState::MorningBuildMode) StorePhaseManager->ToggleBuildMode();
 
   CurrentStoreExpansionLevelID = StoreExpansionLevelID;
-  LevelManager->ExpandStoreSwitchLevel();  // TODO: Add post load callback for UI.
+  LevelManager->ExpandStoreSwitchLevel();
 }
 
 void AStoreExpansionManager::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {

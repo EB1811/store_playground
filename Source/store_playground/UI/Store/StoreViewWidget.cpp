@@ -9,6 +9,7 @@
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
 #include "store_playground/UI/Store/StoreDetailsWidget.h"
 #include "store_playground/UI/Store/StoreExpansion/StoreExpansionsListWidget.h"
+#include "store_playground/Level/LevelManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -33,6 +34,11 @@ void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
       UnlockButton->SetVisibility(ESlateVisibility::Hidden);
       break;
     case EStoreViewTab::Expansion:
+      if (LevelManager->CurrentLevel != ELevel::Store) {
+        ActiveTab = EStoreViewTab::Details;
+        return;
+      }
+
       StoreDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
       StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Visible);
       UnlockButton->SetVisibility(ESlateVisibility::Visible);
@@ -52,6 +58,7 @@ void UStoreViewWidget::RefreshUI() {
 }
 
 void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
+                              const class ALevelManager* _LevelManager,
                               const ADayManager* DayManager,
                               const AStorePhaseManager* StorePhaseManager,
                               const AMarketEconomy* MarketEconomy,
@@ -63,11 +70,17 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                               AStore* Store,
                               AStoreExpansionManager* StoreExpansionManager,
                               std::function<void()> _CloseWidgetFunc) {
-  check(DayManager && StorePhaseManager && MarketEconomy && Market && StatisticsGen && UpgradeManager &&
-        AbilityManager && PlayerInventoryC && Store && StoreExpansionManager && _CloseWidgetFunc);
+  check(_LevelManager && DayManager && StorePhaseManager && MarketEconomy && Market && StatisticsGen &&
+        UpgradeManager && AbilityManager && PlayerInventoryC && Store && StoreExpansionManager && _CloseWidgetFunc);
+
+  LevelManager = _LevelManager;
 
   TArray<FTopBarTab> TopBarTabs = {};
-  for (auto Tab : TEnumRange<EStoreViewTab>()) TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Tab)});
+  for (auto Tab : TEnumRange<EStoreViewTab>()) {
+    if (Tab == EStoreViewTab::Expansion && LevelManager->CurrentLevel != ELevel::Store) continue;
+
+    TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Tab)});
+  }
   auto TabSelectedFunc = [this](FText TabText) {
     EStoreViewTab SelectedTab = EStoreViewTab::Details;
     for (auto Tab : TEnumRange<EStoreViewTab>()) {

@@ -82,21 +82,6 @@ void ABuildable::SetToNone() {
   InteractionComponent->InteractionType = EInteractionType::Buildable;
 }
 
-#if WITH_EDITOR
-void ABuildable::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) {
-  Super::PostEditChangeProperty(PropertyChangedEvent);
-
-  const FName ChangedPropertyName = PropertyChangedEvent.GetPropertyName();
-  if (ChangedPropertyName == GET_MEMBER_NAME_CHECKED(ABuildable, BuildableType)) {
-    switch (BuildableType) {
-      case EBuildableType::StockDisplay: SetToStockDisplay(); break;
-      case EBuildableType::Decoration: SetToDecoration(); break;
-      default: SetToNone();
-    }
-  }
-}
-#endif
-
 void LoadBuildableSaveState(ABuildable* Buildable) {
   switch (Buildable->BuildableType) {
     case EBuildableType::StockDisplay: Buildable->SetToStockDisplay(); break;

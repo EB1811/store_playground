@@ -201,6 +201,9 @@ void ALevelManager::SaveLevelState(ELevel Level) {
 }
 
 void ALevelManager::ExpandStoreSwitchLevel() {
+  Store->StoreLevelState.ActorSaveMap.Empty();
+  Store->StoreLevelState.ComponentSaveMap.Empty();
+  Store->StoreLevelState.ObjectSaveStates.Empty();
   LevelReadyFunc = [this]() { PlayerCommand->ResetPosition(); };
   LevelUnloadedFunc = [this]() {
     LevelNames[ELevel::Store] = StoreExpansionLevelMap[StoreExpansionManager->CurrentStoreExpansionLevelID];

@@ -207,7 +207,9 @@ void AStorePGGameMode::BeginPlay() {
       {EUpgradeEffectSystem::StorePhaseManager, StorePhaseManager->Upgradeable},
   };
 
+  StoreExpansionManager->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;
   StoreExpansionManager->LevelManager = LevelManager;
+  StoreExpansionManager->StorePhaseManager = StorePhaseManager;
   StoreExpansionManager->Store = Store;
 
   StatisticsGen->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;

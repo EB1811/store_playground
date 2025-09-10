@@ -58,10 +58,6 @@ public:
   void SetToStockDisplay();
   void SetToDecoration();
   void SetToNone();
-
-#if WITH_EDITOR
-  virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
 };
 
 void LoadBuildableSaveState(ABuildable* Buildable);

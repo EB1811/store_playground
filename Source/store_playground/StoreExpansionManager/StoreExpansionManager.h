@@ -39,7 +39,11 @@ public:
   virtual void Tick(float DeltaTime) override;
 
   UPROPERTY(EditAnywhere)
+  class UInventoryComponent* PlayerInventoryC;
+  UPROPERTY(EditAnywhere)
   class ALevelManager* LevelManager;
+  UPROPERTY(EditAnywhere)
+  class AStorePhaseManager* StorePhaseManager;
   UPROPERTY(EditAnywhere)
   class AStore* Store;
 
