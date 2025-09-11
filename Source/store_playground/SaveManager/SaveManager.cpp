@@ -155,7 +155,7 @@ void ASaveManager::CreateNewSaveGame(int32 SlotIndex) {
   CurrentSaveGame = Cast<UMySaveGame>(UGameplayStatics::CreateSaveGameObject(UMySaveGame::StaticClass()));
   check(CurrentSaveGame);
 
-  CurrentSaveGame->Initialize(SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(SlotIndex), SlotIndex);
+  CurrentSaveGame->Initialize(SaveManagerParams.SaveSlotNamePrefix + FString::FromInt(SlotIndex + 1), SlotIndex);
   SaveCurrentSlotToDisk();
 
   if (SlotIndex >= SaveSlotListSaveGame->SaveSlotList.Num())

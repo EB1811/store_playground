@@ -87,6 +87,8 @@ public:
   UPROPERTY()
   class AMarketEconomy* MarketEconomy;
 
+  UPROPERTY(EditAnywhere)
+  bool bSkipIntro;
   void NewGameIntro();
 
   UFUNCTION(BlueprintCallable, Category = "GameMode")

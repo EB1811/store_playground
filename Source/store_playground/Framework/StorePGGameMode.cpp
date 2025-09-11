@@ -341,6 +341,7 @@ void AStorePGGameMode::NewGameIntro() {
     PlayerCharacter->PlayerTagsComponent->ConfigurationTags.AppendTags(IntroTutorialTag);
   }
 
+  if (bSkipIntro) return;
   auto CutsceneTags = StringTagsToContainer({FName("Cutscene.GameIntro")});
   auto res = CutsceneManager->PlayPotentialCutscene(CutsceneTags);
 }

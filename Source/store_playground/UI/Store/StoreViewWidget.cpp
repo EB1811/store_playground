@@ -24,8 +24,6 @@ void UStoreViewWidget::NativeOnInitialized() {
 }
 
 void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
-  if (ActiveTab == Tab) return;
-
   ActiveTab = Tab;
   switch (ActiveTab) {
     case EStoreViewTab::Details:
@@ -99,6 +97,7 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                              PlayerInventoryC, StatisticsGen, Store);
   StoreExpansionsListWidget->InitUI(Store, StoreExpansionManager, [this]() { CloseWidgetFunc(); });
 
+  UnlockButton->SetVisibility(ESlateVisibility::Hidden);
   UnlockButton->ActionText->SetText(FText::FromString("Unlock (Hold)"));
   UnlockButton->CommonActionWidget->SetEnhancedInputAction(InUIInputActions.AdvanceUIHoldAction);
   BackButton->ActionText->SetText(FText::FromString("Back"));
