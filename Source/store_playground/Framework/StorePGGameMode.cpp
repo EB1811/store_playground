@@ -281,6 +281,7 @@ void AStorePGGameMode::BeginPlay() {
 
   NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;
   NewsGen->Market = Market;
+  NewsGen->StatisticsGen = StatisticsGen;
 
   UE_LOG(LogTemp, Log, TEXT("Initializing Game..."));
 

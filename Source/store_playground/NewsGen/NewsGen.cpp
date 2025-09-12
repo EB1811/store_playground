@@ -2,17 +2,78 @@
 #include "HAL/Platform.h"
 #include "Logging/LogVerbosity.h"
 #include "NewsGenDataStructs.h"
+#include "UObject/NameTypes.h"
+#include "store_playground/Item/ItemBase.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
 #include "store_playground/Market/Market.h"
 #include "store_playground/Framework/UtilFuncs.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "Kismet/GameplayStatics.h"
+
+inline float GetItemPriceTrend(TArray<float> PriceHistory) {
+  if (PriceHistory.Num() < 2) return 0.f;
+
+  // Percentage price change fist and last.
+  return (PriceHistory.Last() - PriceHistory[0]) / PriceHistory[0];
+}
 
 ANewsGen::ANewsGen() { PrimaryActorTick.bCanEverTick = false; }
 
 void ANewsGen::BeginPlay() { Super::BeginPlay(); }
 
 void ANewsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+auto ANewsGen::GetItemPriceTrendArticle(float PriceTrend, FName ItemId) -> FArticle {
+  FArticle SelectedArticle;
+
+  if (PriceTrend > 0.15f) {
+    TArray<FArticle> PriceIncreaseArticles =
+        PriceTrend > 0.15f && PriceTrend <= 0.5f
+            ? GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
+                return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceIncrease.Mid"));
+              })
+            : GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
+                return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceIncrease.High"));
+              });
+    check(PriceIncreaseArticles.Num() > 0);
+
+    SelectedArticle = GetWeightedRandomItem<FArticle>(PriceIncreaseArticles,
+                                                      [](const auto& Article) { return Article.AppearWeight; });
+
+  } else if (PriceTrend < -0.15f) {
+    TArray<FArticle> PriceDecreaseArticles =
+        PriceTrend < -0.15f && PriceTrend >= -0.5f
+            ? GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
+                return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceDecrease.Mid"));
+              })
+            : GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
+                return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceDecrease.High"));
+              });
+    check(PriceDecreaseArticles.Num() > 0);
+
+    SelectedArticle = GetWeightedRandomItem<FArticle>(PriceDecreaseArticles,
+                                                      [](const auto& Article) { return Article.AppearWeight; });
+
+  } else {
+    TArray<FArticle> PriceStableArticles =
+        GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
+          return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceStable"));
+        });
+    check(PriceStableArticles.Num() > 0);
+
+    SelectedArticle =
+        GetWeightedRandomItem<FArticle>(PriceStableArticles, [](const auto& Article) { return Article.AppearWeight; });
+  }
+
+  auto ItemName = Market->AllItemsMap[ItemId]->TextData.Name;
+  SelectedArticle.ArticleID = FName(*FString::Printf(TEXT("PriceTrend_%s_%s_%f"), *ItemId.ToString(),
+                                                     *SelectedArticle.ArticleID.ToString(), FMath::FRand()));
+  SelectedArticle.TextData.Body =
+      FText::FromString(SelectedArticle.TextData.Body.ToString().Replace(TEXT("{ItemName}"), *ItemName.ToString()));
+
+  return SelectedArticle;
+}
 
 void ANewsGen::GenDaysRandomArticles() {
   check(GlobalStaticDataManager && Market);
@@ -69,6 +130,23 @@ void ANewsGen::GenDaysRandomArticles() {
     });
     if (PossibleArticles.Num() <= 0) return;
 
+    // Price trend based articles.
+    int32 PriceTrendArticleNum = FMath::RandRange(0, 1);
+    for (int32 j = 0; j < PriceTrendArticleNum; j++) {
+      if (TotalLayoutSpace <= 0) break;
+
+      FItemStatistics RandomItemStat =
+          StatisticsGen->ItemStatisticsMap.Array()[FMath::RandRange(0, StatisticsGen->ItemStatisticsMap.Num() - 1)]
+              .Value;
+      float PriceTrend = GetItemPriceTrend(RandomItemStat.PriceHistory);
+      UE_LOG(LogTemp, Log, TEXT("Selected item %s price trend: %f"), *RandomItemStat.ItemId.ToString(), PriceTrend);
+
+      FArticle SelectedArticle = GetItemPriceTrendArticle(PriceTrend, RandomItemStat.ItemId);
+      DaysArticles.Add(SelectedArticle);
+
+      TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
+    }
+
     while (TotalLayoutSpace > 0 && PossibleArticles.Num() > 0) {
       TArray<FArticle> SizedArticles =
           PossibleArticles.FilterByPredicate([this, TotalLayoutSpace](const FArticle& Article) {
@@ -85,11 +163,25 @@ void ANewsGen::GenDaysRandomArticles() {
 
       PossibleArticles.RemoveAllSwap(
           [&SelectedArticle](const FArticle& Article) { return Article.ArticleID == SelectedArticle.ArticleID; });
-
       TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
       UE_LOG(LogTemp, Log, TEXT("Selected article: %s, size: %d, space left: %d"),
              *SelectedArticle.ArticleID.ToString(), NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size],
              TotalLayoutSpace);
+    }
+
+    // Fill remaining space with price trend articles if no other articles fit.
+    if (TotalLayoutSpace > 0 && PossibleArticles.Num() <= 0) {
+      while (TotalLayoutSpace > 0) {
+        FItemStatistics RandomItemStat =
+            StatisticsGen->ItemStatisticsMap.Array()[FMath::RandRange(0, StatisticsGen->ItemStatisticsMap.Num() - 1)]
+                .Value;
+        float PriceTrend = GetItemPriceTrend(RandomItemStat.PriceHistory);
+
+        FArticle SelectedArticle = GetItemPriceTrendArticle(PriceTrend, RandomItemStat.ItemId);
+        DaysArticles.Add(SelectedArticle);
+
+        TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
+      }
     }
   }
 }

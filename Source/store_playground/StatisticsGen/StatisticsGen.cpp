@@ -66,6 +66,7 @@ void AStatisticsGen::ItemPriceChange(const FName ItemId, const float NewPrice) {
     ItemStatisticsMap[ItemId].PriceHistory.Reserve(StatisticsGenParams.ItemPriceHistoryCount);
   }
 
+  ItemStatisticsMap[ItemId].ItemId = ItemId;
   ItemStatisticsMap[ItemId].PriceHistory.Add(NewPrice);
 
   if (ItemStatisticsMap[ItemId].PriceHistory.Num() > StatisticsGenParams.ItemPriceHistoryCount)

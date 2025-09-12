@@ -31,6 +31,8 @@ public:
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   const class AMarket* Market;
+  UPROPERTY(EditAnywhere, Category = "NewsGen")
+  const class AStatisticsGen* StatisticsGen;
 
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   FNewsGenParams NewsGenParams;
@@ -44,6 +46,8 @@ public:
   TArray<FArticle> DaysArticles;
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   bool bNewArticles;
+
+  auto GetItemPriceTrendArticle(float PriceTrend, FName ItemId) -> FArticle;
 
   void GenDaysRandomArticles();
 
