@@ -307,7 +307,7 @@ void AMarketEconomy::PerformEconomyTick() {
     TArray<TTuple<int32, float>> NewWealthTypePopIndexes = {};
     for (int32 i = 0; i < CustomerPops.Num(); i++)
       if (CustomerPops[i].WealthType == NewWealthType && CustomerPops[i].PopType == CustomerPop.PopType &&
-          PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
+          PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita * 1.3f)
         NewWealthTypePopIndexes.Add(
             {i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
     if (NewWealthTypePopIndexes.Num() <= 0) continue;
@@ -332,7 +332,7 @@ void AMarketEconomy::PerformEconomyTick() {
     TArray<TTuple<int32, float>> NewWealthTypePopIndexes = {};
     for (int32 i = 0; i < CustomerPops.Num(); i++)
       if (CustomerPops[i].WealthType == NewWealthType && CustomerPops[i].PopType == CustomerPop.PopType &&
-          PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
+          PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita * 0.7f)
         NewWealthTypePopIndexes.Add(
             {i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
     if (NewWealthTypePopIndexes.Num() <= 0) continue;
@@ -563,7 +563,8 @@ void AMarketEconomy::InitializeEconomyData() {
     for (auto EconType : CustomerPops[i].ItemEconTypes) {
       float TotalNeeds = 0;
       for (auto WealthType : TEnumRange<EItemWealthType>())
-        TotalNeeds += float(CustomerPops[i].ItemNeeds[WealthType]) * float(PopEconDataArray[i].Population);
+        TotalNeeds += (float(CustomerPops[i].ItemNeeds[WealthType]) / float(CustomerPops[i].ItemEconTypes.Num())) *
+                      float(PopEconDataArray[i].Population);
       for (auto WealthType : TEnumRange<EItemWealthType>())
         AverageNeedsMap[{EconType, WealthType}] += TotalNeeds * (CustomerPops[i].ItemSpendPercent[WealthType] / 100.0f);
     }
@@ -586,6 +587,14 @@ void AMarketEconomy::InitializeEconomyData() {
       AverageUnitPriceMap[{EconType, WealthType}] /= ItemCountMap[{EconType, WealthType}];
     }
   }
+  for (auto& Pair : AverageNeedsMap)
+    UE_LOG(LogTemp, Warning, TEXT("AverageNeedsMap EconType: %s, WealthType: %s, Needs: %f"),
+           *UEnum::GetDisplayValueAsText(Pair.Key.Get<0>()).ToString(),
+           *UEnum::GetDisplayValueAsText(Pair.Key.Get<1>()).ToString(), Pair.Value);
+  for (auto& Pair : AverageUnitPriceMap)
+    UE_LOG(LogTemp, Warning, TEXT("AverageUnitPriceMap EconType: %s, WealthType: %s, Price: %f"),
+           *UEnum::GetDisplayValueAsText(Pair.Key.Get<0>()).ToString(),
+           *UEnum::GetDisplayValueAsText(Pair.Key.Get<1>()).ToString(), Pair.Value);
 
   float BaseTotalMoney = 0;
   for (int32 i = 0; i < CustomerPops.Num(); i++)
