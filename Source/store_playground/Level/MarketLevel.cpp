@@ -535,7 +535,7 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
 
     Npc->DialogueComponent->SpeakerName = RandomNpcData.CustomerName;
     Npc->DialogueComponent->DialogueComponentType = EDialogueComponentType::Random;
-    int32 RandomDialogueCount = FMath::RandRange(2, 3);
+    int32 RandomDialogueCount = FMath::RandRange(1, 3);
 
     // if (FMath::FRand() < 0.1) Npc->DynamicTalkingWidgetComponent->SetVisibility(true, true);
 

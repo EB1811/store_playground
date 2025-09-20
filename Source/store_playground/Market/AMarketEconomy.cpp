@@ -64,7 +64,7 @@ AMarketEconomy::AMarketEconomy() {
   EconomyParams.LuxaryNeedsPercent = 80.0f;
   TotalPopulation = 0;
   TotalWealth = 0;
-  TotaBought = 0;
+  TotalBought = 0;
 
   SetupUpgradeable();
 }
@@ -104,14 +104,19 @@ void AMarketEconomy::PerformEconomyTick() {
   for (int32 i = 0; i < CustomerPops.Num(); i++)
     TotalWealth += PopEconDataArray[i].MGen * PopEconDataArray[i].Population;
   TMap<FName, float> PopWealthMap;
-  for (int32 i = 0; i < CustomerPops.Num(); i++)  // %share = diff(pop ratio, base %)
-    PopWealthMap.Add(CustomerPops[i].ID, TotalWealth *
-                                             ((PopEconDataArray[i].MSharePercent / 100.0f) +
-                                              (float(PopEconDataArray[i].Population) / float(TotalPopulation))) *
-                                             0.5f);
+  for (int32 i = 0; i < CustomerPops.Num(); i++) {
+    // lerp get lerp between MGen% and Pop%.
+    float PopulationPercent = float(PopEconDataArray[i].Population) / float(TotalPopulation);
+    float MGenPercent = float(PopEconDataArray[i].MGen * PopEconDataArray[i].Population) / TotalWealth;
+    float PopLerp = FMath::Lerp(PopulationPercent, MGenPercent, BehaviorParams.MGenPopRatioShareWeighting);
+    // lerp between base Base MSharePercent and PopLerp.
+    float BasePercent = PopEconDataArray[i].MSharePercent / 100.0f;
+    PopWealthMap.Add(CustomerPops[i].ID,
+                     TotalWealth * (FMath::Lerp(PopLerp, BasePercent, BehaviorParams.BaseShareWeighting)));
+  }
 
   // Calculate the amount of total goods bought, and the needs fulfilled for each pop.
-  TotaBought = 0;
+  TotalBought = 0;
   TMap<TTuple<EItemEconType, EItemWealthType>, float> TotalBoughtMap;
   for (auto EconType : TEnumRange<EItemEconType>())
     for (auto WealthType : TEnumRange<EItemWealthType>()) TotalBoughtMap.Add({EconType, WealthType}, 0);
@@ -129,7 +134,7 @@ void AMarketEconomy::PerformEconomyTick() {
     PopEconData.ItemNeedsFulfilled.Empty();
     for (auto WealthType : TEnumRange<EItemWealthType>()) PopEconData.ItemNeedsFulfilled.Add(WealthType, 0);
 
-    float PopTotalBought = 0;
+    float PopTotalValueBought = 0;
 
     TArray<EItemEconType> PopEconTypes = CustomerPop.ItemEconTypes;
     for (auto EconType : PopEconTypes) {
@@ -194,8 +199,8 @@ void AMarketEconomy::PerformEconomyTick() {
 
       // Update total bought map.
       for (auto WealthType : TEnumRange<EItemWealthType>()) {
-        PopTotalBought += PopBoughtMap[WealthType];
-        TotaBought += PopBoughtMap[WealthType];
+        PopTotalValueBought += PopBoughtMap[WealthType] * (EconTypePricesMap[EconType].WealthTypePricesMap[WealthType]);
+        TotalBought += PopBoughtMap[WealthType];
         PopEconData.ItemNeedsFulfilled[WealthType] +=
             PopBoughtMap[WealthType] / (CustomerPop.ItemNeeds[WealthType] * PopEconData.Population);
 
@@ -219,11 +224,12 @@ void AMarketEconomy::PerformEconomyTick() {
       float LuxuryBucketNeeds = CustomerPop.ItemNeeds[EItemWealthType::Luxury] * PopEconData.Population / 5;
       float LuxaryNeedsPercent = FMath::Max(EconomyParams.LuxaryNeedsPercent / 100.0f, 0.01f);
       for (float Bought : LuxuryBoughtSplit)
-        if (FMath::Max(Bought, 0.1f) / FMath::Max(LuxuryBucketNeeds, 1.0f) > LuxaryNeedsPercent)
+        if (FMath::Max(Bought, 0.1f) / FMath::Max(LuxuryBucketNeeds, 1.0f) > LuxaryNeedsPercent &&
+            DemotionConsiderPopIndexes.Find(i) == INDEX_NONE)
           PromotionConsiderPopIndexes.Add(i);
     }
 
-    PopEconData.GoodsBoughtPerCapita = PopTotalBought / PopEconData.Population;
+    PopEconData.GoodsBoughtPerCapita = PopTotalValueBought / PopEconData.Population;
     for (auto WealthType : TEnumRange<EItemWealthType>())
       PopEconData.ItemNeedsFulfilled[WealthType] /= PopEconTypes.Num();
   }
@@ -453,7 +459,7 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
 }
 
 void AMarketEconomy::InitializeEconomyData() {
-  int32 TotalMShare = 0;
+  float TotalMShare = 0;
   TMap<EPopType, TMap<EPopWealthType, FBasePopTypeEconomyData>> PopEconGenDataMap;
   TArray<FBasePopTypeToEconomyRow*> BasePopTypeToEconomyRows;
   BasePopTypeToEconomyTable->GetAllRows<FBasePopTypeToEconomyRow>("", BasePopTypeToEconomyRows);
@@ -481,13 +487,12 @@ void AMarketEconomy::InitializeEconomyData() {
   //              *UEnum::GetDisplayValueAsText(PopType).ToString());
   // }
 
-  UE_LOG(LogTemp, Warning, TEXT("Total MShare: %d"), TotalMShare);
-  UE_LOG(LogTemp, Warning, TEXT("Total MShare: %f"), 100. / (float)TotalMShare);
+  UE_LOG(LogTemp, Warning, TEXT("Total MShare: %f"), TotalMShare);
 
   // Equalize all percentages.
   for (auto& PopType : PopEconGenDataMap) {
     for (auto& PopEconGen : PopType.Value) {
-      if (TotalMShare != 100) PopEconGen.Value.MSharePercent *= 100. / (float)TotalMShare;
+      if (TotalMShare != 100) PopEconGen.Value.MSharePercent *= 100. / TotalMShare;
 
       int32 TotalItemSpend = 0;
       for (auto& ItemSpend : PopEconGen.Value.ItemSpendPercent) TotalItemSpend += ItemSpend.Value;

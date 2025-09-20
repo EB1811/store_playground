@@ -31,6 +31,11 @@ struct FEconomyBehaviorParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, SaveGame)
+  float MGenPopRatioShareWeighting;  // 0 = only pop ratio, 1 = only money gen share.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float BaseShareWeighting;  // 0 = only pop ratio (using MGenPopRatioShareWeighting), 1 = only base MSharePercent.
+
+  UPROPERTY(EditAnywhere, SaveGame)
   float PromotionChance;  // Promote to a higher wealth type.
   UPROPERTY(EditAnywhere, SaveGame)
   float DemotionChance;  // Demote to a lower wealth type.
@@ -81,7 +86,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Economy")
   float TotalWealth;
   UPROPERTY(EditAnywhere, Category = "Economy")
-  float TotaBought;
+  float TotalBought;
 
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   FEconomyBehaviorParams BehaviorParams;

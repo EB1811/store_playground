@@ -164,8 +164,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->CustomerAIComponent->NegotiationAIDetails.MoneyToSpend = MoneyToSpend;
   UniqueCustomer->CustomerAIComponent->NegotiationAIDetails.AcceptancePercentage = AcceptancePercentage;
   UniqueCustomer->CustomerAIComponent->NegotiationAIDetails.AcceptanceFalloffMulti =
-      ManagerParams.AttitudeBaseAcceptFalloffMultiMap[UniqueCustomer->CustomerAIComponent->Attitude] *
-      BehaviorParams.AcceptanceFalloffMulti;
+      ManagerParams.BaseAcceptFalloffMulti * BehaviorParams.AcceptanceFalloffMulti;
   UniqueCustomer->CustomerAIComponent->NegotiationAIDetails.HagglingCount =
       UniqueNpcData.NegotiationData.MaxHagglingCount;
 
@@ -222,7 +221,7 @@ void ACustomerAIManager::SpawnCustomers() {
           ? FMath::Clamp(Store->StoreStockItems.Num() / (float)Store->StockDisplayCount, 0.0f, 1.0f)
           : 0.0f;
   int32 MaxCustomers =
-      FMath::RoundToInt(BehaviorParams.MaxCustomers * FMath::Clamp(FilledStockPercent * 1.5f, 0.75f, 1.25f));
+      FMath::RoundToInt(BehaviorParams.MaxCustomers * FMath::Clamp(FilledStockPercent * 1.5f, 0.85f, 1.15f));
   if (AllCustomers.Num() >= MaxCustomers) return;
 
   ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];
@@ -283,7 +282,8 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->Attitude = RandomCustomerData.InitAttitude;
     Customer->CustomerAIComponent->Tags = RandomCustomerData.Tags;
     Customer->CustomerAIComponent->AvailableMoney =
-        (PopMoneySpendData->Money / PopMoneySpendData->Population) * BehaviorParams.AvailableMoneyMulti;
+        ((PopMoneySpendData->Money / PopMoneySpendData->Population) * ManagerParams.PopMoneyToCustomerMoneyMulti) *
+        BehaviorParams.AvailableMoneyMulti;
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
@@ -545,21 +545,10 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomerPC* Customer) {
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 
   float MoneyToSpend = CustomerAI->AvailableMoney;
-  if (CustomerAI->Attitude == ECustomerAttitude::Friendly) MoneyToSpend *= FMath::FRandRange(1.0f, 1.5);
-  else if (CustomerAI->Attitude == ECustomerAttitude::Hostile) MoneyToSpend *= FMath::FRandRange(0.5f, 1.0f);
-  // float AcceptanceMin = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 5.0f
-  //                       : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 0.0f
-  //                                                                            : 2.5f;
-  // float AcceptanceMax = CustomerAI->Attitude == ECustomerAttitude::Friendly  ? 25.0f
-  //                       : CustomerAI->Attitude == ECustomerAttitude::Hostile ? 10.0f
-  //                                                                            : 15.0f;
-  float AcceptanceMin =
-      ManagerParams.AttitudeBaseAcceptMinMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceMinMulti;
-  float AcceptanceMax =
-      ManagerParams.AttitudeBaseAcceptMaxMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceMaxMulti;
+  float AcceptanceMin = ManagerParams.BaseAcceptMin * BehaviorParams.AcceptanceMinMulti;
+  float AcceptanceMax = ManagerParams.BaseAcceptMax * BehaviorParams.AcceptanceMaxMulti;
   float AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
-  float AcceptanceFalloffMulti =
-      ManagerParams.AttitudeBaseAcceptFalloffMultiMap[CustomerAI->Attitude] * BehaviorParams.AcceptanceFalloffMulti;
+  float AcceptanceFalloffMulti = ManagerParams.BaseAcceptFalloffMulti * BehaviorParams.AcceptanceFalloffMulti;
   int32 HagglingCount = FMath::Max(BehaviorParams.InitHagglingCount, 1);
 
   for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)

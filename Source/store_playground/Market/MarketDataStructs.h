@@ -135,7 +135,7 @@ struct FPopEconData {
   float MSharePercent;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  float GoodsBoughtPerCapita;  // * Total goods bought / population.
+  float GoodsBoughtPerCapita;  // * Value of total goods bought / population.
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<EItemWealthType, float> ItemNeedsFulfilled;
 };

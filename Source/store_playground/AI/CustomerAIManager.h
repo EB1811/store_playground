@@ -33,14 +33,17 @@ struct FCustomerAIManagerParams {
   int32 RecentNpcSpawnedKeepTime;
 
   UPROPERTY(EditAnywhere)
+  float PopMoneyToCustomerMoneyMulti;
+
+  UPROPERTY(EditAnywhere)
   float PickItemFrequency;
 
   UPROPERTY(EditAnywhere)
-  TMap<ECustomerAttitude, float> AttitudeBaseAcceptMinMap;
+  float BaseAcceptMin;
   UPROPERTY(EditAnywhere)
-  TMap<ECustomerAttitude, float> AttitudeBaseAcceptMaxMap;
+  float BaseAcceptMax;
   UPROPERTY(EditAnywhere)
-  TMap<ECustomerAttitude, float> AttitudeBaseAcceptFalloffMultiMap;
+  float BaseAcceptFalloffMulti;
 };
 
 USTRUCT()

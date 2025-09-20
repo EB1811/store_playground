@@ -7,6 +7,7 @@
 #include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/UI/Newspaper/PopDetailsWidget.h"
 #include "store_playground/UI/Newspaper/PopTypeWrapBox.h"
+#include "store_playground/Item/ItemDataStructs.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
@@ -29,7 +30,7 @@ inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconD
   if (GivenPopGoodsBoughtPercentage < 1.5f) return "Low";
   if (GivenPopGoodsBoughtPercentage < 3.0f) return "Middle";
   if (GivenPopGoodsBoughtPercentage < 6.0f) return "High";
-  if (GivenPopGoodsBoughtPercentage < 12.0f) return "Very High";
+  if (GivenPopGoodsBoughtPercentage < 10.0f) return "Very High";
   return "Immense";
 }
 inline auto GetItemSpendText(TMap<EItemWealthType, float> ItemSpendPercent) -> FString {
@@ -132,10 +133,13 @@ void UEconomyDetailsWidget::RefreshUI() {
           FText::FromString(FString::Printf(TEXT("Population: %d"), PopEconData.Population)));
       PopDetailsWidget->ItemSpendText->SetText(
           FText::FromString("Spends On: " + GetItemSpendText(Pop.ItemSpendPercent)));
-      PopDetailsWidget->ItemEconTypesText->SetText(FText::FromString(
-          "Goods Type: " + FString::JoinBy(Pop.ItemEconTypes, TEXT(" & "), [](const EItemEconType& EconType) {
-            return UEnum::GetDisplayValueAsText(EconType).ToString();
-          })));
+      FString EconTypesText = Pop.ItemEconTypes.Num() < 4
+                                  ? FString::JoinBy(Pop.ItemEconTypes, TEXT(" & "),
+                                                    [](const EItemEconType& EconType) {
+                                                      return UEnum::GetDisplayValueAsText(EconType).ToString();
+                                                    })
+                                  : "All";
+      PopDetailsWidget->ItemEconTypesText->SetText(FText::FromString("Goods Type: " + EconTypesText));
 
       if (StatisticsGen->PopStatisticsMap.Num() > 0) {
         auto GoodsBoughtPerCapitaHistory =

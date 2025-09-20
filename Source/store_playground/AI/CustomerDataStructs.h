@@ -37,7 +37,7 @@ struct FGenericCustomerData {
   FText CustomerName;
 
   UPROPERTY(EditAnywhere)
-  ECustomerAttitude InitAttitude;
+  ECustomerAttitude InitAttitude;  // * Affects dialogue.
 
   UPROPERTY(EditAnywhere)
   FCustomerAssetData AssetData;
@@ -61,7 +61,7 @@ struct FCustomerDataRow : public FTableRowBase {
   FText LinkedPopName;
 
   UPROPERTY(EditAnywhere)
-  ECustomerAttitude InitAttitude;
+  ECustomerAttitude InitAttitude;  // * Affects dialogue.
 
   UPROPERTY(EditAnywhere)
   FCustomerAssetData AssetData;
