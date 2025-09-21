@@ -204,6 +204,8 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
     bool EvalResult = false;
     if (GameDataMap[OperandE].type() == typeid(float))
       EvalResult = ApplyOperator(Operator, std::any_cast<float>(GameDataMap[OperandE]), FCString::Atof(*ValueStr));
+    if (GameDataMap[OperandE].type() == typeid(double))
+      EvalResult = ApplyOperator(Operator, std::any_cast<double>(GameDataMap[OperandE]), FCString::Atod(*ValueStr));
     else if (GameDataMap[OperandE].type() == typeid(int32))
       EvalResult = ApplyOperator(Operator, std::any_cast<int32>(GameDataMap[OperandE]), FCString::Atoi(*ValueStr));
     else if (GameDataMap[OperandE].type() == typeid(FName))

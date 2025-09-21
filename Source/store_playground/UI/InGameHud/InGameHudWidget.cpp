@@ -58,13 +58,12 @@ void UInGameHudWidget::RefreshUI() {
       FText::FromString(FString::Printf(TEXT("%s - Day: %d"), *CurrentPhaseText.ToString(), CurrentDay)));
   DaySlideWidget->RightSlideText->SetText(FText::FromString(DayManager->bIsWeekend ? "Weekend" : "Normal Day"));
 
-  float NextDebtAmount = DayManager->NextDebtAmount;
-  int32 NextPaymentDay = DayManager->NextDayToPayDebt;
-  OwnedSlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Owned: %.0f¬"), NextDebtAmount)));
-  OwnedSlideWidget->RightSlideText->SetText(FText::FromString(FString::Printf(TEXT("On Day: %d"), NextPaymentDay)));
+  OwnedSlideWidget->SlideText->SetText(
+      FText::FromString(FString::Printf(TEXT("Owned: %.0f¬"), DayManager->NextDebtAmount)));
+  OwnedSlideWidget->RightSlideText->SetText(
+      FText::FromString(FString::Printf(TEXT("On Day: %d"), DayManager->NextDayToPayDebt)));
 
-  const float Money = Store->Money;
-  MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Money)));
+  MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
   FText CurrentLevelText = UEnum::GetDisplayValueAsText(LevelManager->LoadedLevel);

@@ -72,7 +72,7 @@ public:
   class AAmbientSoundManager* AmbientSoundManager;
 
   UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
-  float Money;
+  double Money;
   UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   FStoreStats StoreStats;
 

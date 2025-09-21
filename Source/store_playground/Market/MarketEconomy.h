@@ -16,14 +16,14 @@ struct FEconomyParams {
   bool bRunSimulation;
 
   UPROPERTY(EditAnywhere)
-  float NeedsfulfilledPercent;  // Artificially set for 60% of the needs fulfilled at the start of the game.
+  TMap<EItemWealthType, float> NeedsfulfilledPercent;
   UPROPERTY(EditAnywhere)
   float SingleUnitPriceMulti;
 
   UPROPERTY(EditAnywhere)
-  float EssentialNeedsPercent;  // Percentage of needs that must be at least fulfilled to avoid demotion.
+  float DemotionNeedsPercent;  // Percentage of needs that must be at least fulfilled to avoid demotion.
   UPROPERTY(EditAnywhere)
-  float LuxaryNeedsPercent;  // Percentage of needs that must be at least fulfilled to consider promotion.
+  float PromotionNeedsPercent;  // Percentage of needs that must be at least fulfilled to consider promotion.
 };
 
 USTRUCT()
