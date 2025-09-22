@@ -472,7 +472,8 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
 
               float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
               // Higher difference from wealth means lower weight.
-              return int32(FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - PlayerNetWorth) + 1.0f) / PlayerNetWorth),
+              return int32(FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - (PlayerNetWorth / 3.0f)) + 1.0f) /
+                                                (PlayerNetWorth / 3.0f)),
                                         0.1f, 1.0f) *
                            100.0f);
             });
@@ -554,22 +555,6 @@ void AMarketLevel::InitMarketNpcs(bool bIsWeekend) {
       continue;
     }
 
-    const TArray<FEconEvent>& CatastrophicEvents = Market->TodaysEconEvents.FilterByPredicate(
-        [](const auto& Event) { return Event.Severity == EEconEventSeverity::Catastrophic; });
-    if (CatastrophicEvents.Num() > 0 && FMath::FRand() * 100 < LevelParams.CatastrophicReactionChance) {
-      TArray<FDialogueData> RandomDialogues =
-          GlobalStaticDataManager->GetRandomMarketNpcDialogues(RandomDialogueCount, [&](const FDialogueData& Dialogue) {
-            FGameplayTagContainer EventTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Event"}));
-            if (!EventTags.HasAny(CatastrophicEvents[0].Tags)) return false;
-
-            FGameplayTagContainer NpcDialogueTags = Dialogue.DialogueTags.Filter(StringTagsToContainer({"Npc"}));
-            if (!NpcDialogueTags.IsEmpty() && !NpcDialogueTags.HasAny(RandomNpcData.Tags)) return false;
-
-            return true;
-          });
-      Npc->DialogueComponent->DialogueArray = RandomDialogues;
-      continue;
-    }
     const FEconEvent& RandomEconEvent = GetWeightedRandomItem<FEconEvent>(
         Market->TodaysEconEvents, [](const auto& Event) { return Event.StartChance; });
     TArray<FDialogueData> RandomDialogues =

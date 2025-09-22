@@ -18,6 +18,8 @@ struct FEconomyParams {
   UPROPERTY(EditAnywhere)
   TMap<EItemWealthType, float> NeedsfulfilledPercent;
   UPROPERTY(EditAnywhere)
+  float ActualTotalMoneyAdjustMulti;
+  UPROPERTY(EditAnywhere)
   float SingleUnitPriceMulti;
 
   UPROPERTY(EditAnywhere)

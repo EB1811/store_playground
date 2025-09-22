@@ -37,6 +37,7 @@ inline auto GetItemSpendText(TMap<EItemWealthType, float> ItemSpendPercent) -> F
   TArray<FString> SpendStrings;
   for (const auto& Spend : ItemSpendPercent)
     if (Spend.Value >= 40.0f) SpendStrings.Add(UEnum::GetDisplayValueAsText(Spend.Key).ToString());
+  if (SpendStrings.Num() <= 0) return "All";
 
   return FString::Join(SpendStrings, TEXT(" & "));
 }

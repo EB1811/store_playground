@@ -138,6 +138,8 @@ struct FPopEconData {
   float GoodsBoughtPerCapita;  // * Value of total goods bought / population.
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<EItemWealthType, float> ItemNeedsFulfilled;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float AllNeedsFulfilled;
 };
 
 USTRUCT()

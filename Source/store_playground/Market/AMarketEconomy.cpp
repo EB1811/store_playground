@@ -20,7 +20,7 @@ inline TArray<float> GetRandomSplit(int32 Buckets, float Value) {
   float Sum = 0;
   TArray<float> RandomMoneyBuckets;
   for (int i = 0; i < Buckets; i++) {
-    float RandomRange = FMath::RandRange(0.3f, 0.7f);  // * Avoiding too high of a range.
+    float RandomRange = FMath::RandRange(0.425f, 0.575f);  // * Avoiding too high of a range.
     RandomMoneyBuckets.Add(RandomRange);
     Sum += RandomRange;
   }
@@ -131,6 +131,7 @@ void AMarketEconomy::PerformEconomyTick() {
 
     PopEconData.Money = PopWealthMap[PopEconData.PopID];
     PopEconData.ItemNeedsFulfilled.Empty();
+    PopEconData.AllNeedsFulfilled = 0;
     for (auto WealthType : TEnumRange<EItemWealthType>()) PopEconData.ItemNeedsFulfilled.Add(WealthType, 0);
 
     float PopTotalValueBought = 0;
@@ -174,10 +175,6 @@ void AMarketEconomy::PerformEconomyTick() {
           float Spending = RemainingMoney;
           float Price = EconTypePricesMap[EconType].WealthTypePricesMap[WealthType];
 
-          UE_LOG(LogTemp, Warning, TEXT("Pop %s spending remaining money %.2f on %s %s"),
-                 *CustomerPop.PopName.ToString(), Spending, *UEnum::GetDisplayValueAsText(EconType).ToString(),
-                 *UEnum::GetDisplayValueAsText(WealthType).ToString());
-
           float AdditionalBuyAmount = Spending / Price;
           float BuyAmount = PopBoughtMap[WealthType] + AdditionalBuyAmount;
           if (BuyAmount >= Need) {
@@ -219,17 +216,19 @@ void AMarketEconomy::PerformEconomyTick() {
                          CustomerPop.ItemNeeds[EItemWealthType::Mid] + CustomerPop.ItemNeeds[EItemWealthType::Luxury]) /
                         CustomerPop.ItemEconTypes.Num()) *
                        PopEconData.Population;
-      TArray<float> AllBoughtSplit = GetRandomSplit(FMath::Min(PopEconData.Population, 5), AllBought);
-      float AllBucketNeeds = AllNeeds / 5.0f;
-      float AllNeedsPercent = FMath::Max(EconomyParams.DemotionNeedsPercent / 100.0f, 0.01f);
-      for (float Bought : AllBoughtSplit)
-        if (Bought / AllBucketNeeds < AllNeedsPercent) DemotionConsiderPopIndexes.Add(i);
-        else if (Bought / AllBucketNeeds > AllNeedsPercent) PromotionConsiderPopIndexes.Add(i);
+      PopEconData.AllNeedsFulfilled += AllBought / AllNeeds;
     }
 
     PopEconData.GoodsBoughtPerCapita = PopTotalValueBought / PopEconData.Population;
     for (auto WealthType : TEnumRange<EItemWealthType>())
       PopEconData.ItemNeedsFulfilled[WealthType] /= PopEconTypes.Num();
+    PopEconData.AllNeedsFulfilled /= PopEconTypes.Num();
+
+    if (PopEconData.AllNeedsFulfilled * FMath::FRandRange(0.9f, 1.1f) < EconomyParams.DemotionNeedsPercent / 100.0f)
+      DemotionConsiderPopIndexes.Add(i);
+    else if (PopEconData.AllNeedsFulfilled * FMath::FRandRange(0.9f, 1.1f) >
+             EconomyParams.PromotionNeedsPercent / 100.0f)
+      PromotionConsiderPopIndexes.Add(i);
   }
 
   // Calculate perfect prices based on amount of bought items + small random variation.
@@ -598,7 +597,7 @@ void AMarketEconomy::InitializeEconomyData() {
                           (TotalNeedsMap[{EconType, WealthType}] * EconomyParams.NeedsfulfilledPercent[WealthType]);
     }
   }
-  float MGenMulti = (ActualTotalMoney / BaseTotalMoney);
+  float MGenMulti = (ActualTotalMoney * EconomyParams.ActualTotalMoneyAdjustMulti) / BaseTotalMoney;
   check(MGenMulti > 0);
   for (int32 i = 0; i < PopEconDataArray.Num(); i++) PopEconDataArray[i].MGen *= MGenMulti;
 

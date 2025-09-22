@@ -27,8 +27,8 @@ void UStoreDetailsWidget::RefreshUI() {
   int32 CurrentDay = DayManager->CurrentDay;
   int32 NextWeekendDay = CurrentDay + (CurrentDay % DayManager->DayManagerParams.WeekendDivisor == 0
                                            ? DayManager->DayManagerParams.WeekendDivisor
-                                           : DayManager->DayManagerParams.WeekendDivisor *
-                                                 (1 - (CurrentDay % DayManager->DayManagerParams.WeekendDivisor)));
+                                           : DayManager->DayManagerParams.WeekendDivisor -
+                                                 (CurrentDay % DayManager->DayManagerParams.WeekendDivisor));
   DayCardWidget->InitUI(
       FText::FromString(FString::Printf(TEXT("%s - Day: %d"), *CurrentPhaseText.ToString(), CurrentDay)),
       FText::GetEmpty(), FText::FromString(DayManager->bIsWeekend ? "Weekend" : "Normal Day"),
