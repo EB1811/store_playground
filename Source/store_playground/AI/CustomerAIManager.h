@@ -23,6 +23,8 @@ struct FCustomerAIManagerParams {
   UPROPERTY(EditAnywhere)
   float CustomerSpawnInterval;
   UPROPERTY(EditAnywhere)
+  float CustomerSpawnedDelay;  // Delay after spawning customers before doing actions (just moving around).
+  UPROPERTY(EditAnywhere)
   int32 MaxSpawnCustomersInOneGo;  // Avoid freezing the game by spawning too many customers at once.
 
   UPROPERTY(EditAnywhere)
@@ -97,6 +99,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TSubclassOf<class ASpawnPoint> SpawnPointClass;
 
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  const class APlayerZDCharacter* PlayerCharacter;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")

@@ -155,6 +155,7 @@ void APlayerZDCharacter::BeginPlay() {
   Super::BeginPlay();
 
   PlayerBehaviourState = EPlayerState::NoControl;
+  GameActionsState = EPlayerGameActionsState::None;
 
   // Make sure all player data is correctly initialized.
   check(PlayerInventoryComponent->InventoryType == EInventoryType::PlayerInventory);
@@ -262,6 +263,16 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
 
   // Showing tutorials when available.
   if (PlayerBehaviourState == EPlayerState::Normal) TutorialManager->ShowPendingTutorials();
+
+  // Informing game actions state of player.
+  if (PlayerBehaviourState == EPlayerState::Normal) ChangeGameActionsState(EPlayerGameActionsState::None);
+}
+void APlayerZDCharacter::ChangeGameActionsState(EPlayerGameActionsState NewState) {
+  if (GameActionsState == NewState) return;
+
+  GameActionsState = NewState;
+  UE_LOG(LogTemp, Log, TEXT("Player game actions state changed to: %s"),
+         *UEnum::GetDisplayValueAsText(NewState).ToString());
 }
 
 void APlayerZDCharacter::Move(const FInputActionValue& Value) {
@@ -750,6 +761,8 @@ void APlayerZDCharacter::EnterQuest(UQuestComponent* QuestC,
                                     USimpleSpriteAnimComponent* SpriteAnimC,
                                     UCustomerAIComponent* CustomerAI,
                                     UItemBase* Item) {
+  ChangeGameActionsState(EPlayerGameActionsState::InQuest);
+
   // * Differentiate between when quest is from a customer (store open), and from a npc (e.g., in market).
   if (!CustomerAI)
     return EnterDialogue(

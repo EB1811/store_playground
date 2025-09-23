@@ -75,7 +75,7 @@ void AStore::ItemBought(UItemBase* Item, float SingleUnitPrice, int32 Quantity) 
   checkf((SingleUnitPrice * Quantity) <= Money,
          TEXT("Caller should handle the case when Price is greater than available Money."));
 
-  Item->PlayerPriceData.BoughtAt = SingleUnitPrice;
+  Item->PlayerPriceData.BoughtAt = float(FMath::RoundToInt32(SingleUnitPrice));
 
   Money -= SingleUnitPrice * Quantity;
 

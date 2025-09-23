@@ -11,6 +11,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Misc/AssertionMacros.h"
 #include "Widgets/Notifications/SProgressBar.h"
+#include "Kismet/GameplayStatics.h"
 
 void UPriceSliderWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
@@ -35,6 +36,8 @@ void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
 void UPriceSliderWidget::ChangePrice(float Direction) {
   float NewValue = FMath::Clamp(PlayerPriceSlider->GetValue() + (-1 * Direction) * PlayerPriceSlider->GetStepSize(),
                                 PlayerPriceSlider->GetMinValue(), PlayerPriceSlider->GetMaxValue());
+  if (NewValue != PlayerPriceSlider->GetValue()) UGameplayStatics::PlaySound2D(this, PriceChangeSound, 1.0f);
+
   PlayerPriceSlider->SetValue(NewValue);
   UpdatePlayerPriceText(PlayerPriceSlider->GetValue());
 }
@@ -155,9 +158,9 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   NPCPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(NpcPrice))));
   NPCPriceText->SetColorAndOpacity(NpcPriceNormalColor);
   PlayerPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(PlayerPrice))));
-  PlayerPriceText->SetColorAndOpacity(PriceNormalColor);
+  PlayerPriceText->SetColorAndOpacity(PlayerPrice > PlayerMoney ? PriceErrorColor : PriceNormalColor);
   // ! GetDesiredSize() is not updated yet, so a hardcoded value of 50.0f is used here.
-  // Can do a delay, or somehow force it to update.
+  // ? Can do a delay, or somehow force it to update.
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);
   auto PlayerSliderBoxSize = PlayerSliderBoxAsCanvas->GetSize().Y;
   NPCPriceText->SetRenderTranslation(

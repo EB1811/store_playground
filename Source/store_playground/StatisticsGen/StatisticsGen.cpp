@@ -54,7 +54,7 @@ auto AStatisticsGen::CalcNetWorth() -> float {
   CachedDetails.PlayerNetWorth = TotalValue;
 
   StoreStatistics.NetWorthHistory.Add(TotalValue);
-  if (StoreStatistics.NetWorthHistory.Num() > StatisticsGenParams.ValueHistoryCount)
+  if (StoreStatistics.NetWorthHistory.Num() > StatisticsGenParams.NetWorthHistoryCount)
     StoreStatistics.NetWorthHistory.RemoveAt(0);
 
   return TotalValue;

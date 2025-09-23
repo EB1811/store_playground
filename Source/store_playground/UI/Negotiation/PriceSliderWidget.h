@@ -53,6 +53,9 @@ public:
   class UHorizontalBox* PlayerSliderBox;  // * To get size of the slider.
 
   UPROPERTY(EditAnywhere)
+  class USoundBase* PriceChangeSound;
+
+  UPROPERTY(EditAnywhere)
   FPriceSliderUIParams PriceSliderUIParams;
   UPROPERTY(EditAnywhere)
   FLinearColor PriceNormalColor;

@@ -43,7 +43,7 @@ inline auto GetItemSpendText(TMap<EItemWealthType, float> ItemSpendPercent) -> F
 }
 
 inline auto IsWealthTrendUp(TArray<float> GoodsBoughtPerCapitaHistory) -> bool {
-  int32 ConsideredHistoryCount = 2;
+  int32 ConsideredHistoryCount = 10;
   if (GoodsBoughtPerCapitaHistory.Num() < ConsideredHistoryCount) return false;
 
   float SignificantChange = 1.0f;
@@ -51,7 +51,7 @@ inline auto IsWealthTrendUp(TArray<float> GoodsBoughtPerCapitaHistory) -> bool {
          GoodsBoughtPerCapitaHistory[GoodsBoughtPerCapitaHistory.Num() - ConsideredHistoryCount] + SignificantChange;
 }
 inline auto IsWealthTrendDown(TArray<float> GoodsBoughtPerCapitaHistory) -> bool {
-  int32 ConsideredHistoryCount = 2;
+  int32 ConsideredHistoryCount = 10;
   if (GoodsBoughtPerCapitaHistory.Num() < ConsideredHistoryCount) return false;
 
   float SignificantChange = 1.0f;

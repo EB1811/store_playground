@@ -12,6 +12,7 @@
 #include "store_playground/WorldObject/Customer.h"
 #include "store_playground/WorldObject/CustomerPC.h"
 #include "store_playground/Interaction/InteractionComponent.h"
+#include "store_playground/Player/PlayerZDCharacter.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"
 #include "store_playground/Inventory/InventoryComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
@@ -40,6 +41,7 @@ ACustomerAIManager::ACustomerAIManager() {
 
   ManagerParams.bSpawnCustomers = false;
   ManagerParams.CustomerSpawnInterval = 5.0f;
+  ManagerParams.CustomerSpawnedDelay = 3.0f;
   ManagerParams.UniqueNpcBaseSpawnChance = 10.0f;
   ManagerParams.RecentNpcSpawnedKeepTime = 2.0f;
   ManagerParams.UNpcMaxSpawnPerDay = 1;
@@ -132,6 +134,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   UniqueCustomer->DialogueComponent->DialogueArray =
       GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs, {"Level.Store"});
 
+  UniqueCustomer->CustomerAIComponent->SpawnedTime = GetWorld()->GetTimeSeconds();
   UniqueCustomer->CustomerAIComponent->CustomerName = UniqueNpcData.NpcName;
   UniqueCustomer->CustomerAIComponent->CustomerType = ECustomerType::Unique;
   UniqueCustomer->CustomerAIComponent->Attitude = UniqueNpcData.NegotiationData.Attitude;
@@ -142,6 +145,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   const FPopEconData* PopEconData = MarketEconomy->PopEconDataArray.FindByPredicate(
       [UniqueNpcData](const FPopEconData& Pop) { return Pop.PopID == UniqueNpcData.LinkedPopID; });
   check(CustomerPopData && PopEconData);
+  UniqueCustomer->CustomerAIComponent->CustomerPopID = CustomerPopData->ID;
   UniqueCustomer->CustomerAIComponent->ItemEconTypes = CustomerPopData->ItemEconTypes;
   UniqueCustomer->CustomerAIComponent->AvailableMoney =
       (PopEconData->Money / PopEconData->Population) * BehaviorParams.AvailableMoneyMulti;
@@ -275,6 +279,7 @@ void ACustomerAIManager::SpawnCustomers() {
         [RandomCustomerData](const auto& Pop) { return Pop.PopID == RandomCustomerData.LinkedPopID; });
     check(CustomerPopData && PopMoneySpendData);
 
+    Customer->CustomerAIComponent->CustomerPopID = CustomerPopData->ID;
     Customer->CustomerAIComponent->CustomerName = RandomCustomerData.CustomerName;
     Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
     Customer->CustomerAIComponent->CustomerType = ECustomerType::Generic;
@@ -284,6 +289,7 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->AvailableMoney =
         ((PopMoneySpendData->Money / PopMoneySpendData->Population) * ManagerParams.PopMoneyToCustomerMoneyMulti) *
         BehaviorParams.AvailableMoneyMulti;
+    Customer->CustomerAIComponent->SpawnedTime = GetWorld()->GetTimeSeconds();
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
 
@@ -308,15 +314,21 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   if (Store->StoreStockItems.Num() < 5.0f)
     ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
 
+  // ? Split array into browsing and all other customers to avoid condition checks?
   TArray<ACustomerPC*> CustomersToExit;
   for (ACustomerPC* Customer : AllCustomers) {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
+        if (GetWorld()->TimeSince(Customer->CustomerAIComponent->SpawnedTime) < ManagerParams.CustomerSpawnedDelay ||
+            PlayerCharacter->GameActionsState == EPlayerGameActionsState::InQuest) {
+          if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
+          break;
+        }
+
         if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
           CustomerPerformAction(Customer, ActionWeights);
           break;
         }
-
         if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
         break;
       }
@@ -325,6 +337,11 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       }
       case (ECustomerState::Requesting): {
         if (GetWorld()->TimeSince(Customer->CustomerAIComponent->RequestingTime) > BehaviorParams.CustomerWaitingTime) {
+          if (PlayerCharacter->GameActionsState == EPlayerGameActionsState::InQuest) {
+            Customer->CustomerAIComponent->RequestingTime = GetWorld()->GetTimeSeconds();
+            break;
+          }
+
           Customer->WidgetComponent->SetVisibility(false, true);
           Customer->InteractionComponent->InteractionType = EInteractionType::None;
           Customer->CustomerAIComponent->CustomerState = ECustomerState::Leaving;

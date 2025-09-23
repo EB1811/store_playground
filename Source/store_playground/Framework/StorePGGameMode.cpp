@@ -272,6 +272,7 @@ void AStorePGGameMode::BeginPlay() {
 
   MarketEconomy->StatisticsGen = StatisticsGen;
 
+  CustomerAIManager->PlayerCharacter = PlayerCharacter;
   CustomerAIManager->GlobalStaticDataManager = GlobalStaticDataManager;
   CustomerAIManager->AbilityManager = AbilityManager;
   CustomerAIManager->Market = Market;

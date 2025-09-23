@@ -20,6 +20,14 @@ enum class EPlayerState : uint8 {
   PausedCutscene UMETA(DisplayName = "PausedCutscene"),
   GameOver UMETA(DisplayName = "GameOver"),
 };
+// * Used by variaous systems to check what the player is currently doing, e.g., in a quest, negotiation, etc.
+UENUM()
+enum class EPlayerGameActionsState : uint8 {
+  None UMETA(DisplayName = "None"),                    // * Not doing anything special.
+  InDialogue UMETA(DisplayName = "InDialogue"),        // * In a dialogue.
+  InNegotiation UMETA(DisplayName = "InNegotiation"),  // * In a negotiation.
+  InQuest UMETA(DisplayName = "InQuest"),              // * In a quest (e.g., fetching item, etc.).
+};
 
 USTRUCT()
 struct FOcclusionCheckData {
@@ -85,6 +93,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Character | PlayerState")
   EPlayerState PlayerBehaviourState;
   void ChangePlayerState(EPlayerState NewState);
+  UPROPERTY(EditAnywhere, Category = "Character | PlayerState")
+  EPlayerGameActionsState GameActionsState;
+  void ChangeGameActionsState(EPlayerGameActionsState NewState);
 
   UPROPERTY()
   class ASpgHUD* HUD;

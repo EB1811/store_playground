@@ -47,7 +47,6 @@ inline EPopWealthType GetLowerWealthType(EPopWealthType WealthType) {
 inline void MovePopPopulation(FPopEconData& From, FPopEconData& To, float PopulationPercent, int32 MaxPopChange) {
   int32 PopulationChange =
       FMath::Min(FMath::RoundToInt32(FMath::Max(From.Population * PopulationPercent, 1.0f)), MaxPopChange);
-  UE_LOG(LogTemp, Warning, TEXT("PopulationChange num %d"), PopulationChange);
 
   From.Population -= PopulationChange;
   To.Population += PopulationChange;
@@ -124,6 +123,7 @@ void AMarketEconomy::PerformEconomyTick() {
   // ? Store goods bought for each pop?
   TArray<int32> PromotionConsiderPopIndexes;
   TArray<int32> DemotionConsiderPopIndexes;
+  TArray<int32> CrossConsiderPopIndexes;
 
   for (int32 i = 0; i < CustomerPops.Num(); i++) {
     auto& CustomerPop = CustomerPops[i];
@@ -229,6 +229,10 @@ void AMarketEconomy::PerformEconomyTick() {
     else if (PopEconData.AllNeedsFulfilled * FMath::FRandRange(0.9f, 1.1f) >
              EconomyParams.PromotionNeedsPercent / 100.0f)
       PromotionConsiderPopIndexes.Add(i);
+    // Cross promotion chance. A double random check, so 1% chance is 1% * 1% = 0.01% chance.
+    if (FMath::FRand() * 100 <
+        BehaviorParams.CrossPromotionChanceMap[CustomerPop.WealthType] * BehaviorParams.CrossPromotionChanceMulti)
+      CrossConsiderPopIndexes.Add(i);
   }
 
   // Calculate perfect prices based on amount of bought items + small random variation.
@@ -293,6 +297,10 @@ void AMarketEconomy::PerformEconomyTick() {
     else if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType] *
                                         BehaviorParams.CrossPromotionChanceMulti)
       CrossPromotionPopIndexes.Add(Index);
+  for (int32 Index : CrossConsiderPopIndexes)
+    if (FMath::FRand() * 100 < BehaviorParams.CrossPromotionChanceMap[CustomerPops[Index].WealthType] *
+                                   BehaviorParams.CrossPromotionChanceMulti)
+      CrossPromotionPopIndexes.Add(Index);
 
   // Promote / Demote if next wealth type buys more goods than current wealth type.
   for (int32 Index : PromotionPopIndexes) {
@@ -351,9 +359,8 @@ void AMarketEconomy::PerformEconomyTick() {
 
     TArray<TTuple<int32, float>> NewPopIndexes = {};
     for (int32 i = 0; i < CustomerPops.Num(); i++)
-      if (CustomerPops[i].WealthType == CustomerPop.WealthType && CustomerPops[i].ID != CustomerPop.ID &&
-          PopEconDataArray[i].GoodsBoughtPerCapita > PopEconData.GoodsBoughtPerCapita)
-        NewPopIndexes.Add({i, PopEconDataArray[i].GoodsBoughtPerCapita * GetPopWeightingMulti(CustomerPops[i])});
+      if (CustomerPops[i].WealthType == CustomerPop.WealthType && CustomerPops[i].ID != CustomerPop.ID)
+        NewPopIndexes.Add({i, GetPopWeightingMulti(CustomerPops[i])});
     if (NewPopIndexes.Num() <= 0) continue;
 
     int32 RandomNewPopIndex =

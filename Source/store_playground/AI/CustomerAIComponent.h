@@ -40,6 +40,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   FGuid CustomerAIID;
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  FName CustomerPopID;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   FText CustomerName;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
@@ -65,6 +67,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   ECustomerState CustomerState;
 
+  UPROPERTY(EditAnywhere, Category = "Decision AI")
+  float SpawnedTime;
   UPROPERTY(EditAnywhere, Category = "Decision AI")
   float RequestingTime;  // * Time the customer waits.
 

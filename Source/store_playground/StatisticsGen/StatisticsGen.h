@@ -18,7 +18,9 @@ struct FStatisticsGenParams {
   UPROPERTY(EditAnywhere)
   int32 ItemPriceHistoryCount;
   UPROPERTY(EditAnywhere)
-  int32 ValueHistoryCount;  // * e.g., net worth, population, etc.
+  int32 ValueHistoryCount;  // * e.g., population, etc.
+  UPROPERTY(EditAnywhere)
+  int32 NetWorthHistoryCount;
 };
 
 USTRUCT()
