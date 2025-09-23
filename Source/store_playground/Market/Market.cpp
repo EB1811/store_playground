@@ -208,7 +208,8 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
   for (auto& Event : EligibleEvents)
     if (RecentEconEventsMap.Contains(Event.ID)) Event.StartChance *= 0.25f;
   for (auto& Event : EligibleEvents)
-    if (FMath::FRand() * 100 < Event.StartChance * (EconEvents.Num() < 1 ? 2.0f : 1.0f / EconEvents.Num()))
+    if (FMath::FRand() * 100 < Event.StartChance * (EconEvents.Num() < 1 ? 2.0f : 1.0f / EconEvents.Num()) *
+                                   BehaviorParams.EconEventStartChanceMulti)
       EconEvents.Add(Event);
 
   for (auto& Event : EconEvents) {

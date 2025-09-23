@@ -422,18 +422,20 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
   TArray<FPopEffect> PopEffectsToRemove;
 
   for (auto& PriceEffect : ActivePriceEffects) {
-    if (PriceEffect.DurationType == EEffectDurationType::Permanent) continue;
-
-    if (PriceEffect.DurationLeft < 1) {
-      PriceEffectsToRemove.Add(PriceEffect);
-    } else if (FMath::Abs(PriceEffect.CurrentPriceMultiPercent) <
-               FMath::Abs(PriceEffect.PriceMultiPercent) - KINDA_SMALL_NUMBER) {
+    if (FMath::Abs(PriceEffect.CurrentPriceMultiPercent) <
+        FMath::Abs(PriceEffect.PriceMultiPercent) - KINDA_SMALL_NUMBER) {
       PriceEffect.CurrentPriceMultiPercent +=
           PriceEffect.PriceMultiPercent * (PriceEffect.PriceMultiPercentBuildup / 100.0f);
       PriceEffect.CurrentPriceMultiPercent =
           PriceEffect.PriceMultiPercent > 0.0f
               ? FMath::Min(PriceEffect.CurrentPriceMultiPercent, PriceEffect.PriceMultiPercent)
               : FMath::Max(PriceEffect.CurrentPriceMultiPercent, PriceEffect.PriceMultiPercent);
+      continue;
+    }
+    if (PriceEffect.DurationType == EEffectDurationType::Permanent) continue;
+
+    if (PriceEffect.DurationLeft < 1) {
+      PriceEffectsToRemove.Add(PriceEffect);
     } else {
       PriceEffect.DurationLeft -= 1;
       PriceEffect.PriceMultiPercent =

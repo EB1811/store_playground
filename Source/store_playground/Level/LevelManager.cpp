@@ -1,5 +1,6 @@
 #include "LevelManager.h"
 #include "Containers/ContainersFwd.h"
+#include "Engine/Level.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -18,6 +19,7 @@
 #include "store_playground/StoreExpansionManager/StoreExpansionManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
+#include "Engine/World.h"
 
 ALevelManager::ALevelManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -39,8 +41,8 @@ void ALevelManager::InitLoadStore(std::function<void()> _LevelReadyFunc) {
     LoadedLevel = ELevel::Store;
     LevelReadyFunc = _LevelReadyFunc;
 
-    Streaming->OnLevelShown.Clear();
-    Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
+    FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
+    FWorldDelegates::LevelAddedToWorld.AddUObject(this, &ALevelManager::OnLevelAddedToWorld);
 
     FLatentActionInfo LatentInfo;
     LatentInfo.CallbackTarget = this;
@@ -58,8 +60,10 @@ void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelRea
     LevelReadyFunc = _LevelReadyFunc;
 
     HUD->StartLevelLoadingTransition([this, Level = Level, Streaming = Streaming]() {
-      Streaming->OnLevelShown.Clear();
-      Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
+      // Streaming->OnLevelShown.Clear();
+      // Streaming->OnLevelShown.AddDynamic(this, &ALevelManager::OnLevelShown);
+      FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
+      FWorldDelegates::LevelAddedToWorld.AddUObject(this, &ALevelManager::OnLevelAddedToWorld);
 
       FLatentActionInfo LatentInfo;
       LatentInfo.CallbackTarget = this;
@@ -98,6 +102,13 @@ void ALevelManager::OnLevelShown() {
   LevelReadyFunc = nullptr;
 
   HUD->EndLevelLoadingTransition([this]() { EnterLevel(CurrentLevel); });
+}
+void ALevelManager::OnLevelAddedToWorld(ULevel* InLevel, UWorld* InWorld) {
+  if (InWorld != GetWorld()) return;
+  if (InLevel->GetOuter()->GetFName() != LevelNames[LoadedLevel]) return;
+
+  FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
+  OnLevelShown();
 }
 void ALevelManager::OnLevelUnloaded() {
   UE_LOG(LogTemp, Warning, TEXT("Level unloaded: %s"), *UEnum::GetDisplayValueAsText(CurrentLevel).ToString());

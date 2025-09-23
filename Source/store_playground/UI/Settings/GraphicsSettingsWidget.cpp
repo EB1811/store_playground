@@ -239,7 +239,7 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   AntiAliasingMethodComboBox->AddOption(TEXT("DLSS"));
 
   GlobalIlluminationMethodComboBox->ClearOptions();
-  GlobalIlluminationMethodComboBox->AddOption(TEXT("None"));
+  GlobalIlluminationMethodComboBox->AddOption(TEXT("None (Recommended)"));
   GlobalIlluminationMethodComboBox->AddOption(TEXT("Lumen"));
   GlobalIlluminationMethodComboBox->AddOption(TEXT("Screen Space"));
 

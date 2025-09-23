@@ -26,6 +26,8 @@ struct FMarketBehaviorParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere, SaveGame)
+  float EconEventStartChanceMulti;  // * Multiplier for starting econ events.
+  UPROPERTY(EditAnywhere, SaveGame)
   float StoreMarkupMulti;
 };
 

@@ -60,6 +60,8 @@ public:
   UFUNCTION()
   void OnLevelShown();
   UFUNCTION()
+  void OnLevelAddedToWorld(ULevel* InLevel, UWorld* InWorld);
+  UFUNCTION()
   void OnLevelUnloaded();
 
   void InitLevel(ELevel Level);

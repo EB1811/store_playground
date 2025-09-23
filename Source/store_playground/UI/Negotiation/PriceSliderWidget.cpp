@@ -158,7 +158,6 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   NPCPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(NpcPrice))));
   NPCPriceText->SetColorAndOpacity(NpcPriceNormalColor);
   PlayerPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(PlayerPrice))));
-  PlayerPriceText->SetColorAndOpacity(PlayerPrice > PlayerMoney ? PriceErrorColor : PriceNormalColor);
   // ! GetDesiredSize() is not updated yet, so a hardcoded value of 50.0f is used here.
   // ? Can do a delay, or somehow force it to update.
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);
@@ -167,4 +166,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
       FVector2D(0.0f, PlayerSliderBoxSize - NPCPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize - 50.0f / 2.0f));
   PlayerPriceText->SetRenderTranslation(FVector2D(
       0.0f, PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize - 50.0f / 2.0f));
+  if (Type == NegotiationType::PlayerBuy && PlayerPrice > PlayerMoney)
+    PlayerPriceText->SetColorAndOpacity(PriceErrorColor);
+  else PlayerPriceText->SetColorAndOpacity(PriceNormalColor);
 }
