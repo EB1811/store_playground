@@ -40,6 +40,13 @@ void UInteractionComponent::EndInteraction() {
 }
 
 void UInteractionComponent::InteractUse() const {}
+void UInteractionComponent::InteractExamine() const {}
+auto UInteractionComponent::InteractDialogue() const -> TOptional<class UDialogueComponent*> {
+  UDialogueComponent* OwnerDialogueC = GetOwner()->FindComponentByClass<UDialogueComponent>();
+  check(OwnerDialogueC);
+
+  return OwnerDialogueC;
+}
 
 auto UInteractionComponent::InteractLevelChange() const -> ULevelChangeComponent* {
   ULevelChangeComponent* OwnerLevelChangeC = GetOwner()->FindComponentByClass<ULevelChangeComponent>();

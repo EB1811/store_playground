@@ -596,6 +596,15 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
 
   Interactable->PlayInteractionSound();
   switch (Interactable->InteractionType) {
+    case EInteractionType::Use: {
+      Interactable->InteractUse();
+      break;
+    }
+    case EInteractionType::Dialogue: {
+      auto DialogueC = Interactable->InteractDialogue();
+      EnterDialogue(DialogueC.GetValue());
+      break;
+    }
     case EInteractionType::LevelChange: {
       auto LevelChangeC = Interactable->InteractLevelChange();
 
@@ -617,10 +626,6 @@ void APlayerZDCharacter::HandleInteraction(UInteractionComponent* Interactable) 
     }
     case EInteractionType::AbilitySelect: {
       EnterAbilitySelect();
-      break;
-    }
-    case EInteractionType::Use: {
-      Interactable->InteractUse();
       break;
     }
     case EInteractionType::Buildable: {

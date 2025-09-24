@@ -13,7 +13,11 @@
 UENUM()
 enum class EInteractionType : uint8 {
   None UMETA(DisplayName = "None"),
+
   Use UMETA(DisplayName = "Use"),
+  Examine UMETA(DisplayName = "Examine"),
+  Dialogue UMETA(DisplayName = "Dialogue"),
+  Pickup UMETA(DisplayName = "Pickup"),
 
   LevelChange UMETA(DisplayName = "Level Change"),
   LeaveStore UMETA(DisplayName = "Leave Store"),
@@ -34,7 +38,6 @@ enum class EInteractionType : uint8 {
   NpcStore UMETA(DisplayName = "NPC Store"),
   Container UMETA(DisplayName = "Container"),
 
-  Pickup UMETA(DisplayName = "Pickup"),
   MiniGame UMETA(DisplayName = "MiniGame"),
 };
 
@@ -61,6 +64,9 @@ public:
   void EndInteraction();
 
   void InteractUse() const;
+  void InteractExamine() const;
+  auto InteractDialogue() const -> TOptional<class UDialogueComponent*>;
+  auto InteractPickup() const -> TOptional<class UPickupComponent*>;
 
   auto InteractLevelChange() const -> class ULevelChangeComponent*;
 
@@ -83,6 +89,5 @@ public:
       -> TTuple<class UNpcStoreComponent*, class UInventoryComponent*, class UDialogueComponent*>;
   auto InteractContainer() const -> class UInventoryComponent*;
 
-  auto InteractPickup() const -> TOptional<class UPickupComponent*>;
   auto InteractMiniGame() const -> TTuple<class UMiniGameComponent*, class UDialogueComponent*>;
 };
