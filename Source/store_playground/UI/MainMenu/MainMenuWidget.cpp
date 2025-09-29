@@ -4,6 +4,7 @@
 #include "store_playground/UI/MainMenu/NewGameSetupWidget.h"
 #include "store_playground/UI/SaveSlots/SaveLoadSlotsWidget.h"
 #include "store_playground/UI/Settings/SettingsWidget.h"
+#include "store_playground/UI/MainMenu/CreditsWidget.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveSlotListSaveGame.h"
@@ -24,6 +25,8 @@ void UMainMenuWidget::NativeOnInitialized() {
   LoadMenuButton->OnHovered.AddDynamic(this, &UMainMenuWidget::UnhoverButton);
   SettingsButton->OnClicked.AddDynamic(this, &UMainMenuWidget::SettingsMenu);
   SettingsButton->OnHovered.AddDynamic(this, &UMainMenuWidget::UnhoverButton);
+  CreditsButton->OnClicked.AddDynamic(this, &UMainMenuWidget::Credits);
+  CreditsButton->OnHovered.AddDynamic(this, &UMainMenuWidget::UnhoverButton);
   ExitButton->OnClicked.AddDynamic(this, &UMainMenuWidget::Exit);
   ExitButton->OnHovered.AddDynamic(this, &UMainMenuWidget::UnhoverButton);
 
@@ -105,6 +108,7 @@ void UMainMenuWidget::NewGame() {
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Visible);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
@@ -121,6 +125,7 @@ void UMainMenuWidget::LoadMenu() {
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
@@ -136,6 +141,23 @@ void UMainMenuWidget::SettingsMenu() {
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
+  CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+  UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
+}
+void UMainMenuWidget::Credits() {
+  auto BackFunc = [this]() {
+    MainOverlay->SetVisibility(ESlateVisibility::Visible);
+    CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
+    HoverButton(CreditsButton);
+  };
+  CreditsWidget->InitUI(InUIInputActions, BackFunc);
+
+  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
+  NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
+  SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  CreditsWidget->SetVisibility(ESlateVisibility::Visible);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
@@ -168,6 +190,7 @@ void UMainMenuWidget::InitUI(FInUIInputActions _InUIInputActions,
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   HoverButton(NewGameButton);
 }
@@ -177,22 +200,26 @@ void UMainMenuWidget::SetupUIActionable() {
     if (NewGameSetupWidget->IsVisible()) NewGameSetupWidget->UIActionable.AdvanceUI();
     else if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.AdvanceUI();
     else if (SettingsWidget->IsVisible()) SettingsWidget->UIActionable.AdvanceUI();
+    else if (CreditsWidget->IsVisible()) CreditsWidget->UIActionable.AdvanceUI();
     else SelectHoveredButton();
   };
   UIActionable.DirectionalInput = [this](FVector2D Direction) {
     if (NewGameSetupWidget->IsVisible()) NewGameSetupWidget->UIActionable.DirectionalInput(Direction);
     else if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.DirectionalInput(Direction);
     else if (SettingsWidget->IsVisible()) SettingsWidget->UIActionable.DirectionalInput(Direction);
+    else if (CreditsWidget->IsVisible()) CreditsWidget->UIActionable.DirectionalInput(Direction);
     else HoverNextButton(Direction);
   };
   UIActionable.SideButton4 = [this]() {
     if (NewGameSetupWidget->IsVisible()) NewGameSetupWidget->UIActionable.SideButton4();
     else if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.SideButton4();
     else if (SettingsWidget->IsVisible()) SettingsWidget->UIActionable.SideButton4();
+    else if (CreditsWidget->IsVisible()) CreditsWidget->UIActionable.SideButton4();
   };
   UIActionable.RetractUI = [this]() {
     if (NewGameSetupWidget->IsVisible()) NewGameSetupWidget->UIActionable.RetractUI();
     else if (SaveLoadSlotsWidget->IsVisible()) SaveLoadSlotsWidget->UIActionable.RetractUI();
     else if (SettingsWidget->IsVisible()) SettingsWidget->UIActionable.RetractUI();
+    else if (CreditsWidget->IsVisible()) CreditsWidget->UIActionable.RetractUI();
   };
 }

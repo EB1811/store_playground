@@ -208,7 +208,7 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
   for (auto& Event : EligibleEvents)
     if (RecentEconEventsMap.Contains(Event.ID)) Event.StartChance *= 0.25f;
   for (auto& Event : EligibleEvents)
-    if (FMath::FRand() * 100 < Event.StartChance * (EconEvents.Num() < 1 ? 2.0f : 1.0f / EconEvents.Num()) *
+    if (FMath::FRand() * 100 < Event.StartChance * (EconEvents.Num() < 1 ? 2.0f : 0.5f / EconEvents.Num()) *
                                    BehaviorParams.EconEventStartChanceMulti)
       EconEvents.Add(Event);
 
@@ -223,9 +223,6 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
     if (!TodaysEconEvents.ContainsByPredicate([Event](const auto& OtherEvent) { return Event.ID == OtherEvent.ID; }))
       TodaysEconEvents.Add(Event);
   }
-  // ? If no events, add a random one so there's at least one.
-  // FEconEvent RandomEvent =
-  //     GetWeightedRandomItem<FEconEvent>(EligibleEvents, [](const auto& Event) { return Event.StartChance; });
 
   return EconEvents;
 }

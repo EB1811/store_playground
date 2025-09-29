@@ -23,6 +23,8 @@ public:
   class USaveLoadSlotsWidget* SaveLoadSlotsWidget;
   UPROPERTY(meta = (BindWidget))
   class USettingsWidget* SettingsWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UCreditsWidget* CreditsWidget;
 
   UPROPERTY(meta = (BindWidget))
   class UButton* ContinueButton;
@@ -32,6 +34,8 @@ public:
   class UButton* LoadMenuButton;
   UPROPERTY(meta = (BindWidget))
   class UButton* SettingsButton;
+  UPROPERTY(meta = (BindWidget))
+  class UButton* CreditsButton;
   UPROPERTY(meta = (BindWidget))
   class UButton* ExitButton;
 
@@ -64,6 +68,8 @@ public:
   void LoadMenu();
   UFUNCTION()
   void SettingsMenu();
+  UFUNCTION()
+  void Credits();
   UFUNCTION()
   void Exit();
 

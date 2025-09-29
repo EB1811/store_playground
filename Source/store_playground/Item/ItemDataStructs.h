@@ -20,18 +20,11 @@ enum class EItemType : uint8 {
 };
 ENUM_RANGE_BY_COUNT(EItemType, 8);
 
-// UENUM()
-// enum class EItemMetaType : uint8 {
-//   Unique UMETA(DisplayName = "Unique"),
-//   NonUnique UMETA(DisplayName = "NonUnique"),
-// };
-// ENUM_RANGE_BY_COUNT(EItemMetaType, 2);
-
 UENUM()
 enum class EItemWealthType : uint8 {
-  Essential UMETA(DisplayName = "Essential"),
+  Essential UMETA(DisplayName = "Low"),
   Mid UMETA(DisplayName = "Mid"),
-  Luxury UMETA(DisplayName = "Luxury"),
+  Luxury UMETA(DisplayName = "High"),
 };
 ENUM_RANGE_BY_COUNT(EItemWealthType, 3);
 UENUM()
@@ -109,7 +102,7 @@ struct FItemDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   float BasePrice;
   UPROPERTY(EditAnywhere)
-  float PriceJumpPercent;  // * Reverse price stickiness, 1.0 = current price changes to perfect price in one cycle.
+  float PriceJumpPercent;  // * Reverse price stickiness, 100 = current price changes to perfect price in one cycle.
 
   UPROPERTY(EditAnywhere)
   FItemFlavorData FlavorData;
