@@ -55,14 +55,14 @@ void ASettingsManager::SetRenderMethod(int32 Method) {
   UE_LOG(LogTemp, Log, TEXT("Setting Render Method to: %d"), Method);
   // 0=Default, 1=DirectX12, 2=Vulkan
   if (Method == 0) {
-    GConfig->SetText(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
-                     FText::FromString("DefaultGraphicsRHI_Default"), GEngineIni);
+    GConfig->SetString(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
+                       TEXT("DefaultGraphicsRHI_Default"), GEngineIni);
   } else if (Method == 1) {
-    GConfig->SetText(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
-                     FText::FromString("DefaultGraphicsRHI_DX12"), GEngineIni);
+    GConfig->SetString(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
+                       TEXT("DefaultGraphicsRHI_DX12"), GEngineIni);
   } else if (Method == 2) {
-    GConfig->SetText(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
-                     FText::FromString("DefaultGraphicsRHI_Vulkan"), GEngineIni);
+    GConfig->SetString(TEXT("/Script/WindowsTargetPlatform.WindowsTargetSettings"), TEXT("DefaultGraphicsRHI"),
+                       TEXT("DefaultGraphicsRHI_Vulkan"), GEngineIni);
   } else {
     checkNoEntry();
   }
