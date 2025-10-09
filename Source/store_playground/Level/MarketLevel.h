@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/World.h"
 #include "GameFramework/Info.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/Dialogue/DialogueDataStructs.h"

@@ -86,10 +86,11 @@ public:
 
   auto TrySpendMoney(float Amount) -> bool;
 
-  void StockItemSold(const UItemBase* Item);
+  void NegStockItemSold(const UItemBase* Item);
+  void NegItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quantity = 1);
 
   void ItemBought(UItemBase* Item, float SingleUnitPrice, int32 Quantity = 1);
-  void ItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quantity = 1);
+
   void MoneyGained(float Amount);
   void MoneySpent(float Amount);
 

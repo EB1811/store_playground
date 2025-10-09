@@ -41,6 +41,7 @@
 #include "store_playground/Cutscene/CutsceneManager.h"
 #include "store_playground/Tags/TagsComponent.h"
 #include "store_playground/UI/SpgHUD.h"
+#include "store_playground/Steam/SteamManager.h"
 
 AStorePGGameMode::AStorePGGameMode() {}
 
@@ -89,6 +90,7 @@ void AStorePGGameMode::BeginPlay() {
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
   AStatisticsGen* StatisticsGen = GetWorld()->SpawnActor<AStatisticsGen>(StatisticsGenClass);
+  ASteamManager* SteamManager = GetWorld()->SpawnActor<ASteamManager>(SteamManagerClass);
   ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
   AMiniGameManager* MiniGameManager = GetWorld()->SpawnActor<AMiniGameManager>(MiniGameManagerClass);
 
@@ -124,6 +126,7 @@ void AStorePGGameMode::BeginPlay() {
   NegotiationSystem->Store = Store;
   NegotiationSystem->PlayerInventory = PlayerCharacter->PlayerInventoryComponent;
   NegotiationSystem->QuestManager = QuestManager;
+  NegotiationSystem->SteamManager = SteamManager;
 
   CutsceneSystem->HUD = HUD;
   CutsceneSystem->DialogueSystem = DialogueSystem;
@@ -148,6 +151,7 @@ void AStorePGGameMode::BeginPlay() {
       {"Market", Market},
       {"MarketEconomy", MarketEconomy},
       {"StatisticsGen", StatisticsGen},
+      {"SteamManager", SteamManager},
       {"NewsGen", NewsGen},
       {"MiniGameManager", MiniGameManager},
   };
@@ -216,6 +220,9 @@ void AStorePGGameMode::BeginPlay() {
   StatisticsGen->Store = Store;
   StatisticsGen->MarketEconomy = MarketEconomy;
   StatisticsGen->UpgradeManager = UpgradeManager;
+  StatisticsGen->SteamManager = SteamManager;
+
+  SteamManager->GlobalDataManager = GlobalDataManager;
 
   GlobalDataManager->PlayerCharacter = PlayerCharacter;
   GlobalDataManager->UpgradeManager = UpgradeManager;

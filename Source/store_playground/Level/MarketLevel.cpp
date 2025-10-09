@@ -471,9 +471,9 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
               if (InventoryC->ItemsArray.Contains(Item)) return 1;
 
               float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
+              float NetWorthWeight = PlayerNetWorth / 10.0f;  // To prefer lower valued items at lower net worths.
               // Higher difference from wealth means lower weight.
-              return int32(FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - (PlayerNetWorth / 3.0f)) + 1.0f) /
-                                                (PlayerNetWorth / 3.0f)),
+              return int32(FMath::Clamp(1.0f - ((FMath::Abs(MarketPrice - NetWorthWeight) + 1.0f) / NetWorthWeight),
                                         0.1f, 1.0f) *
                            100.0f);
             });

@@ -1,5 +1,6 @@
 #include "NegotiationSystem.h"
 #include "CoreFwd.h"
+#include "GameplayTagContainer.h"
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Item/ItemBase.h"
@@ -12,6 +13,7 @@
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Quest/QuestComponent.h"
+#include "store_playground/Steam/SteamManager.h"
 
 UNegotiationSystem::UNegotiationSystem() {
   NStateTransitions = {
@@ -175,6 +177,8 @@ void UNegotiationSystem::PlayerShowItem(UItemBase* Item, UInventoryComponent* _F
     MarketPrice += EconItem->CurrentPrice;
     OfferedPrice += MarketPrice;
   }
+
+  SteamManager->AchBehaviour(FGameplayTag::RequestGameplayTag("AchBehaviour.NegShowCorrectItem"));
 }
 
 FNextDialogueRes UNegotiationSystem::NPCNegotiationTurn() {
@@ -212,11 +216,13 @@ void UNegotiationSystem::NegotiationSuccess() {
   if (Type == NegotiationType::PlayerSell) {
     check(FromInventory);
 
-    for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->ItemSold(NegotiatedItem, OfferedPrice);
+    for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->NegItemSold(NegotiatedItem, OfferedPrice);
     if (FromInventory == PlayerInventory)
       for (const UItemBase* NegotiatedItem : NegotiatedItems) PlayerInventory->RemoveItem(NegotiatedItem);
     else
-      for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->StockItemSold(NegotiatedItem);
+      for (const UItemBase* NegotiatedItem : NegotiatedItems) Store->NegStockItemSold(NegotiatedItem);
+
+    SteamManager->AchBehaviour(FGameplayTag::RequestGameplayTag("AchBehaviour.NegSellItem"));
   } else if (Type == NegotiationType::PlayerBuy) {
     check(PlayerInventory);
 

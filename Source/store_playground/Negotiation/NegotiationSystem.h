@@ -79,6 +79,8 @@ public:
   class UInventoryComponent* PlayerInventory;
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class AQuestManager* QuestManager;
+  UPROPERTY(EditAnywhere, Category = "Negotiation")
+  class ASteamManager* SteamManager;
 
   UPROPERTY(EditAnywhere, Category = "Negotiation")
   class UCustomerAIComponent* CustomerAI;

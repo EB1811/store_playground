@@ -105,6 +105,8 @@ public:
 
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;
+  UPROPERTY(EditAnywhere)
+  class ASteamManager* SteamManager;
 
   UPROPERTY(EditAnywhere)
   FStatisticsGenParams StatisticsGenParams;

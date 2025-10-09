@@ -60,7 +60,7 @@ auto AStore::TrySpendMoney(float Amount) -> bool {
   return true;
 }
 
-void AStore::StockItemSold(const UItemBase* Item) {
+void AStore::NegStockItemSold(const UItemBase* Item) {
   auto* StockItem = StoreStockItems.FindByPredicate(
       [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
   check(StockItem);
@@ -69,6 +69,12 @@ void AStore::StockItemSold(const UItemBase* Item) {
   StockItem->BelongingStockInventoryC->RemoveItem(Item);
   StoreStockItems.RemoveAllSwap(
       [Item](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Item->UniqueItemID; });
+}
+void AStore::NegItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quantity) {
+  Money += SingleUnitPrice * Quantity;
+
+  StatisticsGen->ItemDeal({Item->ItemID, Item->PlayerPriceData.BoughtAt, SingleUnitPrice, Quantity});
+  StatisticsGen->StoreMoneyGained(SingleUnitPrice * Quantity);
 }
 
 void AStore::ItemBought(UItemBase* Item, float SingleUnitPrice, int32 Quantity) {
@@ -80,12 +86,6 @@ void AStore::ItemBought(UItemBase* Item, float SingleUnitPrice, int32 Quantity) 
   Money -= SingleUnitPrice * Quantity;
 
   StatisticsGen->StoreMoneySpent(SingleUnitPrice * Quantity);
-}
-void AStore::ItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Quantity) {
-  Money += SingleUnitPrice * Quantity;
-
-  StatisticsGen->ItemDeal({Item->ItemID, Item->PlayerPriceData.BoughtAt, SingleUnitPrice, Quantity});
-  StatisticsGen->StoreMoneyGained(SingleUnitPrice * Quantity);
 }
 
 void AStore::MoneyGained(float Amount) {

@@ -12,6 +12,7 @@
 #include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveManager.h"
+#include "store_playground/Steam/SteamManager.h"
 
 void AStatisticsGen::BeginPlay() {
   Super::BeginPlay();
@@ -27,16 +28,19 @@ void AStatisticsGen::ItemDeal(const FItemDeal ItemDeal) {
   TodaysItemDeals.Add(ItemDeal);
 
   UpgradeManager->ConsiderUpgradePoints();
+  SteamManager->AchItemDeal(ItemDeal);
 }
 void AStatisticsGen::StoreMoneySpent(float Amount) {
   TodaysStoreMoneyActivity.AllExpenses += Amount;
 
   UpgradeManager->ConsiderUpgradePoints();
+  SteamManager->ConsiderAchievements();
 }
 void AStatisticsGen::StoreMoneyGained(float Amount) {
   TodaysStoreMoneyActivity.AllIncome += Amount;
 
   UpgradeManager->ConsiderUpgradePoints();
+  SteamManager->ConsiderAchievements();
 }
 
 auto AStatisticsGen::CalcTodaysStoreProfit() const -> float {
