@@ -29,7 +29,7 @@ void UBuildableDisplayWidget::Back() { CloseWidgetFunc(); }
 void UBuildableDisplayWidget::RefreshUI() {
   check(Buildable && Store);
 
-  float Price = Buildable->BuildingPricesMap[EBuildableType::StockDisplay];
+  float Price = Store->GetBuildablePrice(Buildable);
   float Money = Store->Money;
 
   PriceText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Price)));

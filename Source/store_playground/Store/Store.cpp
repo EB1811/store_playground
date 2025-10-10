@@ -29,17 +29,22 @@ void AStore::BeginPlay() {
   Super::BeginPlay();
 
   check(BuildableClass);
+
+  Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) { ChangeBehaviorParam(ParamValues); };
 }
 
 void AStore::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
+auto AStore::GetBuildablePrice(ABuildable* Buildable) -> float {
+  return Buildable->BuildingPricesMap[EBuildableType::StockDisplay] * BehaviorParams.BuildCostMulti;
+}
 auto AStore::BuildStockDisplay(ABuildable* Buildable) -> bool {
   if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Money) return false;
 
   Buildable->SetToStockDisplay();
   if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
 
-  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay]);
+  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay] * BehaviorParams.BuildCostMulti);
   StockDisplayCount++;
   return true;
 }
@@ -49,7 +54,7 @@ auto AStore::BuildDecoration(ABuildable* Buildable) -> bool {
   Buildable->SetToDecoration();
   if (Buildable->BuildableType != EBuildableType::Decoration) return false;
 
-  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::Decoration]);
+  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::Decoration] * BehaviorParams.BuildCostMulti);
   return true;
 }
 
@@ -208,5 +213,13 @@ void AStore::InitStockDisplays() {
       StoreStockItems.Add({Item->ItemID, Buildable->StockDisplay, Item, StockInventory});
       Buildable->StockDisplay->SetDisplaySprite(Item->AssetData.Sprite);
     }
+  }
+}
+
+void AStore::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    auto StructProp = CastField<FStructProperty>(this->GetClass()->FindPropertyByName("BehaviorParams"));
+    auto StructPtr = StructProp->ContainerPtrToValuePtr<void>(this);
+    AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }

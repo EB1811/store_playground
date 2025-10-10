@@ -168,8 +168,9 @@ enum class EUpgradeEffectSystem : uint8 {
   MarketEconomy UMETA(DisplayName = "MarketEconomy"),          // * MarketEconomy changes.
   MarketLevel UMETA(DisplayName = "MarketLevel"),              // * MarketLevel changes.
   StorePhaseManager UMETA(DisplayName = "StorePhaseManager"),  // * StorePhaseManager changes.
+  Store UMETA(DisplayName = "Store"),                          // * Store changes.
 };
-ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 7);
+ENUM_RANGE_BY_COUNT(EUpgradeEffectSystem, 8);
 
 USTRUCT()
 struct FUpgradeEffectTextData {

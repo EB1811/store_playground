@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "store_playground/SaveManager/SaveStructs.h"
+#include "store_playground/Upgrade/UpgradeStructs.h"
 #include "store_playground/WorldObject/Buildable.h"
 #include "GameFramework/Info.h"
 #include "Store.generated.h"
@@ -46,6 +47,14 @@ struct FStoreLevelState {
   TArray<FObjectSaveState> ObjectSaveStates;
 };
 
+USTRUCT()
+struct FStoreBehaviorParams {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float BuildCostMulti;
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API AStore : public AInfo {
   GENERATED_BODY()
@@ -72,6 +81,9 @@ public:
   class AAmbientSoundManager* AmbientSoundManager;
 
   UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
+  struct FStoreBehaviorParams BehaviorParams;
+
+  UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   double Money;
   UPROPERTY(EditAnywhere, Category = "Store", SaveGame)
   FStoreStats StoreStats;
@@ -81,6 +93,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Store")
   TArray<FStockItem> StoreStockItems;
 
+  auto GetBuildablePrice(ABuildable* Buildable) -> float;
   auto BuildStockDisplay(ABuildable* Buildable) -> bool;
   auto BuildDecoration(ABuildable* Buildable) -> bool;
 
@@ -102,4 +115,8 @@ public:
   void SaveStoreLevelState();
   void LoadStoreLevelState();
   void InitStockDisplays();
+
+  UPROPERTY(EditAnywhere, Category = "Store")
+  struct FUpgradeable Upgradeable;
+  void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
 };

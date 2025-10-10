@@ -161,7 +161,9 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   float MoneyToSpend = UniqueCustomer->CustomerAIComponent->AvailableMoney;
   float AcceptanceMin = UniqueNpcData.NegotiationData.AcceptancePercentageRange[0] * BehaviorParams.AcceptanceMinMulti;
   float AcceptanceMax = UniqueNpcData.NegotiationData.AcceptancePercentageRange[1] * BehaviorParams.AcceptanceMaxMulti;
-  float AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
+  float AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax) *
+                               BehaviorParams.PopTypeAcceptMultis[CustomerPopData->PopType] *
+                               BehaviorParams.PopWealthTypeAcceptMultis[CustomerPopData->WealthType];
   float AcceptanceFalloffMulti = ManagerParams.BaseAcceptFalloffMulti * BehaviorParams.AcceptanceFalloffMulti;
   int32 HagglingCount = FMath::Max(BehaviorParams.InitHagglingCount, 1);
   for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
@@ -220,11 +222,14 @@ void ACustomerAIManager::SpawnCustomers() {
   check(CustomerClass && GlobalStaticDataManager && MarketEconomy && Store);
   LastSpawnTime = GetWorld()->GetTimeSeconds();
 
+  int32 CustomerCountFromStoreDisplay =
+      FMath::FloorToInt32((float)Store->StockDisplayCount / ManagerParams.StockDisplayToCustomerRatio);
   float FilledStockPercent =
       Store->StockDisplayCount > 0
           ? FMath::Clamp(Store->StoreStockItems.Num() / (float)Store->StockDisplayCount, 0.0f, 1.0f)
           : 0.0f;
   int32 MaxCustomers =
+      CustomerCountFromStoreDisplay +
       FMath::RoundToInt(BehaviorParams.MaxCustomers * FMath::Clamp(FilledStockPercent * 1.5f, 0.8f, 1.2));
   if (AllCustomers.Num() >= MaxCustomers) return;
 
@@ -561,10 +566,15 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomerPC* Customer) {
 
   if (CustomerAI->CustomerType == ECustomerType::Unique) return;
 
+  const auto PopCustomerData = *MarketEconomy->CustomerPops.FindByPredicate(
+      [CustomerAI](const auto& CPop) { return CPop.ID == CustomerAI->CustomerPopID; });
+
   float MoneyToSpend = CustomerAI->AvailableMoney;
   float AcceptanceMin = ManagerParams.BaseAcceptMin * BehaviorParams.AcceptanceMinMulti;
   float AcceptanceMax = ManagerParams.BaseAcceptMax * BehaviorParams.AcceptanceMaxMulti;
-  float AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax);
+  float AcceptancePercentage = FMath::FRandRange(AcceptanceMin, AcceptanceMax) *
+                               BehaviorParams.PopTypeAcceptMultis[PopCustomerData.PopType] *
+                               BehaviorParams.PopWealthTypeAcceptMultis[PopCustomerData.WealthType];
   float AcceptanceFalloffMulti = ManagerParams.BaseAcceptFalloffMulti * BehaviorParams.AcceptanceFalloffMulti;
   int32 HagglingCount = FMath::Max(BehaviorParams.InitHagglingCount, 1);
   for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
@@ -668,13 +678,14 @@ void ACustomerAIManager::ChangeBehaviorParam(const TMap<FName, float>& ParamValu
     AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }
-
 void ACustomerAIManager::UpgradeFunction(FName FunctionName,
                                          const TArray<FName>& Ids,
                                          const TMap<FName, float>& ParamValues) {
   if (FunctionName == "ChangeActionWeights") ChangeActionWeights(ParamValues);
   else if (FunctionName == "ChangePopTypeMultis") ChangePopTypeMultis(ParamValues);
   else if (FunctionName == "ChangePopWealthTypeMultis") ChangePopWealthTypeMultis(ParamValues);
+  else if (FunctionName == "ChangePopTypeAcceptMultis") ChangePopTypeAcceptMultis(ParamValues);
+  else if (FunctionName == "ChangePopWealthTypeAcceptMultis") ChangePopWealthTypeAcceptMultis(ParamValues);
   else checkNoEntry();
 }
 void ACustomerAIManager::ChangeActionWeights(const TMap<FName, float>& ParamValues) {
@@ -715,5 +726,31 @@ void ACustomerAIManager::ChangePopWealthTypeMultis(const TMap<FName, float>& Par
     }
 
     BehaviorParams.PopWealthTypeMultis[WealthType] += ParamPair.Value;
+  }
+}
+void ACustomerAIManager::ChangePopTypeAcceptMultis(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    EPopType PopType = EPopType::Common;
+    for (auto P : TEnumRange<EPopType>()) {
+      if (UEnum::GetDisplayValueAsText(P).ToString() == ParamPair.Key) {
+        PopType = P;
+        break;
+      }
+    }
+
+    BehaviorParams.PopTypeAcceptMultis[PopType] += ParamPair.Value;
+  }
+}
+void ACustomerAIManager::ChangePopWealthTypeAcceptMultis(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    EPopWealthType WealthType = EPopWealthType::Poorer;
+    for (auto W : TEnumRange<EPopWealthType>()) {
+      if (UEnum::GetDisplayValueAsText(W).ToString() == ParamPair.Key) {
+        WealthType = W;
+        break;
+      }
+    }
+
+    BehaviorParams.PopWealthTypeAcceptMultis[WealthType] += ParamPair.Value;
   }
 }

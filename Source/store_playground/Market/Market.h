@@ -27,8 +27,11 @@ struct FMarketBehaviorParams {
 
   UPROPERTY(EditAnywhere, SaveGame)
   float EconEventStartChanceMulti;  // * Multiplier for starting econ events.
+
   UPROPERTY(EditAnywhere, SaveGame)
   float StoreMarkupMulti;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<EItemEconType, float> StoreMarkupItemEconTypeMulti;  // * Multiplier for item econ types.
 };
 
 UCLASS(Blueprintable)
@@ -110,4 +113,6 @@ public:
   FUpgradeable Upgradeable;
   void ChangeBehaviorParam(const TMap<FName, float>& ParamValues);
   void UnlockIDs(const FName DataName, const TArray<FName>& Ids);
+  void UpgradeFunction(FName FunctionName, const TArray<FName>& Ids, const TMap<FName, float>& ParamValues);
+  void ChangeItemEconTypeMulti(const TMap<FName, float>& ParamValues);
 };

@@ -26,6 +26,8 @@ struct FCustomerAIManagerParams {
   float CustomerSpawnedDelay;  // Delay after spawning customers before doing actions (just moving around).
   UPROPERTY(EditAnywhere)
   int32 MaxSpawnCustomersInOneGo;  // Avoid freezing the game by spawning too many customers at once.
+  UPROPERTY(EditAnywhere)
+  float StockDisplayToCustomerRatio;  // Number of additional customers to spawn per stock display count.
 
   UPROPERTY(EditAnywhere)
   float UniqueNpcBaseSpawnChance;
@@ -79,6 +81,10 @@ struct FCustomerAIBehaviorParams {
   float PostHagglingAcceptanceMulti;  // * If npc counteroffers, the acceptance drops.
   UPROPERTY(EditAnywhere, SaveGame)
   int32 InitHagglingCount;  // * Decreases after each attempt.
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<EPopType, float> PopTypeAcceptMultis;  // * Multiplier for acceptance based on pop type.
+  UPROPERTY(EditAnywhere, SaveGame)
+  TMap<EPopWealthType, float> PopWealthTypeAcceptMultis;  // * Multiplier for acceptance based on pop wealth type.
 
   UPROPERTY(EditAnywhere, SaveGame)
   float CustomerWaitingTime;  // * Time the customer waits before leaving.
@@ -172,4 +178,6 @@ public:
   void ChangeActionWeights(const TMap<FName, float>& ParamValues);
   void ChangePopTypeMultis(const TMap<FName, float>& ParamValues);
   void ChangePopWealthTypeMultis(const TMap<FName, float>& ParamValues);
+  void ChangePopTypeAcceptMultis(const TMap<FName, float>& ParamValues);
+  void ChangePopWealthTypeAcceptMultis(const TMap<FName, float>& ParamValues);
 };

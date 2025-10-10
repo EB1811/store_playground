@@ -25,6 +25,10 @@ AMarket::AMarket() {
 
   Upgradeable.ChangeBehaviorParam = [this](const TMap<FName, float>& ParamValues) { ChangeBehaviorParam(ParamValues); };
   Upgradeable.UnlockIDs = [this](const FName DataName, const TArray<FName>& Ids) { UnlockIDs(DataName, Ids); };
+  Upgradeable.UpgradeFunction = [this](const FName FunctionName, const TArray<FName>& Ids,
+                                       const TMap<FName, float>& ParamValues) {
+    UpgradeFunction(FunctionName, Ids, ParamValues);
+  };
 }
 
 void AMarket::BeginPlay() {
@@ -120,9 +124,11 @@ auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, co
       [ItemID](const FEconItem& EconItem) { return EconItem.ItemID == ItemID; });
   check(EconItem);
 
-  float ItemMarkup = NpcStoreC->StockItemMarkups.Contains(ItemID) ? NpcStoreC->StockItemMarkups[ItemID]
-                                                                  : NpcStoreC->NpcStoreType.StoreMarkup;
-  float TotalPrice = EconItem->CurrentPrice * (1.0f + ItemMarkup * BehaviorParams.StoreMarkupMulti);
+  float ItemMarkup = (NpcStoreC->StockItemMarkups.Contains(ItemID) ? NpcStoreC->StockItemMarkups[ItemID]
+                                                                   : NpcStoreC->NpcStoreType.StoreMarkup) *
+                     BehaviorParams.StoreMarkupMulti *
+                     BehaviorParams.StoreMarkupItemEconTypeMulti[EconItem->ItemEconType];
+  float TotalPrice = EconItem->CurrentPrice * (1.0f + ItemMarkup);
   return TotalPrice;
 }
 auto AMarket::GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float {
@@ -132,9 +138,11 @@ auto AMarket::GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, con
       [ItemID](const FEconItem& EconItem) { return EconItem.ItemID == ItemID; });
   check(EconItem);
 
-  float ItemMarkup = NpcStoreC->StockItemMarkups.Contains(ItemID) ? NpcStoreC->StockItemMarkups[ItemID]
-                                                                  : NpcStoreC->NpcStoreType.StoreMarkup;
-  float TotalPrice = EconItem->CurrentPrice * (1.0f - ItemMarkup * BehaviorParams.StoreMarkupMulti);
+  float ItemMarkup = (NpcStoreC->StockItemMarkups.Contains(ItemID) ? NpcStoreC->StockItemMarkups[ItemID]
+                                                                   : NpcStoreC->NpcStoreType.StoreMarkup) *
+                     BehaviorParams.StoreMarkupMulti *
+                     BehaviorParams.StoreMarkupItemEconTypeMulti[EconItem->ItemEconType];
+  float TotalPrice = EconItem->CurrentPrice * (1.0f - ItemMarkup);
   return TotalPrice;
 }
 
@@ -244,11 +252,27 @@ void AMarket::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
     AddToStructPropertyValue(StructProp, StructPtr, ParamPair.Key, ParamPair.Value);
   }
 }
-
 void AMarket::UnlockIDs(const FName DataName, const TArray<FName>& Ids) {
   if (DataName != "Item") checkf(false, TEXT("UnlockIDs only supports Item IDs."));
 
   TArray<FName> IdsFilteredDuplicates =
       Ids.FilterByPredicate([this](const FName& Id) { return !EligibleItemIds.Contains(Id); });
   for (auto Id : IdsFilteredDuplicates) EligibleItemIds.Add(Id);
+}
+void AMarket::UpgradeFunction(FName FunctionName, const TArray<FName>& Ids, const TMap<FName, float>& ParamValues) {
+  if (FunctionName == "ChangeItemEconTypeMulti") ChangeItemEconTypeMulti(ParamValues);
+  else checkNoEntry();
+}
+void AMarket::ChangeItemEconTypeMulti(const TMap<FName, float>& ParamValues) {
+  for (const auto& ParamPair : ParamValues) {
+    EItemEconType EconType = EItemEconType::Consumer;
+    for (auto T : TEnumRange<EItemEconType>()) {
+      if (UEnum::GetDisplayValueAsText(T).ToString() == ParamPair.Key) {
+        EconType = T;
+        break;
+      }
+    }
+
+    BehaviorParams.StoreMarkupItemEconTypeMulti[EconType] += ParamPair.Value;
+  }
 }

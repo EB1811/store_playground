@@ -209,6 +209,7 @@ void AStorePGGameMode::BeginPlay() {
       {EUpgradeEffectSystem::MarketEconomy, MarketEconomy->Upgradeable},
       {EUpgradeEffectSystem::MarketLevel, MarketLevel->Upgradeable},
       {EUpgradeEffectSystem::StorePhaseManager, StorePhaseManager->Upgradeable},
+      {EUpgradeEffectSystem::Store, Store->Upgradeable},
   };
 
   StoreExpansionManager->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;
