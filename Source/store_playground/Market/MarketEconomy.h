@@ -38,6 +38,9 @@ struct FEconomyBehaviorParams {
   float BaseShareWeighting;  // 0 = only pop ratio (using MGenPopRatioShareWeighting), 1 = only base MSharePercent.
 
   UPROPERTY(EditAnywhere, SaveGame)
+  float MGenMulti;  // Multiplier for the money generation of all pops.
+
+  UPROPERTY(EditAnywhere, SaveGame)
   float PromotionChance;  // Promote to a higher wealth type.
   UPROPERTY(EditAnywhere, SaveGame)
   float DemotionChance;  // Demote to a lower wealth type.

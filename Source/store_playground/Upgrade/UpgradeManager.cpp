@@ -70,8 +70,8 @@ auto AUpgradeManager::GetUpgradeEffectsByIds(const TArray<FName>& EffectIDs) con
 
 auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
   int32 Level = 1;
-  for (const auto& Pair : UpgradeManagerParams.UpgradeLevelRevenueReq)
-    if (StatisticsGen->StoreStatistics.TotalRevenueToDate >= Pair.Value) Level = Pair.Key;
+  for (const auto& Pair : UpgradeManagerParams.UpgradeLevelSelectedReq)
+    if (SelectedUpgradeIDs.Num() >= Pair.Value) Level = Pair.Key;
     else break;
 
   return GlobalStaticDataManager->GetEligibleUpgrades(UpgradeClass, Level, SelectedUpgradeIDs);
@@ -79,8 +79,8 @@ auto AUpgradeManager::GetAvailableUpgrades(EUpgradeClass UpgradeClass) const -> 
 
 auto AUpgradeManager::GetUpgradesReqsNotMet(EUpgradeClass UpgradeClass) const -> TArray<FUpgrade> {
   int32 Level = 1;
-  for (const auto& Pair : UpgradeManagerParams.UpgradeLevelRevenueReq)
-    if (StatisticsGen->StoreStatistics.TotalRevenueToDate >= Pair.Value) Level = Pair.Key;
+  for (const auto& Pair : UpgradeManagerParams.UpgradeLevelSelectedReq)
+    if (SelectedUpgradeIDs.Num() >= Pair.Value) Level = Pair.Key;
     else break;
 
   return GlobalStaticDataManager->GetUpgradesReqsNotMet(UpgradeClass, Level, SelectedUpgradeIDs);

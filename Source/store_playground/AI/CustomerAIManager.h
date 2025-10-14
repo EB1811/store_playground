@@ -26,8 +26,6 @@ struct FCustomerAIManagerParams {
   float CustomerSpawnedDelay;  // Delay after spawning customers before doing actions (just moving around).
   UPROPERTY(EditAnywhere)
   int32 MaxSpawnCustomersInOneGo;  // Avoid freezing the game by spawning too many customers at once.
-  UPROPERTY(EditAnywhere)
-  float StockDisplayToCustomerRatio;  // Number of additional customers to spawn per stock display count.
 
   UPROPERTY(EditAnywhere)
   float UniqueNpcBaseSpawnChance;
@@ -54,6 +52,8 @@ USTRUCT()
 struct FCustomerAIBehaviorParams {
   GENERATED_BODY()
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  float StockDisplayToCustomerRatio;  // Number of additional customers to spawn per stock display count.
   UPROPERTY(EditAnywhere, SaveGame)
   int32 MaxCustomers;
   UPROPERTY(EditAnywhere, SaveGame)
@@ -85,9 +85,14 @@ struct FCustomerAIBehaviorParams {
   TMap<EPopType, float> PopTypeAcceptMultis;  // * Multiplier for acceptance based on pop type.
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<EPopWealthType, float> PopWealthTypeAcceptMultis;  // * Multiplier for acceptance based on pop wealth type.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float AnyPriceAcceptanceChance;  // * An additional flat check to accept any price.
 
   UPROPERTY(EditAnywhere, SaveGame)
   float CustomerWaitingTime;  // * Time the customer waits before leaving.
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  bool bSpawnBasedOnItemsInStore;  // * Upgrade, if true, spawn customers based on items displayed.
 };
 
 UCLASS(Blueprintable)
@@ -162,12 +167,13 @@ public:
   auto CustomerSellItem(class UCustomerAIComponent* CustomerAI, class UItemBase* Item = nullptr) -> bool;
   void MakeCustomerNegotiable(class ACustomerPC* Customer);
 
+  auto ConsiderStockCheck(class UCustomerAIComponent* CustomerAI, const class UItemBase* Item) const -> FOfferResponse;
   auto ConsiderOffer(class UCustomerAIComponent* CustomerAI,
                      const class UItemBase* Item,
                      float LastOfferedPrice,
                      float PlayerOfferedPrice) const -> FOfferResponse;
-  auto ConsiderStockCheck(const class UCustomerAIComponent* CustomerAI,
-                          const class UItemBase* Item) const -> FOfferResponse;
+
+  void StockUpdated();
 
   void TickDaysTimedVars();
 

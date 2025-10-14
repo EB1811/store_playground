@@ -29,50 +29,6 @@ enum class EQuestOutcomeType : uint8 {
   Negotiation UMETA(DisplayName = "Negotiation"),         // * Save negotiation outcomes.
 };
 
-// UENUM()
-// enum class EStartReqType : uint8 {
-//   None UMETA(DisplayName = "None"),  // * Always a random chance of happening.
-//   Time UMETA(DisplayName = "Time"),
-//   Money UMETA(DisplayName = "Money"),
-//   Inventory UMETA(DisplayName = "Inventory"),                        // * Using item ids.
-//   CompletedQuests UMETA(DisplayName = "Completed Quests"),           // * Using quest ids.
-//   MadeDialogueChoices UMETA(DisplayName = "Made Dialogue Choices"),  // * Using dialogue chain ids.
-// };
-// UENUM()
-// enum class EStartReqOperators : uint8 {
-//   None UMETA(DisplayName = "None"),
-//   EqualTo UMETA(DisplayName = "Equal To"),
-//   GreaterThan UMETA(DisplayName = "Greater Than"),
-//   LessThan UMETA(DisplayName = "Less Than"),
-//   Contains UMETA(DisplayName = "Contains"),
-// };
-// UENUM()
-// enum class EStartReqsLogic : uint8 {
-//   None UMETA(DisplayName = "None"),
-//   And UMETA(DisplayName = "And"),
-//   Or UMETA(DisplayName = "Or"),
-// };
-// USTRUCT()
-// struct FQuestChainStartReq {
-//   GENERATED_BODY()
-
-//   UPROPERTY(EditAnywhere)
-//   EStartReqType StartReqType;
-//   UPROPERTY(EditAnywhere)
-//   EStartReqOperators StartReqOperator;
-//   UPROPERTY(EditAnywhere)
-//   FName StartReqValue;  // * String, number, id, (id, ...).
-// };
-// USTRUCT()
-// struct FQuestChainStartRequirements {
-//   GENERATED_BODY()
-
-//   UPROPERTY(EditAnywhere)
-//   TArray<FQuestChainStartReq> StartReqs;
-//   UPROPERTY(EditAnywhere)
-//   EStartReqsLogic Logic;
-// };
-
 USTRUCT()
 struct FQuestChainData {
   GENERATED_BODY()
@@ -80,7 +36,7 @@ struct FQuestChainData {
   UPROPERTY(EditAnywhere)
   FName QuestID;
   UPROPERTY(EditAnywhere)
-  FName ID;  // * For tracking quest chains.
+  FName ID;
   UPROPERTY(EditAnywhere, SaveGame)
   EQuestChainType QuestChainType;
 
@@ -119,7 +75,7 @@ struct FQuestChainDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FName QuestID;
   UPROPERTY(EditAnywhere)
-  FName ID;  // * For tracking quest chains.
+  FName ID;
   UPROPERTY(EditAnywhere)
   EQuestChainType QuestChainType;
 

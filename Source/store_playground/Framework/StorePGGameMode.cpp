@@ -269,6 +269,7 @@ void AStorePGGameMode::BeginPlay() {
 
   Store->SaveManager = SaveManager;
   Store->StorePhaseManager = StorePhaseManager;
+  Store->CustomerAIManager = CustomerAIManager;
   Store->StatisticsGen = StatisticsGen;
   Store->StorePhaseLightingManager = StorePhaseLightingManager;
   Store->AmbientSoundManager = AmbientSoundManager;

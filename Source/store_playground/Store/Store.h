@@ -74,6 +74,8 @@ public:
   class TSubclassOf<class AActor> BuildableClass;
 
   UPROPERTY(EditAnywhere, Category = "Store")
+  class ACustomerAIManager* CustomerAIManager;
+  UPROPERTY(EditAnywhere, Category = "Store")
   class AStatisticsGen* StatisticsGen;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class AStorePhaseLightingManager* StorePhaseLightingManager;

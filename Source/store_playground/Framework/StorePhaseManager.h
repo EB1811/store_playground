@@ -37,6 +37,9 @@ struct FStorePhaseBehaviorParams {
 
   UPROPERTY(EditAnywhere, SaveGame)
   float OpenShopDuration;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  bool bCanAdjustStockWhileOpen;  // ? Put into upgrade manager?
 };
 
 UCLASS(Blueprintable)

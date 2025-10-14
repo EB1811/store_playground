@@ -11,7 +11,7 @@ struct FUpgradeManagerParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  TMap<int32, float> UpgradeLevelRevenueReq;  // * Revenue required to unlock the next level of upgrades.
+  TMap<int32, int32> UpgradeLevelSelectedReq;  // Level to total selected upgrades required.
 };
 
 UCLASS(Blueprintable)

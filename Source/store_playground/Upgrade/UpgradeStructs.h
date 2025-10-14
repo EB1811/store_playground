@@ -106,7 +106,10 @@ struct FEconEventAbilityRow : public FTableRowBase {
 UENUM()
 enum class ECustomerAIEffect : uint8 {
   AvailableMoney UMETA(DisplayName = "AvailableMoney"),              // * Money available for negotiation.
-  AcceptancePercentage UMETA(DisplayName = "AcceptancePercentage"),  // * Acceptance percentage for offers
+  AcceptancePercentage UMETA(DisplayName = "AcceptancePercentage"),  // * Acceptance percentage for offers.
+  // Specific
+  PricePsychology UMETA(DisplayName = "PricePsychology"),  // * Affects how customers perceive prices.
+  TreasureDealer UMETA(DisplayName = "TreasureDealer"),    // * Increases acceptance in proportion to item price.
 };
 USTRUCT()
 struct FNegotiationSkillTextData {

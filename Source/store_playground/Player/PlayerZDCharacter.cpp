@@ -578,8 +578,13 @@ auto APlayerZDCharacter::IsInteractable(const UInteractionComponent* Interactabl
       break;
     case EInteractionType::StockDisplay:
       if (StorePhaseManager->StorePhaseState != EStorePhaseState::Morning &&
-          StorePhaseManager->StorePhaseState != EStorePhaseState::Night)
+          StorePhaseManager->StorePhaseState != EStorePhaseState::Night) {
+        if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen &&
+            StorePhaseManager->BehaviorParams.bCanAdjustStockWhileOpen)
+          return true;
+
         return false;
+      }
       break;
     case EInteractionType::LevelChange:
     case EInteractionType::LeaveStore:

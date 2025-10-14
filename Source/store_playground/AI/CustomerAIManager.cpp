@@ -9,6 +9,7 @@
 #include "Misc/AssertionMacros.h"
 #include "Engine/World.h"
 #include "Engine/DataTable.h"
+#include "Templates/Tuple.h"
 #include "store_playground/WorldObject/Customer.h"
 #include "store_playground/WorldObject/CustomerPC.h"
 #include "store_playground/Interaction/InteractionComponent.h"
@@ -222,8 +223,8 @@ void ACustomerAIManager::SpawnCustomers() {
   check(CustomerClass && GlobalStaticDataManager && MarketEconomy && Store);
   LastSpawnTime = GetWorld()->GetTimeSeconds();
 
-  int32 CustomerCountFromStoreDisplay =
-      FMath::FloorToInt32((float)Store->StockDisplayCount / ManagerParams.StockDisplayToCustomerRatio);
+  int32 CustomerCountFromStoreDisplay = FMath::FloorToInt32(
+      (float)Store->StockDisplayCount / FMath::Max(BehaviorParams.StockDisplayToCustomerRatio, 1.0f));
   float FilledStockPercent =
       Store->StockDisplayCount > 0
           ? FMath::Clamp(Store->StoreStockItems.Num() / (float)Store->StockDisplayCount, 0.0f, 1.0f)
@@ -254,6 +255,19 @@ void ACustomerAIManager::SpawnCustomers() {
     float PopWeightingMulti = MarketEconomy->GetPopWeightingMulti(PopData) *
                               BehaviorParams.PopTypeMultis[PopCustomerData.PopType] *
                               BehaviorParams.PopWealthTypeMultis[PopCustomerData.WealthType];
+
+    if (BehaviorParams.bSpawnBasedOnItemsInStore && Store->StoreStockItems.Num() > 0) {
+      int32 RelevantItemCount = 0;
+      for (const auto& ItemType : PopCustomerData.ItemEconTypes)
+        if (Store->StoreStockItems.ContainsByPredicate(
+                [ItemType](const auto& StockItem) { return StockItem.Item->ItemEconType == ItemType; }))
+          RelevantItemCount += 1;
+      if (RelevantItemCount <= 0) continue;
+
+      WeightedCustomers.Add({GenericCustomer, PopData.Population * PopWeightingMulti *
+                                                  ((float)RelevantItemCount / Store->StoreStockItems.Num())});
+      continue;
+    }
     WeightedCustomers.Add({GenericCustomer, PopData.Population * PopWeightingMulti});
   }
 
@@ -401,7 +415,6 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     AllCustomers.RemoveSingleSwap(Customer);
     ExitingCustomers.Add(Customer);
 
-    // ? Call function somewhere to remove the picked item on successful negotiation?
     if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
       PickingItemIdsMap.Remove(*ItemID);
   }
@@ -577,13 +590,43 @@ void ACustomerAIManager::MakeCustomerNegotiable(class ACustomerPC* Customer) {
                                BehaviorParams.PopWealthTypeAcceptMultis[PopCustomerData.WealthType];
   float AcceptanceFalloffMulti = ManagerParams.BaseAcceptFalloffMulti * BehaviorParams.AcceptanceFalloffMulti;
   int32 HagglingCount = FMath::Max(BehaviorParams.InitHagglingCount, 1);
-  for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills)
+
+  for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills) {
     if (Skill.EffectType == ECustomerAIEffect::AcceptancePercentage) AcceptancePercentage *= Skill.Multi;
+    // Specific negotiation skills.
+    if (Skill.EffectType == ECustomerAIEffect::TreasureDealer) {
+      if (CustomerAI->NegotiationAIDetails.RequestType != ECustomerRequestType::BuyStockItem) continue;
+
+      float MarketPrice = MarketEconomy->GetMarketPrice(CustomerAI->NegotiationAIDetails.RelevantItem->ItemID);
+      AcceptancePercentage *= 1.0f + (MarketPrice / FMath::Max(Skill.Multi, 1.0f));
+    }
+  }
 
   CustomerAI->NegotiationAIDetails.MoneyToSpend = MoneyToSpend;
   CustomerAI->NegotiationAIDetails.AcceptancePercentage = AcceptancePercentage;
   CustomerAI->NegotiationAIDetails.AcceptanceFalloffMulti = AcceptanceFalloffMulti;
   CustomerAI->NegotiationAIDetails.HagglingCount = HagglingCount;
+}
+
+auto ACustomerAIManager::ConsiderStockCheck(UCustomerAIComponent* CustomerAI,
+                                            const UItemBase* Item) const -> FOfferResponse {
+  check(CustomerAI && Item);
+
+  FNegotiationAIDetails& NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
+  if (Item->ItemType == NegotiationAIDetails.WantedItemType.ItemType &&
+      Item->ItemEconType == NegotiationAIDetails.WantedItemType.ItemEconType) {
+    if (auto Skill = AbilityManager->ActiveNegotiationSkills.FindByPredicate(
+            [](const FNegotiationSkill& Skill) { return Skill.EffectType == ECustomerAIEffect::TreasureDealer; })) {
+      float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
+      NegotiationAIDetails.AcceptancePercentage *= 1.0f + (MarketPrice / FMath::Max(Skill->Multi, 1.0f));
+    }
+
+    return {true, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues,
+            NegotiationAIDetails.CustomerName};
+  }
+
+  return {false, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues,
+          NegotiationAIDetails.CustomerName};
 }
 
 auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
@@ -617,14 +660,28 @@ auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
                                         : (MarketPrice < LastOfferedPrice ? MarketPrice : LastOfferedPrice);
   UE_LOG(LogTemp, Log, TEXT("ConsiderOffer: MarketPrice: %f, AcceptanceMaxPrice: %f, AcceptanceMinPrice: %f"),
          MarketPrice, AcceptanceMaxPrice, AcceptanceMinPrice);
-  if (bNpcBuying && PlayerOfferedPrice > AcceptanceMaxPrice || !bNpcBuying && PlayerOfferedPrice < AcceptanceMaxPrice)
+  if (bNpcBuying && PlayerOfferedPrice > AcceptanceMaxPrice || !bNpcBuying && PlayerOfferedPrice < AcceptanceMaxPrice) {
+    if (FMath::FRand() * 100 < BehaviorParams.AnyPriceAcceptanceChance)
+      return {true, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::Accept].Dialogues,
+              NegotiationAIDetails.CustomerName};
     return {false, 0,
             bNpcBuying ? NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::BuyItemTooHigh].Dialogues
                        : NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::SellItemTooLow].Dialogues,
             NegotiationAIDetails.CustomerName};
+  }
 
   float OfferedPercentBetween = (PlayerOfferedPrice - AcceptanceMinPrice) / (AcceptanceMaxPrice - AcceptanceMinPrice);
   float AcceptanceChance = 1.0f - (OfferedPercentBetween * NegotiationAIDetails.AcceptanceFalloffMulti);
+
+  // Specific negotiation skills.
+  for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills) {
+    if (Skill.EffectType == ECustomerAIEffect::PricePsychology) {
+      if (!bNpcBuying) continue;
+
+      FString PriceStr = FString::FromInt(FMath::RoundToInt(PlayerOfferedPrice));
+      if (PriceStr.EndsWith("9")) AcceptanceChance *= Skill.Multi;
+    }
+  }
 
   AcceptanceChance = AcceptanceChance > 0.95f ? 1.0f : AcceptanceChance;  // If close enough, always accept.
   UE_LOG(LogTemp, Log, TEXT("ConsiderOffer: OfferedPercentBetween: %f, AcceptanceChance: %f"), OfferedPercentBetween,
@@ -641,25 +698,37 @@ auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
 
   UE_LOG(LogTemp, Log, TEXT("ConsiderOffer: AdjustedPercent: %f, AcceptancePercentage: %f"), AdjustedPercent,
          NegotiationAIDetails.AcceptancePercentage);
+
+  if (FMath::FRand() * 100 < BehaviorParams.AnyPriceAcceptanceChance)
+    return {true, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::Accept].Dialogues,
+            NegotiationAIDetails.CustomerName};
   return {false, MarketPrice * AdjustedPercent,
           (bNpcBuying ? NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::BuyItemClose].Dialogues
                       : NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::SellItemClose].Dialogues),
           NegotiationAIDetails.CustomerName};
 }
 
-auto ACustomerAIManager::ConsiderStockCheck(const UCustomerAIComponent* CustomerAI,
-                                            const UItemBase* Item) const -> FOfferResponse {
-  check(CustomerAI && Item);
+void ACustomerAIManager::StockUpdated() {
+  auto PickingItemsNowInvalid = PickingItemIdsMap.FilterByPredicate([this](auto& Pair) {
+    return !Store->StoreStockItems.ContainsByPredicate(
+        [Pair](const FStockItem& StockItem) { return StockItem.Item->UniqueItemID == Pair.Key; });
+  });
 
-  FNegotiationAIDetails NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
-  // float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
-  if (Item->ItemType == NegotiationAIDetails.WantedItemType.ItemType &&
-      Item->ItemEconType == NegotiationAIDetails.WantedItemType.ItemEconType)
-    return {true, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::StockCheckAccept].Dialogues,
-            NegotiationAIDetails.CustomerName};
+  for (const auto& Pair : PickingItemsNowInvalid) {
+    PickingItemIdsMap.Remove(Pair.Key);
 
-  return {false, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::StockCheckReject].Dialogues,
-          NegotiationAIDetails.CustomerName};
+    // ? In what situation would this fail?
+    check(AllCustomers.FindByPredicate(
+        [Pair](const ACustomerPC* C) { return C->CustomerAIComponent->CustomerAIID == Pair.Value; }));
+
+    auto Customer = *(AllCustomers.FindByPredicate(
+        [Pair](const ACustomerPC* C) { return C->CustomerAIComponent->CustomerAIID == Pair.Value; }));
+    if (Customer->CustomerAIComponent->CustomerState == ECustomerState::Requesting) {
+      Customer->WidgetComponent->SetVisibility(false, true);
+      Customer->InteractionComponent->InteractionType = EInteractionType::Customer;
+      Customer->CustomerAIComponent->CustomerState = ECustomerState::Browsing;
+    }
+  }
 }
 
 void ACustomerAIManager::TickDaysTimedVars() {

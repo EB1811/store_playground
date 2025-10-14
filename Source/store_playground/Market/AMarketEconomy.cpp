@@ -100,12 +100,13 @@ void AMarketEconomy::PerformEconomyTick() {
   // Calculate total wealth.
   TotalWealth = 0;
   for (int32 i = 0; i < CustomerPops.Num(); i++)
-    TotalWealth += PopEconDataArray[i].MGen * PopEconDataArray[i].Population;
+    TotalWealth += PopEconDataArray[i].MGen * PopEconDataArray[i].Population * BehaviorParams.MGenMulti;
   TMap<FName, float> PopWealthMap;
   for (int32 i = 0; i < CustomerPops.Num(); i++) {
     // lerp get lerp between MGen% and Pop%.
     float PopulationPercent = float(PopEconDataArray[i].Population) / float(TotalPopulation);
-    float MGenPercent = float(PopEconDataArray[i].MGen * PopEconDataArray[i].Population) / TotalWealth;
+    float MGenPercent =
+        float(PopEconDataArray[i].MGen * PopEconDataArray[i].Population * BehaviorParams.MGenMulti) / TotalWealth;
     float PopLerp = FMath::Lerp(PopulationPercent, MGenPercent, BehaviorParams.MGenPopRatioShareWeighting);
     // lerp between base Base MSharePercent and PopLerp.
     float BasePercent = PopEconDataArray[i].MSharePercent / 100.0f;

@@ -17,6 +17,7 @@
 #include "store_playground/Store/StockDisplayComponent.h"
 #include "store_playground/Lighting/StorePhaseLightingManager.h"
 #include "store_playground/Sound/AmbientSoundManager.h"
+#include "store_playground/AI/CustomerAIManager.h"
 
 AStore::AStore() {
   PrimaryActorTick.bCanEverTick = false;
@@ -214,6 +215,8 @@ void AStore::InitStockDisplays() {
       Buildable->StockDisplay->SetDisplaySprite(Item->AssetData.Sprite);
     }
   }
+
+  if (CustomerAIManager) CustomerAIManager->StockUpdated();
 }
 
 void AStore::ChangeBehaviorParam(const TMap<FName, float>& ParamValues) {
