@@ -18,6 +18,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* Name;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* GensText;
+  UPROPERTY(meta = (BindWidget))
   class UTextBlock* WealthText;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* PopulationText;

@@ -27,9 +27,11 @@ void ANewsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 auto ANewsGen::GetItemPriceTrendArticle(float PriceTrend, FName ItemId) -> FArticle {
   FArticle SelectedArticle;
 
-  if (PriceTrend > 0.15f) {
+  constexpr float TrendThreshold = 0.15f;
+  constexpr float HighTrendThreshold = 0.5f;
+  if (PriceTrend > TrendThreshold) {
     TArray<FArticle> PriceIncreaseArticles =
-        PriceTrend > 0.15f && PriceTrend <= 0.5f
+        PriceTrend > TrendThreshold && PriceTrend <= HighTrendThreshold
             ? GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
                 return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceIncrease.Mid"));
               })
@@ -41,9 +43,9 @@ auto ANewsGen::GetItemPriceTrendArticle(float PriceTrend, FName ItemId) -> FArti
     SelectedArticle = GetWeightedRandomItem<FArticle>(PriceIncreaseArticles,
                                                       [](const auto& Article) { return Article.AppearWeight; });
 
-  } else if (PriceTrend < -0.15f) {
+  } else if (PriceTrend < -TrendThreshold) {
     TArray<FArticle> PriceDecreaseArticles =
-        PriceTrend < -0.15f && PriceTrend >= -0.5f
+        PriceTrend < -TrendThreshold && PriceTrend >= -HighTrendThreshold
             ? GlobalStaticDataManager->ArticlesArray.FilterByPredicate([](const FArticle& Article) {
                 return Article.Tags.HasTag(FGameplayTag::RequestGameplayTag("Article.PriceDecrease.Mid"));
               })

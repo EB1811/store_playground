@@ -523,9 +523,11 @@ void AGlobalStaticDataManager::InitializeMarketData() {
         Row->PopTypes,
         Row->PopWealthTypes,
         Row->PopChangeMulti,
+        Row->PopMGenMulti,
         Row->DurationType,
         Row->Duration,
-        Row->PopChangeMultiFalloff,
+        Row->BuildupPercent,
+        Row->MultiFalloff,
     });
 
   check(PriceEffectsArray.Num() > 0);

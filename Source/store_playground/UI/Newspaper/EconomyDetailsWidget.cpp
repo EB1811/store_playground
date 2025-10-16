@@ -17,7 +17,14 @@
 #include "PaperSprite.h"
 #include "Blueprint/WidgetTree.h"
 
-inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconData& GivenPop) -> FString {
+inline auto GetGensString(const class AMarketEconomy* MarketEconomy, const FPopEconData& GivenPop) -> FString {
+  float GenPercent = ((float(GivenPop.MGen) * float(GivenPop.Population) * MarketEconomy->BehaviorParams.MGenMulti) /
+                      MarketEconomy->TotalWealth) *
+                     100.0f;
+
+  return FString::Printf(GenPercent < 1.0f ? TEXT("Produces: %.1f") : TEXT("Produces: %.0f"), GenPercent) + "%";
+}
+inline auto GetWealthString(TArray<FPopEconData> PopEconDataArray, const FPopEconData& GivenPop) -> FString {
   float TotalGoodsBoughtPerCapita = 0.0f;
   for (auto& Pop : PopEconDataArray) TotalGoodsBoughtPerCapita += Pop.GoodsBoughtPerCapita;
 
@@ -25,15 +32,19 @@ inline auto GetWealthText(TArray<FPopEconData> PopEconDataArray, const FPopEconD
   UE_LOG(LogTemp, Log, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
          GivenPopGoodsBoughtPercentage);
 
-  if (GivenPopGoodsBoughtPercentage <= 0.0f) return "None";
-  if (GivenPopGoodsBoughtPercentage < 0.5f) return "Very Low";
-  if (GivenPopGoodsBoughtPercentage < 1.5f) return "Low";
-  if (GivenPopGoodsBoughtPercentage < 3.0f) return "Middle";
-  if (GivenPopGoodsBoughtPercentage < 6.0f) return "High";
-  if (GivenPopGoodsBoughtPercentage < 10.0f) return "Very High";
-  return "Immense";
+  return FString::Printf(GivenPopGoodsBoughtPercentage < 1.0f ? TEXT("Wealth: %.1f") : TEXT("Wealth: %.0f"),
+                         GivenPopGoodsBoughtPercentage) +
+         "%";
+
+  // if (GivenPopGoodsBoughtPercentage <= 0.0f) return "None";
+  // if (GivenPopGoodsBoughtPercentage < 0.5f) return "Very Low";
+  // if (GivenPopGoodsBoughtPercentage < 1.5f) return "Low";
+  // if (GivenPopGoodsBoughtPercentage < 3.0f) return "Middle";
+  // if (GivenPopGoodsBoughtPercentage < 6.0f) return "High";
+  // if (GivenPopGoodsBoughtPercentage < 10.0f) return "Very High";
+  // return "Immense";
 }
-inline auto GetItemSpendText(TMap<EItemWealthType, float> ItemSpendPercent) -> FString {
+inline auto GetItemSpendString(TMap<EItemWealthType, float> ItemSpendPercent) -> FString {
   TArray<FString> SpendStrings;
   for (const auto& Spend : ItemSpendPercent)
     if (Spend.Value >= 40.0f) SpendStrings.Add(UEnum::GetDisplayValueAsText(Spend.Key).ToString());
@@ -123,8 +134,13 @@ void UEconomyDetailsWidget::RefreshUI() {
       }
 
       PopDetailsWidget->Name->SetText(Pop.PopName);
+      float GenPercent =
+          ((float(PopEconData.MGen) * float(PopEconData.Population) * MarketEconomy->BehaviorParams.MGenMulti) /
+           MarketEconomy->TotalWealth) *
+          100.0f;
+      PopDetailsWidget->GensText->SetText(FText::FromString(GetGensString(MarketEconomy, PopEconData)));
       PopDetailsWidget->WealthText->SetText(
-          FText::FromString("Wealth: " + GetWealthText(MarketEconomy->PopEconDataArray, PopEconData)));
+          FText::FromString(GetWealthString(MarketEconomy->PopEconDataArray, PopEconData)));
       // float PopulationPercent = float(PopEconData.Population) / float(MarketEconomy->TotalPopulation) * 100.0f;
       // PopDetailsWidget->PopulationText->SetText(FText::FromString(
       //     FString::Printf(PopulationPercent < 1.0f ? TEXT("Population: %.1f") : TEXT("Population: %.0f"),
@@ -133,7 +149,7 @@ void UEconomyDetailsWidget::RefreshUI() {
       PopDetailsWidget->PopulationText->SetText(
           FText::FromString(FString::Printf(TEXT("Population: %d"), PopEconData.Population)));
       PopDetailsWidget->ItemSpendText->SetText(
-          FText::FromString("Spends On: " + GetItemSpendText(Pop.ItemSpendPercent)));
+          FText::FromString("Spends On: " + GetItemSpendString(Pop.ItemSpendPercent)));
       FString EconTypesText = Pop.ItemEconTypes.Num() < 4
                                   ? FString::JoinBy(Pop.ItemEconTypes, TEXT(" & "),
                                                     [](const EItemEconType& EconType) {

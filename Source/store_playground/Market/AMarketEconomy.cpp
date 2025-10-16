@@ -97,16 +97,32 @@ void AMarketEconomy::PerformEconomyTick() {
   }
 
   // * Pop Simulation.
+  // MGen effects.
+  TMap<TTuple<EPopType, EPopWealthType>, float> MGenMap;
+  for (auto PopType : TEnumRange<EPopType>())
+    for (auto WealthType : TEnumRange<EPopWealthType>()) MGenMap.Add({PopType, WealthType}, 1.0f);
+  for (auto PopEffect : ActivePopEffects) {
+    for (auto PopType : PopEffect.PopTypes)
+      for (auto WealthType : PopEffect.PopWealthTypes)
+        MGenMap[TTuple<EPopType, EPopWealthType>(PopType, WealthType)] += PopEffect.PopMGenMulti - 1.0f;
+  }
+
   // Calculate total wealth.
   TotalWealth = 0;
   for (int32 i = 0; i < CustomerPops.Num(); i++)
-    TotalWealth += PopEconDataArray[i].MGen * PopEconDataArray[i].Population * BehaviorParams.MGenMulti;
+    TotalWealth += PopEconDataArray[i].MGen * PopEconDataArray[i].Population *
+                   MGenMap[TTuple<EPopType, EPopWealthType>(CustomerPops[i].PopType, CustomerPops[i].WealthType)] *
+                   BehaviorParams.MGenMulti;
+
   TMap<FName, float> PopWealthMap;
   for (int32 i = 0; i < CustomerPops.Num(); i++) {
     // lerp get lerp between MGen% and Pop%.
     float PopulationPercent = float(PopEconDataArray[i].Population) / float(TotalPopulation);
     float MGenPercent =
-        float(PopEconDataArray[i].MGen * PopEconDataArray[i].Population * BehaviorParams.MGenMulti) / TotalWealth;
+        float(PopEconDataArray[i].MGen * PopEconDataArray[i].Population *
+              MGenMap[TTuple<EPopType, EPopWealthType>(CustomerPops[i].PopType, CustomerPops[i].WealthType)] *
+              BehaviorParams.MGenMulti) /
+        TotalWealth;
     float PopLerp = FMath::Lerp(PopulationPercent, MGenPercent, BehaviorParams.MGenPopRatioShareWeighting);
     // lerp between base Base MSharePercent and PopLerp.
     float BasePercent = PopEconDataArray[i].MSharePercent / 100.0f;
@@ -453,7 +469,8 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
       PopEffectsToRemove.Add(PopEffect);
     } else {
       PopEffect.DurationLeft -= 1;
-      PopEffect.PopChangeMulti = FMath::Max(PopEffect.PopChangeMulti - PopEffect.PopChangeMultiFalloff, 1.0f);
+      PopEffect.PopChangeMulti = FMath::Max(PopEffect.PopChangeMulti - PopEffect.MultiFalloff, 1.0f);
+      PopEffect.PopMGenMulti = FMath::Max(PopEffect.PopMGenMulti - PopEffect.MultiFalloff, 1.0f);
     }
   }
 

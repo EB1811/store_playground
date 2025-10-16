@@ -169,7 +169,6 @@ void UItemsWidget::InitUI(const class UInventoryComponent* _InventoryRef,
   ShowPriceFunc = _ShowPriceFunc;
 
   FilterData = {.ItemType = EItemType::Weapon, .bFilterByType = false};
-  SortData = {.SortType = ESortType::None, .bReverse = false};
   SelectedItem = nullptr;
 
   GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);

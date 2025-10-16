@@ -315,14 +315,18 @@ struct FPopEffect {
   TArray<EPopWealthType> PopWealthTypes;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  float PopChangeMulti;  // * Chance to change pop.
+  float PopChangeMulti;  // * Chance to change pop multi.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PopMGenMulti;  // * Multiplier to MGen.
 
   UPROPERTY(EditAnywhere, SaveGame)
   EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere, SaveGame)
   int32 DurationLeft;  // * Duration in days.
   UPROPERTY(EditAnywhere, SaveGame)
-  float PopChangeMultiFalloff;  // * Falloff each day, if any.
+  float BuildupPercent;  // * Not used.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float MultiFalloff;  // * Falloff each day, if any.
 };
 USTRUCT()
 struct FPopEffectRow : public FTableRowBase {
@@ -337,14 +341,18 @@ struct FPopEffectRow : public FTableRowBase {
   TArray<EPopWealthType> PopWealthTypes;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  float PopChangeMulti;  // * Chance to change pop.
+  float PopChangeMulti;  // * Chance to change pop multi.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float PopMGenMulti;  // * Multiplier to MGen.
 
   UPROPERTY(EditAnywhere, SaveGame)
   EEffectDurationType DurationType;
   UPROPERTY(EditAnywhere, SaveGame)
   int32 Duration;  // * Duration in days.
   UPROPERTY(EditAnywhere, SaveGame)
-  float PopChangeMultiFalloff;  // * Falloff each day, if any.
+  float BuildupPercent;  // * Not used.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float MultiFalloff;  // * Falloff each day, if any.
 };
 
 UENUM()
