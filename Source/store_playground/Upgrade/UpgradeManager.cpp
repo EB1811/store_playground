@@ -59,6 +59,8 @@ void AUpgradeManager::ConsiderUpgradePoints() {
   }
 }
 void AUpgradeManager::GainUpgradePoints(int32 Points) {
+  if (AvailableUpgradePoints >= UpgradeManagerParams.MaxUpgradePoints) return;
+
   AvailableUpgradePoints += Points;
 
   HUD->NotifyUpgradePointsGained();

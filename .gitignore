@@ -98,7 +98,6 @@ Content/**/*
 !/Content/UserInterface/*
 !/Content/UserInterface/**/*.uasset
 !/Content/UserInterface/Store/**/*.uasset
-!/Content/Levels/**/*.uasset
 !/Content/Levels/**/*.umap
 !/Content/PostProcess/**
 !/Content/Audio/**

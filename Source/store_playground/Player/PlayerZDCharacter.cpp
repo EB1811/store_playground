@@ -184,6 +184,8 @@ void APlayerZDCharacter::BeginPlay() {
     if (PlayerBehaviourState == EPlayerState::Cutscene) return ChangePlayerState(EPlayerState::PausedCutscene);
     ChangePlayerState(EPlayerState::Paused);
   };
+  HUD->SetGameActionTutorialFunc = [this]() { ChangeGameActionsState(EPlayerGameActionsState::InTutorial); };
+  HUD->SetGameActionNoneFunc = [this]() { ChangeGameActionsState(EPlayerGameActionsState::None); };
   // Input actions
   HUD->InGameInputActions = InGameInputActions;
   HUD->InUIInputActions = InUIInputActions;

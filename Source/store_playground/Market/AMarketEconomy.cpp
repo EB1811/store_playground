@@ -451,35 +451,33 @@ void AMarketEconomy::TickDaysActivePriceEffects() {
     }
     if (PriceEffect.DurationType == EEffectDurationType::Permanent) continue;
 
-    if (PriceEffect.DurationLeft < 1) {
-      PriceEffectsToRemove.Add(PriceEffect);
-    } else {
-      PriceEffect.DurationLeft -= 1;
-      PriceEffect.PriceMultiPercent =
-          PriceEffect.PriceMultiPercent > 0.0f
-              ? FMath::Max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 0.0f)
-              : FMath::Min(PriceEffect.PriceMultiPercent + PriceEffect.PriceMultiPercentFalloff, -0.0f);
-      PriceEffect.CurrentPriceMultiPercent = PriceEffect.PriceMultiPercent;
-    }
+    PriceEffect.DurationLeft -= 1;
+    PriceEffect.PriceMultiPercent =
+        PriceEffect.PriceMultiPercent > 0.0f
+            ? FMath::Max(PriceEffect.PriceMultiPercent - PriceEffect.PriceMultiPercentFalloff, 0.0f)
+            : FMath::Min(PriceEffect.PriceMultiPercent + PriceEffect.PriceMultiPercentFalloff, -0.0f);
+    PriceEffect.CurrentPriceMultiPercent = PriceEffect.PriceMultiPercent;
+
+    if (PriceEffect.DurationLeft < 0) PriceEffectsToRemove.Add(PriceEffect);
   }
   for (auto& PopEffect : ActivePopEffects) {
     if (PopEffect.DurationType == EEffectDurationType::Permanent) continue;
 
-    if (PopEffect.DurationLeft <= 1) {
-      PopEffectsToRemove.Add(PopEffect);
-    } else {
-      PopEffect.DurationLeft -= 1;
-      PopEffect.PopChangeMulti = FMath::Max(PopEffect.PopChangeMulti - PopEffect.MultiFalloff, 1.0f);
-      PopEffect.PopMGenMulti = FMath::Max(PopEffect.PopMGenMulti - PopEffect.MultiFalloff, 1.0f);
-    }
+    PopEffect.DurationLeft -= 1;
+    PopEffect.PopChangeMulti = FMath::Max(PopEffect.PopChangeMulti - PopEffect.MultiFalloff, 1.0f);
+    PopEffect.PopMGenMulti = FMath::Max(PopEffect.PopMGenMulti - PopEffect.MultiFalloff, 1.0f);
+
+    if (PopEffect.DurationLeft < 0) PopEffectsToRemove.Add(PopEffect);
   }
 
   for (auto& PriceEffect : PriceEffectsToRemove)
-    ActivePriceEffects.RemoveAllSwap(
-        [PriceEffect](const auto& OtherPriceEffect) { return PriceEffect.ID == OtherPriceEffect.ID; });
+    ActivePriceEffects.RemoveAllSwap([PriceEffect](const auto& ArrPriceEffect) {
+      return PriceEffect.ID == ArrPriceEffect.ID && ArrPriceEffect.DurationLeft < 0;
+    });
   for (auto& PopEffect : PopEffectsToRemove)
-    ActivePopEffects.RemoveAllSwap(
-        [PopEffect](const auto& OtherPopEffect) { return PopEffect.ID == OtherPopEffect.ID; });
+    ActivePopEffects.RemoveAllSwap([PopEffect](const auto& ArrPopEffect) {
+      return PopEffect.ID == ArrPopEffect.ID && ArrPopEffect.DurationLeft < 0;
+    });
 }
 
 void AMarketEconomy::InitializeEconomyData() {

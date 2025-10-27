@@ -589,10 +589,14 @@ void ASpgHUD::SetAndOpenAbilityView() {
 void ASpgHUD::SetAndOpenTutorialView(TArray<FUITutorialStep> TutorialSteps) {
   check(TutorialViewWidget);
 
-  TutorialViewWidget->InitUI(InUIInputActions, TutorialSteps, [this] { CloseWidget(TutorialViewWidget); });
+  TutorialViewWidget->InitUI(InUIInputActions, TutorialSteps, [this] {
+    CloseWidget(TutorialViewWidget);
+    SetGameActionNoneFunc();
+  });
   TutorialViewWidget->RefreshUI();
 
   OpenFocusedMenu(TutorialViewWidget);
+  SetGameActionTutorialFunc();
 }
 
 void ASpgHUD::SetAndOpenMiniGame(AMiniGameManager* MiniGameManager,

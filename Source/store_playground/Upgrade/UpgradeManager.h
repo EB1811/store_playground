@@ -12,6 +12,8 @@ struct FUpgradeManagerParams {
 
   UPROPERTY(EditAnywhere)
   TMap<int32, int32> UpgradeLevelSelectedReq;  // Level to total selected upgrades required.
+  UPROPERTY(EditAnywhere)
+  int32 MaxUpgradePoints;
 };
 
 UCLASS(Blueprintable)

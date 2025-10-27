@@ -26,6 +26,8 @@ void AMainMenuPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
                                        &AMainMenuPlayer::AdvanceUI);
     EnhancedInputComponent->BindAction(InUIInputActions.RetractUIAction, ETriggerEvent::Triggered, this,
                                        &AMainMenuPlayer::RetractUIAction);
+    EnhancedInputComponent->BindAction(InUIInputActions.UISideButton4Action, ETriggerEvent::Triggered, this,
+                                       &AMainMenuPlayer::UISideButton4Action);
     EnhancedInputComponent->BindAction(InUIInputActions.UIDirectionalInputAction, ETriggerEvent::Triggered, this,
                                        &AMainMenuPlayer::UIDirectionalInputAction);
   }

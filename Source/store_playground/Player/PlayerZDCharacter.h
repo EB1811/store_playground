@@ -27,6 +27,7 @@ enum class EPlayerGameActionsState : uint8 {
   InDialogue UMETA(DisplayName = "InDialogue"),        // * In a dialogue.
   InNegotiation UMETA(DisplayName = "InNegotiation"),  // * In a negotiation.
   InQuest UMETA(DisplayName = "InQuest"),              // * In a quest (e.g., fetching item, etc.).
+  InTutorial UMETA(DisplayName = "InTutorial"),        // * In a tutorial.
 };
 
 USTRUCT()

@@ -102,6 +102,9 @@ public:
   std::function<void()> SetPlayerNoControlFunc;  // * Set player state to no control (i.e, loading, etc.).
   std::function<void()> SetPlayerPausedFunc;     // * Set player state to paused (not in menu, etc.).
 
+  TFunction<void()> SetGameActionTutorialFunc;
+  TFunction<void()> SetGameActionNoneFunc;
+
   UPROPERTY(EditAnywhere)
   FInGameInputActions InGameInputActions;
   UPROPERTY(EditAnywhere)

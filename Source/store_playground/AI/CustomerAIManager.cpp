@@ -339,7 +339,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
     switch (Customer->CustomerAIComponent->CustomerState) {
       case (ECustomerState::Browsing): {
         if (GetWorld()->TimeSince(Customer->CustomerAIComponent->SpawnedTime) < ManagerParams.CustomerSpawnedDelay ||
-            PlayerCharacter->GameActionsState == EPlayerGameActionsState::InQuest) {
+            PlayerCharacter->GameActionsState == EPlayerGameActionsState::InQuest ||
+            PlayerCharacter->GameActionsState == EPlayerGameActionsState::InTutorial) {
           if (FMath::FRand() < 0.5f) MoveCustomerRandom(NavSystem, Customer);
           break;
         }
@@ -356,7 +357,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
       }
       case (ECustomerState::Requesting): {
         if (GetWorld()->TimeSince(Customer->CustomerAIComponent->RequestingTime) > BehaviorParams.CustomerWaitingTime) {
-          if (PlayerCharacter->GameActionsState == EPlayerGameActionsState::InQuest) {
+          if (PlayerCharacter->GameActionsState == EPlayerGameActionsState::InQuest ||
+              PlayerCharacter->GameActionsState == EPlayerGameActionsState::InTutorial) {
             Customer->CustomerAIComponent->RequestingTime = GetWorld()->GetTimeSeconds();
             break;
           }

@@ -305,8 +305,8 @@ void ASettingsManager::InitSettings() {
   UE_LOG(LogTemp, Warning, TEXT("Benchmark Overall Quality Level: %d"), CurrentOverallQuality);
   if (CurrentOverallQuality >= 3) {  // Epic
     SetAntiAliasingMethod(4);        // TSR
-    SetGlobalIlluminationMethod(1);  // Lumen
-    SetReflectionMethod(1);          // Lumen
+    SetGlobalIlluminationMethod(0);
+    SetReflectionMethod(2);  // Screen Space
     SetDepthOfFieldEnabled(true);
     SetBloomEnabled(true);
     SetDLSSFrameGenerationEnabled(false);

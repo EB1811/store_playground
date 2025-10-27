@@ -38,7 +38,7 @@ void UGraphicsSettingsWidget::NativeOnInitialized() {
   ReflectionMethodComboBox->OnSelectionChanged.AddDynamic(this, &UGraphicsSettingsWidget::OnReflectionMethodChanged);
 
   ResolutionScaleSlider->SetMinValue(0.25f);
-  ResolutionScaleSlider->SetMaxValue(1.5f);
+  ResolutionScaleSlider->SetMaxValue(1.0f);
 
   SetupUIActionable();
 }
@@ -101,20 +101,17 @@ void UGraphicsSettingsWidget::OnOverallQualityChanged(FString SelectedItem, ESel
   if (QualityLevel == 4) return;  // Custom quality, do not change anything
 
   // Set advanced settings based on quality level
-  if (QualityLevel >= 3)                                    // Epic and Cinematic use Lumen
-    GlobalIlluminationMethodComboBox->SetSelectedIndex(1);  // Lumen
-  else                                                      // Low and Medium uses None
-    GlobalIlluminationMethodComboBox->SetSelectedIndex(0);  // None
-  if (QualityLevel >= 3)                                    // Epic use Lumen
-    ReflectionMethodComboBox->SetSelectedIndex(1);          // Lumen
-  else                                                      // Low, Medium, High use None
-    ReflectionMethodComboBox->SetSelectedIndex(0);          // None
-  if (QualityLevel >= 3)                                    // Epic use TSR
-    AntiAliasingMethodComboBox->SetSelectedIndex(2);        // TSR
-  else                                                      // Low, Medium, High use None
-    AntiAliasingMethodComboBox->SetSelectedIndex(0);        // None
-  DepthOfFieldCheckBox->SetIsChecked(QualityLevel >= 1);    // Depth of Field for Medium and above
-  BloomCheckBox->SetIsChecked(QualityLevel >= 1);           // Bloom for Medium and above
+  GlobalIlluminationMethodComboBox->SetSelectedIndex(0);  // None
+  if (QualityLevel >= 3)                                  // Epic use Screen Space
+    ReflectionMethodComboBox->SetSelectedIndex(2);        // Screen Space
+  else                                                    // Low, Medium, High use None
+    ReflectionMethodComboBox->SetSelectedIndex(0);        // None
+  if (QualityLevel >= 3)                                  // Epic use TSR
+    AntiAliasingMethodComboBox->SetSelectedIndex(2);      // TSR
+  else                                                    // Low, Medium, High use None
+    AntiAliasingMethodComboBox->SetSelectedIndex(0);      // None
+  DepthOfFieldCheckBox->SetIsChecked(QualityLevel >= 1);  // Depth of Field for Medium and above
+  BloomCheckBox->SetIsChecked(QualityLevel >= 1);         // Bloom for Medium and above
 
   PopulateQualityComboBox(ViewDistanceComboBox, QualityLevel);
   PopulateQualityComboBox(ShadowQualityComboBox, QualityLevel);
