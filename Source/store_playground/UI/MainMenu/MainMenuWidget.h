@@ -16,7 +16,7 @@ public:
   virtual void NativeOnInitialized() override;
 
   UPROPERTY(meta = (BindWidget))
-  class UOverlay* MainOverlay;
+  class UOverlay* MenusOverlay;
   UPROPERTY(meta = (BindWidget))
   class UNewGameSetupWidget* NewGameSetupWidget;
   UPROPERTY(EditAnywhere, meta = (BindWidget))
@@ -39,10 +39,22 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* ExitButton;
 
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* StartupAnim;
+  UPROPERTY(Transient, meta = (BindWidgetAnim))
+  class UWidgetAnimation* ShowPageAnim;
+  // UPROPERTY(Transient, meta = (BindWidgetAnim))
+  // class UWidgetAnimation* HidePageAnim;
+
+  UPROPERTY(EditAnywhere)
+  class USoundBase* StartupSound;
   UPROPERTY(EditAnywhere)
   class USoundBase* HoverSound;
   UPROPERTY(EditAnywhere)
   class USoundBase* SelectSound;
+
+  UPROPERTY(EditAnywhere)
+  class AMainMenuControlHUD* MainMenuControlHUD;
 
   UPROPERTY(EditAnywhere)
   FInUIInputActions InUIInputActions;
@@ -73,8 +85,11 @@ public:
   UFUNCTION()
   void Exit();
 
+  void ShowSplashScreen();
+
   void RefreshUI();
-  void InitUI(FInUIInputActions _InUIInputActions,
+  void InitUI(AMainMenuControlHUD* _MainMenuControlHUD,
+              FInUIInputActions _InUIInputActions,
               class ASettingsManager* _SettingsManager,
               class ASaveManager* _SaveManager);
 

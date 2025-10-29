@@ -11,6 +11,7 @@
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/SaveSlotListSaveGame.h"
 #include "store_playground/MainMenuControl/MainMenuControlHUD.h"
+#include "store_playground/Sound/MusicManager.h"
 
 void AMainMenuGameMode::BeginPlay() {
   Super::BeginPlay();
@@ -22,6 +23,7 @@ void AMainMenuGameMode::BeginPlay() {
 
   ASettingsManager* SettingsManager = GetWorld()->SpawnActor<ASettingsManager>(SettingsManagerClass);
   SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
+  AMusicManager* MusicManager = GetWorld()->SpawnActor<AMusicManager>(MusicManagerClass);
 
   MainMenuControlHUD->SettingsManager = SettingsManager;
   MainMenuControlHUD->SaveManager = SaveManager;
@@ -44,6 +46,8 @@ void AMainMenuGameMode::BeginPlay() {
 
   MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
   MainMenuControlHUD->OpenMainMenu();
+
+  MusicManager->MainMenuMusicCalled();
 }
 
 void AMainMenuGameMode::Continue() {

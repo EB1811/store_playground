@@ -1,6 +1,7 @@
 #include "MainMenuControlHUD.h"
 #include "Components/Button.h"
 #include "Components/SlateWrapperTypes.h"
+#include "Logging/LogVerbosity.h"
 #include "store_playground/MainMenuControl/MainMenuGameMode.h"
 #include "store_playground/SaveManager/SettingsSaveGame.h"
 #include "store_playground/SaveManager/SaveSlotListSaveGame.h"
@@ -51,10 +52,12 @@ void AMainMenuControlHUD::OpenMainMenu() {
   MainMenuWidget = CreateWidget<UMainMenuWidget>(GetWorld(), MainMenuWidgetClass);
   MainMenuWidget->AddToViewport(20);
 
-  MainMenuWidget->InitUI(InUIInputActions, SettingsManager, SaveManager);
+  MainMenuWidget->InitUI(this, InUIInputActions, SettingsManager, SaveManager);
   MainMenuWidget->RefreshUI();
 
   MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
+  MainMenuWidget->SetFocus();
+  MainMenuWidget->PlayAnimation(MainMenuWidget->StartupAnim);
 }
 
 void AMainMenuControlHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {
@@ -62,4 +65,10 @@ void AMainMenuControlHUD::StartLevelLoadingTransition(std::function<void()> _Fad
 
   LevelLoadingTransitionWidget->AddToViewport(100);
   LevelLoadingTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+}
+
+void AMainMenuControlHUD::PlayWidgetAnim(class UUserWidget* Widget, class UWidgetAnimation* Animation) {
+  if (!Widget || !Animation) return;
+
+  Widget->PlayAnimation(Animation);
 }

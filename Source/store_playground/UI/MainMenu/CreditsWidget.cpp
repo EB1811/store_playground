@@ -29,5 +29,8 @@ void UCreditsWidget::InitUI(FInUIInputActions _InUIInputActions, std::function<v
 }
 
 void UCreditsWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() {};
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {};
+  UIActionable.SideButton4 = [this]() {};
   UIActionable.RetractUI = [this]() { Back(); };
 }

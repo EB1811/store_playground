@@ -19,6 +19,8 @@ public:
   TSubclassOf<class ASettingsManager> SettingsManagerClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ASaveManager> SaveManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class AMusicManager> MusicManagerClass;
 
   UPROPERTY(EditAnywhere, Category = "Widgets")
   class AMainMenuControlHUD* MainMenuControlHUD;

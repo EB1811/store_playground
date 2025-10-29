@@ -8,6 +8,7 @@
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveSlotListSaveGame.h"
+#include "store_playground/MainMenuControl/MainMenuControlHUD.h"
 #include "Components/WrapBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -40,6 +41,7 @@ void UMainMenuWidget::SelectHoveredButton() {
   else if (HoveredButton == NewGameButton) NewGame();
   else if (HoveredButton == LoadMenuButton) LoadMenu();
   else if (HoveredButton == SettingsButton) SettingsMenu();
+  else if (HoveredButton == CreditsButton) Credits();
   else if (HoveredButton == ExitButton) Exit();
 }
 void UMainMenuWidget::HoverButton(UButton* Button) {
@@ -67,7 +69,7 @@ void UMainMenuWidget::HoverNextButton(FVector2D Direction) {
     return;
   }
 
-  TArray<UButton*> Buttons = {ContinueButton, NewGameButton, LoadMenuButton, SettingsButton, ExitButton};
+  TArray<UButton*> Buttons = {ContinueButton, NewGameButton, LoadMenuButton, SettingsButton, CreditsButton, ExitButton};
   int32 CurrentIndex = Buttons.IndexOfByKey(HoveredButton);
   check(CurrentIndex != INDEX_NONE);
   int32 NextIndex = CurrentIndex + (Direction.X > 0 ? 1 : -1);
@@ -97,67 +99,88 @@ void UMainMenuWidget::Continue() {
   MainMenuGameMode->Continue();
 }
 void UMainMenuWidget::NewGame() {
-  NewGameSetupWidget->InitUI(InUIInputActions, SettingsManager, [this]() {
-    MainOverlay->SetVisibility(ESlateVisibility::Visible);
+  auto BackFunc = [this]() {
+    this->PlayAnimationReverse(ShowPageAnim, 4.0f);
+    MenusOverlay->SetVisibility(ESlateVisibility::Collapsed);
     NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+    ShowSplashScreen();
     HoverButton(NewGameButton);
-  });
+  };
+  NewGameSetupWidget->InitUI(InUIInputActions, SettingsManager, BackFunc);
   NewGameSetupWidget->RefreshUI();
 
-  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
+  this->PlayAnimationReverse(StartupAnim, 4.0f);
+  MenusOverlay->SetVisibility(ESlateVisibility::Visible);
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Visible);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
   CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  MainMenuControlHUD->PlayWidgetAnim(this, ShowPageAnim);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UMainMenuWidget::LoadMenu() {
   auto BackFunc = [this]() {
-    MainOverlay->SetVisibility(ESlateVisibility::Visible);
+    this->PlayAnimationReverse(ShowPageAnim, 4.0f);
+    MenusOverlay->SetVisibility(ESlateVisibility::Collapsed);
     SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+    ShowSplashScreen();
     HoverButton(LoadMenuButton);
   };
   SaveLoadSlotsWidget->InitUI(InUIInputActions, false, SaveManager, BackFunc);
   SaveLoadSlotsWidget->RefreshUI();
 
-  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
+  this->PlayAnimationReverse(StartupAnim, 4.0f);
+  MenusOverlay->SetVisibility(ESlateVisibility::Visible);
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Visible);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
   CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  MainMenuControlHUD->PlayWidgetAnim(this, ShowPageAnim);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UMainMenuWidget::SettingsMenu() {
   auto BackFunc = [this]() {
-    MainOverlay->SetVisibility(ESlateVisibility::Visible);
+    this->PlayAnimationReverse(ShowPageAnim, 4.0f);
+    MenusOverlay->SetVisibility(ESlateVisibility::Collapsed);
     SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+    ShowSplashScreen();
     HoverButton(SettingsButton);
   };
   SettingsWidget->InitUI(InUIInputActions, SettingsManager, BackFunc);
 
-  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
+  this->PlayAnimationReverse(StartupAnim, 4.0f);
+  MenusOverlay->SetVisibility(ESlateVisibility::Visible);
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Visible);
   CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
+  MainMenuControlHUD->PlayWidgetAnim(this, ShowPageAnim);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
 void UMainMenuWidget::Credits() {
   auto BackFunc = [this]() {
-    MainOverlay->SetVisibility(ESlateVisibility::Visible);
+    this->PlayAnimationReverse(ShowPageAnim, 4.0f);
+    MenusOverlay->SetVisibility(ESlateVisibility::Collapsed);
     CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+    ShowSplashScreen();
     HoverButton(CreditsButton);
   };
   CreditsWidget->InitUI(InUIInputActions, BackFunc);
 
-  MainOverlay->SetVisibility(ESlateVisibility::Hidden);
+  this->PlayAnimationReverse(StartupAnim, 4.0f);
+  MenusOverlay->SetVisibility(ESlateVisibility::Visible);
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
   CreditsWidget->SetVisibility(ESlateVisibility::Visible);
+  MainMenuControlHUD->PlayWidgetAnim(this, ShowPageAnim);
 
   UGameplayStatics::PlaySound2D(this, SelectSound, 1.0f);
 }
@@ -169,6 +192,12 @@ void UMainMenuWidget::Exit() {
   MainMenuGameMode->Exit();
 }
 
+void UMainMenuWidget::ShowSplashScreen() {
+  MainMenuControlHUD->PlayWidgetAnim(this, StartupAnim);
+
+  UGameplayStatics::PlaySound2D(this, StartupSound, 1.0f);
+}
+
 void UMainMenuWidget::RefreshUI() {
   if (SaveManager->SaveSlotListSaveGame->bHasAutoSave ||
       (SaveManager->SaveSlotListSaveGame->SaveSlotList.Num() > 0 &&
@@ -178,21 +207,26 @@ void UMainMenuWidget::RefreshUI() {
   else ContinueButton->SetIsEnabled(false);
 }
 
-void UMainMenuWidget::InitUI(FInUIInputActions _InUIInputActions,
+void UMainMenuWidget::InitUI(AMainMenuControlHUD* _MainMenuControlHUD,
+                             FInUIInputActions _InUIInputActions,
                              class ASettingsManager* _SettingsManager,
                              class ASaveManager* _SaveManager) {
-  check(_SettingsManager && _SaveManager);
+  check(_MainMenuControlHUD && _SettingsManager && _SaveManager);
 
+  MainMenuControlHUD = _MainMenuControlHUD;
   InUIInputActions = _InUIInputActions;
   SettingsManager = _SettingsManager;
   SaveManager = _SaveManager;
 
+  MenusOverlay->SetVisibility(ESlateVisibility::Collapsed);
   NewGameSetupWidget->SetVisibility(ESlateVisibility::Collapsed);
   SaveLoadSlotsWidget->SetVisibility(ESlateVisibility::Collapsed);
   SettingsWidget->SetVisibility(ESlateVisibility::Collapsed);
   CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
-  HoverButton(NewGameButton);
+  // HoverButton(NewGameButton);
+
+  UGameplayStatics::PlaySound2D(this, StartupSound, 1.0f);
 }
 
 void UMainMenuWidget::SetupUIActionable() {

@@ -41,4 +41,6 @@ public:
   UPROPERTY()
   class ULevelLoadingTransitionWidget* LevelLoadingTransitionWidget;
   void StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc);
+
+  void PlayWidgetAnim(class UUserWidget* Widget, class UWidgetAnimation* Animation);
 };

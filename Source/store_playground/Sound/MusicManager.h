@@ -28,6 +28,8 @@ public:
 
   // * Music changes done in blueprints for fine tuning iterations.
   UFUNCTION(BlueprintImplementableEvent)
+  void MainMenuMusicCalled();
+  UFUNCTION(BlueprintImplementableEvent)
   void MorningMusicCalled();
   UFUNCTION(BlueprintImplementableEvent)
   void ShopOpenMusicCalled();
