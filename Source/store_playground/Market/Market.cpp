@@ -267,7 +267,9 @@ void AMarket::ChangeItemEconTypeMulti(const TMap<FName, float>& ParamValues) {
   for (const auto& ParamPair : ParamValues) {
     EItemEconType EconType = EItemEconType::Consumer;
     for (auto T : TEnumRange<EItemEconType>()) {
-      if (UEnum::GetDisplayValueAsText(T).ToString() == ParamPair.Key) {
+      FString EnumStr;
+      UEnum::GetValueAsString(T).Split(TEXT("::"), nullptr, &EnumStr);
+      if (EnumStr == ParamPair.Key) {
         EconType = T;
         break;
       }

@@ -93,7 +93,6 @@ public:
               class ASettingsManager* _SettingsManager,
               class ASaveManager* _SaveManager);
 
-  // * Pause state currently doesn't have inputs.
   UPROPERTY(EditAnywhere)
   FUIActionable UIActionable;
   void SetupUIActionable();

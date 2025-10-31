@@ -127,6 +127,13 @@ enum class NegDialogueVars : uint8 {
   ItemPrice UMETA(DisplayName = "ItemPrice")
 };
 ENUM_RANGE_BY_COUNT(NegDialogueVars, 2);
+inline auto GetNegDialogueVarText(NegDialogueVars Var) -> FText {
+  switch (Var) {
+    case NegDialogueVars::WantedItemType: return FText::FromString("WantedItemType");
+    case NegDialogueVars::ItemPrice: return FText::FromString("ItemPrice");
+    default: return FText::FromString("");
+  }
+}
 
 UENUM()
 enum class ENegotiationDialogueType : uint8 {

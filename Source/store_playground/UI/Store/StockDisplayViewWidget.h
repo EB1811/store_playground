@@ -13,6 +13,13 @@ enum class EStockDisplayViewType : uint8 {
   Player UMETA(DisplayName = "Items"),
   Display UMETA(DisplayName = "Display"),
 };
+inline auto GetStockDisplayViewTypeText(EStockDisplayViewType ViewType) -> FText {
+  switch (ViewType) {
+    case EStockDisplayViewType::Player: return FText::FromString("Items");
+    case EStockDisplayViewType::Display: return FText::FromString("Display");
+    default: return FText::FromString("");
+  }
+}
 
 UCLASS()
 class STORE_PLAYGROUND_API UStockDisplayViewWidget : public UUserWidget {

@@ -53,7 +53,7 @@ void ALevelManager::InitLoadStore(std::function<void()> _LevelReadyFunc) {
 }
 
 void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelReadyFunc) {
-  UE_LOG(LogTemp, Warning, TEXT("Loading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
+  UE_LOG(LogTemp, Warning, TEXT("Loading level: %s"), *UEnum::GetValueAsString(Level));
 
   if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[Level])) {
     LoadedLevel = Level;
@@ -74,7 +74,7 @@ void ALevelManager::BeginLoadLevel(ELevel Level, std::function<void()> _LevelRea
 }
 
 void ALevelManager::BeginUnloadLevel(ELevel Level, std::function<void()> _LevelUnloadedFunc) {
-  UE_LOG(LogTemp, Warning, TEXT("Unloading level: %s"), *UEnum::GetDisplayValueAsText(Level).ToString());
+  UE_LOG(LogTemp, Warning, TEXT("Unloading level: %s"), *UEnum::GetValueAsString(Level));
 
   if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, LevelNames[CurrentLevel])) {
     LevelUnloadedFunc = _LevelUnloadedFunc;
@@ -89,7 +89,7 @@ void ALevelManager::BeginUnloadLevel(ELevel Level, std::function<void()> _LevelU
 }
 
 void ALevelManager::OnLevelShown() {
-  UE_LOG(LogTemp, Warning, TEXT("Level shown: %s"), *UEnum::GetDisplayValueAsText(LoadedLevel).ToString());
+  UE_LOG(LogTemp, Warning, TEXT("Level shown: %s"), *UEnum::GetValueAsString(LoadedLevel));
 
   if (CurrentLevel != ELevel::None) {
     SaveLevelState(CurrentLevel);
@@ -111,7 +111,7 @@ void ALevelManager::OnLevelAddedToWorld(ULevel* InLevel, UWorld* InWorld) {
   OnLevelShown();
 }
 void ALevelManager::OnLevelUnloaded() {
-  UE_LOG(LogTemp, Warning, TEXT("Level unloaded: %s"), *UEnum::GetDisplayValueAsText(CurrentLevel).ToString());
+  UE_LOG(LogTemp, Warning, TEXT("Level unloaded: %s"), *UEnum::GetValueAsString(CurrentLevel));
 
   if (LevelUnloadedFunc) LevelUnloadedFunc();
   LevelUnloadedFunc = nullptr;
@@ -181,8 +181,8 @@ void ALevelManager::InitLevel(ELevel Level) {
 void ALevelManager::EnterLevel(ELevel Level) {
   check(CutsceneManager && PlayerTags && MarketLevel);
 
-  FGameplayTagContainer LevelCutsceneTags = StringTagsToContainer(
-      {FName(FString::Printf(TEXT("Cutscene.%s"), *UEnum::GetDisplayValueAsText(Level).ToString()))});
+  FGameplayTagContainer LevelCutsceneTags =
+      StringTagsToContainer({FName(FString::Printf(TEXT("Cutscene.%s"), *GetLevelText(Level).ToString()))});
   if (CutsceneManager->PlayPotentialCutscene(LevelCutsceneTags)) return;
 
   switch (Level) {

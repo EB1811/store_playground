@@ -52,7 +52,7 @@ void UInGameHudWidget::RefreshUI() {
       FText::FromString(FString::Printf(TEXT("Upgrade Points: %d"), UpgradeManager->AvailableUpgradePoints)));
   UpgradePointsSlideWidget->RightSlideText->SetText(FText::FromString(""));
 
-  FText CurrentPhaseText = UEnum::GetDisplayValueAsText(StorePhaseManager->StorePhaseState);
+  FText CurrentPhaseText = GetStorePhaseText(StorePhaseManager->StorePhaseState);
   int32 CurrentDay = DayManager->CurrentDay;
   DaySlideWidget->SlideText->SetText(
       FText::FromString(FString::Printf(TEXT("%s - Day: %d"), *CurrentPhaseText.ToString(), CurrentDay)));
@@ -66,7 +66,7 @@ void UInGameHudWidget::RefreshUI() {
   MoneySlideWidget->SlideText->SetText(FText::FromString(FString::Printf(TEXT("Money: %.0f¬"), Store->Money)));
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
-  FText CurrentLevelText = UEnum::GetDisplayValueAsText(LevelManager->LoadedLevel);
+  FText CurrentLevelText = GetLevelText(LevelManager->LoadedLevel);
   LocationSlideWidget->SlideText->SetText(CurrentLevelText);
 
   if (LevelManager->LoadedLevel == ELevel::Store &&

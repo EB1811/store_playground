@@ -123,7 +123,7 @@ void UStockDisplayViewWidget::SwitchViewType() {
 void UStockDisplayViewWidget::Back() { CloseWidgetFunc(); }
 
 void UStockDisplayViewWidget::RefreshUI() {
-  MenuHeaderWidget->SetTitle(UEnum::GetDisplayValueAsText(StockDisplayViewType));
+  MenuHeaderWidget->SetTitle(GetStockDisplayViewTypeText(StockDisplayViewType));
   AddOrTakeButton->ActionText->SetText(
       FText::FromString(StockDisplayViewType == EStockDisplayViewType::Player ? "Add" : "Take"));
   SwitchViewTypeButton->ActionText->SetText(
@@ -153,14 +153,14 @@ void UStockDisplayViewWidget::InitUI(FInUIInputActions InUIInputActions,
   TArray<FTopBarTab> TopBarTabs = {
       FTopBarTab{FText::FromString("All")},
   };
-  for (auto Type : TEnumRange<EItemType>()) TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Type)});
+  for (auto Type : TEnumRange<EItemType>()) TopBarTabs.Add(FTopBarTab{GetItemTypeText(Type)});
   auto TabSelectedFunc = [this](FText TabText) {
     if (TabText.ToString() == "All") {
       ItemsWidget->FilterData = {.ItemType = EItemType::Weapon, .bFilterByType = false};
     } else {
       EItemType ItemType = EItemType::Weapon;
       for (auto Type : TEnumRange<EItemType>()) {
-        if (UEnum::GetDisplayValueAsText(Type).EqualTo(TabText)) {
+        if (GetItemTypeText(Type).EqualTo(TabText)) {
           ItemType = Type;
           break;
         }

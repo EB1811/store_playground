@@ -14,6 +14,13 @@ enum class ENewsAndEconomyViewTab : uint8 {
   Economy UMETA(DisplayName = "Economy"),
 };
 ENUM_RANGE_BY_COUNT(ENewsAndEconomyViewTab, 2);
+inline auto GetNewsAndEconomyViewTabText(ENewsAndEconomyViewTab Tab) -> FText {
+  switch (Tab) {
+    case ENewsAndEconomyViewTab::Articles: return FText::FromString("Articles");
+    case ENewsAndEconomyViewTab::Economy: return FText::FromString("Economy");
+    default: return FText::FromString("");
+  }
+}
 
 UCLASS()
 class STORE_PLAYGROUND_API UNewsAndEconomyViewWidget : public UUserWidget {

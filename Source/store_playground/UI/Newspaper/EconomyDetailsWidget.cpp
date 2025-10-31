@@ -47,7 +47,7 @@ inline auto GetWealthString(TArray<FPopEconData> PopEconDataArray, const FPopEco
 inline auto GetItemSpendString(TMap<EItemWealthType, float> ItemSpendPercent) -> FString {
   TArray<FString> SpendStrings;
   for (const auto& Spend : ItemSpendPercent)
-    if (Spend.Value >= 40.0f) SpendStrings.Add(UEnum::GetDisplayValueAsText(Spend.Key).ToString());
+    if (Spend.Value >= 40.0f) SpendStrings.Add(GetItemWealthTypeText(Spend.Key).ToString());
   if (SpendStrings.Num() <= 0) return "All";
 
   return FString::Join(SpendStrings, TEXT(" & "));
@@ -150,12 +150,11 @@ void UEconomyDetailsWidget::RefreshUI() {
           FText::FromString(FString::Printf(TEXT("Population: %d"), PopEconData.Population)));
       PopDetailsWidget->ItemSpendText->SetText(
           FText::FromString("Spends On: " + GetItemSpendString(Pop.ItemSpendPercent)));
-      FString EconTypesText = Pop.ItemEconTypes.Num() < 4
-                                  ? FString::JoinBy(Pop.ItemEconTypes, TEXT(" & "),
-                                                    [](const EItemEconType& EconType) {
-                                                      return UEnum::GetDisplayValueAsText(EconType).ToString();
-                                                    })
-                                  : "All";
+      FString EconTypesText =
+          Pop.ItemEconTypes.Num() < 4
+              ? FString::JoinBy(Pop.ItemEconTypes, TEXT(" & "),
+                                [](const EItemEconType& EconType) { return GetItemEconTypeText(EconType).ToString(); })
+              : "All";
       PopDetailsWidget->ItemEconTypesText->SetText(FText::FromString("Goods Type: " + EconTypesText));
 
       if (StatisticsGen->PopStatisticsMap.Num() > 0) {

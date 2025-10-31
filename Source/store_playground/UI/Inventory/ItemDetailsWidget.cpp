@@ -8,9 +8,9 @@ void UItemDetailsWidget::RefreshUI() {
   check(ItemRef && MarketPriceFunc);
 
   Name->SetText(ItemRef->TextData.Name);
-  EconInfo->SetText(FText::FromString(
-      FString::Printf(TEXT("%s, %s"), *(UEnum::GetDisplayValueAsText(ItemRef->ItemEconType)).ToString(),
-                      *(UEnum::GetDisplayValueAsText(ItemRef->ItemWealthType).ToString()))));
+  EconInfo->SetText(
+      FText::FromString(FString::Printf(TEXT("%s, %s"), *(GetItemEconTypeText(ItemRef->ItemEconType).ToString()),
+                                        *(GetItemWealthTypeText(ItemRef->ItemWealthType).ToString()))));
   Desc->SetText(ItemRef->TextData.Description);
   Icon->SetBrushFromTexture(ItemRef->AssetData.Icon);
 

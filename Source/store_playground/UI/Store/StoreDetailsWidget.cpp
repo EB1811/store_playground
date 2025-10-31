@@ -23,7 +23,7 @@
 void UStoreDetailsWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
 
 void UStoreDetailsWidget::RefreshUI() {
-  FText CurrentPhaseText = UEnum::GetDisplayValueAsText(StorePhaseManager->StorePhaseState);
+  FText CurrentPhaseText = GetStorePhaseText(StorePhaseManager->StorePhaseState);
   int32 CurrentDay = DayManager->CurrentDay;
   int32 NextWeekendDay = CurrentDay + (CurrentDay % DayManager->DayManagerParams.WeekendDivisor == 0
                                            ? DayManager->DayManagerParams.WeekendDivisor

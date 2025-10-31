@@ -57,11 +57,11 @@ void UNewsAndEconomyViewWidget::InitUI(FInUIInputActions InUIInputActions,
   check(_DayManager && _NewsGen && _MarketEconomy && _StatisticsGen && _CloseWidgetFunc);
 
   TArray<FTopBarTab> TopBarTabs = {};
-  for (auto Tab : TEnumRange<ENewsAndEconomyViewTab>()) TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Tab)});
+  for (auto Tab : TEnumRange<ENewsAndEconomyViewTab>()) TopBarTabs.Add(FTopBarTab{GetNewsAndEconomyViewTabText(Tab)});
   auto TabSelectedFunc = [this](FText TabText) {
     ENewsAndEconomyViewTab SelectedTab = ENewsAndEconomyViewTab::Articles;
     for (auto Tab : TEnumRange<ENewsAndEconomyViewTab>()) {
-      if (UEnum::GetDisplayValueAsText(Tab).EqualTo(TabText)) {
+      if (GetNewsAndEconomyViewTabText(Tab).EqualTo(TabText)) {
         SelectedTab = Tab;
         break;
       }

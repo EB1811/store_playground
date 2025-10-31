@@ -77,12 +77,12 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
   for (auto Tab : TEnumRange<EStoreViewTab>()) {
     if (Tab == EStoreViewTab::Expansion && LevelManager->CurrentLevel != ELevel::Store) continue;
 
-    TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Tab)});
+    TopBarTabs.Add(FTopBarTab{GetStoreViewTabText(Tab)});
   }
   auto TabSelectedFunc = [this](FText TabText) {
     EStoreViewTab SelectedTab = EStoreViewTab::Details;
     for (auto Tab : TEnumRange<EStoreViewTab>()) {
-      if (UEnum::GetDisplayValueAsText(Tab).EqualTo(TabText)) {
+      if (GetStoreViewTabText(Tab).EqualTo(TabText)) {
         SelectedTab = Tab;
         break;
       }

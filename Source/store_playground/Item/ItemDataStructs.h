@@ -19,7 +19,6 @@ enum class EItemType : uint8 {
   Financial UMETA(DisplayName = "Financial"),
 };
 ENUM_RANGE_BY_COUNT(EItemType, 8);
-
 UENUM()
 enum class EItemWealthType : uint8 {
   Essential UMETA(DisplayName = "Low"),
@@ -35,6 +34,38 @@ enum class EItemEconType : uint8 {
   Finance UMETA(DisplayName = "Finance"),
 };
 ENUM_RANGE_BY_COUNT(EItemEconType, 4);
+
+// For UI display.
+inline auto GetItemTypeText(EItemType ItemType) -> FText {
+  switch (ItemType) {
+    case EItemType::Weapon: return FText::FromString("Weapon");
+    case EItemType::Armor: return FText::FromString("Armor");
+    case EItemType::Jewellery: return FText::FromString("Jewellery");
+    case EItemType::Clothing: return FText::FromString("Clothing");
+    case EItemType::Consumable: return FText::FromString("Consumable");
+    case EItemType::Valuables: return FText::FromString("Valuable");
+    case EItemType::Objects: return FText::FromString("Object");
+    case EItemType::Financial: return FText::FromString("Financial");
+    default: return FText::FromString("");
+  }
+}
+inline auto GetItemWealthTypeText(EItemWealthType WealthType) -> FText {
+  switch (WealthType) {
+    case EItemWealthType::Essential: return FText::FromString("Low");
+    case EItemWealthType::Mid: return FText::FromString("Mid");
+    case EItemWealthType::Luxury: return FText::FromString("High");
+    default: return FText::FromString("");
+  }
+}
+inline auto GetItemEconTypeText(EItemEconType EconType) -> FText {
+  switch (EconType) {
+    case EItemEconType::Consumer: return FText::FromString("Consumer");
+    case EItemEconType::Adventurer: return FText::FromString("Adventurer");
+    case EItemEconType::Magic: return FText::FromString("Magic");
+    case EItemEconType::Finance: return FText::FromString("Finance");
+    default: return FText::FromString("");
+  }
+}
 
 USTRUCT()
 struct FItemTextData {

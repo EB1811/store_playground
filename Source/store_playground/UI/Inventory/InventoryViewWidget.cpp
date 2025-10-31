@@ -1,4 +1,5 @@
 #include "InventoryViewWidget.h"
+#include "Internationalization/Text.h"
 #include "Math/UnrealMathUtility.h"
 #include "store_playground/Store/Store.h"
 #include "store_playground/Market/MarketEconomy.h"
@@ -56,6 +57,7 @@ void UInventoryViewWidget::RefreshUI() {
 
   ItemsWidget->RefreshUI();
 
+  // todo-low: Tick to update.
   float TotalItemsValue = 0.0f;
   for (const UItemBase* Item : ItemsWidget->SortedItems) {
     float MarketPrice = MarketEconomy->GetMarketPrice(Item->ItemID);
@@ -78,14 +80,14 @@ void UInventoryViewWidget::InitUI(FInUIInputActions InUIInputActions,
   TArray<FTopBarTab> TopBarTabs = {
       FTopBarTab{FText::FromString("All")},
   };
-  for (auto Type : TEnumRange<EItemType>()) TopBarTabs.Add(FTopBarTab{UEnum::GetDisplayValueAsText(Type)});
+  for (auto Type : TEnumRange<EItemType>()) TopBarTabs.Add(FTopBarTab{GetItemTypeText(Type)});
   auto TabSelectedFunc = [this](FText TabText) {
     if (TabText.ToString() == "All") {
       ItemsWidget->FilterData = {.ItemType = EItemType::Weapon, .bFilterByType = false};
     } else {
       EItemType ItemType = EItemType::Weapon;
       for (auto Type : TEnumRange<EItemType>()) {
-        if (UEnum::GetDisplayValueAsText(Type).EqualTo(TabText)) {
+        if (GetItemTypeText(Type).EqualTo(TabText)) {
           ItemType = Type;
           break;
         }

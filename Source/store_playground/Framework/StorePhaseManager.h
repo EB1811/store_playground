@@ -16,6 +16,15 @@ enum class EStorePhaseState : uint8 {
   ShopOpen UMETA(DisplayName = "Shop Open"),
   Night UMETA(DisplayName = "Night"),
 };
+inline auto GetStorePhaseText(EStorePhaseState PhaseState) -> FText {
+  switch (PhaseState) {
+    case EStorePhaseState::Morning: return FText::FromString("Morning");
+    case EStorePhaseState::MorningBuildMode: return FText::FromString("Morning");
+    case EStorePhaseState::ShopOpen: return FText::FromString("Shop Open");
+    case EStorePhaseState::Night: return FText::FromString("Night");
+    default: return FText::FromString("");
+  }
+}
 UENUM()
 enum class EStorePhaseAction : uint8 {
   Start UMETA(DisplayName = "Start"),

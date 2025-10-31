@@ -102,8 +102,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   UE_LOG(LogTemp, Log,
          TEXT("PriceSliderWidget::InitUI: Type: %s, NpcAcceptance: %.2f, MarketPrice: %.2f, "
               "PlayerPrice: %.2f, NpcPrice: %.2f, BoughtAtPrice: %.2f"),
-         *UEnum::GetDisplayValueAsText(Type).ToString(), NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice,
-         BoughtAtPrice);
+         *UEnum::GetValueAsString(Type), NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice, BoughtAtPrice);
 
   MarketPriceSlider->SetStepSize(StepSize);
   MarketPriceSlider->SetMaxValue(MaxValue);

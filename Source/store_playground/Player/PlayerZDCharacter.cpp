@@ -250,7 +250,7 @@ void APlayerZDCharacter::ChangePlayerState(EPlayerState NewState) {
 
   EPlayerState OldState = PlayerBehaviourState;
   PlayerBehaviourState = NewState;
-  UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetDisplayValueAsText(NewState).ToString());
+  UE_LOG(LogTemp, Log, TEXT("Player state changed to: %s"), *UEnum::GetValueAsString(NewState));
 
   if (StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen)
     StorePhaseManager->ShopOpenConsiderPlayerState(PlayerBehaviourState);
@@ -273,8 +273,7 @@ void APlayerZDCharacter::ChangeGameActionsState(EPlayerGameActionsState NewState
   if (GameActionsState == NewState) return;
 
   GameActionsState = NewState;
-  UE_LOG(LogTemp, Log, TEXT("Player game actions state changed to: %s"),
-         *UEnum::GetDisplayValueAsText(NewState).ToString());
+  UE_LOG(LogTemp, Log, TEXT("Player game actions state changed to: %s"), *UEnum::GetValueAsString(NewState));
 }
 
 void APlayerZDCharacter::Move(const FInputActionValue& Value) {

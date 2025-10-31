@@ -13,6 +13,13 @@ enum class ETradeType : uint8 {
   Buy UMETA(DisplayName = "Buy"),
   Sell UMETA(DisplayName = "Sell"),
 };
+inline auto GetTradeTypeText(ETradeType TradeType) -> FText {
+  switch (TradeType) {
+    case ETradeType::Buy: return FText::FromString("Buy");
+    case ETradeType::Sell: return FText::FromString("Sell");
+    default: return FText::FromString("");
+  }
+}
 
 UCLASS()
 class STORE_PLAYGROUND_API UNpcStoreViewWidget : public UUserWidget {

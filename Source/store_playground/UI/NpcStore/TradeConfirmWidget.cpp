@@ -83,7 +83,7 @@ void UTradeConfirmWidget::InitUI(ETradeType _TradeType,
   check(_ShowPriceFunc && _ConfirmTradeFunc && _BackFunc);
 
   TradeType = _TradeType;
-  TitleText->SetText(UEnum::GetDisplayValueAsText(_TradeType));
+  TitleText->SetText(GetTradeTypeText(_TradeType));
   Name->SetText(ItemName);
   Quantity = _ShowPriceFunc() > _Money ? 0 : 1;
   AvailableQuantity = _AvailableQuantity;

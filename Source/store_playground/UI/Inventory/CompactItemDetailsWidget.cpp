@@ -11,8 +11,8 @@ void UCompactItemDetailsWidget::InitUI(const UItemBase* Item,
 
   Name->SetText(Item->TextData.Name);
   EconInfo->SetText(
-      FText::FromString(FString::Printf(TEXT("%s, %s"), *(UEnum::GetDisplayValueAsText(Item->ItemEconType)).ToString(),
-                                        *(UEnum::GetDisplayValueAsText(Item->ItemWealthType).ToString()))));
+      FText::FromString(FString::Printf(TEXT("%s, %s"), *(GetItemEconTypeText(Item->ItemEconType).ToString()),
+                                        *(GetItemWealthTypeText(Item->ItemWealthType).ToString()))));
   Desc->SetText(Item->TextData.Description);
   Icon->SetBrushFromTexture(Item->AssetData.Icon);
 

@@ -763,7 +763,9 @@ void ACustomerAIManager::ChangeActionWeights(const TMap<FName, float>& ParamValu
   for (const auto& ParamPair : ParamValues) {
     ECustomerAction Action = ECustomerAction::None;
     for (auto A : TEnumRange<ECustomerAction>()) {
-      if (UEnum::GetDisplayValueAsText(A).ToString() == ParamPair.Key) {
+      FString EnumStr;
+      UEnum::GetValueAsString(A).Split(TEXT("::"), nullptr, &EnumStr);
+      if (EnumStr == ParamPair.Key) {
         Action = A;
         break;
       }
@@ -777,7 +779,9 @@ void ACustomerAIManager::ChangePopTypeMultis(const TMap<FName, float>& ParamValu
   for (const auto& ParamPair : ParamValues) {
     EPopType PopType = EPopType::Common;
     for (auto P : TEnumRange<EPopType>()) {
-      if (UEnum::GetDisplayValueAsText(P).ToString() == ParamPair.Key) {
+      FString EnumStr;
+      UEnum::GetValueAsString(P).Split(TEXT("::"), nullptr, &EnumStr);
+      if (EnumStr == ParamPair.Key) {
         PopType = P;
         break;
       }
@@ -790,7 +794,9 @@ void ACustomerAIManager::ChangePopWealthTypeMultis(const TMap<FName, float>& Par
   for (const auto& ParamPair : ParamValues) {
     EPopWealthType WealthType = EPopWealthType::Poorer;
     for (auto W : TEnumRange<EPopWealthType>()) {
-      if (UEnum::GetDisplayValueAsText(W).ToString() == ParamPair.Key) {
+      FString EnumStr;
+      UEnum::GetValueAsString(W).Split(TEXT("::"), nullptr, &EnumStr);
+      if (EnumStr == ParamPair.Key) {
         WealthType = W;
         break;
       }
@@ -803,7 +809,9 @@ void ACustomerAIManager::ChangePopTypeAcceptMultis(const TMap<FName, float>& Par
   for (const auto& ParamPair : ParamValues) {
     EPopType PopType = EPopType::Common;
     for (auto P : TEnumRange<EPopType>()) {
-      if (UEnum::GetDisplayValueAsText(P).ToString() == ParamPair.Key) {
+      FString EnumStr;
+      UEnum::GetValueAsString(P).Split(TEXT("::"), nullptr, &EnumStr);
+      if (EnumStr == ParamPair.Key) {
         PopType = P;
         break;
       }
@@ -816,7 +824,9 @@ void ACustomerAIManager::ChangePopWealthTypeAcceptMultis(const TMap<FName, float
   for (const auto& ParamPair : ParamValues) {
     EPopWealthType WealthType = EPopWealthType::Poorer;
     for (auto W : TEnumRange<EPopWealthType>()) {
-      if (UEnum::GetDisplayValueAsText(W).ToString() == ParamPair.Key) {
+      FString EnumStr;
+      UEnum::GetValueAsString(W).Split(TEXT("::"), nullptr, &EnumStr);
+      if (EnumStr == ParamPair.Key) {
         WealthType = W;
         break;
       }

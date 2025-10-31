@@ -343,7 +343,7 @@ void AMarketEconomy::PerformEconomyTick() {
     MovePopPopulation(PopEconData, RandomNewPop, 0.01f, BehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Log, TEXT("Pop %s promoted to %s"), *CustomerPops[Index].PopName.ToString(),
-           *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
+           *UEnum::GetValueAsString(NewWealthType));
   }
   for (int32 Index : DemotionPopIndexes) {
     // UE_LOG(LogTemp, Warning, TEXT("Pop %s considering demotion"), *CustomerPops[Index].PopName.ToString());
@@ -368,7 +368,7 @@ void AMarketEconomy::PerformEconomyTick() {
     MovePopPopulation(PopEconData, RandomNewPop, 0.01f, BehaviorParams.MaxPopChangeAtOnce);
 
     UE_LOG(LogTemp, Log, TEXT("Pop %s demoted to %s"), *CustomerPops[Index].PopName.ToString(),
-           *UEnum::GetDisplayValueAsText(NewWealthType).ToString());
+           *UEnum::GetValueAsString(NewWealthType));
   }
   for (int32 Index : CrossPromotionPopIndexes) {
     auto& CustomerPop = CustomerPops[Index];

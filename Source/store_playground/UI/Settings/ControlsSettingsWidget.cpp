@@ -18,7 +18,7 @@ inline bool HasDuplicateKeyInCategory(const FKey& Key,
                                       const FName& ExcludeMappingName,
                                       UEnhancedPlayerMappableKeyProfile* Profile) {
   FString CategoryString = Category.ToString();
-  if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InUINonExclusive).ToString()) return false;
+  if (CategoryString == GetInputTypeNameText(EInputTypeNames::InUINonExclusive).ToString()) return false;
 
   for (const TPair<FName, FKeyMappingRow>& RowPair : Profile->GetPlayerMappingRows()) {
     for (const FPlayerKeyMapping& Mapping : RowPair.Value.Mappings) {
@@ -154,13 +154,13 @@ void UControlsSettingsWidget::RefreshUI() {
       FString CategoryString = Mapping.GetDisplayCategory().ToString();
       check(!CategoryString.IsEmpty());
 
-      if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InGame).ToString())
+      if (CategoryString == GetInputTypeNameText(EInputTypeNames::InGame).ToString())
         InGameControlsPanel->AddChildToVerticalBox(RebindWidget);
-      else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InUI).ToString())
+      else if (CategoryString == GetInputTypeNameText(EInputTypeNames::InUI).ToString())
         InUIControlsPanel->AddChildToVerticalBox(RebindWidget);
-      else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InUINonExclusive).ToString())
+      else if (CategoryString == GetInputTypeNameText(EInputTypeNames::InUINonExclusive).ToString())
         InUIControlsPanel->AddChildToVerticalBox(RebindWidget);
-      else if (CategoryString == UEnum::GetDisplayValueAsText(EInputTypeNames::InCutscene).ToString())
+      else if (CategoryString == GetInputTypeNameText(EInputTypeNames::InCutscene).ToString())
         InCutsceneControlsPanel->AddChildToVerticalBox(RebindWidget);
       else UE_LOG(LogTemp, Error, TEXT("Unknown input type: %s"), *CategoryString);
     }

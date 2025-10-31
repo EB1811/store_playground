@@ -54,7 +54,7 @@ auto APlayerCommand::CommandCutscene(struct FResolvedCutsceneData ResolvedCutsce
   if (PlayerCharacter->PlayerBehaviourState != EPlayerState::Normal &&
       PlayerCharacter->PlayerBehaviourState != EPlayerState::FocussedMenu) {
     UE_LOG(LogTemp, Error, TEXT("Cannot enter cutscene, player in state: %s"),
-           *UEnum::GetDisplayValueAsText(PlayerCharacter->PlayerBehaviourState).ToString());
+           *UEnum::GetValueAsString(PlayerCharacter->PlayerBehaviourState));
     return false;
   }
 
@@ -67,7 +67,7 @@ auto APlayerCommand::CommandTutorial(const TArray<FUITutorialStep>& Steps) -> bo
   if (PlayerCharacter->PlayerBehaviourState != EPlayerState::Normal &&
       PlayerCharacter->PlayerBehaviourState != EPlayerState::FocussedMenu) {
     UE_LOG(LogTemp, Error, TEXT("Cannot start tutorial, player in state: %s"),
-           *UEnum::GetDisplayValueAsText(PlayerCharacter->PlayerBehaviourState).ToString());
+           *UEnum::GetValueAsString(PlayerCharacter->PlayerBehaviourState));
     return false;
   }
 
@@ -80,7 +80,7 @@ auto APlayerCommand::CommandExitCurrentAction() -> bool {
   if (PlayerCharacter->PlayerBehaviourState != EPlayerState::Normal &&
       PlayerCharacter->PlayerBehaviourState != EPlayerState::FocussedMenu) {
     UE_LOG(LogTemp, Error, TEXT("Cannot exit current action, player in state: %s"),
-           *UEnum::GetDisplayValueAsText(PlayerCharacter->PlayerBehaviourState).ToString());
+           *UEnum::GetValueAsString(PlayerCharacter->PlayerBehaviourState));
     return false;
   }
 

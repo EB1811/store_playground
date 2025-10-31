@@ -68,10 +68,10 @@ ENegotiationState UNegotiationSystem::GetNextNegotiationState(ENegotiationState 
 auto UNegotiationSystem::AddVarsToDialogueText(const FText& DialogueText) -> FText {
   FString NewDialogue = DialogueText.ToString();
   NewDialogue = NewDialogue.Replace(
-      *FString::Printf(TEXT("{%s}"), *UEnum::GetDisplayValueAsText(NegDialogueVars::WantedItemType).ToString()),
+      *FString::Printf(TEXT("{%s}"), *GetNegDialogueVarText(NegDialogueVars::WantedItemType).ToString()),
       *WantedItemType.WantedItemTypeName.ToString());
   NewDialogue =
-      NewDialogue.Replace(*FString::Printf(TEXT("{%s}"), *UEnum::GetValueAsString(NegDialogueVars::ItemPrice)),
+      NewDialogue.Replace(*FString::Printf(TEXT("{%s}"), *GetNegDialogueVarText(NegDialogueVars::ItemPrice).ToString()),
                           *FString::Printf(TEXT("%.0f¬"), MarketPrice));
 
   return FText::FromString(*NewDialogue);

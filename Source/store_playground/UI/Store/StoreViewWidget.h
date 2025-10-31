@@ -15,6 +15,13 @@ enum class EStoreViewTab : uint8 {
   Expansion UMETA(DisplayName = "Expansion"),
 };
 ENUM_RANGE_BY_COUNT(EStoreViewTab, 2);
+inline auto GetStoreViewTabText(EStoreViewTab Tab) -> FText {
+  switch (Tab) {
+    case EStoreViewTab::Details: return FText::FromString("Details");
+    case EStoreViewTab::Expansion: return FText::FromString("Expansion");
+    default: return FText::FromString("");
+  }
+}
 
 UCLASS()
 class STORE_PLAYGROUND_API UStoreViewWidget : public UUserWidget {

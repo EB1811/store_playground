@@ -304,7 +304,7 @@ void ASettingsManager::InitSettings() {
   int32 CurrentOverallQuality = UnrealSettings->GetOverallScalabilityLevel();
   UE_LOG(LogTemp, Warning, TEXT("Benchmark Overall Quality Level: %d"), CurrentOverallQuality);
   if (CurrentOverallQuality >= 3) {  // Epic
-    SetAntiAliasingMethod(4);        // TSR
+    SetAntiAliasingMethod(0);
     SetGlobalIlluminationMethod(0);
     SetReflectionMethod(2);  // Screen Space
     SetDepthOfFieldEnabled(true);
@@ -339,7 +339,12 @@ void ASettingsManager::InitSettings() {
       .Difficulty = EGameDifficulty::Normal,
       .bShowTutorials = true,
   };
+  SetGameSettings(GameSettings);
+
   SoundSettings = {.MasterVolume = 0.5f, .MusicVolume = 1.0f, .SFXVolume = 1.0f};
+  SetMasterVolume(SoundSettings.MasterVolume);
+  SetMusicVolume(SoundSettings.MusicVolume);
+  SetSFXVolume(SoundSettings.SFXVolume);
 
   SaveSettings();
 }

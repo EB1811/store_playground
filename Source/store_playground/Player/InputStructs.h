@@ -14,6 +14,15 @@ enum class EInputTypeNames : uint8 {
   InUINonExclusive UMETA(DisplayName = "InUINonExclusive"),  // * When the actions is allowed duplicate key.
   InCutscene UMETA(DisplayName = "InCutscene"),
 };
+inline auto GetInputTypeNameText(EInputTypeNames InputType) -> FText {
+  switch (InputType) {
+    case EInputTypeNames::InGame: return FText::FromString("InGame");
+    case EInputTypeNames::InUI: return FText::FromString("InUI");
+    case EInputTypeNames::InUINonExclusive: return FText::FromString("InUINonExclusive");
+    case EInputTypeNames::InCutscene: return FText::FromString("InCutscene");
+    default: return FText::FromString("");
+  }
+}
 
 USTRUCT()
 struct FInGameInputActions {

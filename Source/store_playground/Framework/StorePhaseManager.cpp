@@ -168,7 +168,7 @@ void AStorePhaseManager::NextPhase() {
       default: break;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("Next phase: %s"), *UEnum::GetDisplayValueAsText(StorePhaseState).ToString());
+    UE_LOG(LogTemp, Log, TEXT("Next phase: %s"), *UEnum::GetValueAsString(StorePhaseState));
   });
 
   if (StorePhaseState != EStorePhaseState::MorningBuildMode) UGameplayStatics::PlaySound2D(this, NextPhaseSound, 1.0f);

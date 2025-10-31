@@ -1,6 +1,7 @@
 #include "GlobalDataManager.h"
 #include "Containers/Array.h"
 #include "Engine/DataTable.h"
+#include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "Misc/CString.h"
 #include "UObject/Field.h"
@@ -159,7 +160,8 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
     FString ValueStr;
 
     for (auto Op : TEnumRange<EReqFilterOperand>()) {
-      FString OpStr = UEnum::GetDisplayValueAsText(Op).ToString();
+      FString OpStr;
+      UEnum::GetValueAsString(Op).Split(TEXT("::"), nullptr, &OpStr);
       if (FilterExpr.Contains(OpStr)) {
         Operand = OpStr;
         OperandE = Op;
