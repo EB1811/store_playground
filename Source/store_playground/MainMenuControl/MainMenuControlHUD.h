@@ -37,6 +37,12 @@ public:
   void OpenMainMenu();
 
   UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UInitLoadTransitionWidget> InitLoadTransitionWidgetClass;
+  UPROPERTY()
+  class UInitLoadTransitionWidget* InitLoadTransitionWidget;
+  void InitMenuFadeOut(std::function<void()> _FadeOutEndFunc);
+
+  UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class ULevelLoadingTransitionWidget> LevelLoadingTransitionWidgetClass;
   UPROPERTY()
   class ULevelLoadingTransitionWidget* LevelLoadingTransitionWidget;

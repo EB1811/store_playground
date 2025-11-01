@@ -225,8 +225,6 @@ void UMainMenuWidget::InitUI(AMainMenuControlHUD* _MainMenuControlHUD,
   CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   // HoverButton(NewGameButton);
-
-  UGameplayStatics::PlaySound2D(this, StartupSound, 1.0f);
 }
 
 void UMainMenuWidget::SetupUIActionable() {
