@@ -13,11 +13,9 @@ void UUpgradeCardWidget::NativeOnInitialized() {
 
 void UUpgradeCardWidget::RefreshUI() {
   if (bIsSelected) {
-    UpgradeDescText->SetVisibility(ESlateVisibility::Visible);
     CardBorder->SetVisibility(ESlateVisibility::Visible);
     // SelectButton->SetIsEnabled(false);
   } else {
-    UpgradeDescText->SetVisibility(ESlateVisibility::Collapsed);
     CardBorder->SetVisibility(ESlateVisibility::Collapsed);
     // SelectButton->SetIsEnabled(true);
   }

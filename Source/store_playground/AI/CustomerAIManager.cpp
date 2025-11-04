@@ -430,7 +430,7 @@ void ACustomerAIManager::MoveCustomerRandom(UNavigationSystemV1* NavSystem, ACus
   if (OwnerAIController->GetMoveStatus() != EPathFollowingStatus::Idle) return;
 
   FNavLocation RandomLocation;
-  NavSystem->GetRandomReachablePointInRadius(Customer->GetActorLocation(), float(500.0f), RandomLocation);
+  NavSystem->GetRandomReachablePointInRadius(Customer->GetActorLocation(), float(1000.0f), RandomLocation);
   Customer->GetCharacterMovement()->MaxFlySpeed = FMath::FRandRange(75.0f, 300.0f);
 
   // ? Do we only need to bind it once?
