@@ -222,5 +222,9 @@ void UNegotiationViewWidget::SetupUIActionable() {
     else if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.RetractUI();
     else if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.RetractUI();
   };
-  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+  UIActionable.QuitUI = [this]() {
+    if (DialogueWidget->IsVisible()) RejectLeave();
+    else if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.RetractUI();
+    else if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.RetractUI();
+  };
 }

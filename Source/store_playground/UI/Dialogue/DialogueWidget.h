@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Materials/MaterialInstance.h"
 #include "store_playground/UI/UIStructs.h"
 #include "DialogueWidget.generated.h"
 
@@ -34,10 +35,19 @@ public:
   UPROPERTY(EditAnywhere, BlueprintReadWrite)
   class USoundBase* NextSound;
 
+  // ! Temp using speaker name to avoid refactoring Dialogue struct.
+  UPROPERTY(EditAnywhere)
+  TMap<FName, UMaterialInstance*> SpeakerMaterialMap;
+  UPROPERTY(EditAnywhere)
+  UMaterialInstance* DefaultSpeakerMaterial;
+  UPROPERTY(EditAnywhere)
+  UMaterialInstance* PlayerSpeakerMaterial;
+
   UPROPERTY(EditAnywhere)
   class UDialogueSystem* DialogueSystem;
 
   void UpdateDialogueText(const FText& SpeakerName, const FText& NewDialogueContent, bool IsLast = false);
+  void SetDialogueSpeakerMaterial(FName SpeakerID);
 
   UFUNCTION()
   void Next();

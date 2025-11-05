@@ -19,4 +19,7 @@ public:
   class UButton* NextButton;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* NextButtonText;
+
+  UPROPERTY(meta = (BindWidget))
+  class UBorder* BgBorder;
 };

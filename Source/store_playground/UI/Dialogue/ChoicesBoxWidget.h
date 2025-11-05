@@ -19,6 +19,8 @@ public:
   class UTextBlock* Speaker;
   UPROPERTY(meta = (BindWidget))
   class UVerticalBox* ChoicesBox;
+  UPROPERTY(meta = (BindWidget))
+  class UBorder* BgBorder;
 
   UPROPERTY(EditAnywhere)
   TArray<FDialogueData> Dialogues;

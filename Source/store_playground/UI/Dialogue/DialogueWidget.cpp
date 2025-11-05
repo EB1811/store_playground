@@ -1,4 +1,5 @@
 #include "DialogueWidget.h"
+#include "Components/Border.h"
 #include "DialogueBoxWidget.h"
 #include "DialogueChoiceWidget.h"
 #include "HAL/Platform.h"
@@ -18,8 +19,10 @@
 auto GetSpeakerName(const UDialogueSystem* DialogueSystem, FDialogueData& Dialogue) -> FText {
   if (!Dialogue.SpeakerName.IsEmptyOrWhitespace()) return Dialogue.SpeakerName;
 
-  return DialogueSystem->DialogueState == EDialogueState::PlayerTalk ? FText::FromString("You")
-                                                                     : DialogueSystem->SpeakerName;
+  return DialogueSystem->DialogueState == EDialogueState::PlayerTalk ||
+                 DialogueSystem->DialogueState == EDialogueState::PlayerChoice
+             ? FText::FromString("You")
+             : DialogueSystem->SpeakerName;
 }
 
 void UDialogueWidget::NativeOnInitialized() {
@@ -39,6 +42,15 @@ void UDialogueWidget::UpdateDialogueText(const FText& SpeakerName, const FText& 
   DialogueBoxWidget->DialogueText->SetText(NewDialogueContent);
 
   if (IsLast) DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Close"));
+}
+void UDialogueWidget::SetDialogueSpeakerMaterial(FName SpeakerID) {
+  if (DialogueSystem->DialogueState == EDialogueState::PlayerTalk ||
+      DialogueSystem->DialogueState == EDialogueState::PlayerChoice)
+    return DialogueBoxWidget->BgBorder->SetBrushFromMaterial(PlayerSpeakerMaterial);
+
+  UMaterialInstance** FoundMaterial = SpeakerMaterialMap.Find(SpeakerID);
+  if (FoundMaterial) DialogueBoxWidget->BgBorder->SetBrushFromMaterial(*FoundMaterial);
+  else DialogueBoxWidget->BgBorder->SetBrushFromMaterial(DefaultSpeakerMaterial);
 }
 
 void UDialogueWidget::Next() {
@@ -68,6 +80,7 @@ void UDialogueWidget::Next() {
       FText SpeakerName = GetSpeakerName(DialogueSystem, NextDialogue.DialogueData.GetValue());
       UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                          NextDialogue.DialogueData->Action == EDialogueAction::End);
+      SetDialogueSpeakerMaterial(FName(SpeakerName.ToString()));
 
       break;
     }
@@ -93,6 +106,7 @@ void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
   FText SpeakerName = GetSpeakerName(DialogueSystem, NextDialogue.DialogueData.GetValue());
   UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
                      NextDialogue.DialogueData->Action == EDialogueAction::End);
+  SetDialogueSpeakerMaterial(FName(SpeakerName.ToString()));
 
   UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
 }
@@ -123,6 +137,7 @@ void UDialogueWidget::InitUI() {
       UpdateDialogueText(
           SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
           DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
+      SetDialogueSpeakerMaterial(FName(SpeakerName.ToString()));
 
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
       ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
