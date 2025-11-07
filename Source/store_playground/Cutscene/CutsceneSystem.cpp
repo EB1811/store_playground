@@ -4,6 +4,7 @@
 #include "TimerManager.h"
 #include "store_playground/Dialogue/DialogueSystem.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
+#include "store_playground/Steam/SteamManager.h"
 #include "store_playground/UI/SpgHUD.h"
 
 UCutsceneSystem::UCutsceneSystem() {
@@ -61,6 +62,7 @@ void UCutsceneSystem::HandleCutsceneState() {
       break;
     }
     case ECutsceneState::Finished: {
+      SteamManager->ConsiderAchievements();
       HUD->ShowInGameHudWidget();
       CutsceneFinishedFunc();
       break;

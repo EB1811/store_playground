@@ -47,6 +47,8 @@ public:
   class UDialogueSystem* DialogueSystem;
   UPROPERTY(EditAnywhere)
   class ACutsceneManager* CutsceneManager;
+  UPROPERTY(EditAnywhere)
+  class ASteamManager* SteamManager;
 
   UPROPERTY(EditAnywhere)
   ECutsceneState CutsceneState;

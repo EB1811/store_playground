@@ -18,12 +18,13 @@ enum class EReqFilterOperand : uint8 {
   PlayerTags UMETA(DisplayName = "PlayerTags"),                    // * Using gameplay tags.
   Inventory UMETA(DisplayName = "Inventory"),                      // * Using item ids.
   QuestsCompleted UMETA(DisplayName = "QuestsCompleted"),          // * Using quest ids.
+  PlayedCutscenes UMETA(DisplayName = "PlayedCutscenes"),          // * Using cutscene ids.
   MadeDialogueChoices UMETA(DisplayName = "MadeDialogueChoices"),  // * Using dialogue chain ids.
   RecentEconEvents UMETA(DisplayName = "RecentEconEvents"),        // * Using econ event ids.
   PublishedArticles UMETA(DisplayName = "PublishedArticles"),      // * Using article ids.
   SelectedUpgradeIDs UMETA(DisplayName = "SelectedUpgradeIDs"),    // * Using upgrade ids.
 };
-ENUM_RANGE_BY_COUNT(EReqFilterOperand, 9);
+ENUM_RANGE_BY_COUNT(EReqFilterOperand, 10);
 
 bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags, const class UTagsComponent* PlayerTagsC);
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap);
@@ -48,6 +49,8 @@ public:
   const class AStore* Store;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class AQuestManager* QuestManager;
+  UPROPERTY(EditAnywhere, Category = "GameDataMap")
+  const class ACutsceneManager* CutsceneManager;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")

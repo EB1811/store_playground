@@ -75,7 +75,7 @@ void AMainMenuControlHUD::InitMenuFadeOut(std::function<void()> _FadeOutEndFunc)
 
     _FadeOutEndFunc();
   };
-  InitLoadTransitionWidget->NewGameFadeOut();
+  InitLoadTransitionWidget->StartupFadeOut();
 }
 
 void AMainMenuControlHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {

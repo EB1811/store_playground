@@ -15,6 +15,8 @@ public:
   void FadeOut();
   UFUNCTION(BlueprintImplementableEvent)
   void NewGameFadeOut();
+  UFUNCTION(BlueprintImplementableEvent)
+  void StartupFadeOut();
 
   UFUNCTION(BlueprintCallable)
   void OnFadeOutEnded();

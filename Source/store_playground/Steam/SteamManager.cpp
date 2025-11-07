@@ -3,22 +3,65 @@
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
 #include "store_playground/Framework/GlobalDataManager.h"
+#include "OnlineSubsystem.h"
+#include "Interfaces/OnlineAchievementsInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
 
 void ASteamManager::BeginPlay() { Super::BeginPlay(); }
 
 void ASteamManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 void ASteamManager::AwardAchievements(TArray<FSteamAchievement>& Achievements) {
+  if (!SteamManagerParams.bEnableSteamIntegration) {
+    for (auto& Ach : Achievements) {
+      auto* FoundAch =
+          SteamAchievements.FindByPredicate([Ach](const auto& ArrayAch) { return ArrayAch.SteamID == Ach.SteamID; });
+      check(FoundAch);
+      FoundAch->bAchieved = true;
+
+      UE_LOG(LogTemp, Warning, TEXT("Awarded steam achievement %s"), *Ach.SteamID.ToString());
+    }
+    return;
+  }
+
+  IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+  if (!OnlineSub) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online subsystem"));
+    return;
+  }
+  IOnlineIdentityPtr IdentityI = OnlineSub->GetIdentityInterface();
+  IOnlineAchievementsPtr AchievementsI = OnlineSub->GetAchievementsInterface();
+  if (!IdentityI.IsValid() || !AchievementsI.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online identity or achievements interface"));
+    return;
+  }
+  FUniqueNetIdPtr UserId = IdentityI->GetUniquePlayerId(0);
+  if (!UserId.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get unique player id"));
+    return;
+  }
+
   for (auto& Ach : Achievements) {
     auto* FoundAch =
         SteamAchievements.FindByPredicate([Ach](const auto& ArrayAch) { return ArrayAch.SteamID == Ach.SteamID; });
     check(FoundAch);
     FoundAch->bAchieved = true;
 
-    if (SteamManagerParams.bEnableSteamIntegration) {
-      // SteamAPI()->UserStats()->SetAchievement(TCHAR_TO_ANSI(*Ach.SteamID.ToString()));
-      // SteamAPI()->UserStats()->StoreStats();
-    }
+    FOnlineAchievementsWritePtr WriteObject = MakeShareable(new FOnlineAchievementsWrite());
+    WriteObject->SetFloatStat(Ach.SteamID.ToString(), 100.0f);
+
+    FOnlineAchievementsWriteRef WriteObjectRef = WriteObject.ToSharedRef();
+    AchievementsI->WriteAchievements(
+        *UserId, WriteObjectRef,
+        FOnAchievementsWrittenDelegate::CreateLambda([Ach](const FUniqueNetId& InUserId, bool bWasSuccessful) {
+          if (bWasSuccessful) {
+            UE_LOG(LogTemp, Log, TEXT("Successfully wrote achievement %s for user %s"), *Ach.SteamID.ToString(),
+                   *InUserId.ToString());
+          } else {
+            UE_LOG(LogTemp, Error, TEXT("Failed to write achievement %s for user %s"), *Ach.SteamID.ToString(),
+                   *InUserId.ToString());
+          }
+        }));
 
     UE_LOG(LogTemp, Warning, TEXT("Awarded steam achievement %s"), *Ach.SteamID.ToString());
   }

@@ -131,6 +131,7 @@ void AStorePGGameMode::BeginPlay() {
   CutsceneSystem->HUD = HUD;
   CutsceneSystem->DialogueSystem = DialogueSystem;
   CutsceneSystem->CutsceneManager = CutsceneManager;
+  CutsceneSystem->SteamManager = SteamManager;
 
   SettingsManager->SaveManager = SaveManager;
   SettingsManager->DayManager = DayManager;
@@ -230,6 +231,7 @@ void AStorePGGameMode::BeginPlay() {
   GlobalDataManager->DayManager = DayManager;
   GlobalDataManager->Store = Store;
   GlobalDataManager->QuestManager = QuestManager;
+  GlobalDataManager->CutsceneManager = CutsceneManager;
   GlobalDataManager->Market = Market;
   GlobalDataManager->NewsGen = NewsGen;
 

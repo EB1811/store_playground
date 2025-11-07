@@ -66,7 +66,7 @@ void UPriceSliderWidget::UpdateNegotiationPrices(float NpcAcceptance,
     case NegotiationType::PlayerSell:
       YellowBar->SetPercent((MarketPrice * (1.0f + NpcAcceptance) - MinValue) / (MaxValue - MinValue));
       break;
-    default: checkNoEntry()
+    default: checkNoEntry(); return;
   }
 }
 
@@ -91,7 +91,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
       ThemTopBox->SetVisibility(ESlateVisibility::Collapsed);
       ThemBottomBox->SetVisibility(ESlateVisibility::Visible);
       break;
-    default: checkNoEntry()
+    default: checkNoEntry(); return;
   }
   PlayerMoney = _PlayerMoney;
 
@@ -151,7 +151,7 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
       GreenBar->SetPercent(MarketPriceSlider->GetNormalizedValue());
       YellowBar->SetPercent((MarketPrice * (1.0f + NpcAcceptance) - MinValue) / (MaxValue - MinValue));
       break;
-    default: checkNoEntry()
+    default: checkNoEntry(); return;
   }
 
   NPCPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(NpcPrice))));

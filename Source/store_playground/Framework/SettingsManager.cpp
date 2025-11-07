@@ -298,7 +298,7 @@ void ASettingsManager::InitSettings() {
   check(EInputUserSettings);
 
   // Running a benchmark to set initial graphics settings.
-  UnrealSettings->RunHardwareBenchmark(10, 1.0f, 2.0f);
+  UnrealSettings->RunHardwareBenchmark(10, 1.0f, 1.0f);
   UnrealSettings->ApplyHardwareBenchmarkResults();
 
   int32 CurrentOverallQuality = UnrealSettings->GetOverallScalabilityLevel();

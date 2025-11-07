@@ -18,6 +18,7 @@
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
+#include "store_playground/Cutscene/CutsceneManager.h"
 
 AGlobalDataManager::AGlobalDataManager() {
   PrimaryActorTick.bCanEverTick = false;
@@ -253,6 +254,7 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
       {EReqFilterOperand::PlayerTags, PlayerTags},
       {EReqFilterOperand::Inventory, InventoryItems},
       {EReqFilterOperand::QuestsCompleted, QuestManager->QuestsCompleted},
+      {EReqFilterOperand::PlayedCutscenes, CutsceneManager->PlayedCutscenes},
       {EReqFilterOperand::MadeDialogueChoices, MadeDialogueChoices},
       {EReqFilterOperand::RecentEconEvents, RecentEconEvents},
       {EReqFilterOperand::PublishedArticles, NewsGen->PublishedArticles},
