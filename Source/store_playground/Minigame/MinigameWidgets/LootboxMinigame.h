@@ -13,15 +13,14 @@ struct FLootboxMinigameParams {
   GENERATED_BODY()
 
   UPROPERTY(EditAnywhere)
-  float BaseWinChance;
-
-  UPROPERTY(EditAnywhere)
   float BaseLootboxPriceMin;
   UPROPERTY(EditAnywhere)
   float BaseLootboxPriceMax;
 
   UPROPERTY(EditAnywhere)
-  int32 MaxItems;
+  int32 MaxLowValueItems;
+  UPROPERTY(EditAnywhere)
+  float HighValueWinChance;
 };
 
 // ? Change to actor (with attached widget) for more flexibility (tick, etc.).

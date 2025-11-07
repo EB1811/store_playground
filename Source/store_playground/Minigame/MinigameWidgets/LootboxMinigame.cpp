@@ -38,10 +38,19 @@ void ULootboxMinigame::Open() {
   Store->MoneySpent(Price);
 
   int32 QuantityMin =
-      FMath::Clamp((Price / LootboxMinigameParams.BaseLootboxPriceMax) * (LootboxMinigameParams.MaxItems / 2), 1,
-                   LootboxMinigameParams.MaxItems);
-  int32 RandomQuantity = FMath::RandRange(QuantityMin, LootboxMinigameParams.MaxItems);
-  TArray<UItemBase*> Items = Market->GetNewRandomItems(RandomQuantity);
+      FMath::Clamp((Price / LootboxMinigameParams.BaseLootboxPriceMax) * (LootboxMinigameParams.MaxLowValueItems / 2),
+                   1, LootboxMinigameParams.MaxLowValueItems);
+  int32 RandomQuantity = FMath::RandRange(QuantityMin, LootboxMinigameParams.MaxLowValueItems);
+  TArray<UItemBase*> Items = Market->GetNewRandomItems(RandomQuantity, {}, {EItemWealthType::Essential});
+
+  if (FMath::FRand() <= LootboxMinigameParams.HighValueWinChance) {
+    TArray<UItemBase*> MidItems = Market->GetNewRandomItems(1, {}, {EItemWealthType::Mid});
+    Items.Append(MidItems);
+  }
+  if (FMath::FRand() <= LootboxMinigameParams.HighValueWinChance * LootboxMinigameParams.HighValueWinChance) {
+    TArray<UItemBase*> LuxItems = Market->GetNewRandomItems(1, {}, {EItemWealthType::Luxury});
+    Items.Append(LuxItems);
+  }
 
   AActor* MiniGameOwner = MiniGameC->GetOwner();
   FActorSpawnParameters NpcStoreSpawnParams;
