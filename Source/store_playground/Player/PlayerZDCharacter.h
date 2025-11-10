@@ -289,7 +289,9 @@ public:
   void EnterNewLevel(class ULevelChangeComponent* LevelChangeC);
   void LeaveStore();
 
+  // ? Put in GameMode?
   void GameOverReset();
+  void DemoGameOver();
 
   // // * SaveManager
   // UPROPERTY(EditAnywhere, Category = "Character | SaveManager")

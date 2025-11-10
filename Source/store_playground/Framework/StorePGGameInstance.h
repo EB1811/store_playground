@@ -15,6 +15,9 @@ public:
   UStorePGGameInstance();
 
   UPROPERTY(EditAnywhere)
+  bool bIsDemoVersion;  // * Whether the game is a demo / playtest version.
+
+  UPROPERTY(EditAnywhere)
   bool bFromSaveGame;  // * Whether the game was loaded from a save game or not.
   UPROPERTY(EditAnywhere)
   int32 SaveSlotIndex;  // * Index of the save slot to load from.

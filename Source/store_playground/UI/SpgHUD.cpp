@@ -642,6 +642,19 @@ void ASpgHUD::SetAndOpenGameOverView() {
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
 }
+void ASpgHUD::SetAndOpenDemoGameOverView() {
+  HUDState = EHUDState::GameOver;
+  HideInGameHudWidget();
+
+  GameOverViewWidget = CreateWidget<UGameOverViewWidget>(GetWorld(), DemoGameOverViewWidgetClass);
+  GameOverViewWidget->AddToViewport(50);
+  GameOverViewWidget->InitUI(InUIInputActions);
+  GameOverViewWidget->SetVisibility(ESlateVisibility::Visible);
+
+  const FInputModeGameAndUI InputMode;
+  GetOwningPlayerController()->SetInputMode(InputMode);
+  GetOwningPlayerController()->SetShowMouseCursor(true);
+}
 
 void ASpgHUD::StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc) {
   SetPlayerNoControlFunc();

@@ -966,3 +966,10 @@ void APlayerZDCharacter::GameOverReset() {
   if (bInCinematicView) ToggleCinematicView();
   HUD->SetAndOpenGameOverView();
 }
+void APlayerZDCharacter::DemoGameOver() {
+  ChangePlayerState(EPlayerState::GameOver);
+  UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+  if (bInCinematicView) ToggleCinematicView();
+  HUD->SetAndOpenDemoGameOverView();
+}

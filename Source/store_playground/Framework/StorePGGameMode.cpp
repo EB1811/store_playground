@@ -384,3 +384,10 @@ void AStorePGGameMode::LoadGame(int32 SlotIndex) {
 
   HUD->StartGameLoadTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "StartMap", true); });
 }
+
+void AStorePGGameMode::DemoGameOver() {
+  UE_LOG(LogTemp, Warning, TEXT("Demo Version: Ending game."));
+
+  check(PlayerCharacter);
+  PlayerCharacter->DemoGameOver();
+}

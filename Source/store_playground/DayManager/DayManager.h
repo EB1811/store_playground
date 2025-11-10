@@ -26,6 +26,9 @@ struct FDayManagerParams {
 
   UPROPERTY(EditAnywhere)
   TMap<EGameDifficulty, float> DifficultyDebtMultiMap;
+
+  UPROPERTY(EditAnywhere)
+  int32 DemoVersionMaxDays;  // * Max days before game over in demo version
 };
 
 UCLASS(Blueprintable)
@@ -71,6 +74,8 @@ public:
 
   void StartNewDay();
 
-  void ManageDebt();  // * Attempt to pay debt. If not enough money, game over.
+  auto ManageDebt() -> bool;  // * Attempt to pay debt. If not enough money, game over, returns true.
   void RecalculateNextDebt();
+
+  auto CheckDemoVersion() -> bool;  // * Check if demo version max days reached, if so end game, returns true.
 };

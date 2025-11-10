@@ -39,6 +39,9 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* ExitButton;
 
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* DemoVersionText;
+
   UPROPERTY(Transient, meta = (BindWidgetAnim))
   class UWidgetAnimation* StartupAnim;
   UPROPERTY(Transient, meta = (BindWidgetAnim))

@@ -1,5 +1,6 @@
 #include "DayManager.h"
 #include "Math/UnrealMathUtility.h"
+#include "store_playground/Framework/StorePGGameInstance.h"
 #include "store_playground/Framework/StorePGGameMode.h"
 #include "store_playground/Framework/SettingsManager.h"
 #include "store_playground/Market/Market.h"
@@ -32,8 +33,10 @@ void ADayManager::StartNewDay() {
   check(Market && MarketLevel && NewsGen);
   UE_LOG(LogTemp, Warning, TEXT("DayManager: Starting new day."));
 
+  if (CheckDemoVersion()) return;
+
   // Manage debt first.
-  ManageDebt();
+  if (ManageDebt()) return;
 
   CurrentDay++;
   bIsWeekend = CurrentDay % DayManagerParams.WeekendDivisor == 0;
@@ -53,8 +56,8 @@ void ADayManager::StartNewDay() {
   MarketLevel->ResetDaysLevelState();
 }
 
-void ADayManager::ManageDebt() {
-  if (CurrentDay < NextDayToPayDebt) return;
+auto ADayManager::ManageDebt() -> bool {
+  if (CurrentDay < NextDayToPayDebt) return false;
   if (CurrentDay > NextDayToPayDebt) {
     NextDayToPayDebt = CurrentDay + DayManagerParams.DebtPaymentDayDivisor;
     NextDebtAmount = DayManagerParams.BaseDebtAmount *
@@ -66,7 +69,7 @@ void ADayManager::ManageDebt() {
     EGameDifficulty Difficulty = GameMode->SettingsManager->GameSettings.Difficulty;
     NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
 
-    return;
+    return false;
   }
 
   if (Store->Money >= NextDebtAmount) {
@@ -82,7 +85,7 @@ void ADayManager::ManageDebt() {
     EGameDifficulty Difficulty = GameMode->SettingsManager->GameSettings.Difficulty;
     NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
 
-    return;
+    return false;
   }
 
   // Game over.
@@ -90,6 +93,7 @@ void ADayManager::ManageDebt() {
   AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
   check(GameMode);
   GameMode->GameOverReset();
+  return true;
 }
 void ADayManager::RecalculateNextDebt() {
   NextDebtAmount = DayManagerParams.BaseDebtAmount *
@@ -100,4 +104,20 @@ void ADayManager::RecalculateNextDebt() {
   check(GameMode && GameMode->SettingsManager);
   EGameDifficulty Difficulty = GameMode->SettingsManager->GameSettings.Difficulty;
   NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
+}
+
+auto ADayManager::CheckDemoVersion() -> bool {
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+  check(StorePGGameInstance);
+
+  if (!StorePGGameInstance->bIsDemoVersion) return false;
+
+  if (CurrentDay >= DayManagerParams.DemoVersionMaxDays) {
+    UE_LOG(LogTemp, Warning, TEXT("DayManager: Demo version max days reached. Ending game."));
+    AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    check(GameMode);
+    GameMode->DemoGameOver();
+    return true;
+  }
+  return false;
 }

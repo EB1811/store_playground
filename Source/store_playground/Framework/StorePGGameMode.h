@@ -99,4 +99,7 @@ public:
   void ExitToMainMenu();
   UFUNCTION(BlueprintCallable, Category = "GameMode")
   void LoadGame(int32 SlotIndex);
+
+  UFUNCTION(BlueprintCallable, Category = "GameMode")
+  void DemoGameOver();
 };

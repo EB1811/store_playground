@@ -65,6 +65,8 @@ public:
   TSubclassOf<class UTutorialViewWidget> TutorialViewWidgetClass;
   UPROPERTY(EditAnywhere, Category = "Widgets")
   TSubclassOf<class UGameOverViewWidget> GameOverViewWidgetClass;
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UGameOverViewWidget> DemoGameOverViewWidgetClass;
 
   UPROPERTY(EditAnywhere)
   const class ADayManager* DayManager;
@@ -237,6 +239,9 @@ public:
   UPROPERTY()
   class UGameOverViewWidget* GameOverViewWidget;
   void SetAndOpenGameOverView();
+  UPROPERTY()
+  class UGameOverViewWidget* DemoGameOverViewWidget;
+  void SetAndOpenDemoGameOverView();
 
   // * Transitions
   UPROPERTY(EditAnywhere, Category = "Widgets")

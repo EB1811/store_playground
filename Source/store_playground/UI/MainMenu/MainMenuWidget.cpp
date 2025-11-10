@@ -225,6 +225,11 @@ void UMainMenuWidget::InitUI(AMainMenuControlHUD* _MainMenuControlHUD,
   CreditsWidget->SetVisibility(ESlateVisibility::Collapsed);
 
   // HoverButton(NewGameButton);
+
+  DemoVersionText->SetVisibility(ESlateVisibility::Collapsed);
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+  check(StorePGGameInstance);
+  if (StorePGGameInstance->bIsDemoVersion) DemoVersionText->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UMainMenuWidget::SetupUIActionable() {
