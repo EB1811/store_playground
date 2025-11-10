@@ -348,3 +348,12 @@ void ASettingsManager::InitSettings() {
 
   SaveSettings();
 }
+
+auto ASettingsManager::IsDlssAvailable() const -> bool {
+  static IConsoleVariable* CVarDLSS = IConsoleManager::Get().FindConsoleVariable(TEXT("r.NGX.DLSS.Enable"));
+  return CVarDLSS != nullptr;
+}
+auto ASettingsManager::IsFrameGenAvailable() const -> bool {
+  static IConsoleVariable* CVarDLSSG = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Streamline.DLSSG.Enable"));
+  return CVarDLSSG != nullptr;
+}

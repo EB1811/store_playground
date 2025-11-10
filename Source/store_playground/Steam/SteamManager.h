@@ -69,7 +69,9 @@ public:
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<FGameplayTag, int32> BehaviourTagCounts;
 
+  void QueryAchievements();
   void AwardAchievements(TArray<FSteamAchievement>& Achievements);
+
   void ConsiderAchievements();
   void AchBehaviour(FGameplayTag AchBehaviourTag);
   // * Custom achievements.

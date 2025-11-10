@@ -233,7 +233,7 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   AntiAliasingMethodComboBox->AddOption(TEXT("None"));
   AntiAliasingMethodComboBox->AddOption(TEXT("FXAA"));
   AntiAliasingMethodComboBox->AddOption(TEXT("TSR"));
-  AntiAliasingMethodComboBox->AddOption(TEXT("DLSS"));
+  if (SettingsManager->IsDlssAvailable()) AntiAliasingMethodComboBox->AddOption(TEXT("DLSS"));
 
   GlobalIlluminationMethodComboBox->ClearOptions();
   GlobalIlluminationMethodComboBox->AddOption(TEXT("None (Recommended)"));
@@ -244,6 +244,8 @@ void UGraphicsSettingsWidget::InitUI(FInUIInputActions _InUIInputActions,
   ReflectionMethodComboBox->AddOption(TEXT("None"));
   ReflectionMethodComboBox->AddOption(TEXT("Lumen"));
   ReflectionMethodComboBox->AddOption(TEXT("Screen Space"));
+
+  if (!SettingsManager->IsFrameGenAvailable()) DLSSFrameGenerationCheckBox->SetIsEnabled(false);
 
   WarningText->SetText(FText::FromString(TEXT("Restart required.")));
   WarningText->SetVisibility(ESlateVisibility::Hidden);

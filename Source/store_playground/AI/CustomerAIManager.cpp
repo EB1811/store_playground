@@ -229,10 +229,11 @@ void ACustomerAIManager::SpawnCustomers() {
       Store->StockDisplayCount > 0
           ? FMath::Clamp(Store->StoreStockItems.Num() / (float)Store->StockDisplayCount, 0.0f, 1.0f)
           : 0.0f;
-  int32 MaxCustomers =
-      CustomerCountFromStoreDisplay +
-      FMath::RoundToInt(BehaviorParams.MaxCustomers * FMath::Clamp(FilledStockPercent * 1.5f, 0.8f, 1.2));
+  int32 MaxCustomers = FMath::RoundToInt((CustomerCountFromStoreDisplay + BehaviorParams.MaxCustomers) *
+                                         FMath::Clamp(FilledStockPercent * 1.5f, 0.8f, 1.2));
   if (AllCustomers.Num() >= MaxCustomers) return;
+
+  UE_LOG(LogTemp, Warning, TEXT("Spawning customers. Current: %d, Max: %d"), AllCustomers.Num(), MaxCustomers);
 
   ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];
   check(SpawnPoint);

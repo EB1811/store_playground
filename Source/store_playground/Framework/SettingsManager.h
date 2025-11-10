@@ -66,4 +66,7 @@ public:
   void LoadSettings();
 
   void InitSettings();  // * Init graphics settings based on benchmark.
+
+  auto IsDlssAvailable() const -> bool;
+  auto IsFrameGenAvailable() const -> bool;
 };

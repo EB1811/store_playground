@@ -7,9 +7,46 @@
 #include "Interfaces/OnlineAchievementsInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
 
-void ASteamManager::BeginPlay() { Super::BeginPlay(); }
+void ASteamManager::BeginPlay() {
+  Super::BeginPlay();
+
+  QueryAchievements();
+}
 
 void ASteamManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
+
+void ASteamManager::QueryAchievements() {
+  if (!SteamManagerParams.bEnableSteamIntegration) return;
+
+  IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+  if (!OnlineSub) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online subsystem"));
+    return;
+  }
+  IOnlineIdentityPtr IdentityI = OnlineSub->GetIdentityInterface();
+  IOnlineAchievementsPtr AchievementsI = OnlineSub->GetAchievementsInterface();
+  if (!IdentityI.IsValid() || !AchievementsI.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online identity or achievements interface"));
+    return;
+  }
+  FUniqueNetIdPtr UserId = IdentityI->GetUniquePlayerId(0);
+  if (!UserId.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get unique player id"));
+    return;
+  }
+
+  AchievementsI->QueryAchievements(
+      *UserId,
+      FOnQueryAchievementsCompleteDelegate::CreateLambda([](const FUniqueNetId& InUserId, bool bWasSuccessful) {
+        if (bWasSuccessful) {
+          UE_LOG(LogTemp, Log, TEXT("Successfully queried achievements for user %s"), *InUserId.ToString());
+          return;
+        } else {
+          UE_LOG(LogTemp, Error, TEXT("Failed to query achievements for user %s"), *InUserId.ToString());
+          return;
+        }
+      }));
+}
 
 void ASteamManager::AwardAchievements(TArray<FSteamAchievement>& Achievements) {
   if (!SteamManagerParams.bEnableSteamIntegration) {
