@@ -53,7 +53,7 @@ void ASteamManager::QueryAchievements() {
 void ASteamManager::AwardAchievements(TArray<FSteamAchievement>& Achievements) {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
-  if (!StorePGGameInstance->bIsDemoVersion) return;
+  if (StorePGGameInstance->bIsDemoVersion) return;
 
   if (!SteamManagerParams.bEnableSteamIntegration) {
     for (auto& Ach : Achievements) {

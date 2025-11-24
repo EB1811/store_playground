@@ -196,6 +196,7 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->MarketLevel = MarketLevel;
   DayManager->StatisticsGen = StatisticsGen;
   DayManager->NewsGen = NewsGen;
+  DayManager->SteamManager = SteamManager;
   DayManager->Store = Store;
 
   UpgradeManager->StatisticsGen = StatisticsGen;

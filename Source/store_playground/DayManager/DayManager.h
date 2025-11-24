@@ -58,7 +58,8 @@ public:
   class AMarketLevel* MarketLevel;  // * TickDaysTimedVars.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class ANewsGen* NewsGen;  // * Create new articles.
-
+  UPROPERTY(EditAnywhere, Category = "DayManager")
+  class ASteamManager* SteamManager;  // * Consider achievements.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AStore* Store;
 

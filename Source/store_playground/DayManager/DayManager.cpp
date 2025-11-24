@@ -11,6 +11,7 @@
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
+#include "store_playground/Steam/SteamManager.h"
 #include "Kismet/GameplayStatics.h"
 
 ADayManager::ADayManager() {
@@ -54,6 +55,8 @@ void ADayManager::StartNewDay() {
   NewsGen->GenDaysRandomArticles();
 
   MarketLevel->ResetDaysLevelState();
+
+  SteamManager->ConsiderAchievements();
 }
 
 auto ADayManager::ManageDebt() -> bool {
