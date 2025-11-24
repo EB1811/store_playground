@@ -397,6 +397,7 @@ void AGlobalStaticDataManager::InitializeDialogueData() {
   check(PlayerMiscDialogues.Num() > 0);
   check(UniqueNpcDialoguesMap.Num() > 0);
   check(QuestDialoguesMap.Num() > 0);
+  check(CutsceneDialoguesMap.Num() > 0);
   check(CustomerDialogues.Num() > 0);
   check(MarketNpcDialogues.Num() > 0);
   check(NpcStoreDialogues.Num() > 0);
@@ -404,12 +405,15 @@ void AGlobalStaticDataManager::InitializeDialogueData() {
   //   check(FriendlyDialoguesMap[Type].Dialogues.Num() > 0 && NeutralDialoguesMap[Type].Dialogues.Num() > 0 &&
   //         HostileDialoguesMap[Type].Dialogues.Num() > 0);
 
+  PlayerMiscDialoguesTable = nullptr;
   UniqueNpcDialoguesTable = nullptr;
   QuestDialoguesTable = nullptr;
+  CutsceneDialoguesTable = nullptr;
   CustomerDialoguesTable = nullptr;
   FriendlyNegDialoguesTable.DataTable = nullptr;
   NeutralNegDialoguesTable.DataTable = nullptr;
   HostileNegDialoguesTable.DataTable = nullptr;
+  MarketNpcDialoguesTable = nullptr;
   NpcStoreDialoguesTable = nullptr;
 }
 
@@ -533,6 +537,7 @@ void AGlobalStaticDataManager::InitializeMarketData() {
   check(PriceEffectsArray.Num() > 0);
 
   PriceEffectsDataTable = nullptr;
+  PopEffectsDataTable = nullptr;
 }
 
 void AGlobalStaticDataManager::InitializeNewsData() {

@@ -212,11 +212,12 @@ auto AMarket::ConsiderEconEvents() -> TArray<struct FEconEvent> {
   GuaranteedEconEventIDs.Empty();
 
   TArray<struct FEconEvent> EligibleEvents = GlobalDataManager->GetEligibleEconEvents(OccurredEconEvents);
+  UE_LOG(LogTemp, Warning, TEXT("ConsiderEconEvents: EligibleEvents Num: %d"), EligibleEvents.Num());
   if (EligibleEvents.Num() <= 0) return {};
   for (auto& Event : EligibleEvents)
     if (RecentEconEventsMap.Contains(Event.ID)) Event.StartChance *= 0.25f;
   for (auto& Event : EligibleEvents)
-    if (FMath::FRand() * 100 < Event.StartChance * (EconEvents.Num() < 1 ? 2.0f : 0.5f / EconEvents.Num()) *
+    if (FMath::FRand() * 100 < Event.StartChance * (EconEvents.Num() < 1 ? 3.0f : 0.5 / EconEvents.Num()) *
                                    BehaviorParams.EconEventStartChanceMulti)
       EconEvents.Add(Event);
 

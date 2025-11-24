@@ -330,9 +330,16 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
   check(NavSystem);
 
+  // Reduce pick item action based on number of items in stock.
   TMap<ECustomerAction, float> ActionWeights = BehaviorParams.ActionWeights;
   if (Store->StoreStockItems.Num() < 5.0f)
     ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
+  // Reduce action based on number of customers already performing an action.
+  // todo-low: Look at all customers performing actions instead of just picking items.
+  float PerformActionChance =
+      BehaviorParams.PerformActionChance * FMath::Clamp(1.0f - (FMath::Max((float)PickingItemIdsMap.Num(), 1.0f) /
+                                                                FMath::Max((float)AllCustomers.Num(), 1.0f)),
+                                                        0.5f, 1.0f);
 
   // ? Split array into browsing and all other customers to avoid condition checks?
   TArray<ACustomerPC*> CustomersToExit;
@@ -346,7 +353,7 @@ void ACustomerAIManager::PerformCustomerAILoop() {
           break;
         }
 
-        if (FMath::FRand() * 100 < BehaviorParams.PerformActionChance) {
+        if (FMath::FRand() * 100 < PerformActionChance) {
           CustomerPerformAction(Customer, ActionWeights);
           break;
         }

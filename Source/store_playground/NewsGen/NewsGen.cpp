@@ -126,11 +126,9 @@ void ANewsGen::GenDaysRandomArticles() {
       return PublishedArticles.ContainsByPredicate(
           [&](FName& PublishedID) { return PublishedID == Article.ArticleID; });
     });
-
     PossibleArticles.RemoveAllSwap([this](const FArticle& Article) {
       return Article.AppearWeight <= 0 || RecentArticlesMap.Contains(Article.ArticleID);
     });
-    if (PossibleArticles.Num() <= 0) return;
 
     // Price trend based articles.
     int32 PriceTrendArticleNum = FMath::RandRange(0, 1);
@@ -172,18 +170,16 @@ void ANewsGen::GenDaysRandomArticles() {
     }
 
     // Fill remaining space with price trend articles if no other articles fit.
-    if (TotalLayoutSpace > 0 && PossibleArticles.Num() <= 0) {
-      while (TotalLayoutSpace > 0) {
-        FItemStatistics RandomItemStat =
-            StatisticsGen->ItemStatisticsMap.Array()[FMath::RandRange(0, StatisticsGen->ItemStatisticsMap.Num() - 1)]
-                .Value;
-        float PriceTrend = GetItemPriceTrend(RandomItemStat.PriceHistory);
+    while (TotalLayoutSpace > 0) {
+      FItemStatistics RandomItemStat =
+          StatisticsGen->ItemStatisticsMap.Array()[FMath::RandRange(0, StatisticsGen->ItemStatisticsMap.Num() - 1)]
+              .Value;
+      float PriceTrend = GetItemPriceTrend(RandomItemStat.PriceHistory);
 
-        FArticle SelectedArticle = GetItemPriceTrendArticle(PriceTrend, RandomItemStat.ItemId);
-        DaysArticles.Add(SelectedArticle);
+      FArticle SelectedArticle = GetItemPriceTrendArticle(PriceTrend, RandomItemStat.ItemId);
+      DaysArticles.Add(SelectedArticle);
 
-        TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
-      }
+      TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
     }
   }
 }

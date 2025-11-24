@@ -24,6 +24,7 @@ void UStoreExpansionSelectWidget::InitUI(const FStoreExpansionData& ExpansionDat
   SelectFunc = _SelectUpgradeFunc;
 
   NameText->SetText(ExpansionData.Name);
+  DescriptionText->SetText(ExpansionData.Description);
   PictureImage->SetBrushFromMaterial(ExpansionData.Picture);
   PriceText->SetText(FText::FromString(FString::Printf(TEXT("Cost: %.0f¬"), ExpansionData.Price)));
 }

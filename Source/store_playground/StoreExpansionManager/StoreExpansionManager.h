@@ -16,6 +16,8 @@ struct FStoreExpansionData {
   UPROPERTY(EditAnywhere)
   FText Name;
   UPROPERTY(EditAnywhere)
+  FText Description;
+  UPROPERTY(EditAnywhere)
   class UMaterialInstance* Picture;
 
   UPROPERTY(EditAnywhere, SaveGame)

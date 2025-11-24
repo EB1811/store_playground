@@ -433,6 +433,17 @@ void AMarketEconomy::AddPriceEffect(const FPriceEffect& PriceEffect) {
 
   ActivePriceEffects.Add(NewPriceEffect);
 }
+void AMarketEconomy::AddPopEffect(const FPopEffect& PopEffect) {
+  FPopEffect NewPopEffect = PopEffect;
+  NewPopEffect.PopChangeMulti = PopEffect.BuildupPercent > 0.0f
+                                    ? 1.0f + (PopEffect.PopChangeMulti - 1.0f) * (PopEffect.BuildupPercent / 100.0f)
+                                    : PopEffect.PopChangeMulti;
+  NewPopEffect.PopMGenMulti = PopEffect.BuildupPercent > 0.0f
+                                  ? 1.0f + (PopEffect.PopMGenMulti - 1.0f) * (PopEffect.BuildupPercent / 100.0f)
+                                  : PopEffect.PopMGenMulti;
+
+  ActivePopEffects.Add(NewPopEffect);
+}
 
 void AMarketEconomy::TickDaysActivePriceEffects() {
   TArray<FPriceEffect> PriceEffectsToRemove;

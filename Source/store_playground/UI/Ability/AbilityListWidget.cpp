@@ -47,6 +47,7 @@ void UAbilityListWidget::HoverNextAbility(FVector2D Direction) {
   HoveredAbilityCardWidget = NextAbilityCardWidget;
   HoveredAbilityCardWidget->bIsHovered = true;
   HoveredAbilityCardWidget->RefreshUI();
+  HoveredAbilityCardWidget->SelectButton->SetFocus();
 }
 
 void UAbilityListWidget::RefreshUI() {

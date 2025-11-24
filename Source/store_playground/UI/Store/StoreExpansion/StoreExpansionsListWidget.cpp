@@ -73,18 +73,19 @@ void UStoreExpansionsListWidget::RefreshUI() {
 
   for (const FStoreExpansionData& ExpansionData : StoreExpansionManager->StoreExpansions) {
     if (ExpansionData.bIsLocked || Store->Money < ExpansionData.Price) {
-      UDisabledStoreExpansionSelectWidget* ExpansionCardWidget =
+      UDisabledStoreExpansionSelectWidget* DisExpansionCardWidget =
           CreateWidget<UDisabledStoreExpansionSelectWidget>(this, DisabledStoreExpansionSelectWidgetClass);
-      check(ExpansionCardWidget);
+      check(DisExpansionCardWidget);
 
-      ExpansionCardWidget->NameText->SetText(ExpansionData.Name);
-      ExpansionCardWidget->PictureImage->SetBrushFromMaterial(ExpansionData.Picture);
-      ExpansionCardWidget->PriceText->SetText(
+      DisExpansionCardWidget->NameText->SetText(ExpansionData.Name);
+      DisExpansionCardWidget->DescriptionText->SetText(ExpansionData.Description);
+      DisExpansionCardWidget->PictureImage->SetBrushFromMaterial(ExpansionData.Picture);
+      DisExpansionCardWidget->PriceText->SetText(
           FText::FromString(FString::Printf(TEXT("Cost: %.0f¬"), ExpansionData.Price)));
-      if (ExpansionData.bIsLocked) ExpansionCardWidget->LockedReasonText->SetText(FText::FromString("Locked"));
-      else ExpansionCardWidget->LockedReasonText->SetVisibility(ESlateVisibility::Hidden);
+      if (ExpansionData.bIsLocked) DisExpansionCardWidget->LockedReasonText->SetText(FText::FromString("Locked"));
+      else DisExpansionCardWidget->LockedReasonText->SetVisibility(ESlateVisibility::Hidden);
 
-      LockedExpansionsListBox->AddChildToVerticalBox(ExpansionCardWidget);
+      LockedExpansionsListBox->AddChildToVerticalBox(DisExpansionCardWidget);
     } else {
       if (ExpansionData.StoreExpansionLevelID == StoreExpansionManager->CurrentStoreExpansionLevelID) continue;
 

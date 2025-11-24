@@ -120,6 +120,7 @@ public:
   auto GetPopWeightingMulti(const FPopEconData& PopEconData) const -> float;
 
   void AddPriceEffect(const FPriceEffect& PriceEffect);
+  void AddPopEffect(const FPopEffect& PopEffect);
 
   void TickDaysActivePriceEffects();
 

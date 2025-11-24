@@ -13,6 +13,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* NameText;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* DescriptionText;
+  UPROPERTY(meta = (BindWidget))
   class UImage* PictureImage;
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* PriceText;

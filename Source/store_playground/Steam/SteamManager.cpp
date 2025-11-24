@@ -6,6 +6,8 @@
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineAchievementsInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
+#include "store_playground/Framework/StorePGGameInstance.h"
+#include "Kismet/GameplayStatics.h"
 
 void ASteamManager::BeginPlay() {
   Super::BeginPlay();
@@ -49,6 +51,10 @@ void ASteamManager::QueryAchievements() {
 }
 
 void ASteamManager::AwardAchievements(TArray<FSteamAchievement>& Achievements) {
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+  check(StorePGGameInstance);
+  if (!StorePGGameInstance->bIsDemoVersion) return;
+
   if (!SteamManagerParams.bEnableSteamIntegration) {
     for (auto& Ach : Achievements) {
       auto* FoundAch =

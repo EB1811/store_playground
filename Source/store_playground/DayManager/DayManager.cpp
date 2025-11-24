@@ -109,7 +109,6 @@ void ADayManager::RecalculateNextDebt() {
 auto ADayManager::CheckDemoVersion() -> bool {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
-
   if (!StorePGGameInstance->bIsDemoVersion) return false;
 
   if (CurrentDay >= DayManagerParams.DemoVersionMaxDays) {

@@ -330,6 +330,8 @@ void APlayerZDCharacter::OpenInventoryView(const FInputActionValue& Value) {
   if (PlayerBehaviourState != EPlayerState::Normal) return;
 
   HUD->SetAndOpenInventoryView(PlayerInventoryComponent);
+
+  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.ItemsView"));
 }
 void APlayerZDCharacter::OpenNewspaper(const FInputActionValue& Value) {
   if (bInCinematicView) ToggleCinematicView();
@@ -363,7 +365,7 @@ void APlayerZDCharacter::EnterBuildMode(const FInputActionValue& Value) {
 
   StorePhaseManager->EnterBuildMode();
 
-  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.BuildMode"));
+  // TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.BuildMode"));
 }
 // Rechecking on input to avoid problems with the interaction frequency not keeping up.
 void APlayerZDCharacter::Interact(const FInputActionValue& Value) {
@@ -704,19 +706,19 @@ void APlayerZDCharacter::EnterStockDisplay(UStockDisplayComponent* StockDisplayC
                                            UInventoryComponent* DisplayInventoryC) {
   HUD->SetAndOpenStockDisplay(StockDisplayC, DisplayInventoryC, PlayerInventoryComponent);
 
-  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.StockDisplay"));
+  // TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.StockDisplay"));
 }
 
 void APlayerZDCharacter::EnterUpgradeSelect(UUpgradeSelectComponent* UpgradeSelectC) {
   HUD->SetAndOpenUpgradeView(UpgradeSelectC);
 
-  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.UpgradeSelect"));
+  // TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.UpgradeSelect"));
 }
 
 void APlayerZDCharacter::EnterAbilitySelect() {
   HUD->SetAndOpenAbilityView();
 
-  TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.AbilitySelect"));
+  // TutorialManager->CheckAndShowTutorial(FGameplayTag::RequestGameplayTag("Tutorial.AbilitySelect"));
 }
 
 void APlayerZDCharacter::EnterMiniGame(UMiniGameComponent* MiniGameC) {
