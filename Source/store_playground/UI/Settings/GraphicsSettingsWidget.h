@@ -8,8 +8,6 @@
 #include "store_playground/UI/UIStructs.h"
 #include "GraphicsSettingsWidget.generated.h"
 
-// todo-low: Profile hardware to auto set and suggest settings.
-
 UCLASS()
 class STORE_PLAYGROUND_API UGraphicsSettingsWidget : public UUserWidget {
   GENERATED_BODY()

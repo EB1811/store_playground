@@ -29,7 +29,6 @@ public:
 
   void ResetPosition();  // * Reset player position to the last spawn point.
 
-  // TODO: Make bool returns.
   auto CommandDialogue(TArray<struct FDialogueData> DialogueArray) -> bool;
   auto CommandNegotiation(class UCustomerAIComponent* CustomerAI,
                           class UItemBase* Item,
