@@ -600,10 +600,7 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
       GlobalStaticDataManager->GetRandomNpcDialogue(UniqueNpcData.DialogueChainIDs, {"Level.Market"});
 
   // Quest override.
-  auto MarketQuestChains =
-      QuestManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs).FilterByPredicate([](const auto& Chain) {
-        return Chain.CustomerAction == ECustomerAction::None;
-      });
+  auto MarketQuestChains = QuestManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs, EQuestStartLocation::Market);
   if (MarketQuestChains.Num() <= 0) return true;
 
   const FQuestChainData& RandomQuestChainData =

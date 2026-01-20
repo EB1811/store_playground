@@ -32,6 +32,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "QuestManager")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
 
+  UPROPERTY(EditAnywhere)
+  class AUpgradeManager* UpgradeManager;
+
   UPROPERTY(EditAnywhere, Category = "QuestManager")
   class TSubclassOf<class ANpc> NpcClass;
 
@@ -40,7 +43,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "QuestManager", SaveGame)
   TMap<FName, FQuestInProgressData> QuestInProgressMap;
 
-  TArray<struct FQuestChainData> GetEligibleQuestChains(const TArray<FName>& QuestIDs) const;
+  TArray<struct FQuestChainData> GetEligibleQuestChains(
+      const TArray<FName>& QuestIDs,
+      const EQuestStartLocation StartLocation = EQuestStartLocation::Any) const;
   void CompleteQuestChain(class UQuestComponent* QuestC,
                           TArray<FName> MadeChoiceIds = {},
                           bool bNegotiationSuccess = false);

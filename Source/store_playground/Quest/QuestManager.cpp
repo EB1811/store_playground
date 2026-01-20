@@ -5,6 +5,7 @@
 #include "store_playground/WorldObject/Npc.h"
 #include "store_playground/Interaction/InteractionComponent.h"
 #include "store_playground/Dialogue/DialogueComponent.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 
 AQuestManager::AQuestManager() { PrimaryActorTick.bCanEverTick = false; }
 
@@ -12,12 +13,18 @@ void AQuestManager::BeginPlay() { Super::BeginPlay(); }
 
 void AQuestManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
-TArray<struct FQuestChainData> AQuestManager::GetEligibleQuestChains(const TArray<FName>& QuestIDs) const {
+TArray<struct FQuestChainData> AQuestManager::GetEligibleQuestChains(const TArray<FName>& QuestIDs,
+                                                                     const EQuestStartLocation StartLocation) const {
   TMap<FName, FName> PrevChainCompletedMap = {};
   for (const auto& QuestInProgress : QuestInProgressMap)
     PrevChainCompletedMap.Add(QuestInProgress.Key, QuestInProgress.Value.ChainCompletedIDs.Last());
 
-  return GlobalStaticDataManager->GetEligibleQuestChains(QuestIDs, QuestsCompleted, PrevChainCompletedMap);
+  auto Eligible = GlobalStaticDataManager->GetEligibleQuestChains(QuestIDs, QuestsCompleted, PrevChainCompletedMap);
+  if (StartLocation == EQuestStartLocation::Any) return Eligible;
+
+  return Eligible.FilterByPredicate([&](const FQuestChainData& Chain) {
+    return Chain.StartLocation == EQuestStartLocation::Any || Chain.StartLocation == StartLocation;
+  });
 }
 
 void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> MadeChoiceIds, bool bNegotiationSuccess) {
@@ -49,4 +56,6 @@ void AQuestManager::CompleteQuestChain(UQuestComponent* QuestC, TArray<FName> Ma
 
   // ? Store npcs with active quests?
   QuestC->PostQuest(GlobalStaticDataManager->GetQuestDialogue(QuestChainData.PostDialogueChainID));
+
+  UpgradeManager->ConsiderUpgradePoints();
 }

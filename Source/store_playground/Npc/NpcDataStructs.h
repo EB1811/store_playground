@@ -22,6 +22,14 @@ enum class EQuestAction : uint8 {
   SplitBranch UMETA(DisplayName = "Split Branch"),
   End UMETA(DisplayName = "End"),
 };
+
+UENUM()
+enum class EQuestStartLocation : uint8 {
+  Any UMETA(DisplayName = "Any"),
+  Market UMETA(DisplayName = "Market"),
+  Store UMETA(DisplayName = "Store"),
+  Church UMETA(DisplayName = "Church"),
+};
 UENUM()
 enum class EQuestOutcomeType : uint8 {
   DialogueChain UMETA(DisplayName = "Dialogue"),
@@ -49,6 +57,8 @@ struct FQuestChainData {
   UPROPERTY(EditAnywhere, SaveGame)
   FName PostDialogueChainID;  // * Dialogue after the quest chain dialogue.
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  EQuestStartLocation StartLocation;
   UPROPERTY(EditAnywhere, SaveGame)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.
                                   // * e.g., "Money > 1000 AND contains(Inventory, ["item_id"]).
@@ -88,6 +98,8 @@ struct FQuestChainDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FName PostDialogueChainID;  // * Dialogue after the quest chain dialogue.
 
+  UPROPERTY(EditAnywhere)
+  EQuestStartLocation StartLocation;
   UPROPERTY(EditAnywhere)
   FName StartRequirementsFilter;  // * Filter string using DynamoDB like syntax.
                                   // * e.g., "Money > 1000 AND contains(Inventory, ["item_id"]).

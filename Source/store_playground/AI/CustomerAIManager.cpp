@@ -178,7 +178,7 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
   AllCustomers.Add(UniqueCustomer);
 
   // Quest override.
-  auto EligibleQuestChains = QuestManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs);
+  auto EligibleQuestChains = QuestManager->GetEligibleQuestChains(UniqueNpcData.QuestIDs, EQuestStartLocation::Store);
   if (EligibleQuestChains.Num() <= 0) return;
 
   const FQuestChainData& RandomQuestChainData =

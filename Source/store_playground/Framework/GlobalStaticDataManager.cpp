@@ -220,9 +220,8 @@ TArray<struct FDialogueData> AGlobalStaticDataManager::GetRandomMarketNpcDialogu
   TArray<FDialogueData> RandDialogues = {};
   for (int32 i = 0; i < Amount; i++) {
     TArray<FDialogueData> Unique = Filtered.FilterByPredicate([&](const FDialogueData& Dialogue) {
-      return !RandDialogues.ContainsByPredicate([&](const FDialogueData& D) {
-        return D.DialogueChainID == Dialogue.DialogueChainID && D.DialogueID == Dialogue.DialogueID;
-      });
+      return !RandDialogues.ContainsByPredicate(
+          [&](const FDialogueData& D) { return D.DialogueChainID == Dialogue.DialogueChainID; });
     });
     if (Unique.Num() <= 0) break;
 
@@ -431,6 +430,7 @@ void AGlobalStaticDataManager::InitializeQuestChainsData() {
         Row->CustomerAction,
         Row->ActionRelevantIDs,
         Row->PostDialogueChainID,
+        Row->StartLocation,
         Row->StartRequirementsFilter,
         Row->StartChance,
         Row->bIsRepeatable,

@@ -269,6 +269,7 @@ void AStorePGGameMode::BeginPlay() {
   MiniGameManager->Store = Store;
 
   QuestManager->GlobalStaticDataManager = GlobalStaticDataManager;
+  QuestManager->UpgradeManager = UpgradeManager;
 
   Store->SaveManager = SaveManager;
   Store->StorePhaseManager = StorePhaseManager;
