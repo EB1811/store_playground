@@ -58,7 +58,6 @@ void UStoreExpansionsListWidget::UnlockExpansion() {
               "GetAvailableExpansions returned wrong data."));
 
   StoreExpansionManager->SelectExpansion(SelectedExpansionID);
-  Store->MoneySpent(ExpansionData->Price);
 
   UGameplayStatics::PlaySound2D(this, UnlockSound, 1.0f);
   CloseWidgetFunc();
@@ -72,6 +71,8 @@ void UStoreExpansionsListWidget::RefreshUI() {
   SelectedExpansionCardWidget = nullptr;
 
   for (const FStoreExpansionData& ExpansionData : StoreExpansionManager->StoreExpansions) {
+    if (ExpansionData.StoreExpansionLevelID == StoreExpansionManager->CurrentStoreExpansionLevelID) continue;
+
     if (ExpansionData.bIsLocked || Store->Money < ExpansionData.Price) {
       UDisabledStoreExpansionSelectWidget* DisExpansionCardWidget =
           CreateWidget<UDisabledStoreExpansionSelectWidget>(this, DisabledStoreExpansionSelectWidgetClass);
@@ -87,8 +88,6 @@ void UStoreExpansionsListWidget::RefreshUI() {
 
       LockedExpansionsListBox->AddChildToVerticalBox(DisExpansionCardWidget);
     } else {
-      if (ExpansionData.StoreExpansionLevelID == StoreExpansionManager->CurrentStoreExpansionLevelID) continue;
-
       UStoreExpansionSelectWidget* ExpansionCardWidget =
           CreateWidget<UStoreExpansionSelectWidget>(this, StoreExpansionSelectWidgetClass);
       check(ExpansionCardWidget);

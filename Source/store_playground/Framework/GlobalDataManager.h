@@ -15,6 +15,7 @@ UENUM()
 enum class EReqFilterOperand : uint8 {
   Time UMETA(DisplayName = "Time"),  // * Day
   Money UMETA(DisplayName = "Money"),
+  NetWorth UMETA(DisplayName = "NetWorth"),
   PlayerTags UMETA(DisplayName = "PlayerTags"),                    // * Using gameplay tags.
   Inventory UMETA(DisplayName = "Inventory"),                      // * Using item ids.
   QuestsCompleted UMETA(DisplayName = "QuestsCompleted"),          // * Using quest ids.
@@ -55,6 +56,8 @@ public:
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "GameDataMap")
   const class ANewsGen* NewsGen;
+  UPROPERTY(EditAnywhere, Category = "GameDataMap")
+  const class AStatisticsGen* StatisticsGen;
   // todo-low: Allow getting only specific operands.
   const TMap<EReqFilterOperand, std::any> GetGameDataMap() const;
 

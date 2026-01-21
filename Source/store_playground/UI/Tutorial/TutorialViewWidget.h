@@ -23,6 +23,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UButton* NextButton;
   UPROPERTY(meta = (BindWidget))
+  class UButton* PrevButton;
+  UPROPERTY(meta = (BindWidget))
   class UButton* CloseButton;
 
   UPROPERTY(Transient, meta = (BindWidgetAnim))
@@ -43,6 +45,8 @@ public:
 
   UFUNCTION()
   void Next();
+  UFUNCTION()
+  void Prev();
   UFUNCTION()
   void Close();
 

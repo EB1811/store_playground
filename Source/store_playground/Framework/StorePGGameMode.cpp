@@ -235,6 +235,7 @@ void AStorePGGameMode::BeginPlay() {
   GlobalDataManager->CutsceneManager = CutsceneManager;
   GlobalDataManager->Market = Market;
   GlobalDataManager->NewsGen = NewsGen;
+  GlobalDataManager->StatisticsGen = StatisticsGen;
 
   GlobalStaticDataManager->GlobalDataManager = GlobalDataManager;
 

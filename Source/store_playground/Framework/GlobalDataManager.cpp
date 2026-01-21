@@ -19,6 +19,7 @@
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/Cutscene/CutsceneManager.h"
+#include "store_playground/StatisticsGen/StatisticsGen.h"
 
 AGlobalDataManager::AGlobalDataManager() {
   PrimaryActorTick.bCanEverTick = false;
@@ -207,7 +208,7 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
     bool EvalResult = false;
     if (GameDataMap[OperandE].type() == typeid(float))
       EvalResult = ApplyOperator(Operator, std::any_cast<float>(GameDataMap[OperandE]), FCString::Atof(*ValueStr));
-    if (GameDataMap[OperandE].type() == typeid(double))
+    else if (GameDataMap[OperandE].type() == typeid(double))
       EvalResult = ApplyOperator(Operator, std::any_cast<double>(GameDataMap[OperandE]), FCString::Atod(*ValueStr));
     else if (GameDataMap[OperandE].type() == typeid(int32))
       EvalResult = ApplyOperator(Operator, std::any_cast<int32>(GameDataMap[OperandE]), FCString::Atoi(*ValueStr));
@@ -251,6 +252,7 @@ const TMap<EReqFilterOperand, std::any> AGlobalDataManager::GetGameDataMap() con
   const TMap<EReqFilterOperand, std::any> GameDataMap = {
       {EReqFilterOperand::Time, DayManager->CurrentDay},
       {EReqFilterOperand::Money, Store->Money},
+      {EReqFilterOperand::NetWorth, StatisticsGen->CachedDetails.PlayerNetWorth},
       {EReqFilterOperand::PlayerTags, PlayerTags},
       {EReqFilterOperand::Inventory, InventoryItems},
       {EReqFilterOperand::QuestsCompleted, QuestManager->QuestsCompleted},

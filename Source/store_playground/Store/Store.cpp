@@ -100,6 +100,7 @@ void AStore::MoneyGained(float Amount) {
   StatisticsGen->StoreMoneyGained(Amount);
 }
 void AStore::MoneySpent(float Amount) {
+  check(Amount <= Money);  // Caller should handle this.
   Money -= Amount;
 
   StatisticsGen->StoreMoneySpent(Amount);

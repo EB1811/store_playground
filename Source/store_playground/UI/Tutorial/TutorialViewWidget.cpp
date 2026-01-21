@@ -36,6 +36,7 @@ void UTutorialViewWidget::NativeOnInitialized() {
   Super::NativeOnInitialized();
 
   NextButton->OnClicked.AddDynamic(this, &UTutorialViewWidget::Next);
+  PrevButton->OnClicked.AddDynamic(this, &UTutorialViewWidget::Prev);
   CloseButton->OnClicked.AddDynamic(this, &UTutorialViewWidget::Close);
 
   SetupUIActionable();
@@ -46,6 +47,14 @@ void UTutorialViewWidget::Next() {
   if (CurrentStepIndex + 1 >= TutorialSteps.Num()) return;
 
   CurrentStepIndex++;
+  RefreshUI();
+
+  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
+}
+void UTutorialViewWidget::Prev() {
+  if (CurrentStepIndex - 1 < 0) return;
+
+  CurrentStepIndex--;
   RefreshUI();
 
   UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
@@ -88,6 +97,7 @@ void UTutorialViewWidget::RefreshUI() {
   StepsScrollBox->ScrollToStart();
 
   NextButton->SetIsEnabled(TutorialSteps.Num() > CurrentStepIndex + 1);
+  PrevButton->SetIsEnabled(CurrentStepIndex - 1 >= 0);
 }
 
 void UTutorialViewWidget::InitUI(FInUIInputActions _InUIInputActions,
@@ -106,8 +116,11 @@ void UTutorialViewWidget::SetupUIActionable() {
     if (NextButton->GetIsEnabled()) Next();
     else Close();
   };
-  UIActionable.RetractUI = [this]() { Close(); };
-  UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
+  UIActionable.RetractUI = [this]() {
+    if (PrevButton->GetIsEnabled()) Prev();
+    else Close();
+  };
+  UIActionable.QuitUI = [this]() { Close(); };
 }
 void UTutorialViewWidget::SetupUIBehaviour() {
   UIBehaviour.ShowAnim = ShowAnim;
