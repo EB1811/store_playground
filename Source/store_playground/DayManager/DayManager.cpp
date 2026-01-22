@@ -40,7 +40,9 @@ void ADayManager::StartNewDay() {
   if (ManageDebt()) return;
 
   CurrentDay++;
-  bIsWeekend = CurrentDay % DayManagerParams.WeekendDivisor == 0;
+  bIsWeekend = CurrentDay % DayManagerParams.WeekendDivisor == 0      ? true
+               : CurrentDay == 1 && DayManagerParams.bDayOneIsWeekend ? true
+                                                                      : false;
 
   AbilityManager->TickDaysTimedVars();
   CustomerAIManager->TickDaysTimedVars();

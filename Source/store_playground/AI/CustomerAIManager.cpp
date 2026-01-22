@@ -30,6 +30,7 @@
 #include "store_playground/NPC/NpcDataStructs.h"
 #include "store_playground/WorldObject/Level/SpawnPoint.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
+#include "store_playground/DayManager/DayManager.h"
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "Navigation/PathFollowingComponent.h"
@@ -230,7 +231,8 @@ void ACustomerAIManager::SpawnCustomers() {
           ? FMath::Clamp(Store->StoreStockItems.Num() / (float)Store->StockDisplayCount, 0.0f, 1.0f)
           : 0.0f;
   int32 MaxCustomers = FMath::RoundToInt((CustomerCountFromStoreDisplay + BehaviorParams.MaxCustomers) *
-                                         FMath::Clamp(FilledStockPercent * 1.5f, 0.8f, 1.2));
+                                         FMath::Clamp(FilledStockPercent * 1.5f, 0.85f, 1.15));
+  if (DayManager->bIsWeekend) MaxCustomers = FMath::RoundToInt(MaxCustomers * BehaviorParams.WeekendCustomerMulti);
   if (AllCustomers.Num() >= MaxCustomers) return;
 
   UE_LOG(LogTemp, Warning, TEXT("Spawning customers. Current: %d, Max: %d"), AllCustomers.Num(), MaxCustomers);
@@ -309,6 +311,8 @@ void ACustomerAIManager::SpawnCustomers() {
     Customer->CustomerAIComponent->AvailableMoney =
         ((PopMoneySpendData->Money / PopMoneySpendData->Population) * ManagerParams.PopMoneyToCustomerMoneyMulti) *
         BehaviorParams.AvailableMoneyMulti;
+    if (DayManager->bIsWeekend)
+      Customer->CustomerAIComponent->AvailableMoney *= BehaviorParams.WeekendAvailableMoneyMulti;
     Customer->CustomerAIComponent->SpawnedTime = GetWorld()->GetTimeSeconds();
 
     Customer->InteractionComponent->InteractionType = EInteractionType::Customer;

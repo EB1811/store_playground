@@ -57,6 +57,8 @@ struct FCustomerAIBehaviorParams {
   UPROPERTY(EditAnywhere, SaveGame)
   int32 MaxCustomers;
   UPROPERTY(EditAnywhere, SaveGame)
+  float WeekendCustomerMulti;
+  UPROPERTY(EditAnywhere, SaveGame)
   float CustomerSpawnChance;  // * Higher means more customers in the store at once.
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<EPopType, float> PopTypeMultis;
@@ -70,6 +72,8 @@ struct FCustomerAIBehaviorParams {
 
   UPROPERTY(EditAnywhere, SaveGame)
   float AvailableMoneyMulti;  // * Multiplier for the available money of the customer.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float WeekendAvailableMoneyMulti;
 
   UPROPERTY(EditAnywhere, SaveGame)
   float AcceptanceMinMulti;
@@ -114,6 +118,8 @@ public:
   const class APlayerZDCharacter* PlayerCharacter;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  const class ADayManager* DayManager;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   const class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")

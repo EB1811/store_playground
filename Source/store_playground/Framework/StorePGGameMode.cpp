@@ -288,6 +288,7 @@ void AStorePGGameMode::BeginPlay() {
 
   CustomerAIManager->PlayerCharacter = PlayerCharacter;
   CustomerAIManager->GlobalStaticDataManager = GlobalStaticDataManager;
+  CustomerAIManager->DayManager = DayManager;
   CustomerAIManager->AbilityManager = AbilityManager;
   CustomerAIManager->Market = Market;
   CustomerAIManager->MarketEconomy = MarketEconomy;

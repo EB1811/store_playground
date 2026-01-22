@@ -407,6 +407,8 @@ void ASpgHUD::HideInGameHudWidget() {
 void ASpgHUD::NotifyUpgradePointsGained() { InGameHudWidget->NotifyUpgradePointsGained(); }
 
 void ASpgHUD::OpenPauseMenuView() {
+  if (HUDState == EHUDState::PlayingAnim) return;
+
   if (OpenedWidgets.Contains(PauseMenuViewWidget)) return CloseWidget(PauseMenuViewWidget);
 
   PauseMenuViewWidget->InitUI(InUIInputActions, SettingsManager, SaveManager, [this] {

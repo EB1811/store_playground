@@ -15,6 +15,8 @@ struct FDayManagerParams {
 
   UPROPERTY(EditAnywhere)
   int32 WeekendDivisor;  // * Divisor for the weekend days, e.g., 5 = 1 weekend day every 5 days.
+  UPROPERTY(EditAnywhere)
+  bool bDayOneIsWeekend;
 
   // ? Or use a map for specific amounts?
   UPROPERTY(EditAnywhere)
