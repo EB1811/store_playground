@@ -68,7 +68,7 @@ FNextDialogueRes UDialogueSystem::StartDialogue(class UDialogueComponent* _Dialo
   CurrentDialogueIndex = 0;
   ChoiceDialoguesSelectedIDs.Empty();
 
-  UE_LOG(LogTemp, Warning, TEXT("StartDialogue: %d"), CurrentDialogueIndex);
+  // UE_LOG(LogTemp, Warning, TEXT("StartDialogue: %d"), CurrentDialogueIndex);
 
   return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
 }
@@ -87,7 +87,7 @@ FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _Dia
   CurrentDialogueIndex = 0;
   ChoiceDialoguesSelectedIDs.Empty();
 
-  UE_LOG(LogTemp, Warning, TEXT("StartDialogue: %d"), CurrentDialogueIndex);
+  // UE_LOG(LogTemp, Warning, TEXT("StartDialogue: %d"), CurrentDialogueIndex);
 
   return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
 }

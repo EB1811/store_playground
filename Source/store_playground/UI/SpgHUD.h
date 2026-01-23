@@ -78,6 +78,8 @@ public:
   const class AMarketEconomy* MarketEconomy;
   UPROPERTY(EditAnywhere)
   const class AMarket* Market;
+  UPROPERTY(EditAnywhere)
+  const class ACustomerAIManager* CustomerAIManager;
 
   UPROPERTY(EditAnywhere)
   class ASettingsManager* SettingsManager;

@@ -25,7 +25,7 @@ enum class EReqFilterOperand : uint8 {
   PublishedArticles UMETA(DisplayName = "PublishedArticles"),      // * Using article ids.
   SelectedUpgradeIDs UMETA(DisplayName = "SelectedUpgradeIDs"),    // * Using upgrade ids.
 };
-ENUM_RANGE_BY_COUNT(EReqFilterOperand, 10);
+ENUM_RANGE_BY_COUNT(EReqFilterOperand, 11);
 
 bool EvaluatePlayerTagsRequirements(const FGameplayTagContainer& RequiredTags, const class UTagsComponent* PlayerTagsC);
 bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReqFilterOperand, std::any>& GameDataMap);

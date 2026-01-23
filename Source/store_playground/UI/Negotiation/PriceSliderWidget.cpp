@@ -1,4 +1,6 @@
 #include "PriceSliderWidget.h"
+#include "store_playground/Negotiation/NegotiationSystem.h"
+#include "store_playground/AI/CustomerAIManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
 #include "Components/Button.h"
@@ -26,6 +28,18 @@ void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
   PlayerPriceText->SetRenderTranslation(
       FVector2D(0.0f, PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize -
                           PlayerPriceText->GetDesiredSize().Y / 2.0f));
+
+  if (bInstantAcceptanceChange ||
+      GetWorld()->TimeSince(LastAcceptanceChanceCheckTime) > AcceptanceChanceUpdateFrequency) {
+    float AcceptanceChance = CustomerAIManager->GetPriceAcceptanceChance(
+        NegotiationSystem->CustomerAI, NegotiationSystem->MarketPrice, NegotiationSystem->OfferedPrice, Value);
+    AcceptanceChanceText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%%"), AcceptanceChance * 100.0f)));
+    LastAcceptanceChanceCheckTime = GetWorld()->GetTimeSeconds();
+  }
+  AcceptanceChanceText->SetRenderTranslation(
+      FVector2D(0.0f, PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize -
+                          AcceptanceChanceText->GetDesiredSize().Y / 2.0f) -
+      FVector2D(0.0f, 23.0f));
 
   if (Type == NegotiationType::PlayerSell) return;
 
@@ -58,6 +72,10 @@ void UPriceSliderWidget::UpdateNegotiationPrices(float NpcAcceptance,
                                                          NPCPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize -
                                                          PlayerPriceText->GetDesiredSize().Y / 2.0f));
 
+  float AcceptanceChance = CustomerAIManager->GetPriceAcceptanceChance(NegotiationSystem->CustomerAI, MarketPrice,
+                                                                       NpcPrice, PlayerPriceSlider->GetValue());
+  AcceptanceChanceText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%%"), AcceptanceChance * 100.0f)));
+
   switch (Type) {
     case NegotiationType::PlayerBuy:
       YellowBar->SetPercent(
@@ -70,13 +88,19 @@ void UPriceSliderWidget::UpdateNegotiationPrices(float NpcAcceptance,
   }
 }
 
-void UPriceSliderWidget::InitUI(NegotiationType _Type,
+void UPriceSliderWidget::InitUI(const class UNegotiationSystem* _NegotiationSystem,
+                                const class ACustomerAIManager* _CustomerAIManager,
+                                NegotiationType _Type,
                                 float NpcAcceptance,
                                 float MarketPrice,
                                 float PlayerPrice,
                                 float NpcPrice,
                                 float _PlayerMoney,
                                 float BoughtAtPrice) {
+  check(_NegotiationSystem && _CustomerAIManager);
+  NegotiationSystem = _NegotiationSystem;
+  CustomerAIManager = _CustomerAIManager;
+
   Type = _Type;
   switch (Type) {
     case NegotiationType::PlayerBuy:
@@ -168,4 +192,13 @@ void UPriceSliderWidget::InitUI(NegotiationType _Type,
   if (Type == NegotiationType::PlayerBuy && PlayerPrice > PlayerMoney)
     PlayerPriceText->SetColorAndOpacity(PriceErrorColor);
   else PlayerPriceText->SetColorAndOpacity(PriceNormalColor);
+
+  float AcceptanceChance = CustomerAIManager->GetPriceAcceptanceChance(
+      NegotiationSystem->CustomerAI, NegotiationSystem->MarketPrice, NegotiationSystem->OfferedPrice, PlayerPrice);
+  AcceptanceChanceText->SetText(FText::FromString(FString::Printf(TEXT("%.0f%%"), AcceptanceChance * 100.0f)));
+  AcceptanceChanceText->SetRenderTranslation(
+      FVector2D(0.0f,
+                PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize - 50.0f / 2.0f) -
+      FVector2D(0.0f, 15.0f));
+  LastAcceptanceChanceCheckTime = GetWorld()->GetTimeSeconds();
 }

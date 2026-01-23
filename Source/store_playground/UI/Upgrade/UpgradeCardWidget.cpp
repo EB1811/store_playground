@@ -37,6 +37,14 @@ void UUpgradeCardWidget::InitUI(const FUpgrade& Upgrade,
   for (const FUpgradeEffect& Effect : UpgradeEffects)
     if (!Effect.TextData.Description.IsEmpty()) UpgradeEffectsTexts.Add(Effect.TextData.Description);
   UpgradeEffectsRichText->SetText(FText::Join(FText::FromString("\n"), UpgradeEffectsTexts));
+
+  if (Upgrade.Requirements.IsNone()) {
+    ReqsText->SetText(FText::FromString(""));
+    ReqsText->SetVisibility(ESlateVisibility::Collapsed);
+  } else {
+    ReqsText->SetText(Upgrade.RequirementsFilterDescription);
+    ReqsText->SetVisibility(ESlateVisibility::Visible);
+  }
 }
 
 void UUpgradeCardWidget::OnSelectButtonClicked() {

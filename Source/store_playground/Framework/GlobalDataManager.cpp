@@ -84,12 +84,16 @@ inline bool ApplyOperator<const TArray<FName>>(const FString& Operator,
     for (const FName& Value : Value2)
       if (!Value1.Contains(Value)) return false;
     return true;
+  } else if (Operator == TEXT("not_contains")) {
+    for (const FName& Value : Value2)
+      if (Value1.Contains(Value)) return false;
+    return true;
   }
 
   return false;
 }
 inline bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Array, const FString& ValueString) {
-  if (Operator == TEXT("contains")) {
+  if (Operator == TEXT("contains") || Operator == TEXT("not_contains")) {
     TArray<FString> ValueArray;
     if (ValueString.Contains("[") && ValueString.Contains(",") && ValueString.Contains("]"))
       ValueString.LeftChop(1).RightChop(1).ParseIntoArray(ValueArray, TEXT(","), true);
@@ -106,7 +110,7 @@ inline bool ApplyFuncOperator(const FString& Operator, const TArray<FName>& Arra
 inline bool ApplyFuncOperator(const FString& Operator,
                               const FGameplayTagContainer& Container,
                               const FString& ValueString) {
-  if (Operator == TEXT("contains")) {
+  if (Operator == TEXT("contains") || Operator == TEXT("not_contains")) {
     TArray<FString> ValueArray;
     if (ValueString.Contains("[") && ValueString.Contains(",") && ValueString.Contains("]"))
       ValueString.LeftChop(1).RightChop(1).ParseIntoArray(ValueArray, TEXT(","), true);
@@ -120,6 +124,7 @@ inline bool ApplyFuncOperator(const FString& Operator,
     }
 
     if (Operator == TEXT("contains")) return Container.HasAll(ValueNameContainer);
+    if (Operator == TEXT("not_contains")) return !Container.HasAny(ValueNameContainer);
     return false;
   }
 
@@ -172,8 +177,9 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
     }
     checkf(!Operand.IsEmpty(), TEXT("FilterExpr %s does not contain a valid operand."), *FilterExpr);
 
-    TArray<FString> ValidOperators = {TEXT("contains"), TEXT(">="), TEXT("<="), TEXT("!="),
-                                      TEXT(">"),        TEXT("<"),  TEXT("=")};
+    // Order is important here, longer operators should be checked first.
+    TArray<FString> ValidOperators = {TEXT("not_contains"), TEXT("contains"), TEXT(">="), TEXT("<="),
+                                      TEXT("!="),           TEXT(">"),        TEXT("<"),  TEXT("=")};
     for (const FString& Op : ValidOperators) {
       if (FilterExpr.Contains(Op)) {
         Operator = Op;
@@ -182,10 +188,13 @@ bool EvaluateRequirementsFilter(const FName& RequirementsFilter, const TMap<EReq
     }
     checkf(!Operator.IsEmpty(), TEXT("FilterExpr %s does not contain a valid operator."), *FilterExpr);
 
+    // UE_LOG(LogTemp, Log, TEXT("Evaluating FilterExpr: %s, Operand: %s, Operator: %s"), *FilterExpr, *Operand,
+    //        *Operator);
+
     int32 OpStart = FilterExpr.Find(Operator, ESearchCase::IgnoreCase, ESearchDir::FromStart);
     int32 OpEnd = OpStart + Operator.Len();
     ValueStr = FilterExpr.Mid(OpEnd).TrimStartAndEnd();
-    TArray<FString> FuncOperators = {TEXT("contains")};
+    TArray<FString> FuncOperators = {TEXT("contains"), TEXT("not_contains")};
     if (FuncOperators.Contains(Operator)) {
       // e.g., contains(array, [i, j])
       ValueStr.TrimStartAndEndInline();

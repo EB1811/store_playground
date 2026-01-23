@@ -30,6 +30,8 @@ public:
   const class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
+  UPROPERTY(EditAnywhere)
+  const class ACustomerAIManager* CustomerAIManager;
 
   UPROPERTY(EditAnywhere)
   class UNegotiationSystem* NegotiationSystem;
@@ -40,6 +42,7 @@ public:
   void InitUI(FInUIInputActions InUIInputActions,
               const class AAbilityManager* _AbilityManager,
               const class AStore* _Store,
+              const class ACustomerAIManager* _CustomerAIManager,
               class UNegotiationSystem* _NegotiationSystem,
               std::function<void(float)> _OfferAcceptFunc,
               std::function<void()> _RejectFunc);

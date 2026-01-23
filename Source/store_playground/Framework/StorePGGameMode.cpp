@@ -111,6 +111,7 @@ void AStorePGGameMode::BeginPlay() {
   HUD->LevelManager = LevelManager;
   HUD->MarketEconomy = MarketEconomy;
   HUD->Market = Market;
+  HUD->CustomerAIManager = CustomerAIManager;
   HUD->StatisticsGen = StatisticsGen;
   HUD->SettingsManager = SettingsManager;
   HUD->SaveManager = SaveManager;

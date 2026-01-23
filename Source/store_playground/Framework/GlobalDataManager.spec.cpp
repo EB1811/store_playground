@@ -163,6 +163,31 @@ void AGlobalDataManagerSpec::Define() {
           ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"), FName("Quest4"), FName("Quest5"))));
     });
 
+    It("should evaluate array not_contains operator correctly", EAsyncExecution::ThreadPool, [this]() {
+      // Single item - array does not contain the item
+      TEST_TRUE(
+          EvaluateRequirementsFilter(FName("not_contains(QuestsCompleted, Quest4)"), ARRAY_NAMES(FName("Quest1"))));
+      TEST_FALSE(
+          EvaluateRequirementsFilter(FName("not_contains(QuestsCompleted, Quest1)"), ARRAY_NAMES(FName("Quest1"))));
+
+      // Multiple items - array does not contain any of the specified items
+      TEST_TRUE(EvaluateRequirementsFilter(FName("not_contains(QuestsCompleted, [Quest4, Quest5])"),
+                                           ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
+      TEST_FALSE(EvaluateRequirementsFilter(FName("not_contains(QuestsCompleted, [Quest1, Quest4])"),
+                                            ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
+
+      // Empty array - should not contain anything
+      TEST_TRUE(EvaluateRequirementsFilter(FName("not_contains(QuestsCompleted, Quest1)"), ARRAY_NAMES()));
+
+      // Array with many items - does not contain specified item
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("not_contains(QuestsCompleted, Quest3)"),
+          ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"), FName("Quest4"), FName("Quest5"))));
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("not_contains(QuestsCompleted, Quest10)"),
+          ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"), FName("Quest4"), FName("Quest5"))));
+    });
+
     It("should evaluate array count comparisons correctly", EAsyncExecution::ThreadPool, [this]() {
       // Count equals
       TEST_TRUE(EvaluateRequirementsFilter(FName("QuestsCompleted = 3"),
@@ -242,6 +267,49 @@ void AGlobalDataManagerSpec::Define() {
            {EReqFilterOperand::Money, 150.0f}}));
     });
 
+    It("should evaluate PlayerTags not_contains operator correctly", EAsyncExecution::ThreadPool, [this]() {
+      // Single tag - does not contain the tag
+      TEST_TRUE(EvaluateRequirementsFilter(FName("not_contains(PlayerTags, Player.Configuration.TestTag)"),
+                                           PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"))));
+      TEST_FALSE(EvaluateRequirementsFilter(FName("not_contains(PlayerTags, Player.Configuration.IsDoingTutorial)"),
+                                            PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"))));
+
+      // Multiple tags - does not contain any of the specified tags
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("not_contains(PlayerTags, [Player.Configuration.TestTag2, Player.Configuration.TestTag3])"),
+          PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"), FName("Player.Configuration.TestTag"))));
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("not_contains(PlayerTags, [Player.Configuration.IsDoingTutorial, Player.Configuration.TestTag2])"),
+          PLAYER_TAGS(FName("Player.Configuration.IsDoingTutorial"), FName("Player.Configuration.TestTag"))));
+
+      // Empty PlayerTags container - should not contain anything
+      TEST_TRUE(EvaluateRequirementsFilter(FName("not_contains(PlayerTags, Player.Configuration.IsDoingTutorial)"),
+                                           PLAYER_TAGS()));
+
+      // Complex expressions with not_contains and other operands
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("not_contains(PlayerTags, Player.Configuration.TestTag) AND Money >= 100"),
+          {{EReqFilterOperand::PlayerTags,
+            []() {
+              FGameplayTagContainer Container;
+              auto Tag = FGameplayTag::RequestGameplayTag(FName("Player.Configuration.IsDoingTutorial"));
+              if (Tag.IsValid()) Container.AddTag(Tag);
+              return Container;
+            }()},
+           {EReqFilterOperand::Money, 100.0f}}));
+
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("not_contains(PlayerTags, Player.Configuration.IsDoingTutorial) AND Money >= 100"),
+          {{EReqFilterOperand::PlayerTags,
+            []() {
+              FGameplayTagContainer Container;
+              auto Tag = FGameplayTag::RequestGameplayTag(FName("Player.Configuration.IsDoingTutorial"));
+              if (Tag.IsValid()) Container.AddTag(Tag);
+              return Container;
+            }()},
+           {EReqFilterOperand::Money, 150.0f}}));
+    });
+
     It("should evaluate complex expressions with arrays correctly", EAsyncExecution::ThreadPool, [this]() {
       // Array contains with money condition
       TEST_TRUE(EvaluateRequirementsFilter(
@@ -289,6 +357,16 @@ void AGlobalDataManagerSpec::Define() {
 
       TEST_FALSE(EvaluateRequirementsFilter(FName("contains(QuestsCompleted, Quest4)"),
                                             ARRAY_NAMES(FName("Quest1"), FName("Quest2"), FName("Quest3"))));
+
+      // not_contains with complex expressions
+      TEST_TRUE(EvaluateRequirementsFilter(
+          FName("not_contains(QuestsCompleted, Quest4) AND Money >= 100"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1"), FName("Quest2")}},
+           {EReqFilterOperand::Money, 100.0f}}));
+
+      TEST_FALSE(EvaluateRequirementsFilter(
+          FName("not_contains(QuestsCompleted, Quest1) OR Money < 50"),
+          {{EReqFilterOperand::QuestsCompleted, TArray<FName>{FName("Quest1")}}, {EReqFilterOperand::Money, 100.0f}}));
     });
   });
 }

@@ -9,6 +9,7 @@
 #include "store_playground/AI/CustomerAIComponent.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/Store/Store.h"
+#include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
@@ -56,6 +57,7 @@ void UPriceNegotiationWidget::RefreshUI() {
 void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
                                      const AAbilityManager* _AbilityManager,
                                      const AStore* _Store,
+                                     const class ACustomerAIManager* _CustomerAIManager,
                                      UNegotiationSystem* _NegotiationSystem,
                                      std::function<void(float)> _OfferAcceptFunc,
                                      std::function<void()> _RejectFunc) {
@@ -63,6 +65,7 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
 
   AbilityManager = _AbilityManager;
   Store = _Store;
+  CustomerAIManager = _CustomerAIManager;
   NegotiationSystem = _NegotiationSystem;
   OfferAcceptFunc = _OfferAcceptFunc;
   RejectFunc = _RejectFunc;
@@ -76,8 +79,8 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
                        ? NegotiationSystem->CustomerOfferResponse.CounterOffer
                        : MarketPrice;
   float BoughtAtPrice = NegotiationSystem->BoughtAtPrice;
-  PriceSliderWidget->InitUI(NegotiationSystem->Type, NpcAcceptance, MarketPrice, PlayerPrice, NpcPrice, Store->Money,
-                            BoughtAtPrice);
+  PriceSliderWidget->InitUI(NegotiationSystem, CustomerAIManager, NegotiationSystem->Type, NpcAcceptance, MarketPrice,
+                            PlayerPrice, NpcPrice, Store->Money, BoughtAtPrice);
 
   CompactItemDetailsWidget->InitUI(NegotiationSystem->NegotiatedItems[0], "Bought At:", MarketPrice, BoughtAtPrice);
 

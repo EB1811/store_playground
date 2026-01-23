@@ -97,6 +97,7 @@ void ACustomerAIManager::EndCustomerAI() {
   for (ACustomerPC* Customer : AllCustomers) CustomersToRemove.Add(Customer);
   for (ACustomerPC* Customer : ExitingCustomers) CustomersToRemove.Add(Customer);
   AllCustomers.Empty();
+  RequestingCustomers.Empty();
   ExitingCustomers.Empty();
 
   for (ACustomerPC* Customer : CustomersToRemove) Customer->Destroy();
@@ -120,7 +121,6 @@ void ACustomerAIManager::SpawnUniqueNpcs() {
       GetWeightedRandomItem<FUniqueNpcData>(EligibleNpcs, [](const auto& Npc) { return Npc.SpawnWeight; });
   RecentlySpawnedUniqueNpcsMap.Add(UniqueNpcData.ID, ManagerParams.RecentNpcSpawnedKeepTime);
 
-  UE_LOG(LogTemp, Warning, TEXT("Spawning unique npc: %s."), *UniqueNpcData.ID.ToString());
   ACustomerPC* UniqueCustomer = GetWorld()->SpawnActor<ACustomerPC>(CustomerClass, SpawnPoint->GetActorLocation(),
                                                                     SpawnPoint->GetActorRotation(), SpawnParams);
 
@@ -235,8 +235,6 @@ void ACustomerAIManager::SpawnCustomers() {
   if (DayManager->bIsWeekend) MaxCustomers = FMath::RoundToInt(MaxCustomers * BehaviorParams.WeekendCustomerMulti);
   if (AllCustomers.Num() >= MaxCustomers) return;
 
-  UE_LOG(LogTemp, Warning, TEXT("Spawning customers. Current: %d, Max: %d"), AllCustomers.Num(), MaxCustomers);
-
   ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];
   check(SpawnPoint);
 
@@ -339,9 +337,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
   if (Store->StoreStockItems.Num() < 5.0f)
     ActionWeights[ECustomerAction::PickItem] -= (5.0f - Store->StoreStockItems.Num()) * 5.0f;
   // Reduce action based on number of customers already performing an action.
-  // todo-low: Look at all customers performing actions instead of just picking items.
   float PerformActionChance =
-      BehaviorParams.PerformActionChance * FMath::Clamp(1.0f - (FMath::Max((float)PickingItemIdsMap.Num(), 1.0f) /
+      BehaviorParams.PerformActionChance * FMath::Clamp(1.0f - (FMath::Max((float)RequestingCustomers.Num(), 1.0f) /
                                                                 FMath::Max((float)AllCustomers.Num(), 1.0f)),
                                                         0.5f, 1.0f);
 
@@ -428,6 +425,8 @@ void ACustomerAIManager::PerformCustomerAILoop() {
 
     AllCustomers.RemoveSingleSwap(Customer);
     ExitingCustomers.Add(Customer);
+
+    if (RequestingCustomers.Contains(Customer)) RequestingCustomers.RemoveSingleSwap(Customer);
 
     if (auto ItemID = PickingItemIdsMap.FindKey(Customer->CustomerAIComponent->CustomerAIID))
       PickingItemIdsMap.Remove(*ItemID);
@@ -574,6 +573,8 @@ auto ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UIte
 }
 
 void ACustomerAIManager::MakeCustomerNegotiable(class ACustomerPC* Customer) {
+  RequestingCustomers.Add(Customer);
+
   AAIController* OwnerAIController = Customer->GetController<AAIController>();
   if (OwnerAIController) OwnerAIController->StopMovement();
 
@@ -643,6 +644,41 @@ auto ACustomerAIManager::ConsiderStockCheck(UCustomerAIComponent* CustomerAI,
           NegotiationAIDetails.CustomerName};
 }
 
+auto ACustomerAIManager::GetPriceAcceptanceChance(UCustomerAIComponent* CustomerAI,
+                                                  float MarketPrice,
+                                                  float LastOfferedPrice,
+                                                  float PlayerOfferedPrice) const -> float {
+  check(CustomerAI);
+
+  FNegotiationAIDetails& NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
+  bool bNpcBuying = NegotiationAIDetails.RequestType == ECustomerRequestType::BuyStockItem ||
+                    NegotiationAIDetails.RequestType == ECustomerRequestType::StockCheck;
+
+  float AcceptanceMaxPrice = MarketPrice * (bNpcBuying ? (1.0f + NegotiationAIDetails.AcceptancePercentage / 100.0f)
+                                                       : (1.0f - NegotiationAIDetails.AcceptancePercentage / 100.0f));
+  float AcceptanceMinPrice = bNpcBuying ? (MarketPrice > LastOfferedPrice ? MarketPrice : LastOfferedPrice)
+                                        : (MarketPrice < LastOfferedPrice ? MarketPrice : LastOfferedPrice);
+
+  if (bNpcBuying && PlayerOfferedPrice >= AcceptanceMaxPrice || !bNpcBuying && PlayerOfferedPrice <= AcceptanceMaxPrice)
+    return BehaviorParams.AnyPriceAcceptanceChance > 0 ? BehaviorParams.AnyPriceAcceptanceChance / 100.0f : 0.0f;
+
+  float OfferedPercentBetween = (PlayerOfferedPrice - AcceptanceMinPrice) / (AcceptanceMaxPrice - AcceptanceMinPrice);
+  float AcceptanceChance = 1.0f - (OfferedPercentBetween * NegotiationAIDetails.AcceptanceFalloffMulti);
+
+  // Specific negotiation skills.
+  for (const FNegotiationSkill& Skill : AbilityManager->ActiveNegotiationSkills) {
+    if (Skill.EffectType == ECustomerAIEffect::PricePsychology) {
+      if (!bNpcBuying) continue;
+
+      FString PriceStr = FString::FromInt(FMath::RoundToInt(PlayerOfferedPrice));
+      if (PriceStr.EndsWith("9")) AcceptanceChance *= Skill.Multi;
+    }
+  }
+  AcceptanceChance = FMath::Clamp(
+      AcceptanceChance,
+      (BehaviorParams.AnyPriceAcceptanceChance > 0 ? BehaviorParams.AnyPriceAcceptanceChance / 100.0f : 0.0f), 1.0f);
+  return AcceptanceChance;
+}
 auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
                                        const UItemBase* Item,
                                        float LastOfferedPrice,
@@ -651,13 +687,13 @@ auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
 
   FNegotiationAIDetails& NegotiationAIDetails = CustomerAI->NegotiationAIDetails;
 
-  // ? Add error margin to prices / round to nearest int?
   bool bNpcBuying = NegotiationAIDetails.RequestType == ECustomerRequestType::BuyStockItem ||
                     NegotiationAIDetails.RequestType == ECustomerRequestType::StockCheck;
 
   UE_LOG(LogTemp, Log, TEXT("ConsiderOffer: NPCBuying: %d, LastOfferedPrice: %f, PlayerOfferedPrice: %f"), bNpcBuying,
          LastOfferedPrice, PlayerOfferedPrice);
-  if ((bNpcBuying && PlayerOfferedPrice <= LastOfferedPrice) || (!bNpcBuying && PlayerOfferedPrice >= LastOfferedPrice))
+  if ((bNpcBuying && (int32)(PlayerOfferedPrice - 0.5f) <= (int32)LastOfferedPrice) ||
+      (!bNpcBuying && (int32)(PlayerOfferedPrice + 0.5f) >= (int32)LastOfferedPrice))
     return {true, 0, NegotiationAIDetails.DialoguesMap[ENegotiationDialogueType::Accept].Dialogues,
             NegotiationAIDetails.CustomerName};
 
@@ -697,7 +733,7 @@ auto ACustomerAIManager::ConsiderOffer(UCustomerAIComponent* CustomerAI,
     }
   }
 
-  AcceptanceChance = AcceptanceChance > 0.95f ? 1.0f : AcceptanceChance;  // If close enough, always accept.
+  AcceptanceChance = AcceptanceChance > 0.98f ? 1.0f : AcceptanceChance;  // If close enough, always accept.
   UE_LOG(LogTemp, Log, TEXT("ConsiderOffer: OfferedPercentBetween: %f, AcceptanceChance: %f"), OfferedPercentBetween,
          AcceptanceChance);
   if (FMath::FRand() < AcceptanceChance)

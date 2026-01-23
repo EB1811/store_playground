@@ -19,6 +19,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class URichTextBlock* UpgradeEffectsRichText;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* ReqsText;
+  UPROPERTY(meta = (BindWidget))
   class UTextBlock* UpgradeCostText;
   UPROPERTY(meta = (BindWidget))
   class UBorder* CardBorder;

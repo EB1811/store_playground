@@ -153,6 +153,8 @@ public:
   TArray<class ACustomerPC*> AllCustomers;
   UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
   TArray<class ACustomerPC*> ExitingCustomers;
+  UPROPERTY(EditAnywhere, Category = "CustomerAIManager")
+  TArray<class ACustomerPC*> RequestingCustomers;
 
   void StartCustomerAI();
   void EndCustomerAI();
@@ -174,6 +176,10 @@ public:
   void MakeCustomerNegotiable(class ACustomerPC* Customer);
 
   auto ConsiderStockCheck(class UCustomerAIComponent* CustomerAI, const class UItemBase* Item) const -> FOfferResponse;
+  auto GetPriceAcceptanceChance(class UCustomerAIComponent* CustomerAI,
+                                float MarketPrice,
+                                float LastOfferedPrice,
+                                float PlayerOfferedPrice) const -> float;
   auto ConsiderOffer(class UCustomerAIComponent* CustomerAI,
                      const class UItemBase* Item,
                      float LastOfferedPrice,

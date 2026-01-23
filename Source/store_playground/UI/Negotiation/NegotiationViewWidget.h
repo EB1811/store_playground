@@ -33,6 +33,8 @@ public:
   const class AAbilityManager* AbilityManager;
   UPROPERTY(EditAnywhere)
   const class AStore* Store;
+  UPROPERTY(EditAnywhere)
+  const class ACustomerAIManager* CustomerAIManager;
 
   UPROPERTY(EditAnywhere)
   FInUIInputActions InUIInputActions;
@@ -54,6 +56,7 @@ public:
               const class AStore* _Store,
               const class AMarketEconomy* _MarketEconomy,
               const class AStatisticsGen* _StatisticsGen,
+              const class ACustomerAIManager* _CustomerAIManager,
               class UInventoryComponent* _PlayerInventoryC,
               class UNegotiationSystem* _NegotiationSystem,
               class UDialogueSystem* _DialogueSystem,

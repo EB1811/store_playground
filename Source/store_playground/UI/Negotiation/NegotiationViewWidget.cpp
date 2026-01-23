@@ -42,8 +42,8 @@ void UNegotiationViewWidget::ShowItem(UItemBase* Item) {
 
   if (NegotiationSystem->CustomerOfferResponse.Accepted)
     PriceNegotiationWidget->InitUI(
-        InUIInputActions, AbilityManager, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
-        [this]() { RejectLeave(); });
+        InUIInputActions, AbilityManager, Store, CustomerAIManager, NegotiationSystem,
+        [this](float Price) { OfferAccept(Price); }, [this]() { RejectLeave(); });
   RefreshUI();
 }
 
@@ -146,6 +146,7 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
                                     const class AStore* _Store,
                                     const class AMarketEconomy* _MarketEconomy,
                                     const class AStatisticsGen* _StatisticsGen,
+                                    const class ACustomerAIManager* _CustomerAIManager,
                                     class UInventoryComponent* _PlayerInventoryC,
                                     class UNegotiationSystem* _NegotiationSystem,
                                     class UDialogueSystem* _DialogueSystem,
@@ -156,6 +157,7 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
   InUIInputActions = _InUIInputActions;
   AbilityManager = _AbilityManager;
   Store = _Store;
+  CustomerAIManager = _CustomerAIManager;
   PlayerInventoryC = _PlayerInventoryC;
   NegotiationSystem = _NegotiationSystem;
   DialogueSystem = _DialogueSystem;
@@ -172,8 +174,8 @@ void UNegotiationViewWidget::InitUI(FInUIInputActions _InUIInputActions,
         [this](UItemBase* Item) { ShowItem(Item); }, [this]() { RejectLeave(); });
   else
     PriceNegotiationWidget->InitUI(
-        InUIInputActions, AbilityManager, Store, NegotiationSystem, [this](float Price) { OfferAccept(Price); },
-        [this]() { RejectLeave(); });
+        InUIInputActions, AbilityManager, Store, CustomerAIManager, NegotiationSystem,
+        [this](float Price) { OfferAccept(Price); }, [this]() { RejectLeave(); });
 
   DialogueWidget->InitUI(InUIInputActions, DialogueSystem, [this](bool bDialogueFinished) {
     if (NegotiationSystem->NegotiationState == ENegotiationState::NpcRequest ||

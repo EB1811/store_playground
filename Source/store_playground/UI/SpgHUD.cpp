@@ -528,8 +528,9 @@ void ASpgHUD::SetAndOpenNegotiation(UNegotiationSystem* NegotiationSystem,
   check(NegotiationViewWidget);
   if (OpenedWidgets.Contains(NegotiationViewWidget)) return CloseWidget(NegotiationViewWidget);
 
-  NegotiationViewWidget->InitUI(InUIInputActions, AbilityManager, Store, MarketEconomy, StatisticsGen, PlayerInventoryC,
-                                NegotiationSystem, DialogueSystem, [this] { CloseWidget(NegotiationViewWidget); });
+  NegotiationViewWidget->InitUI(InUIInputActions, AbilityManager, Store, MarketEconomy, StatisticsGen,
+                                CustomerAIManager, PlayerInventoryC, NegotiationSystem, DialogueSystem,
+                                [this] { CloseWidget(NegotiationViewWidget); });
   NegotiationViewWidget->RefreshUI();
 
   OpenFocusedMenu(NegotiationViewWidget);

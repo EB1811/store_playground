@@ -50,6 +50,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* PlayerPriceText;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* AcceptanceChanceText;
+  UPROPERTY(meta = (BindWidget))
   class UHorizontalBox* PlayerSliderBox;  // * To get size of the slider.
 
   UPROPERTY(EditAnywhere)
@@ -65,6 +67,11 @@ public:
   FLinearColor NpcPriceNormalColor;
 
   UPROPERTY(EditAnywhere)
+  const class UNegotiationSystem* NegotiationSystem;
+  UPROPERTY(EditAnywhere)
+  const class ACustomerAIManager* CustomerAIManager;
+
+  UPROPERTY(EditAnywhere)
   NegotiationType Type;
   UPROPERTY(EditAnywhere)
   float MaxValue;
@@ -72,6 +79,13 @@ public:
   float MinValue;
   UPROPERTY(EditAnywhere)
   float PlayerMoney;
+
+  UPROPERTY(EditAnywhere)
+  bool bInstantAcceptanceChange;
+  UPROPERTY(EditAnywhere)
+  float AcceptanceChanceUpdateFrequency;
+  UPROPERTY(EditAnywhere)
+  float LastAcceptanceChanceCheckTime;  // * To limit how often the acceptance chance text is updated.
 
   UFUNCTION()
   void UpdatePlayerPriceText(float Value);
@@ -84,7 +98,9 @@ public:
                                int32 HagglingCount);
 
   // ? Turn into a struct?
-  void InitUI(NegotiationType _Type,
+  void InitUI(const class UNegotiationSystem* _NegotiationSystem,
+              const class ACustomerAIManager* _CustomerAIManager,
+              NegotiationType _Type,
               float NpcAcceptance,
               float MarketPrice,
               float PlayerPrice,
