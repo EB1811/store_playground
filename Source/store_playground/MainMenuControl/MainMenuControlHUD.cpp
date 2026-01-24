@@ -23,6 +23,10 @@ void AMainMenuControlHUD::BeginPlay() {
   LevelLoadingTransitionWidget =
       CreateWidget<ULevelLoadingTransitionWidget>(GetWorld(), LevelLoadingTransitionWidgetClass);
 
+  InitLoadTransitionWidget = CreateWidget<UInitLoadTransitionWidget>(GetWorld(), InitLoadTransitionWidgetClass);
+  InitLoadTransitionWidget->AddToViewport(100);
+  InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+
   const FInputModeGameAndUI InputMode;
   GetOwningPlayerController()->SetInputMode(InputMode);
   GetOwningPlayerController()->SetShowMouseCursor(true);
@@ -64,9 +68,7 @@ void AMainMenuControlHUD::OpenMainMenu() {
 }
 
 void AMainMenuControlHUD::InitMenuFadeOut(std::function<void()> _FadeOutEndFunc) {
-  InitLoadTransitionWidget = CreateWidget<UInitLoadTransitionWidget>(GetWorld(), InitLoadTransitionWidgetClass);
-  InitLoadTransitionWidget->AddToViewport(100);
-  InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Visible);
+  check(InitLoadTransitionWidget);
 
   InitLoadTransitionWidget->FadeOutEndFunc = [this, _FadeOutEndFunc]() {
     InitLoadTransitionWidget->SetVisibility(ESlateVisibility::Collapsed);

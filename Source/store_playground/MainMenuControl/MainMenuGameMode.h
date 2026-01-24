@@ -11,7 +11,7 @@ class STORE_PLAYGROUND_API AMainMenuGameMode : public AGameModeBase {
   GENERATED_BODY()
 
 public:
-  AMainMenuGameMode(){};
+  AMainMenuGameMode() { CheckCount = 0; };
 
   virtual void BeginPlay() override;
 
@@ -22,10 +22,18 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AMusicManager> MusicManagerClass;
 
-  UPROPERTY(EditAnywhere, Category = "Widgets")
+  UPROPERTY(EditAnywhere)
   class AMainMenuControlHUD* MainMenuControlHUD;
-  UPROPERTY(EditAnywhere, Category = "Widgets")
+  UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
+  UPROPERTY(EditAnywhere)
+  class AMusicManager* MusicManager;
+
+  UPROPERTY()
+  int32 CheckCount;
+  FTimerHandle CheckLoadCompleteTimerHandle;
+  UFUNCTION()
+  void CheckLoadComplete();  // Completes a series of checks to ensure everything is loaded, loops until done.
 
   UFUNCTION(BlueprintCallable, Category = "GameMode")
   void Continue();

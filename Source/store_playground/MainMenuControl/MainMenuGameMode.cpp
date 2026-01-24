@@ -2,6 +2,7 @@
 
 #include "store_playground/MainMenuControl/MainMenuGameMode.h"
 #include "Engine/LocalPlayer.h"
+#include "Logging/LogVerbosity.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -23,7 +24,7 @@ void AMainMenuGameMode::BeginPlay() {
 
   ASettingsManager* SettingsManager = GetWorld()->SpawnActor<ASettingsManager>(SettingsManagerClass);
   SaveManager = GetWorld()->SpawnActor<ASaveManager>(SaveManagerClass);
-  AMusicManager* MusicManager = GetWorld()->SpawnActor<AMusicManager>(MusicManagerClass);
+  MusicManager = GetWorld()->SpawnActor<AMusicManager>(MusicManagerClass);
 
   MainMenuControlHUD->SettingsManager = SettingsManager;
   MainMenuControlHUD->SaveManager = SaveManager;
@@ -45,6 +46,63 @@ void AMainMenuGameMode::BeginPlay() {
   else SettingsManager->LoadSettings();
 
   MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
+
+  GetWorld()->GetTimerManager().SetTimer(CheckLoadCompleteTimerHandle, this, &AMainMenuGameMode::CheckLoadComplete, 1.0,
+                                         false);
+}
+
+void AMainMenuGameMode::CheckLoadComplete() {
+  CheckCount++;
+  bool bAllLoaded = true;
+
+  // * Trying a bunch of things to ensure everything is loaded before proceeding.
+
+  // https://forums.unrealengine.com/t/what-is-the-event-to-check-when-all-materials-and-textures-are-fully-resolved-or-finished-loading-on-a-new-spawned-actor/1166525/9
+  FStreamingManagerCollection& SMC = FStreamingManagerCollection::Get();
+  SMC.BlockTillAllRequestsFinished(0.f, true);
+
+  TArray<AActor*> FoundActors;
+  UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), AActor::StaticClass(), FName("initlevel_load"), FoundActors);
+  if (FoundActors.Num() < 3) bAllLoaded = false;
+  for (AActor* Actor : FoundActors) {
+    if (Actor->HasAnyFlags(RF_NeedLoad) || Actor->HasAnyFlags(RF_NeedPostLoad)) {
+      bAllLoaded = false;
+      break;
+    } else {
+      TArray<UActorComponent*> Components = Actor->GetComponents().Array();
+      for (UActorComponent* Component : Components) {
+        if (Component->HasAnyFlags(RF_NeedLoad) || Component->HasAnyFlags(RF_NeedPostLoad)) {
+          bAllLoaded = false;
+          break;
+        }
+      }
+    }
+    TArray<UStaticMeshComponent*> StaticMeshComponents;
+    Actor->GetComponents<UStaticMeshComponent>(StaticMeshComponents);
+    for (UStaticMeshComponent* SMCom : StaticMeshComponents) {
+      TArray<UMaterialInterface*> MaterialInstances;
+      SMCom->GetUsedMaterials(MaterialInstances);
+      if (MaterialInstances.Num() == 0) {
+        bAllLoaded = false;
+        break;
+      }
+      for (UMaterialInterface* MI : MaterialInstances) {
+        if (MI->HasAnyFlags(RF_NeedLoad) || MI->HasAnyFlags(RF_NeedPostLoad)) {
+          bAllLoaded = false;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!bAllLoaded && CheckCount < 9) {
+    UE_LOG(LogTemp, Warning, TEXT("MainMenuGameMode: Load not complete, rechecking..."));
+    GetWorld()->GetTimerManager().SetTimer(CheckLoadCompleteTimerHandle, this, &AMainMenuGameMode::CheckLoadComplete,
+                                           1.0, false);
+    return;
+  }
+  UE_LOG(LogTemp, Warning, TEXT("MainMenuGameMode: Load complete checks done."));
+
   MainMenuControlHUD->OpenMainMenu();
 
   MusicManager->MainMenuMusicCalled();
