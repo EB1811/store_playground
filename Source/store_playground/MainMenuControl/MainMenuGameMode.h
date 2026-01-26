@@ -23,12 +23,17 @@ public:
   TSubclassOf<class AMusicManager> MusicManagerClass;
 
   UPROPERTY(EditAnywhere)
+  FName InitLevelName;
+
+  UPROPERTY(EditAnywhere)
   class AMainMenuControlHUD* MainMenuControlHUD;
   UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere)
   class AMusicManager* MusicManager;
 
+  UFUNCTION()
+  void OnLevelAddedToWorld(ULevel* InLevel, UWorld* InWorld);
   UPROPERTY()
   int32 CheckCount;
   FTimerHandle CheckLoadCompleteTimerHandle;

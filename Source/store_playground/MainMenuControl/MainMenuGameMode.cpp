@@ -47,10 +47,26 @@ void AMainMenuGameMode::BeginPlay() {
 
   MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
 
+  if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, InitLevelName)) {
+    FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
+    FWorldDelegates::LevelAddedToWorld.AddUObject(this, &AMainMenuGameMode::OnLevelAddedToWorld);
+
+    FLatentActionInfo LatentInfo;
+    LatentInfo.CallbackTarget = this;
+    LatentInfo.UUID = 1;
+    UGameplayStatics::LoadStreamLevel(this, InitLevelName, true, true, LatentInfo);
+  }
+}
+
+void AMainMenuGameMode::OnLevelAddedToWorld(ULevel* InLevel, UWorld* InWorld) {
+  check(InWorld == GetWorld());
+
+  UE_LOG(LogTemp, Warning, TEXT("MainMenuGameMode: Level added to world: %s"), *InLevel->GetOuter()->GetName());
+
+  FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
   GetWorld()->GetTimerManager().SetTimer(CheckLoadCompleteTimerHandle, this, &AMainMenuGameMode::CheckLoadComplete, 1.0,
                                          false);
 }
-
 void AMainMenuGameMode::CheckLoadComplete() {
   CheckCount++;
   bool bAllLoaded = true;
