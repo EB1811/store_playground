@@ -67,6 +67,8 @@ public:
 
   void InitSettings();  // * Init graphics settings based on benchmark.
 
-  auto IsDlssAvailable() const -> bool;
-  auto IsFrameGenAvailable() const -> bool;
+  UFUNCTION(BlueprintNativeEvent)
+  bool IsDlssAvailable();
+  UFUNCTION(BlueprintNativeEvent)
+  bool IsFrameGenAvailable();
 };
