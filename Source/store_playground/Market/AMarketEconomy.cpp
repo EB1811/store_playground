@@ -80,11 +80,8 @@ void AMarketEconomy::Tick(float DeltaTime) {
 }
 
 auto AMarketEconomy::GetMarketPrice(const FName ItemId) const -> float {
-  const FEconItem* EconItem =
-      EconItems.FindByPredicate([ItemId](const FEconItem& Item) { return Item.ItemID == ItemId; });
-  check(EconItem);
-
-  return EconItem->CurrentPrice;
+  check(MarketPricesMap.Contains(ItemId));
+  return MarketPricesMap[ItemId];
 }
 
 void AMarketEconomy::PerformEconomyTick() {
@@ -284,6 +281,7 @@ void AMarketEconomy::PerformEconomyTick() {
 
   for (auto& Item : EconItems) {
     Item.CurrentPrice += (Item.PerfectPrice - Item.CurrentPrice) * Item.PriceJumpMulti;
+    MarketPricesMap[Item.ItemID] = Item.CurrentPrice;
 
     WealthTypePricesSumMap[{Item.ItemEconType, Item.ItemWealthType}] +=
         Item.CurrentPrice * EconomyParams.SingleUnitPriceMulti;
@@ -601,6 +599,7 @@ void AMarketEconomy::InitializeEconomyData() {
     }
   }
   for (auto& Item : EconItems) {
+    MarketPricesMap.Add(Item.ItemID, Item.CurrentPrice);
     AverageUnitPriceMap[{Item.ItemEconType, Item.ItemWealthType}] +=
         Item.CurrentPrice * EconomyParams.SingleUnitPriceMulti;
     ItemCountMap[{Item.ItemEconType, Item.ItemWealthType}] += 1;

@@ -107,7 +107,9 @@ public:
   TArray<FPopEffect> ActivePopEffects;
 
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
-  TArray<FEconItem> EconItems;  // ? Also need fast lookups?
+  TArray<FEconItem> EconItems;
+  UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
+  TMap<FName, float> MarketPricesMap;
   UPROPERTY(EditAnywhere, Category = "Economy", SaveGame)
   TMap<EItemEconType, FEconTypePrices> EconTypePricesMap;
 
