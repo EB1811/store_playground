@@ -84,6 +84,12 @@ void UNewsAndEconomyViewWidget::InitUI(FInUIInputActions InUIInputActions,
 void UNewsAndEconomyViewWidget::SetupUIActionable() {
   UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
   UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };
+  UIActionable.DirectionalInput = [this](FVector2D Direction) {
+    if (ActiveTab != ENewsAndEconomyViewTab::Articles) return;
+
+    // if (Direction.Y > 0) NewspaperWidget->ShowNextDay();
+    // else if (Direction.Y < 0) NewspaperWidget->ShowPrevDay();
+  };
   UIActionable.RetractUI = [this]() { Back(); };
   UIActionable.QuitUI = [this]() { CloseWidgetFunc(); };
 }

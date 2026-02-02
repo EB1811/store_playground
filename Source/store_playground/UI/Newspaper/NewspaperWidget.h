@@ -31,6 +31,12 @@ public:
   UPROPERTY(EditAnywhere)
   class ANewsGen* NewsGen;
 
+  UPROPERTY(EditAnywhere)
+  int32 LookingAtDay;
+
+  void ShowNextDay();
+  void ShowPrevDay();
+
   void RefreshUI();
   void InitUI(const class ADayManager* _DayManager, class ANewsGen* _NewsGen);
 };

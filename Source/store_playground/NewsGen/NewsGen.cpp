@@ -3,6 +3,7 @@
 #include "Logging/LogVerbosity.h"
 #include "NewsGenDataStructs.h"
 #include "UObject/NameTypes.h"
+#include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/NewsGen/NewsGenDataStructs.h"
 #include "store_playground/Framework/GlobalStaticDataManager.h"
@@ -76,9 +77,28 @@ auto ANewsGen::GetItemPriceTrendArticle(float PriceTrend, FName ItemId) -> FArti
 
   return SelectedArticle;
 }
+auto ANewsGen::GetDaysArticles(int32 Day) -> TArray<FArticle> {
+  if (Day == DayManager->CurrentDay) return DaysArticles;
+
+  if (!PrevDaysArticlesMap.Contains(Day)) return {};
+
+  TArray<FArticle> Articles = {};
+  for (const FName& ArticleID : PrevDaysArticlesMap[Day].PublishedIDs) {
+    if (!ArticleID.ToString().StartsWith("PriceTrend_")) {
+      Articles.Add(GlobalStaticDataManager->GetArticle(ArticleID));
+      continue;
+    }
+
+    const auto& PriceTrendArticle = PrevDaysArticlesMap[Day].PriceTrendArticles.FindByPredicate(
+        [&](const FArticle& Article) { return Article.ArticleID == ArticleID; });
+    check(PriceTrendArticle);
+    Articles.Add(*PriceTrendArticle);
+  }
+  return Articles;
+}
 
 void ANewsGen::GenDaysRandomArticles() {
-  check(GlobalStaticDataManager && Market);
+  check(GlobalStaticDataManager && DayManager && Market);
 
   DaysArticles.Empty();
   bNewArticles = true;
@@ -182,6 +202,14 @@ void ANewsGen::GenDaysRandomArticles() {
       TotalLayoutSpace -= NewsGenParams.ArticleSizeToSpaceMap[SelectedArticle.Size];
     }
   }
+
+  TArray<FName> PublishedIds;
+  TArray<FArticle> PriceTrendArticles;
+  for (const auto& Article : DaysArticles) {
+    PublishedIds.Add(Article.ArticleID);
+    if (Article.ArticleID.ToString().StartsWith("PriceTrend_")) PriceTrendArticles.Add(Article);
+  }
+  PrevDaysArticlesMap.Add(DayManager->CurrentDay, {PublishedIds, PriceTrendArticles});
 }
 
 void ANewsGen::TickDaysTimedVars() {

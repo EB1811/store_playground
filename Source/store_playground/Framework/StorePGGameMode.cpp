@@ -297,6 +297,7 @@ void AStorePGGameMode::BeginPlay() {
   CustomerAIManager->QuestManager = QuestManager;
 
   NewsGen->GlobalStaticDataManager = GlobalStaticDataManager;
+  NewsGen->DayManager = DayManager;
   NewsGen->Market = Market;
   NewsGen->StatisticsGen = StatisticsGen;
 

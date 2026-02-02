@@ -17,6 +17,16 @@ struct FNewsGenParams {
   TMap<EArticleSize, int32> ArticleSizeToSpaceMap;  // * The space each size takes in the layout.
 };
 
+USTRUCT()
+struct FPrevArticles {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FName> PublishedIDs;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<FArticle> PriceTrendArticles;  // Since they have dynamic content and ids.
+};
+
 UCLASS(Blueprintable)
 class STORE_PLAYGROUND_API ANewsGen : public AInfo {
   GENERATED_BODY()
@@ -30,6 +40,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   const class AGlobalStaticDataManager* GlobalStaticDataManager;
   UPROPERTY(EditAnywhere, Category = "NewsGen")
+  const class ADayManager* DayManager;
+  UPROPERTY(EditAnywhere, Category = "NewsGen")
   const class AMarket* Market;
   UPROPERTY(EditAnywhere, Category = "NewsGen")
   const class AStatisticsGen* StatisticsGen;
@@ -41,6 +53,8 @@ public:
   TArray<FName> PublishedArticles;
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TMap<FName, int32> RecentArticlesMap;
+  UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
+  TMap<int32, FPrevArticles> PrevDaysArticlesMap;  // * Day to articles.
 
   UPROPERTY(EditAnywhere, Category = "NewsGen", SaveGame)
   TArray<FArticle> DaysArticles;
@@ -48,6 +62,7 @@ public:
   bool bNewArticles;
 
   auto GetItemPriceTrendArticle(float PriceTrend, FName ItemId) -> FArticle;
+  auto GetDaysArticles(int32 Day) -> TArray<FArticle>;
 
   void GenDaysRandomArticles();
 

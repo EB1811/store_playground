@@ -107,8 +107,21 @@ inline auto GetArticleSizeInt(EArticleSize Size) -> int32 {
   }
 }
 
+void UNewspaperWidget::ShowNextDay() {
+  if (LookingAtDay >= DayManager->CurrentDay) return;
+
+  LookingAtDay++;
+  RefreshUI();
+}
+void UNewspaperWidget::ShowPrevDay() {
+  if (LookingAtDay <= 1) return;
+
+  LookingAtDay--;
+  RefreshUI();
+}
+
 void UNewspaperWidget::RefreshUI() {
-  DayText->SetText(FText::FromString(FString::Printf(TEXT("Day %d"), DayManager->CurrentDay)));
+  DayText->SetText(FText::FromString(FString::Printf(TEXT("Day %d"), LookingAtDay)));
 
   // Large article = whole column. Prioritise being in the middle.
   // Medium article = 2/3 of column.
@@ -116,7 +129,7 @@ void UNewspaperWidget::RefreshUI() {
   // Total 3 columns.
   // Prioritise bigger articles. Smaller ones can be skipped if there is not enough space.
 
-  TArray<FArticle> Articles = NewsGen->DaysArticles;
+  TArray<FArticle> Articles = NewsGen->GetDaysArticles(LookingAtDay);
   Articles.Sort(
       [](const FArticle& A, const FArticle& B) { return GetArticleSizeInt(A.Size) > GetArticleSizeInt(B.Size); });
   int32 LargeArticleCount =
@@ -192,7 +205,7 @@ void UNewspaperWidget::RefreshUI() {
   });
 
   // * Check that all articles are accounted for.
-  check(Col1Articles.Num() + Col2Articles.Num() + Col3Articles.Num() == NewsGen->DaysArticles.Num());
+  check(Col1Articles.Num() + Col2Articles.Num() + Col3Articles.Num() == NewsGen->GetDaysArticles(LookingAtDay).Num());
   check(Col1Articles.Num() <= 3 && Col2Articles.Num() <= 3 && Col3Articles.Num() <= 3);
   check(Articles.Num() == 0);
 
@@ -249,4 +262,6 @@ void UNewspaperWidget::InitUI(const ADayManager* _DayManager, ANewsGen* _NewsGen
 
   DayManager = _DayManager;
   NewsGen = _NewsGen;
+
+  LookingAtDay = DayManager->CurrentDay;
 }
