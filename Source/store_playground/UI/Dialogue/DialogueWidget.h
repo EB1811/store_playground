@@ -48,11 +48,14 @@ public:
 
   void UpdateDialogueText(const FText& SpeakerName, const FText& NewDialogueContent, bool IsLast = false);
   void SetDialogueSpeakerMaterial(FName SpeakerID);
+  void UpdateDialogueBasedOnState();
 
   UFUNCTION()
   void Next();
   UFUNCTION()
   void SelectChoice(int32 ChoiceIndex);
+  UFUNCTION()
+  void SelectInquire(int32 InquireIndex);
 
   void InitUI();
   void InitUI(FInUIInputActions InputActions,

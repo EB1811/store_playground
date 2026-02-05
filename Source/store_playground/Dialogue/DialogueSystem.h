@@ -34,6 +34,9 @@ public:
   UPROPERTY(EditAnywhere, Category = "Dialogue")
   int32 CurrentDialogueIndex;
   UPROPERTY(EditAnywhere, Category = "Dialogue")
+  TArray<int32> InquireBlockIndexes;
+
+  UPROPERTY(EditAnywhere, Category = "Dialogue")
   TArray<FName> ChoiceDialoguesSelectedIDs;
 
   FNextDialogueRes StartDialogue(class UDialogueComponent* _DialogueC);
@@ -41,5 +44,8 @@ public:
   FNextDialogueRes NextDialogue();
   TArray<FDialogueData> GetChoiceDialogues();
   FNextDialogueRes DialogueChoice(int32 ChoiceIndex);
+  TArray<FDialogueData> GetInquireDialogues();
+  FNextDialogueRes InquireDialogue(int32 InquireIndex);
+
   void ResetDialogue();
 };

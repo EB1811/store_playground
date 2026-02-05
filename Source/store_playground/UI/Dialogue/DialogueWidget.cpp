@@ -52,74 +52,11 @@ void UDialogueWidget::SetDialogueSpeakerMaterial(FName SpeakerID) {
   if (FoundMaterial) DialogueBoxWidget->BgBorder->SetBrushFromMaterial(*FoundMaterial);
   else DialogueBoxWidget->BgBorder->SetBrushFromMaterial(DefaultSpeakerMaterial);
 }
-
-void UDialogueWidget::Next() {
-  if (DialogueSystem->DialogueState != EDialogueState::PlayerTalk &&
-      DialogueSystem->DialogueState != EDialogueState::NPCTalk)
-    return;
-
-  FNextDialogueRes NextDialogue = DialogueSystem->NextDialogue();
-  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc(true);
-
-  check(NextDialogue.DialogueData);
-  switch (NextDialogue.State) {
-    case EDialogueState::PlayerChoice: {
-      FText SpeakerName = GetSpeakerName(DialogueSystem, NextDialogue.DialogueData.GetValue());
-      auto Dialogues = DialogueSystem->GetChoiceDialogues();
-
-      ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 ChoiceIndex) { SelectChoice(ChoiceIndex); });
-      ChoicesBoxWidget->RefreshUI();
-
-      DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
-      ChoicesBoxWidget->SetVisibility(ESlateVisibility::Visible);
-
-      break;
-    }
-    case EDialogueState::NPCTalk:
-    case EDialogueState::PlayerTalk: {
-      FText SpeakerName = GetSpeakerName(DialogueSystem, NextDialogue.DialogueData.GetValue());
-      UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
-                         NextDialogue.DialogueData->Action == EDialogueAction::End);
-      SetDialogueSpeakerMaterial(FName(SpeakerName.ToString()));
-
-      break;
-    }
-    default: checkNoEntry(); break;
-  }
-
-  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
-}
-
-void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
-  if (DialogueSystem->DialogueState != EDialogueState::PlayerChoice || ChoiceIndex < 0 ||
-      ChoiceIndex >= DialogueSystem->GetChoiceDialogues().Num())
-    return;
-
-  FNextDialogueRes NextDialogue = DialogueSystem->DialogueChoice(ChoiceIndex);
-  if (NextDialogue.State == EDialogueState::End) return CloseDialogueFunc(true);
-
-  check(NextDialogue.DialogueData);
-
-  DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
-  ChoicesBoxWidget->SetVisibility(ESlateVisibility::Collapsed);
-
-  FText SpeakerName = GetSpeakerName(DialogueSystem, NextDialogue.DialogueData.GetValue());
-  UpdateDialogueText(SpeakerName, NextDialogue.DialogueData->DialogueText,
-                     NextDialogue.DialogueData->Action == EDialogueAction::End);
-  SetDialogueSpeakerMaterial(FName(SpeakerName.ToString()));
-
-  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
-}
-
-void UDialogueWidget::InitUI() {
-  if (DialogueSystem->DialogueState == EDialogueState::End) return CloseDialogueFunc(true);
-
-  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
-
+void UDialogueWidget::UpdateDialogueBasedOnState() {
+  FDialogueData CurrDialogue = DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex];
   switch (DialogueSystem->DialogueState) {
     case EDialogueState::PlayerChoice: {
-      FText SpeakerName =
-          GetSpeakerName(DialogueSystem, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex]);
+      FText SpeakerName = GetSpeakerName(DialogueSystem, CurrDialogue);
       auto Dialogues = DialogueSystem->GetChoiceDialogues();
 
       ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 ChoiceIndex) { SelectChoice(ChoiceIndex); });
@@ -130,13 +67,22 @@ void UDialogueWidget::InitUI() {
 
       break;
     }
+    case EDialogueState::PlayerInquire: {
+      FText SpeakerName = GetSpeakerName(DialogueSystem, CurrDialogue);
+      auto Dialogues = DialogueSystem->GetInquireDialogues();
+
+      ChoicesBoxWidget->InitUI(Dialogues, SpeakerName, [this](int32 InquireIndex) { SelectInquire(InquireIndex); });
+      ChoicesBoxWidget->RefreshUI();
+
+      DialogueBoxWidget->SetVisibility(ESlateVisibility::Hidden);
+      ChoicesBoxWidget->SetVisibility(ESlateVisibility::Visible);
+
+      break;
+    }
     case EDialogueState::NPCTalk:
     case EDialogueState::PlayerTalk: {
-      FText SpeakerName =
-          GetSpeakerName(DialogueSystem, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex]);
-      UpdateDialogueText(
-          SpeakerName, DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].DialogueText,
-          DialogueSystem->DialogueDataArr[DialogueSystem->CurrentDialogueIndex].Action == EDialogueAction::End);
+      FText SpeakerName = GetSpeakerName(DialogueSystem, CurrDialogue);
+      UpdateDialogueText(SpeakerName, CurrDialogue.DialogueText, CurrDialogue.Action == EDialogueAction::End);
       SetDialogueSpeakerMaterial(FName(SpeakerName.ToString()));
 
       DialogueBoxWidget->SetVisibility(ESlateVisibility::Visible);
@@ -144,8 +90,47 @@ void UDialogueWidget::InitUI() {
 
       break;
     }
+    case EDialogueState::End: {
+      return CloseDialogueFunc(true);
+    }
     default: checkNoEntry(); break;
   }
+}
+
+void UDialogueWidget::Next() {
+  if (DialogueSystem->DialogueState != EDialogueState::PlayerTalk &&
+      DialogueSystem->DialogueState != EDialogueState::NPCTalk)
+    return;
+
+  DialogueSystem->NextDialogue();
+  UpdateDialogueBasedOnState();
+
+  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
+}
+
+void UDialogueWidget::SelectChoice(int32 ChoiceIndex) {
+  check(DialogueSystem->DialogueState == EDialogueState::PlayerChoice && ChoiceIndex >= 0 &&
+        ChoiceIndex < DialogueSystem->GetChoiceDialogues().Num());
+
+  DialogueSystem->DialogueChoice(ChoiceIndex);
+  UpdateDialogueBasedOnState();
+
+  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
+}
+void UDialogueWidget::SelectInquire(int32 InquireIndex) {
+  check(DialogueSystem->DialogueState == EDialogueState::PlayerInquire && InquireIndex >= 0 &&
+        InquireIndex < DialogueSystem->GetInquireDialogues().Num());
+
+  DialogueSystem->InquireDialogue(InquireIndex);
+  UpdateDialogueBasedOnState();
+
+  UGameplayStatics::PlaySound2D(this, NextSound, 1.0f);
+}
+
+void UDialogueWidget::InitUI() {
+  DialogueBoxWidget->NextButtonText->SetText(FText::FromString("Next"));
+
+  UpdateDialogueBasedOnState();
 }
 void UDialogueWidget::InitUI(FInUIInputActions InputActions,
                              UDialogueSystem* _DialogueSystem,
@@ -180,7 +165,11 @@ void UDialogueWidget::InitUI(FInCutsceneInputActions InputActions,
 
 void UDialogueWidget::SetupUIActionable() {
   UIActionable.AdvanceUI = [this]() { Next(); };
-  UIActionable.NumericInput = [this](float Value) { SelectChoice(FMath::RoundToInt(Value) - 1); };
+  UIActionable.NumericInput = [this](float Value) {
+    if (DialogueSystem->DialogueState == EDialogueState::PlayerChoice) SelectChoice(FMath::RoundToInt(Value) - 1);
+    else if (DialogueSystem->DialogueState == EDialogueState::PlayerInquire)
+      SelectInquire(FMath::RoundToInt(Value) - 1);
+  };
   UIActionable.RetractUI = [this]() { CloseDialogueFunc(false); };
   UIActionable.QuitUI = [this]() { CloseDialogueFunc(false); };
 }

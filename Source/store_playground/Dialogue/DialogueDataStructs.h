@@ -16,6 +16,8 @@ enum class EDialogueState : uint8 {
   NPCTalk UMETA(DisplayName = "NPC Talk"),
   PlayerTalk UMETA(DisplayName = "Player Talk"),
   PlayerChoice UMETA(DisplayName = "Player Choice"),
+  PlayerInquire UMETA(DisplayName = "Player Inquire"),
+  EndPlayerInquire UMETA(DisplayName = "End Player Inquire"),
   End UMETA(DisplayName = "End"),
 };
 UENUM()
@@ -24,7 +26,9 @@ enum class EDialogueAction : uint8 {
   NPCNext UMETA(DisplayName = "NPC Next"),
   PlayerNext UMETA(DisplayName = "Player Next"),
   AskPlayer UMETA(DisplayName = "Ask Player"),
-  End UMETA(DisplayName = "End"),
+  StartPlayerInquire UMETA(DisplayName = "Start Player Inquire"),
+  EndPlayerInquire UMETA(DisplayName = "End Player Inquire"),  // Ends the whole inquire block.
+  End UMETA(DisplayName = "End"),  // Ends the dialogue, ending the whole chain or returning to the inquire block.
 };
 UENUM()
 enum class EDialogueSpeaker : uint8 {
@@ -36,6 +40,7 @@ UENUM()
 enum class EDialogueType : uint8 {
   Dialogue UMETA(DisplayName = "Dialogue"),
   Choice UMETA(DisplayName = "Choice"),
+  Inquire UMETA(DisplayName = "Inquire"),
 };
 
 // * Dialogue tags for systems to filter further.
