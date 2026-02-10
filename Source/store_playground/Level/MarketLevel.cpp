@@ -481,9 +481,9 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
         InventoryC->AddItem(RandItem);
       }
 
-      UE_LOG(LogTemp, Log, TEXT("NpcStore %s has %d items for type %s and econ type %s"),
-             *NpcStoreC->NpcStoreType.DisplayName.ToString(), ItemIds.Num(), *UEnum::GetValueAsString(Pair.Key.Key),
-             *UEnum::GetValueAsString(Pair.Key.Value));
+      // UE_LOG(LogTemp, Log, TEXT("NpcStore %s has %d items for type %s and econ type %s"),
+      //        *NpcStoreC->NpcStoreType.DisplayName.ToString(), ItemIds.Num(), *UEnum::GetValueAsString(Pair.Key.Key),
+      //        *UEnum::GetValueAsString(Pair.Key.Value));
     }
 
     // Calc random markups.

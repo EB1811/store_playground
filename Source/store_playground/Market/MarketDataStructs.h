@@ -185,7 +185,7 @@ USTRUCT()
 struct FNpcStoreType {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName ID;
 
   UPROPERTY(EditAnywhere)
@@ -195,9 +195,9 @@ struct FNpcStoreType {
   UPROPERTY(EditAnywhere)
   TArray<int32> StockCountRange;  // * Min, max stock count.
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float StoreMarkup;
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float StoreMarkupVariation;  // * Randomized markup for each item above and beyond the base markup.
 
   UPROPERTY(EditAnywhere)
@@ -205,7 +205,7 @@ struct FNpcStoreType {
   UPROPERTY(EditAnywhere)
   TMap<EItemEconType, float> ItemEconTypeWeightMap;  // * Item econ types sold, weighted.
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FText DisplayName;  // * Name of the store type, displayed in the UI.
   UPROPERTY(EditAnywhere)
   FNpcStoreAssetData AssetData;
