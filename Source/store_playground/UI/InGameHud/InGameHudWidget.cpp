@@ -59,7 +59,7 @@ void UInGameHudWidget::RefreshUI() {
   DaySlideWidget->RightSlideText->SetText(FText::FromString(DayManager->bIsWeekend ? "Weekend" : "Normal Day"));
 
   OwnedSlideWidget->SlideText->SetText(
-      FText::FromString(FString::Printf(TEXT("Owned: %.0f¬"), DayManager->NextDebtAmount)));
+      FText::FromString(FString::Printf(TEXT("Owed: %.0f¬"), DayManager->NextDebtAmount)));
   OwnedSlideWidget->RightSlideText->SetText(
       FText::FromString(FString::Printf(TEXT("On Day: %d"), DayManager->NextDayToPayDebt)));
 

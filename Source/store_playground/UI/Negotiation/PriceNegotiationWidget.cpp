@@ -89,11 +89,15 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
   ControlsHelpersWidget->SetComponentUI({
       {FText::FromString("Leave / Reject"), InUIInputActions.RetractUIAction},
       {FText::FromString("Offer / Accept"), InUIInputActions.AdvanceUIAction},
+      {FText::FromString("Precise Input On / Off"), InUIInputActions.UISideButton4Action},
   });
 }
 
 void UPriceNegotiationWidget::SetupUIActionable() {
   UIActionable.AdvanceUI = [this]() { OfferAcceptPrice(); };
   UIActionable.DirectionalInput = [this](FVector2D Direction) { PriceSliderWidget->ChangePrice(Direction.X); };
+  UIActionable.SideButton4 = [this]() {
+    PriceSliderWidget->TogglePreciseInput();  // temp: Using a simple toggle for now.
+  };
   UIActionable.RetractUI = [this]() { RejectFunc(); };
 }

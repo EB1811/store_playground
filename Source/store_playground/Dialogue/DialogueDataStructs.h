@@ -43,15 +43,24 @@ enum class EDialogueType : uint8 {
   Inquire UMETA(DisplayName = "Inquire"),
 };
 
-// * Dialogue tags for systems to filter further.
-// Mostly for systems that retrieve random dialogues.
-// UENUM()
-// enum class EDialogueTag : uint8 {
-//   LevelStore UMETA(DisplayName = "LevelStore"),
-//   LevelMarket UMETA(DisplayName = "LevelMarket"),
-//   LevelChurch UMETA(DisplayName = "LevelChurch"),
-//   Idle UMETA(DisplayName = "Idle"),
-// };
+UENUM()
+enum class EGameEffectType : uint8 {
+  None UMETA(DisplayName = "NONE"),
+  AddPlayerTag UMETA(DisplayName = "Add Player Tag"),
+  RemovePlayerTag UMETA(DisplayName = "Remove Player Tag"),
+  PlaySound UMETA(DisplayName = "Play Sound"),
+  PlayMusic UMETA(DisplayName = "Play Music"),
+  Script UMETA(DisplayName = "Script"),  // VordieScript.
+};
+USTRUCT()
+struct FDialogueEffect {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  EGameEffectType GameEffectType;
+  UPROPERTY(EditAnywhere, SaveGame)
+  FName RelevantID;
+};
 
 USTRUCT()
 struct FDialogueData {

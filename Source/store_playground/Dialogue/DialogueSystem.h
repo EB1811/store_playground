@@ -41,7 +41,8 @@ public:
 
   FNextDialogueRes StartDialogue(class UDialogueComponent* _DialogueC);
   FNextDialogueRes StartDialogue(const TArray<FDialogueData> _DialogueDataArr, const FString& _SpeakerName = "NPC");
-  FNextDialogueRes NextDialogue();
+
+  void NextDialogue();
   TArray<FDialogueData> GetChoiceDialogues();
   FNextDialogueRes DialogueChoice(int32 ChoiceIndex);
   TArray<FDialogueData> GetInquireDialogues();

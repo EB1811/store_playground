@@ -39,6 +39,7 @@
 #include "store_playground/Minigame/MiniGameComponent.h"
 #include "store_playground/Sprite/SimpleSpriteAnimComponent.h"
 #include "store_playground/Player/PlayerCommand.h"
+#include "store_playground/WorldObject/Level/ActorSpawnSpoint.h"
 #include "PaperFlipbookComponent.h"
 #include "PaperZDAnimationComponent.h"
 #include "Components/WidgetComponent.h"

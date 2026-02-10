@@ -116,23 +116,23 @@ FNextDialogueRes UDialogueSystem::StartDialogue(const TArray<FDialogueData> _Dia
   return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
 }
 
-FNextDialogueRes UDialogueSystem::NextDialogue() {
+void UDialogueSystem::NextDialogue() {
   DialogueState = GetNextDialogueState(DialogueState, DialogueDataArr[CurrentDialogueIndex].Action);
 
   switch (DialogueState) {
     case EDialogueState::NPCTalk:
     case EDialogueState::PlayerTalk: {
       CurrentDialogueIndex++;
-      return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+      break;
     }
     case EDialogueState::PlayerChoice: {
-      return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+      break;
     }
     // todo-low: Handle this through actions.
     case EDialogueState::PlayerInquire: {
       InquireBlockIndexes.Add(CurrentDialogueIndex);
 
-      return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+      break;
     }
     case EDialogueState::EndPlayerInquire: {
       check(InquireBlockIndexes.Num() > 0);
@@ -141,27 +141,27 @@ FNextDialogueRes UDialogueSystem::NextDialogue() {
       if (InquireBlockIndexes.Num() > 0) {
         CurrentDialogueIndex = InquireBlockIndexes.Last();
         DialogueState = EDialogueState::PlayerInquire;
-        return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+        break;
       }
 
       // No more inquire blocks, end dialogue.
       DialogueState = EDialogueState::End;
       if (DialogueC) DialogueC->FinishReadingDialogueChain();
-      return {{}, DialogueState};
+      break;
     }
     case EDialogueState::End: {
       if (InquireBlockIndexes.Num() > 0) {
         CurrentDialogueIndex = InquireBlockIndexes.Last();
         DialogueState = EDialogueState::PlayerInquire;
-        return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
+        break;
       }
 
       if (DialogueC) DialogueC->FinishReadingDialogueChain();
-      return {{}, DialogueState};
+      break;
     }
     default: {
       checkf(false, TEXT("Invalid Dialogue State"));
-      return {{}, EDialogueState::None};
+      break;
     }
   }
 }
@@ -179,8 +179,7 @@ TArray<FDialogueData> UDialogueSystem::GetChoiceDialogues() {
 }
 FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
   check(ChoiceIndex >= 0 && ChoiceIndex < DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
-
-  if (DialogueState != EDialogueState::PlayerChoice) return {};
+  check(DialogueState == EDialogueState::PlayerChoice);
 
   const TArray<int32>& ChildChoiceIndexes = GetChildChoiceIndexes(DialogueDataArr, CurrentDialogueIndex + 1,
                                                                   DialogueDataArr[CurrentDialogueIndex].ChoicesAmount);
@@ -189,7 +188,8 @@ FNextDialogueRes UDialogueSystem::DialogueChoice(int32 ChoiceIndex) {
   ChoiceDialoguesSelectedIDs.Add(DialogueDataArr[ChoiceDialogueIndex].DialogueID);
 
   CurrentDialogueIndex = ChoiceDialogueIndex;
-  return NextDialogue();
+  NextDialogue();
+  return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
 }
 
 TArray<FDialogueData> UDialogueSystem::GetInquireDialogues() {
@@ -208,7 +208,8 @@ FNextDialogueRes UDialogueSystem::InquireDialogue(int32 InquireIndex) {
 
   const TArray<int32>& ChildInquireIndexes = GetChildInquireIndexes(DialogueDataArr, CurrentDialogueIndex);
   CurrentDialogueIndex = ChildInquireIndexes[InquireIndex];
-  return NextDialogue();
+  NextDialogue();
+  return {DialogueDataArr[CurrentDialogueIndex], DialogueState};
 }
 
 void UDialogueSystem::ResetDialogue() {

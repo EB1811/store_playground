@@ -21,6 +21,8 @@ void UPriceSliderWidget::NativeOnInitialized() {
   PlayerPriceSlider->OnValueChanged.AddDynamic(this, &UPriceSliderWidget::UpdatePlayerPriceText);
 }
 
+void UPriceSliderWidget::TogglePreciseInput() { bPreciseInput = !bPreciseInput; }
+
 void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
   PlayerPriceText->SetText(FText::FromString(FString::FromInt(FMath::RoundToInt(Value))));
   UCanvasPanelSlot* PlayerSliderBoxAsCanvas = Cast<UCanvasPanelSlot>(PlayerSliderBox->Slot);
@@ -48,8 +50,9 @@ void UPriceSliderWidget::UpdatePlayerPriceText(float Value) {
 }
 
 void UPriceSliderWidget::ChangePrice(float Direction) {
-  float NewValue = FMath::Clamp(PlayerPriceSlider->GetValue() + (-1 * Direction) * PlayerPriceSlider->GetStepSize(),
-                                PlayerPriceSlider->GetMinValue(), PlayerPriceSlider->GetMaxValue());
+  float NewValue = FMath::Clamp(
+      PlayerPriceSlider->GetValue() + (-1 * Direction) * (bPreciseInput ? 1.0f : PlayerPriceSlider->GetStepSize()),
+      PlayerPriceSlider->GetMinValue(), PlayerPriceSlider->GetMaxValue());
   if (NewValue != PlayerPriceSlider->GetValue()) UGameplayStatics::PlaySound2D(this, PriceChangeSound, 1.0f);
 
   PlayerPriceSlider->SetValue(NewValue);
@@ -201,4 +204,6 @@ void UPriceSliderWidget::InitUI(const class UNegotiationSystem* _NegotiationSyst
                 PlayerSliderBoxSize - PlayerPriceSlider->GetNormalizedValue() * PlayerSliderBoxSize - 50.0f / 2.0f) -
       FVector2D(0.0f, 15.0f));
   LastAcceptanceChanceCheckTime = GetWorld()->GetTimeSeconds();
+
+  bPreciseInput = false;
 }

@@ -87,6 +87,10 @@ public:
   UPROPERTY(EditAnywhere)
   float LastAcceptanceChanceCheckTime;  // * To limit how often the acceptance chance text is updated.
 
+  UPROPERTY(EditAnywhere)
+  bool bPreciseInput;  // * Increment the price by 1.
+  void TogglePreciseInput();
+
   UFUNCTION()
   void UpdatePlayerPriceText(float Value);
 

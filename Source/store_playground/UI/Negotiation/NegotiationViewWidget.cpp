@@ -211,6 +211,7 @@ void UNegotiationViewWidget::SetupUIActionable() {
     if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.SideButton2();
   };
   UIActionable.SideButton4 = [this]() {
+    if (PriceNegotiationWidget->IsVisible()) PriceNegotiationWidget->UIActionable.SideButton4();
     if (NegotiationShowItemWidget->IsVisible()) NegotiationShowItemWidget->UIActionable.SideButton4();
   };
   UIActionable.CycleLeft = [this]() {
