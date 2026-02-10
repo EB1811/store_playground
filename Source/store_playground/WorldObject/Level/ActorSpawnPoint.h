@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ActorSpawnSpoint.generated.h"
+#include "ActorSpawnPoint.generated.h"
 
 // * Subclass this in BP for any wanted spawn point type.
 // The subclass acts as an identifier for the type of spawn point.
 
 UCLASS()
-class STORE_PLAYGROUND_API AActorSpawnSpoint : public AActor {
+class STORE_PLAYGROUND_API AActorSpawnPoint : public AActor {
   GENERATED_BODY()
 
 public:
-  AActorSpawnSpoint() {
+  AActorSpawnPoint() {
     if (!Id.IsValid()) Id = FGuid::NewGuid();
 
     PrimaryActorTick.bCanEverTick = false;

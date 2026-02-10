@@ -98,7 +98,7 @@ public:
   UPROPERTY(EditAnywhere, Category = "Market Level")
   class TSubclassOf<class APickupActor> PickupActorClass;
   UPROPERTY(EditAnywhere, Category = "Market Level")
-  class TSubclassOf<class AActorSpawnSpoint> PickupSpawnPointClass;
+  class TSubclassOf<class AActorSpawnPoint> PickupSpawnPointClass;
 
   UPROPERTY(EditAnywhere, Category = "Market Level")
   FMarketLevelParams LevelParams;
