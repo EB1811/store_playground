@@ -59,6 +59,7 @@ auto AStore::BuildDecoration(ABuildable* Buildable) -> bool {
   return true;
 }
 
+auto AStore::GetAvailableMoney() const -> double { return Money; }
 auto AStore::TrySpendMoney(float Amount) -> bool {
   if (Amount > Money) return false;
 
@@ -84,7 +85,7 @@ void AStore::NegItemSold(const UItemBase* Item, float SingleUnitPrice, int32 Qua
 }
 
 void AStore::ItemBought(UItemBase* Item, float SingleUnitPrice, int32 Quantity) {
-  checkf((SingleUnitPrice * Quantity) <= Money,
+  checkf((SingleUnitPrice * Quantity) <= GetAvailableMoney(),
          TEXT("Caller should handle the case when Price is greater than available Money."));
 
   Item->PlayerPriceData.BoughtAt = float(FMath::RoundToInt32(SingleUnitPrice));
@@ -100,7 +101,7 @@ void AStore::MoneyGained(float Amount) {
   StatisticsGen->StoreMoneyGained(Amount);
 }
 void AStore::MoneySpent(float Amount) {
-  check(Amount <= Money);  // Caller should handle this.
+  check(Amount <= GetAvailableMoney());  // Caller should handle this.
   Money -= Amount;
 
   StatisticsGen->StoreMoneySpent(Amount);

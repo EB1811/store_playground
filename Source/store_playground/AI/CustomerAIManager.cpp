@@ -565,7 +565,7 @@ auto ACustomerAIManager::CustomerSellItem(UCustomerAIComponent* CustomerAI, UIte
   if (RandomItems.Num() <= 0) return false;
 
   UItemBase* Item = RandomItems[0];
-  // if (MarketEconomy->GetMarketPrice(Item->ItemID) > Store->Money) return false;
+  // if (MarketEconomy->GetMarketPrice(Item->ItemID) > Store->GetAvailableMoney()) return false;
 
   CustomerAI->NegotiationAIDetails.RequestType = ECustomerRequestType::SellItem;
   CustomerAI->NegotiationAIDetails.RelevantItem = Item;

@@ -169,6 +169,11 @@ struct FEconItem {
 };
 
 // * Store types.
+UENUM()
+enum class ENpcStoreBehaviourType : uint8 {
+  Stationary UMETA(DisplayName = "Stationary"),  // Infinite stock, no spawning/despawning.
+  Mobile UMETA(DisplayName = "Mobile"),          // Quantity of stock, dynamic spawning/despawning.
+};
 USTRUCT()
 struct FNpcStoreAssetData {
   GENERATED_BODY()
@@ -189,7 +194,7 @@ struct FNpcStoreType {
   FName ID;
 
   UPROPERTY(EditAnywhere, SaveGame)
-  bool bIsMobile;  // * Mobile stores vs stationary stores, affects spawn and restock behavior.
+  ENpcStoreBehaviourType NpcStoreBehaviourType;
   UPROPERTY(EditAnywhere)
   FText StoreTypeName;
   UPROPERTY(EditAnywhere)

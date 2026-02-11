@@ -28,7 +28,7 @@ void ULootboxMinigame::NativeOnInitialized() {
 
 void ULootboxMinigame::Open() {
   check(Market && PlayerInventory);
-  if (Store->Money < Price) {
+  if (Store->GetAvailableMoney() < Price) {
     ErrorText->SetText(FText::FromString("Not enough money!"));
     ErrorText->SetVisibility(ESlateVisibility::Visible);
     return;
@@ -102,7 +102,7 @@ void ULootboxMinigame::InitUI(FInUIInputActions InUIInputActions,
     PriceText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Price)));
   }
 
-  if (Price > Store->Money) OpenLootboxButton->SetIsEnabled(false);
+  if (Price > Store->GetAvailableMoney()) OpenLootboxButton->SetIsEnabled(false);
   else OpenLootboxButton->SetIsEnabled(true);
 
   PriceText->SetVisibility(ESlateVisibility::Visible);

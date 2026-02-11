@@ -13,6 +13,7 @@
 #include "store_playground/UI/Components/ControlMenuButtonWidget.h"
 #include "store_playground/UI/Components/ControlTextWidget.h"
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
+#include "store_playground/Market/NpcStoreComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -37,6 +38,7 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
   switch (TradeType) {
     case ETradeType::Buy: {
       if (!ItemsWidget->SelectedItem) return;
+
       auto ItemToBuy = StoreInventory->ItemsArray.FindByPredicate(
           [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
       check(ItemToBuy);
@@ -47,6 +49,7 @@ void UNpcStoreViewWidget::TradeConfirmed(int32 Quantity) {
     }
     case ETradeType::Sell: {
       if (!ItemsWidget->SelectedItem) return;
+
       auto ItemToSell = PlayerInventory->ItemsArray.FindByPredicate(
           [this](const UItemBase* Item) { return Item->UniqueItemID == ItemsWidget->SelectedItem->UniqueItemID; });
       check(ItemToSell);
@@ -111,7 +114,8 @@ void UNpcStoreViewWidget::Trade() {
   };
 
   TradeConfirmWidget->InitUI(TradeType, ItemsWidget->SelectedItem->TextData.Name, ItemsWidget->SelectedItem->Quantity,
-                             Store->Money, ShowPriceFunc, ConfirmTradeFunc, BackFunc);
+                             NpcStoreC->NpcStoreType.NpcStoreBehaviourType == ENpcStoreBehaviourType::Mobile,
+                             Store->Money, Store->GetAvailableMoney(), ShowPriceFunc, ConfirmTradeFunc, BackFunc);
   TradeConfirmWidget->RefreshUI();
 
   bIsConfirming = true;

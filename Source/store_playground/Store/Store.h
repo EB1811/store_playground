@@ -53,6 +53,8 @@ struct FStoreBehaviorParams {
 
   UPROPERTY(EditAnywhere, SaveGame)
   float BuildCostMulti;
+  UPROPERTY(EditAnywhere, SaveGame)
+  double DebtLimit;  // * Positive value indicating how much below zero the player can go.
 };
 
 UCLASS(Blueprintable)
@@ -99,6 +101,7 @@ public:
   auto BuildStockDisplay(ABuildable* Buildable) -> bool;
   auto BuildDecoration(ABuildable* Buildable) -> bool;
 
+  auto GetAvailableMoney() const -> double;  // * Includes all modifiers, not for display.
   auto TrySpendMoney(float Amount) -> bool;
 
   void NegStockItemSold(const UItemBase* Item);

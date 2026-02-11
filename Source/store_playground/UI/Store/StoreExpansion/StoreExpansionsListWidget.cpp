@@ -53,7 +53,7 @@ void UStoreExpansionsListWidget::UnlockExpansion() {
 
   FStoreExpansionData* ExpansionData = StoreExpansionManager->StoreExpansions.FindByPredicate(
       [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevelID == SelectedExpansionID; });
-  checkf(ExpansionData && Store->Money >= ExpansionData->Price && !ExpansionData->bIsLocked,
+  checkf(ExpansionData && Store->GetAvailableMoney() >= ExpansionData->Price && !ExpansionData->bIsLocked,
          TEXT("Selected expansion is not available or cost exceeds available money, this means "
               "GetAvailableExpansions returned wrong data."));
 
@@ -73,7 +73,7 @@ void UStoreExpansionsListWidget::RefreshUI() {
   for (const FStoreExpansionData& ExpansionData : StoreExpansionManager->StoreExpansions) {
     if (ExpansionData.StoreExpansionLevelID == StoreExpansionManager->CurrentStoreExpansionLevelID) continue;
 
-    if (ExpansionData.bIsLocked || Store->Money < ExpansionData.Price) {
+    if (ExpansionData.bIsLocked || Store->GetAvailableMoney() < ExpansionData.Price) {
       UDisabledStoreExpansionSelectWidget* DisExpansionCardWidget =
           CreateWidget<UDisabledStoreExpansionSelectWidget>(this, DisabledStoreExpansionSelectWidgetClass);
       check(DisExpansionCardWidget);

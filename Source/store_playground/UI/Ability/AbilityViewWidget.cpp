@@ -30,7 +30,7 @@ void UAbilityViewWidget::Activate() {
   if (SelectedAbilityID.IsNone()) return;
 
   FEconEventAbility SelectedAbility = AbilityManager->GetAbilityById(SelectedAbilityID);
-  check(SelectedAbility.Cost <= Store->Money);  // SelectReplaceAbility should ensure this.
+  check(SelectedAbility.Cost <= Store->GetAvailableMoney());  // SelectReplaceAbility should ensure this.
 
   AbilityManager->ActivateEconEventAbility(SelectedAbilityID);
 

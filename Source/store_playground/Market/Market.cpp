@@ -163,9 +163,9 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
 
   float SingleItemPrice = GetNpcStoreSellPrice(NpcStoreC, Item->ItemID);
   float TotalPrice = SingleItemPrice * Quantity;
-  if (PlayerStore->Money < TotalPrice) {
+  if (PlayerStore->GetAvailableMoney() < TotalPrice) {
     UE_LOG(LogTemp, Log, TEXT("Not enough money to buy item: %s, TotalPrice: %.0f, Money: %.0f"),
-           *Item->TextData.Name.ToString(), TotalPrice, PlayerStore->Money);
+           *Item->TextData.Name.ToString(), TotalPrice, PlayerStore->GetAvailableMoney());
     return false;
   }
 
@@ -174,7 +174,8 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
   UItemBase* ItemCopy = Item->CreateItemCopy();
   PlayerStore->ItemBought(ItemCopy, SingleItemPrice, Quantity);
   PlayerInventory->AddItem(ItemCopy, Quantity);
-  if (NpcStoreC->NpcStoreType.bIsMobile) NPCStoreInventory->RemoveItem(Item, Quantity);
+  if (NpcStoreC->NpcStoreType.NpcStoreBehaviourType == ENpcStoreBehaviourType::Mobile)
+    NPCStoreInventory->RemoveItem(Item, Quantity);
 
   return true;
 }
@@ -193,7 +194,7 @@ auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
   if (!CanTransferItem(NPCStoreInventory, Item)) return false;
 
   PlayerInventory->RemoveItem(Item, Quantity);
-  if (NpcStoreC->NpcStoreType.bIsMobile) {
+  if (NpcStoreC->NpcStoreType.NpcStoreBehaviourType == ENpcStoreBehaviourType::Mobile) {
     if (TObjectPtr<UItemBase>* ExistingItem = NPCStoreInventory->ItemsArray.FindByPredicate(
             [&](UItemBase* ArrayItem) { return (Item->ItemID == ArrayItem->ItemID); })) {
       (*ExistingItem)->Quantity += Quantity;

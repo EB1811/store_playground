@@ -35,7 +35,7 @@ void UPriceNegotiationWidget::OfferAcceptPrice() {
   float Price = PriceSliderWidget->PlayerPriceSlider->GetValue();
   check(Price >= 0.0f);
 
-  if (NegotiationSystem->Type == NegotiationType::PlayerBuy && Price > Store->Money) return;
+  if (NegotiationSystem->Type == NegotiationType::PlayerBuy && Price > Store->GetAvailableMoney()) return;
 
   OfferAcceptFunc(Price);
 }
@@ -80,7 +80,7 @@ void UPriceNegotiationWidget::InitUI(FInUIInputActions InUIInputActions,
                        : MarketPrice;
   float BoughtAtPrice = NegotiationSystem->BoughtAtPrice;
   PriceSliderWidget->InitUI(NegotiationSystem, CustomerAIManager, NegotiationSystem->Type, NpcAcceptance, MarketPrice,
-                            PlayerPrice, NpcPrice, Store->Money, BoughtAtPrice);
+                            PlayerPrice, NpcPrice, Store->GetAvailableMoney(), BoughtAtPrice);
 
   CompactItemDetailsWidget->InitUI(NegotiationSystem->NegotiatedItems[0], "Bought At:", MarketPrice, BoughtAtPrice);
 

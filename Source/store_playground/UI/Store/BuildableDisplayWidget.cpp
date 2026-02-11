@@ -14,7 +14,7 @@ void UBuildableDisplayWidget::NativeConstruct() {
 }
 
 void UBuildableDisplayWidget::BuildStockDisplay() {
-  if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Store->Money) return;
+  if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Store->GetAvailableMoney()) return;
 
   bool bBuilt = (Store->BuildStockDisplay(Buildable));
   check(bBuilt);
@@ -35,7 +35,7 @@ void UBuildableDisplayWidget::RefreshUI() {
   PriceText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Price)));
   MoneyNumberText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), Money)));
 
-  if (Price > Money) {
+  if (Price > Store->GetAvailableMoney()) {
     BuildStockDisplayButton->SetActiveStyle(false);
     BuildStockDisplayButton->ControlButton->SetIsEnabled(false);
   } else {

@@ -48,7 +48,11 @@ public:
   UPROPERTY()
   int32 AvailableQuantity;
   UPROPERTY()
+  bool bQuantityAffectsBuy;
+  UPROPERTY()
   float Money;
+  UPROPERTY()
+  float AvailableMoney;
 
   std::function<float()> ShowPriceFunc;
 
@@ -66,7 +70,9 @@ public:
   void InitUI(ETradeType _TradeType,
               const FText& ItemName,
               int32 _AvailableQuantity,
+              bool _bQuantityAffectsBuy,
               float _Money,
+              float _AvailableMoney,
               std::function<float()> _ShowPriceFunc,
               std::function<void(int32)> _ConfirmTradeFunc,
               std::function<void()> _BackFunc);

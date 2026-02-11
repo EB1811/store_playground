@@ -12,7 +12,7 @@ void AStoreExpansionManager::SelectExpansion(FName StoreExpansionLevelID) {
   FStoreExpansionData* ExpansionData = StoreExpansions.FindByPredicate(
       [&](const FStoreExpansionData& Data) { return Data.StoreExpansionLevelID == StoreExpansionLevelID; });
   check(ExpansionData);
-  check(Store->Money >= ExpansionData->Price && !ExpansionData->bIsLocked);
+  check(Store->GetAvailableMoney() >= ExpansionData->Price && !ExpansionData->bIsLocked);
   check(LevelManager->CurrentLevel == ELevel::Store);
 
   Store->MoneySpent(ExpansionData->Price);

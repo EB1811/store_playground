@@ -23,7 +23,7 @@ auto AAbilityManager::GetAvailableEconEventAbilities() const -> TArray<FEconEven
     return !EconEventAbilityCooldowns.Contains(Ability.ID) &&
            !ActiveEconEventAbilities.ContainsByPredicate(
                [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == Ability.ID; }) &&
-           Store->Money >= Ability.Cost;
+           Store->GetAvailableMoney() >= Ability.Cost;
   });
 }
 
@@ -39,7 +39,7 @@ auto AAbilityManager::GetCooldownEconEventAbilities() const -> TArray<FEconEvent
 auto AAbilityManager::GetNotEnoughMoneyEconEventAbilities() const -> TArray<FEconEventAbility> {
   const auto& AvailableEconEventAbilities = GlobalDataManager->GetEconEventAbilitiesByIds(UnlockedEconEventAbilityIDs);
   return AvailableEconEventAbilities.FilterByPredicate([&](const FEconEventAbility& Ability) {
-    return Store->Money < Ability.Cost && !EconEventAbilityCooldowns.Contains(Ability.ID) &&
+    return Store->GetAvailableMoney() < Ability.Cost && !EconEventAbilityCooldowns.Contains(Ability.ID) &&
            !ActiveEconEventAbilities.ContainsByPredicate(
                [&](const FEconEventAbility& ActiveAbility) { return ActiveAbility.ID == Ability.ID; });
   });
