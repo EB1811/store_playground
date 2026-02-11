@@ -34,15 +34,17 @@ auto TransferItem(UInventoryComponent* From,
                   UInventoryComponent* To,
                   UItemBase* Item,
                   int32 Quantity) -> FInventoryTransferRes {
-  check(From->ItemsArray.ContainsByPredicate(
-      [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }));
-
   if (!CanTransferItem(To, Item)) return FInventoryTransferRes{false};
 
   switch (From->InventoryType) {
     case EInventoryType::Container:
     case EInventoryType::StockDisplay:
-    case EInventoryType::PlayerInventory: From->RemoveItem(Item, Quantity); break;
+    case EInventoryType::PlayerInventory: {
+      check(From->ItemsArray.ContainsByPredicate(
+          [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }));
+      From->RemoveItem(Item, Quantity);
+      break;
+    }
 
     case EInventoryType::Store: break;
   }

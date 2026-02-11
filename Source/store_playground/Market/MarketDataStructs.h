@@ -188,6 +188,8 @@ struct FNpcStoreType {
   UPROPERTY(EditAnywhere, SaveGame)
   FName ID;
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  bool bIsMobile;  // * Mobile stores vs stationary stores, affects spawn and restock behavior.
   UPROPERTY(EditAnywhere)
   FText StoreTypeName;
   UPROPERTY(EditAnywhere)

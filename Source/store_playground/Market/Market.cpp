@@ -171,9 +171,10 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
 
   if (!CanTransferItem(PlayerInventory, Item)) return false;
 
-  auto TransferItemRes = TransferItem(NPCStoreInventory, PlayerInventory, Item, Quantity);
-  check(TransferItemRes.bSuccess);
-  PlayerStore->ItemBought(TransferItemRes.ItemCopy, SingleItemPrice, Quantity);
+  UItemBase* ItemCopy = Item->CreateItemCopy();
+  PlayerStore->ItemBought(ItemCopy, SingleItemPrice, Quantity);
+  PlayerInventory->AddItem(ItemCopy, Quantity);
+  if (NpcStoreC->NpcStoreType.bIsMobile) NPCStoreInventory->RemoveItem(Item, Quantity);
 
   return true;
 }
@@ -189,11 +190,17 @@ auto AMarket::SellItem(UNpcStoreComponent* NpcStoreC,
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
     return false;
 
-  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
-  check(EconItem);
+  if (!CanTransferItem(NPCStoreInventory, Item)) return false;
 
-  if (!TransferItem(PlayerInventory, NPCStoreInventory, Item, Quantity).bSuccess) return false;
+  PlayerInventory->RemoveItem(Item, Quantity);
+  if (NpcStoreC->NpcStoreType.bIsMobile) {
+    if (TObjectPtr<UItemBase>* ExistingItem = NPCStoreInventory->ItemsArray.FindByPredicate(
+            [&](UItemBase* ArrayItem) { return (Item->ItemID == ArrayItem->ItemID); })) {
+      (*ExistingItem)->Quantity += Quantity;
+    } else {
+      NPCStoreInventory->AddItem(Item, Quantity);
+    }
+  }
 
   float SingleItemPrice = GetNpcStoreBuyPrice(NpcStoreC, Item->ItemID);
   PlayerStore->MoneyGained(SingleItemPrice * Quantity);

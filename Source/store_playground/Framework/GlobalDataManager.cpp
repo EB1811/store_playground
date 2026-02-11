@@ -324,6 +324,7 @@ void AGlobalDataManager::InitializeNpcStoreData() {
   for (auto* Row : NpcStoreTypesRows)
     NpcStoreTypesArray.Add({
         Row->ID,
+        true,
         Row->StoreTypeName,
         Row->StoreSpawnWeight,
         Row->StockCountRange,

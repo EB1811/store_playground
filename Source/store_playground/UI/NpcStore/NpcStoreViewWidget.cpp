@@ -215,8 +215,8 @@ void UNpcStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
   MoneySlideWidget->RightSlideText->SetText(FText::FromString(""));
 
   ItemsWidget->InitUI(
-      StoreInventory, StatisticsGen, "Selling At",
-      [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
+      StoreInventory, StatisticsGen,
+      "Selling At:", [this](FName ItemID) -> float { return MarketEconomy->GetMarketPrice(ItemID); },
       [this](FName ItemID) -> float { return Market->GetNpcStoreSellPrice(NpcStoreC, ItemID); });
   if (ItemsWidget->SortData.SortType == ESortType::None) SortByPrice();
 

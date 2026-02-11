@@ -478,7 +478,11 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
                                         0.1f, 1.0f) *
                            100.0f);
             });
-        InventoryC->AddItem(RandItem);
+        int32 RandQuantity = !NpcStoreC->NpcStoreType.bIsMobile
+                                 ? 1
+                                 : FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0],
+                                                    NpcStoreC->NpcStoreType.StockCountRange[1] / 2);
+        InventoryC->AddItem(RandItem, RandQuantity);
       }
 
       // UE_LOG(LogTemp, Log, TEXT("NpcStore %s has %d items for type %s and econ type %s"),
