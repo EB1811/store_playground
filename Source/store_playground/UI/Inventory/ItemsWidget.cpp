@@ -35,7 +35,8 @@ void UItemsWidget::SelectItem(const UItemBase* Item, UItemSlotWidget* ItemSlotWi
   const TArray<float>* PriceHistory = StatisticsGen->ItemStatisticsMap.Num() > 0
                                           ? &StatisticsGen->ItemStatisticsMap[Item->ItemID].PriceHistory
                                           : nullptr;
-  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc);
+  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc,
+                            bShowPriceMargin);
   ItemDetailsWidget->RefreshUI();
 
   if (SelectedItemSlotWidget) {
@@ -129,7 +130,8 @@ void UItemsWidget::RefreshUI() {
   const TArray<float>* PriceHistory = StatisticsGen->ItemStatisticsMap.Num() > 0
                                           ? &StatisticsGen->ItemStatisticsMap[SelectedItem->ItemID].PriceHistory
                                           : nullptr;
-  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc);
+  ItemDetailsWidget->InitUI(SelectedItem, ShowPriceText, MarketPriceFunc, PriceHistory, ShowPriceFunc,
+                            bShowPriceMargin);
   ItemDetailsWidget->RefreshUI();
   ItemDetailsWidget->SetVisibility(ESlateVisibility::Visible);
 

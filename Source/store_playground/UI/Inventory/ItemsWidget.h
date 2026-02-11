@@ -55,6 +55,9 @@ public:
   class USoundBase* SelectSound;
 
   UPROPERTY(EditAnywhere)
+  bool bShowPriceMargin;
+
+  UPROPERTY(EditAnywhere)
   const class UInventoryComponent* InventoryRef;
   UPROPERTY(EditAnywhere)
   const class AStatisticsGen* StatisticsGen;

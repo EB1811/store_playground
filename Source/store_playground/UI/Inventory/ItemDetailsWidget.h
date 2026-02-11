@@ -26,6 +26,8 @@ public:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* ShowPrice;
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* Margin;
+  UPROPERTY(meta = (BindWidget))
   class UTextBlock* MarketPrice;
 
   UPROPERTY(meta = (BindWidget))
@@ -33,6 +35,9 @@ public:
 
   UPROPERTY(EditAnywhere)
   const class UItemBase* ItemRef;
+
+  UPROPERTY(EditAnywhere)
+  bool bShowPriceMargin;
 
   std::function<float(FName)> ShowPriceFunc;
   std::function<float(FName)> MarketPriceFunc;
@@ -42,5 +47,6 @@ public:
               FName _ShowPriceText,
               std::function<float(FName)> _MarketPriceFunc,
               const TArray<float>* PriceHistory,
-              std::function<float(FName)> _ShowPriceFunc = nullptr);
+              std::function<float(FName)> _ShowPriceFunc = nullptr,
+              bool _bShowPriceMargin = false);
 };

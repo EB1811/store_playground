@@ -22,9 +22,19 @@ void UItemDetailsWidget::RefreshUI() {
   }
 
   float _ShowPrice = ShowPriceFunc ? ShowPriceFunc(ItemRef->ItemID) : ItemRef->PlayerPriceData.BoughtAt;
-  ShowPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _ShowPrice)));
   float _MarketPrice = MarketPriceFunc(ItemRef->ItemID);
+  ShowPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _ShowPrice)));
   MarketPrice->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), _MarketPrice)));
+
+  if (bShowPriceMargin) {
+    float MarginDiff = _ShowPrice - _MarketPrice;
+    Margin->SetText(
+        FText::FromString(FString::Printf(TEXT("(%.0f"), FMath::Abs(MarginDiff) / _MarketPrice * 100.0f) + TEXT("%)")));
+
+    Margin->SetVisibility(ESlateVisibility::Visible);
+  } else {
+    Margin->SetVisibility(ESlateVisibility::Collapsed);
+  }
 
   PriceGraphWidget->RefreshUI();
 }
@@ -33,13 +43,15 @@ void UItemDetailsWidget::InitUI(const UItemBase* _ItemRef,
                                 FName _ShowPriceText,
                                 std::function<float(FName)> _MarketPriceFunc,
                                 const TArray<float>* PriceHistory,
-                                std::function<float(FName)> _ShowPriceFunc) {
+                                std::function<float(FName)> _ShowPriceFunc,
+                                bool _bShowPriceMargin) {
   check(_ItemRef && _MarketPriceFunc);
 
   ItemRef = _ItemRef;
   ShowPriceText->SetText(FText::FromName(_ShowPriceText));
   MarketPriceFunc = _MarketPriceFunc;
   ShowPriceFunc = _ShowPriceFunc;
+  bShowPriceMargin = _bShowPriceMargin;
 
   PriceGraphWidget->InitUI(PriceHistory, ItemRef->PlayerPriceData.BoughtAt);
 }
