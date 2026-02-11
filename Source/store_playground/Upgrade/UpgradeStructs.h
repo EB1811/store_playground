@@ -50,9 +50,9 @@ USTRUCT()
 struct FEconEventAbilityTextData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FText Name;
-  UPROPERTY(EditAnywhere, meta = (MultiLine = true))
+  UPROPERTY(EditAnywhere, SaveGame, meta = (MultiLine = true))
   FText Description;
 };
 
@@ -115,7 +115,7 @@ USTRUCT()
 struct FNegotiationSkillTextData {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FText Name;
 };
 // * Affects customer acceptance of offers.
@@ -123,16 +123,16 @@ USTRUCT()
 struct FNegotiationSkill {
   GENERATED_BODY()
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FName ID;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   ECustomerAIEffect EffectType;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   float Multi;
 
-  UPROPERTY(EditAnywhere)
+  UPROPERTY(EditAnywhere, SaveGame)
   FNegotiationSkillTextData TextData;
 };
 USTRUCT()

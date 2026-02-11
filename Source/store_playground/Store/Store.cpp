@@ -102,7 +102,7 @@ void AStore::MoneyGained(float Amount) {
 }
 void AStore::MoneySpent(float Amount) {
   check(Amount <= GetAvailableMoney());  // Caller should handle this.
-  Money -= Amount;
+  Money = FMath::Max(Money - Amount, 0 - GetAvailableMoney());
 
   StatisticsGen->StoreMoneySpent(Amount);
 }

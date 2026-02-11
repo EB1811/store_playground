@@ -157,10 +157,6 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
     return false;
 
-  const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
-      [Item](const FEconItem& EconItem) { return EconItem.ItemID == Item->ItemID; });
-  check(EconItem);
-
   float SingleItemPrice = GetNpcStoreSellPrice(NpcStoreC, Item->ItemID);
   float TotalPrice = SingleItemPrice * Quantity;
   if (PlayerStore->GetAvailableMoney() < TotalPrice) {
