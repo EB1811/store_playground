@@ -375,6 +375,7 @@ void AStorePGGameMode::ExitToMainMenu() {
   UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   check(StorePGGameInstance);
   StorePGGameInstance->bFromSaveGame = false;
+  StorePGGameInstance->bFromGame = true;
   StorePGGameInstance->bFromGameOver = false;
 
   HUD->StartGameLoadTransition([this]() { UGameplayStatics::OpenLevel(GetWorld(), "MainMenuMap", true); });

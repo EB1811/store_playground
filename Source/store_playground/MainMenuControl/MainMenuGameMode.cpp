@@ -47,6 +47,10 @@ void AMainMenuGameMode::BeginPlay() {
 
   MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
 
+  // https://forums.unrealengine.com/t/what-is-the-event-to-check-when-all-materials-and-textures-are-fully-resolved-or-finished-loading-on-a-new-spawned-actor/1166525/9
+  FStreamingManagerCollection& SMC = FStreamingManagerCollection::Get();
+  SMC.BlockTillAllRequestsFinished(0.f, true);
+
   if (ULevelStreaming* Streaming = UGameplayStatics::GetStreamingLevel(this, InitLevelName)) {
     FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
     FWorldDelegates::LevelAddedToWorld.AddUObject(this, &AMainMenuGameMode::OnLevelAddedToWorld);
@@ -63,9 +67,10 @@ void AMainMenuGameMode::OnLevelAddedToWorld(ULevel* InLevel, UWorld* InWorld) {
 
   UE_LOG(LogTemp, Warning, TEXT("MainMenuGameMode: Level added to world: %s"), *InLevel->GetOuter()->GetName());
 
+  UStorePGGameInstance* StorePGGameInstance = Cast<UStorePGGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
   FWorldDelegates::LevelAddedToWorld.RemoveAll(this);
-  GetWorld()->GetTimerManager().SetTimer(CheckLoadCompleteTimerHandle, this, &AMainMenuGameMode::CheckLoadComplete, 1.0,
-                                         false);
+  GetWorld()->GetTimerManager().SetTimer(CheckLoadCompleteTimerHandle, this, &AMainMenuGameMode::CheckLoadComplete,
+                                         StorePGGameInstance->bFromGame ? 0.5 : 2.0, false);
 }
 void AMainMenuGameMode::CheckLoadComplete() {
   CheckCount++;

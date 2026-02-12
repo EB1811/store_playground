@@ -40,17 +40,17 @@ auto AStore::GetBuildablePrice(ABuildable* Buildable) -> float {
   return Buildable->BuildingPricesMap[EBuildableType::StockDisplay] * BehaviorParams.BuildCostMulti;
 }
 auto AStore::BuildStockDisplay(ABuildable* Buildable) -> bool {
-  if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Money) return false;
+  if (GetBuildablePrice(Buildable) > GetAvailableMoney()) return false;
 
   Buildable->SetToStockDisplay();
   if (Buildable->BuildableType != EBuildableType::StockDisplay) return false;
 
-  MoneySpent(Buildable->BuildingPricesMap[EBuildableType::StockDisplay] * BehaviorParams.BuildCostMulti);
+  MoneySpent(GetBuildablePrice(Buildable));
   StockDisplayCount++;
   return true;
 }
 auto AStore::BuildDecoration(ABuildable* Buildable) -> bool {
-  if (Buildable->BuildingPricesMap[EBuildableType::Decoration] > Money) return false;
+  if (Buildable->BuildingPricesMap[EBuildableType::Decoration] > GetAvailableMoney()) return false;
 
   Buildable->SetToDecoration();
   if (Buildable->BuildableType != EBuildableType::Decoration) return false;

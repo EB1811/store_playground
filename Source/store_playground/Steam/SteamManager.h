@@ -72,6 +72,8 @@ public:
   void QueryAchievements();
   void AwardAchievements(TArray<FSteamAchievement>& Achievements);
 
+  void TrackStat(const FName StatName, const int32 Amount);
+
   void ConsiderAchievements();
   void AchBehaviour(FGameplayTag AchBehaviourTag);
   // * Custom achievements.

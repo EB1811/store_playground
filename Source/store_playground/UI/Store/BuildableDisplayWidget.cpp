@@ -14,7 +14,7 @@ void UBuildableDisplayWidget::NativeConstruct() {
 }
 
 void UBuildableDisplayWidget::BuildStockDisplay() {
-  if (Buildable->BuildingPricesMap[EBuildableType::StockDisplay] > Store->GetAvailableMoney()) return;
+  if (Store->GetBuildablePrice(Buildable) > Store->GetAvailableMoney()) return;
 
   bool bBuilt = (Store->BuildStockDisplay(Buildable));
   check(bBuilt);

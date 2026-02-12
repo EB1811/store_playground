@@ -1,7 +1,9 @@
 #include "SteamManager.h"
 #include "Containers/Map.h"
+#include "Interfaces/OnlineStatsInterface.h"
 #include "Logging/LogVerbosity.h"
 #include "Misc/AssertionMacros.h"
+#include "OnlineError.h"
 #include "store_playground/Framework/GlobalDataManager.h"
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineAchievementsInterface.h"
@@ -37,17 +39,35 @@ void ASteamManager::QueryAchievements() {
     return;
   }
 
+  bool bSuccess = false;
   AchievementsI->QueryAchievements(
       *UserId,
-      FOnQueryAchievementsCompleteDelegate::CreateLambda([](const FUniqueNetId& InUserId, bool bWasSuccessful) {
+      FOnQueryAchievementsCompleteDelegate::CreateLambda([bSuccess](const FUniqueNetId& InUserId, bool bWasSuccessful) {
         if (bWasSuccessful) {
           UE_LOG(LogTemp, Log, TEXT("Successfully queried achievements for user %s"), *InUserId.ToString());
-          return;
+          bSuccess;
         } else {
           UE_LOG(LogTemp, Error, TEXT("Failed to query achievements for user %s"), *InUserId.ToString());
-          return;
+          bSuccess;
         }
       }));
+  IOnlineStatsPtr StatsI = OnlineSub->GetStatsInterface();
+  if (!StatsI.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online stats interface"));
+    return;
+  }
+  StatsI->QueryStats(
+      UserId->AsShared(), UserId->AsShared(),
+      FOnlineStatsQueryUserStatsComplete::CreateLambda(
+          [bSuccess](const FOnlineError& Result, const TSharedPtr<const FOnlineStatsUserStats>& QueriedStats) {
+            if (Result.WasSuccessful()) {
+              UE_LOG(LogTemp, Log, TEXT("Successfully queried stats for user"))
+              bSuccess;
+            } else {
+              UE_LOG(LogTemp, Error, TEXT("Failed to query stats for user"))
+              bSuccess;
+            }
+          }));
 }
 
 void ASteamManager::AwardAchievements(TArray<FSteamAchievement>& Achievements) {
@@ -110,6 +130,42 @@ void ASteamManager::AwardAchievements(TArray<FSteamAchievement>& Achievements) {
   }
 }
 
+void ASteamManager::TrackStat(const FName StatName, const int32 Amount) {
+  if (!SteamManagerParams.bEnableSteamIntegration) return;
+
+  IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+  if (!OnlineSub) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online subsystem"));
+    return;
+  }
+  IOnlineIdentityPtr IdentityI = OnlineSub->GetIdentityInterface();
+  IOnlineStatsPtr StatsI = OnlineSub->GetStatsInterface();
+  if (!IdentityI.IsValid() || !StatsI.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get online identity or stats interface"));
+    return;
+  }
+  FUniqueNetIdPtr UserId = IdentityI->GetUniquePlayerId(0);
+  if (!UserId.IsValid()) {
+    UE_LOG(LogTemp, Error, TEXT("Failed to get unique player id"));
+    return;
+  }
+
+  FOnlineStatsUserUpdatedStats UserStats(
+      UserId->AsShared(),
+      {{"stat_" + StatName.ToString(),
+        FOnlineStatUpdate(FOnlineStatValue(Amount), FOnlineStatUpdate::EOnlineStatModificationType::Sum)}});
+  StatsI->UpdateStats(UserId->AsShared(), {UserStats},
+                      FOnlineStatsUpdateStatsComplete::CreateLambda([StatName](const FOnlineError& Result) {
+                        if (Result.WasSuccessful()) {
+                          UE_LOG(LogTemp, Log, TEXT("Successfully updated stat %s"), *StatName.ToString());
+                          return;
+                        } else {
+                          UE_LOG(LogTemp, Error, TEXT("Failed to update stat %s"), *StatName.ToString());
+                          return;
+                        }
+                      }));
+}
+
 void ASteamManager::ConsiderAchievements() {
   auto Filtered = SteamAchievements.FilterByPredicate(
       [](const auto& Ach) { return !Ach.bAchieved && Ach.Type == ESteamAchievementType::GameState; });
@@ -137,6 +193,8 @@ void ASteamManager::AchBehaviour(FGameplayTag AchBehaviourTag) {
       int32& CurrentCount = BehaviourTagCounts.FindOrAdd(AchBehaviourTag);
       CurrentCount++;
 
+      TrackStat(Ach.SteamID, CurrentCount);
+
       if (CurrentCount >= Ach.TargetCount && EvaluateRequirementsFilter(Ach.Requirements, GameDataMap))
         AchsToAward.Add(Ach);
       continue;
@@ -160,6 +218,7 @@ void ASteamManager::AchItemDeal(const FItemDeal ItemDeal) {
   if (auto CustomAch = Filtered.FindByPredicate([](const auto& Ach) {
         return Ach.IdTag == FGameplayTag::RequestGameplayTag("Achievement.MerchantMaster");
       })) {
+    TrackStat(CustomAch->SteamID, 1);
     if (ItemDeal.BoughtAt > 0.0f && ItemDeal.SoldAt > ItemDeal.BoughtAt * 2.0f) AchsToAward.Add(*CustomAch);
   }
   if (auto CustomAch = Filtered.FindByPredicate([](const auto& Ach) {
