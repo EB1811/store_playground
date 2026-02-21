@@ -48,5 +48,11 @@ public:
   class ULevelLoadingTransitionWidget* LevelLoadingTransitionWidget;
   void StartLevelLoadingTransition(std::function<void()> _FadeInEndFunc);
 
+  UPROPERTY(EditAnywhere, Category = "Widgets")
+  TSubclassOf<class UAnyKeyTransitionWidget> AnyKeyTransitionWidgetClass;
+  UPROPERTY()
+  class UAnyKeyTransitionWidget* AnyKeyTransitionWidget;
+  void OpenAnyKeyTransition(std::function<void()> _FadeOutEndFunc);
+
   void PlayWidgetAnim(class UUserWidget* Widget, class UWidgetAnimation* Animation);
 };

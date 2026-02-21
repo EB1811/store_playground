@@ -47,6 +47,8 @@ void AMainMenuGameMode::BeginPlay() {
 
   MainMenuControlHUD->InUIInputActions = MainMenuPlayer->InUIInputActions;
 
+  UE_LOG(LogTemp, Warning, TEXT("MainMenuGameMode: Starting level load..."));
+
   // https://forums.unrealengine.com/t/what-is-the-event-to-check-when-all-materials-and-textures-are-fully-resolved-or-finished-loading-on-a-new-spawned-actor/1166525/9
   FStreamingManagerCollection& SMC = FStreamingManagerCollection::Get();
   SMC.BlockTillAllRequestsFinished(0.f, true);
