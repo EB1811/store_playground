@@ -480,8 +480,10 @@ void AMarketLevel::InitNPCStores(bool bIsWeekend) {
             });
         int32 RandQuantity = !(NpcStoreC->NpcStoreType.NpcStoreBehaviourType == ENpcStoreBehaviourType::Mobile)
                                  ? 1
-                                 : FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0],
-                                                    NpcStoreC->NpcStoreType.StockCountRange[1] / 2);
+                                 : (FMath::Max(FMath::RandRange(NpcStoreC->NpcStoreType.StockCountRange[0] / 2,
+                                                                NpcStoreC->NpcStoreType.StockCountRange[1] / 2),
+                                               1) *
+                                    BehaviorParams.StockQuantityMulti);
         InventoryC->AddItem(RandItem, RandQuantity);
       }
 

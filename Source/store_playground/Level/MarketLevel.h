@@ -52,6 +52,8 @@ struct FMarketLevelBehaviorParams {
 
   UPROPERTY(EditAnywhere, SaveGame)
   float StockCountMulti;
+  UPROPERTY(EditAnywhere, SaveGame)
+  float StockQuantityMulti;
 };
 
 UCLASS(Blueprintable)

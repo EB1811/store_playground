@@ -117,7 +117,9 @@ UItemBase* AMarket::GetItem(const FName& ItemID) const {
   return Item->CreateItemCopy();
 }
 
-auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float {
+auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC,
+                                   const FName& ItemID,
+                                   int32 Quantity) const -> float {
   check(NpcStoreC);
 
   const FEconItem* EconItem = MarketEconomy->EconItems.FindByPredicate(
@@ -128,6 +130,10 @@ auto AMarket::GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, co
                                                                    : NpcStoreC->NpcStoreType.StoreMarkup) *
                      BehaviorParams.StoreMarkupMulti *
                      BehaviorParams.StoreMarkupItemEconTypeMulti[EconItem->ItemEconType];
+  if (Quantity > 1)
+    ItemMarkup *= 1.0f - FMath::Min((float(Quantity - 1) * BehaviorParams.StoreMarkupQuantityMulti),
+                                    BehaviorParams.StoreMarkupQuantityMaxMulti);
+
   float TotalPrice = EconItem->CurrentPrice * (1.0f + ItemMarkup);
   return TotalPrice;
 }
@@ -157,7 +163,7 @@ auto AMarket::BuyItem(UNpcStoreComponent* NpcStoreC,
           [Item](UItemBase* ArrayItem) { return ArrayItem->UniqueItemID == Item->UniqueItemID; }))
     return false;
 
-  float SingleItemPrice = GetNpcStoreSellPrice(NpcStoreC, Item->ItemID);
+  float SingleItemPrice = GetNpcStoreSellPrice(NpcStoreC, Item->ItemID, Quantity);
   float TotalPrice = SingleItemPrice * Quantity;
   if (PlayerStore->GetAvailableMoney() < TotalPrice) {
     UE_LOG(LogTemp, Log, TEXT("Not enough money to buy item: %s, TotalPrice: %.0f, Money: %.0f"),

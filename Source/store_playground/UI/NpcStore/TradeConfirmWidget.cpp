@@ -22,7 +22,7 @@ void UTradeConfirmWidget::ChangeQuantity(float Direction) {
 void UTradeConfirmWidget::IncreaseQuantity() {
   switch (TradeType) {
     case ETradeType::Buy:
-      if ((Quantity + 1) * ShowPriceFunc() > AvailableMoney) {
+      if ((Quantity + 1) * ShowPriceFunc(Quantity + 1) > AvailableMoney) {
         ErrorText->SetText(FText::FromString("Not enough money!"));
         break;
       }
@@ -67,7 +67,7 @@ void UTradeConfirmWidget::ConfirmTrade() {
 void UTradeConfirmWidget::Back() { BackFunc(); }
 
 void UTradeConfirmWidget::RefreshUI() {
-  float Price = ShowPriceFunc();
+  float Price = ShowPriceFunc(Quantity);
   // UE_LOG(LogTemp, Log, TEXT("TradeConfirmWidget::RefreshUI: Price: %.0f, Quantity: %d"), Price, Quantity);
 
   QuantityText->SetText(FText::FromString(FString::Printf(TEXT("%d"), Quantity)));
@@ -83,7 +83,7 @@ void UTradeConfirmWidget::InitUI(ETradeType _TradeType,
                                  bool _bQuantityAffectsBuy,
                                  float _Money,
                                  float _AvailableMoney,
-                                 std::function<float()> _ShowPriceFunc,
+                                 std::function<float(int)> _ShowPriceFunc,
                                  std::function<void(int32)> _ConfirmTradeFunc,
                                  std::function<void()> _BackFunc) {
   check(_ShowPriceFunc && _ConfirmTradeFunc && _BackFunc);
@@ -91,7 +91,7 @@ void UTradeConfirmWidget::InitUI(ETradeType _TradeType,
   TradeType = _TradeType;
   TitleText->SetText(GetTradeTypeText(_TradeType));
   Name->SetText(ItemName);
-  Quantity = _ShowPriceFunc() > _Money ? 0 : 1;
+  Quantity = _ShowPriceFunc(1) > _Money ? 0 : 1;
   AvailableQuantity = _AvailableQuantity;
   bQuantityAffectsBuy = _bQuantityAffectsBuy;
   Money = _Money;

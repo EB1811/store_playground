@@ -32,6 +32,10 @@ struct FMarketBehaviorParams {
   float StoreMarkupMulti;
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<EItemEconType, float> StoreMarkupItemEconTypeMulti;  // * Multiplier for item econ types.
+  UPROPERTY(EditAnywhere, SaveGame)
+  float StoreMarkupQuantityMulti;  // * Multiplier for quantity of items bought (bulk buying).
+  UPROPERTY(EditAnywhere, SaveGame)
+  float StoreMarkupQuantityMaxMulti;  // * Max multiplier for quantity of items bought (bulk buying).
 };
 
 UCLASS(Blueprintable)
@@ -89,7 +93,9 @@ public:
                              std::function<float(const class UItemBase* Item)> WeightFunc) const -> class UItemBase*;
   auto GetItem(const FName& ItemID) const -> class UItemBase*;
 
-  auto GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float;
+  auto GetNpcStoreSellPrice(const class UNpcStoreComponent* NpcStoreC,
+                            const FName& ItemID,
+                            int32 Quantity = 1) const -> float;
   auto GetNpcStoreBuyPrice(const class UNpcStoreComponent* NpcStoreC, const FName& ItemID) const -> float;
   auto BuyItem(class UNpcStoreComponent* NpcStoreC,
                class UInventoryComponent* NPCStoreInventory,

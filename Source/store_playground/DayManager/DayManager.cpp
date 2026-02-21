@@ -67,7 +67,7 @@ auto ADayManager::ManageDebt() -> bool {
     NextDayToPayDebt = CurrentDay + DayManagerParams.DebtPaymentDayDivisor;
     NextDebtAmount = DayManagerParams.BaseDebtAmount *
                      (DayManagerParams.DebtIncreaseMulti *
-                      FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+                      FMath::Floor(float(CurrentDay) / float(DayManagerParams.DebtPaymentDayDivisor) + 1.0f));
 
     AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     check(GameMode && GameMode->SettingsManager);
@@ -83,7 +83,7 @@ auto ADayManager::ManageDebt() -> bool {
     NextDayToPayDebt = CurrentDay + DayManagerParams.DebtPaymentDayDivisor;
     NextDebtAmount = DayManagerParams.BaseDebtAmount *
                      (DayManagerParams.DebtIncreaseMulti *
-                      FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+                      FMath::Floor(float(CurrentDay) / float(DayManagerParams.DebtPaymentDayDivisor) + 1.0f));
 
     AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
     check(GameMode && GameMode->SettingsManager);
@@ -103,7 +103,7 @@ auto ADayManager::ManageDebt() -> bool {
 void ADayManager::RecalculateNextDebt() {
   NextDebtAmount = DayManagerParams.BaseDebtAmount *
                    (DayManagerParams.DebtIncreaseMulti *
-                    FMath::Max(float(CurrentDay + 1) / float(DayManagerParams.DebtPaymentDayDivisor), 1.0f));
+                    FMath::Floor(float(CurrentDay - 1) / float(DayManagerParams.DebtPaymentDayDivisor) + 1.0f));
 
   AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
   check(GameMode && GameMode->SettingsManager);

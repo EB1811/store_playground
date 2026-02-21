@@ -54,7 +54,7 @@ public:
   UPROPERTY()
   float AvailableMoney;
 
-  std::function<float()> ShowPriceFunc;
+  std::function<float(int)> ShowPriceFunc;
 
   void ChangeQuantity(float Direction);
   UFUNCTION()
@@ -73,7 +73,7 @@ public:
               bool _bQuantityAffectsBuy,
               float _Money,
               float _AvailableMoney,
-              std::function<float()> _ShowPriceFunc,
+              std::function<float(int)> _ShowPriceFunc,
               std::function<void(int32)> _ConfirmTradeFunc,
               std::function<void()> _BackFunc);
 

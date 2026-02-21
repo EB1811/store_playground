@@ -98,13 +98,13 @@ void UNpcStoreViewWidget::Trade() {
   if (bIsConfirming) return TradeConfirmWidget->ConfirmTrade();
   if (ItemsWidget->SelectedItem == nullptr) return;
 
-  std::function<float()> ShowPriceFunc = nullptr;
+  std::function<float(int)> ShowPriceFunc = nullptr;
   if (TradeType == ETradeType::Buy)
-    ShowPriceFunc = [this]() -> float {
-      return Market->GetNpcStoreSellPrice(NpcStoreC, ItemsWidget->SelectedItem->ItemID);
+    ShowPriceFunc = [this](int Quantity) -> float {
+      return Market->GetNpcStoreSellPrice(NpcStoreC, ItemsWidget->SelectedItem->ItemID, Quantity > 0 ? Quantity : 1);
     };
   else
-    ShowPriceFunc = [this]() -> float {
+    ShowPriceFunc = [this](int Quantity) -> float {
       return Market->GetNpcStoreBuyPrice(NpcStoreC, ItemsWidget->SelectedItem->ItemID);
     };
   auto ConfirmTradeFunc = [this](int32 Quantity) { return TradeConfirmed(Quantity); };
