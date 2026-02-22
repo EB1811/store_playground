@@ -158,6 +158,8 @@ struct FUniqueNpcData {
   UPROPERTY(EditAnywhere)
   FText NpcName;
 
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<EQuestStartLocation> SpawnableLocations;
   UPROPERTY(EditAnywhere)
   FName SpawnRequirementsFilter;  // * Identical to FQuestChainData.
   UPROPERTY(EditAnywhere)
@@ -188,6 +190,8 @@ struct FUniqueNpcDataRow : public FTableRowBase {
   UPROPERTY(EditAnywhere)
   FText NpcName;
 
+  UPROPERTY(EditAnywhere)
+  TArray<EQuestStartLocation> SpawnableLocations;
   UPROPERTY(EditAnywhere)
   FName SpawnRequirementsFilter;  // * Identical to FQuestChainData.
   UPROPERTY(EditAnywhere)

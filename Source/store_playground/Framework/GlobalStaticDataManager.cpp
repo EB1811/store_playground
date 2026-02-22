@@ -455,6 +455,7 @@ void AGlobalStaticDataManager::InitializeNPCData() {
         Row->ID,
         Row->LinkedPopID,
         Row->NpcName,
+        Row->SpawnableLocations,
         Row->SpawnRequirementsFilter,
         Row->SpawnWeight,
         Row->QuestIDs,

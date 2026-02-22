@@ -104,8 +104,12 @@ void ACustomerAIManager::EndCustomerAI() {
 }
 
 void ACustomerAIManager::SpawnUniqueNpcs() {
-  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate(
-      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
+  TArray<struct FUniqueNpcData> EligibleNpcs =
+      GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate([this](const auto& Npc) {
+        return (Npc.SpawnableLocations.Contains(EQuestStartLocation::Store) ||
+                Npc.SpawnableLocations.Contains(EQuestStartLocation::Any)) &&
+               !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID);
+      });
   if (EligibleNpcs.Num() <= 0) return;
 
   ASpawnPoint* SpawnPoint = GetAllActorsOf<ASpawnPoint>(GetWorld(), SpawnPointClass)[0];

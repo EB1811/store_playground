@@ -585,8 +585,12 @@ auto AMarketLevel::TrySpawnUniqueNpc(ANpcSpawnPoint* SpawnPoint,
       LevelParams.UniqueNpcBaseSpawnChance * (bIsWeekend ? LevelParams.WeekendSpawnChangeMulti : 1.0f))
     return false;
 
-  TArray<struct FUniqueNpcData> EligibleNpcs = GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate(
-      [this](const auto& Npc) { return !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID); });
+  TArray<struct FUniqueNpcData> EligibleNpcs =
+      GlobalStaticDataManager->GetEligibleNpcs().FilterByPredicate([this](const auto& Npc) {
+        return (Npc.SpawnableLocations.Contains(EQuestStartLocation::Market) ||
+                Npc.SpawnableLocations.Contains(EQuestStartLocation::Any)) &&
+               !RecentlySpawnedUniqueNpcsMap.Contains(Npc.ID);
+      });
   if (EligibleNpcs.Num() <= 0) return false;
 
   FUniqueNpcData UniqueNpcData =

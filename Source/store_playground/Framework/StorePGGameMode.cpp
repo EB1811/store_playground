@@ -189,6 +189,7 @@ void AStorePGGameMode::BeginPlay() {
   StorePhaseManager->MusicManager = MusicManager;
   StorePhaseManager->Store = Store;
   StorePhaseManager->CustomerAIManager = CustomerAIManager;
+  StorePhaseManager->UpgradeManager = UpgradeManager;
 
   DayManager->AbilityManager = AbilityManager;
   DayManager->CustomerAIManager = CustomerAIManager;

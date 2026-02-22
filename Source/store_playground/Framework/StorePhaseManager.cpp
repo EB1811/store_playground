@@ -13,6 +13,7 @@
 #include "store_playground/Sound/MusicManager.h"
 #include "store_playground/UI/SpgHUD.h"
 #include "Kismet/GameplayStatics.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 
 EStorePhaseState GetNextStorePhaseState(EStorePhaseState CurrentState, EStorePhaseAction Action) {
   switch (CurrentState) {
@@ -151,6 +152,8 @@ void AStorePhaseManager::EndDay() {
   Store->SetupStoreEnvironment();
 
   DayManager->StartNewDay();
+  UpgradeManager->ConsiderUpgradePoints();
+
   SaveManager->AutoSave();
 }
 

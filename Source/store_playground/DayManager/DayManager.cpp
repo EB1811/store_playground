@@ -12,6 +12,7 @@
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/Steam/SteamManager.h"
+#include "store_playground/Upgrade/UpgradeManager.h"
 #include "Kismet/GameplayStatics.h"
 
 ADayManager::ADayManager() {

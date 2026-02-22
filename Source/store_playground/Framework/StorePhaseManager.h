@@ -85,6 +85,8 @@ public:
   class AStore* Store;
   UPROPERTY(EditAnywhere, Category = "Store Phase")
   class ACustomerAIManager* CustomerAIManager;
+  UPROPERTY(EditAnywhere, Category = "DayManager")
+  class AUpgradeManager* UpgradeManager;
 
   UPROPERTY(EditAnywhere, Category = "Store Phase", SaveGame)
   EStorePhaseState StorePhaseState;
