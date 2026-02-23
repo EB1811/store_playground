@@ -41,6 +41,8 @@ public:
   UPROPERTY(EditAnywhere)
   const class AStorePhaseManager* StorePhaseManager;
   UPROPERTY(EditAnywhere)
+  const class ADebtManager* DebtManager;
+  UPROPERTY(EditAnywhere)
   const class AStore* Store;
   UPROPERTY(EditAnywhere)
   const class ALevelManager* LevelManager;

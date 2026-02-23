@@ -37,6 +37,8 @@ public:
   UPROPERTY(EditAnywhere)
   const class AMarket* Market;
   UPROPERTY(EditAnywhere)
+  const class ADebtManager* DebtManager;
+  UPROPERTY(EditAnywhere)
   const class AUpgradeManager* UpgradeManager;
   UPROPERTY(EditAnywhere)
   const class AAbilityManager* AbilityManager;
@@ -53,6 +55,7 @@ public:
               const class AStorePhaseManager* _StorePhaseManager,
               const class AMarketEconomy* _MarketEconomy,
               const class AMarket* _Market,
+              const class ADebtManager* _DebtManager,
               const class AUpgradeManager* _UpgradeManager,
               const class AAbilityManager* _AbilityManager,
               const class UInventoryComponent* _PlayerInventoryC,

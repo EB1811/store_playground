@@ -13,12 +13,14 @@ UENUM()
 enum class EStoreViewTab : uint8 {
   Details UMETA(DisplayName = "Details"),
   Expansion UMETA(DisplayName = "Expansion"),
+  Finance UMETA(DisplayName = "Finance"),
 };
-ENUM_RANGE_BY_COUNT(EStoreViewTab, 2);
+ENUM_RANGE_BY_COUNT(EStoreViewTab, 3);
 inline auto GetStoreViewTabText(EStoreViewTab Tab) -> FText {
   switch (Tab) {
     case EStoreViewTab::Details: return FText::FromString("Details");
     case EStoreViewTab::Expansion: return FText::FromString("Expansion");
+    case EStoreViewTab::Finance: return FText::FromString("Finance");
     default: return FText::FromString("");
   }
 }
@@ -36,6 +38,8 @@ public:
   class UStoreDetailsWidget* StoreDetailsWidget;
   UPROPERTY(meta = (BindWidget))
   class UStoreExpansionsListWidget* StoreExpansionsListWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UDebtWidget* DebtWidget;
 
   UPROPERTY(meta = (BindWidget))
   class UControlMenuButtonWidget* UnlockButton;
@@ -72,6 +76,7 @@ public:
               const class AAbilityManager* AbilityManager,
               const class UInventoryComponent* PlayerInventoryC,
               class AStatisticsGen* StatisticsGen,
+              class ADebtManager* DebtManager,
               class AStore* Store,
               class AStoreExpansionManager* StoreExpansionManager,
               std::function<void()> _CloseWidgetFunc);

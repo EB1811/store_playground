@@ -35,6 +35,7 @@
 #include "store_playground/UI/NpcStore/NpcStoreViewWidget.h"
 #include "store_playground/UI/Store/StoreViewWidget.h"
 #include "store_playground/Cutscene/CutsceneSystem.h"
+#include "store_playground/DebtManager/DebtManager.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -153,6 +154,7 @@ void ASpgHUD::SetupInitUIStates() {
   InGameHudWidget->UpgradeManager = UpgradeManager;
   InGameHudWidget->DayManager = DayManager;
   InGameHudWidget->StorePhaseManager = StorePhaseManager;
+  InGameHudWidget->DebtManager = DebtManager;
   InGameHudWidget->Store = Store;
   InGameHudWidget->LevelManager = LevelManager;
   // * Input actions are created in SetupPlayerInputComponent, but it runs after BeginPlay, so we need to set them here.
@@ -464,8 +466,8 @@ void ASpgHUD::SetAndOpenStoreView(const UInventoryComponent* PlayerInventory) {
   if (OpenedWidgets.Contains(StoreViewWidget)) return CloseWidget(StoreViewWidget);
 
   StoreViewWidget->InitUI(InUIInputActions, LevelManager, DayManager, StorePhaseManager, MarketEconomy, Market,
-                          UpgradeManager, AbilityManager, PlayerInventory, StatisticsGen, Store, StoreExpansionManager,
-                          [this] { CloseWidget(StoreViewWidget); });
+                          UpgradeManager, AbilityManager, PlayerInventory, StatisticsGen, DebtManager, Store,
+                          StoreExpansionManager, [this] { CloseWidget(StoreViewWidget); });
   StoreViewWidget->RefreshUI();
 
   OpenFocusedMenu(StoreViewWidget);

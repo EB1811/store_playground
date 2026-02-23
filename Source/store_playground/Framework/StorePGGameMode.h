@@ -52,6 +52,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AMarketEconomy> MarketEconomyClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
+  TSubclassOf<class ADebtManager> DebtManagerClass;
+  UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class ANewsGen> NewsGenClass;
   UPROPERTY(EditAnywhere, Category = "BP Classes")
   TSubclassOf<class AStore> StoreClass;

@@ -59,6 +59,8 @@ public:
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class AMarketLevel* MarketLevel;  // * TickDaysTimedVars.
   UPROPERTY(EditAnywhere, Category = "DayManager")
+  class ADebtManager* DebtManager;  // * Manage additional debt payment days and amounts
+  UPROPERTY(EditAnywhere, Category = "DayManager")
   class ANewsGen* NewsGen;  // * Create new articles.
   UPROPERTY(EditAnywhere, Category = "DayManager")
   class ASteamManager* SteamManager;  // * Consider achievements.

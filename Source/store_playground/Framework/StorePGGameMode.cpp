@@ -25,6 +25,7 @@
 #include "store_playground/Level/LevelManager.h"
 #include "store_playground/Quest/QuestManager.h"
 #include "store_playground/DayManager/DayManager.h"
+#include "store_playground/DebtManager/DebtManager.h"
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/Lighting/StorePhaseLightingManager.h"
@@ -89,6 +90,7 @@ void AStorePGGameMode::BeginPlay() {
   AChurchLevel* ChurchLevel = GetWorld()->SpawnActor<AChurchLevel>(ChurchLevelClass);
   AMarket* Market = GetWorld()->SpawnActor<AMarket>(MarketClass);
   MarketEconomy = GetWorld()->SpawnActor<AMarketEconomy>(MarketEconomyClass);
+  ADebtManager* DebtManager = GetWorld()->SpawnActor<ADebtManager>(DebtManagerClass);
   AStatisticsGen* StatisticsGen = GetWorld()->SpawnActor<AStatisticsGen>(StatisticsGenClass);
   ASteamManager* SteamManager = GetWorld()->SpawnActor<ASteamManager>(SteamManagerClass);
   ANewsGen* NewsGen = GetWorld()->SpawnActor<ANewsGen>(NewsGenClass);
@@ -115,6 +117,7 @@ void AStorePGGameMode::BeginPlay() {
   HUD->StatisticsGen = StatisticsGen;
   HUD->SettingsManager = SettingsManager;
   HUD->SaveManager = SaveManager;
+  HUD->DebtManager = DebtManager;
   HUD->UpgradeManager = UpgradeManager;
   HUD->AbilityManager = AbilityManager;
   HUD->NewsGen = NewsGen;
@@ -151,6 +154,7 @@ void AStorePGGameMode::BeginPlay() {
       {"TutorialManager", TutorialManager},
       {"MarketLevel", MarketLevel},
       {"Market", Market},
+      {"DebtManager", DebtManager},
       {"MarketEconomy", MarketEconomy},
       {"StatisticsGen", StatisticsGen},
       {"SteamManager", SteamManager},
@@ -195,6 +199,7 @@ void AStorePGGameMode::BeginPlay() {
   DayManager->CustomerAIManager = CustomerAIManager;
   DayManager->MarketEconomy = MarketEconomy;
   DayManager->Market = Market;
+  DayManager->DebtManager = DebtManager;
   DayManager->MarketLevel = MarketLevel;
   DayManager->StatisticsGen = StatisticsGen;
   DayManager->NewsGen = NewsGen;
@@ -211,6 +216,7 @@ void AStorePGGameMode::BeginPlay() {
       {EUpgradeEffectSystem::GlobalData, GlobalDataManager->Upgradeable},
       {EUpgradeEffectSystem::Market, Market->Upgradeable},
       {EUpgradeEffectSystem::MarketEconomy, MarketEconomy->Upgradeable},
+      {EUpgradeEffectSystem::DebtManager, DebtManager->Upgradeable},
       {EUpgradeEffectSystem::MarketLevel, MarketLevel->Upgradeable},
       {EUpgradeEffectSystem::StorePhaseManager, StorePhaseManager->Upgradeable},
       {EUpgradeEffectSystem::Store, Store->Upgradeable},
@@ -224,6 +230,7 @@ void AStorePGGameMode::BeginPlay() {
   StatisticsGen->PlayerInventoryC = PlayerCharacter->PlayerInventoryComponent;
   StatisticsGen->Store = Store;
   StatisticsGen->MarketEconomy = MarketEconomy;
+  StatisticsGen->DebtManager = DebtManager;
   StatisticsGen->UpgradeManager = UpgradeManager;
   StatisticsGen->SteamManager = SteamManager;
 
@@ -287,6 +294,11 @@ void AStorePGGameMode::BeginPlay() {
   Market->MarketEconomy = MarketEconomy;
 
   MarketEconomy->StatisticsGen = StatisticsGen;
+
+  DebtManager->DayManager = DayManager;
+  DebtManager->MarketEconomy = MarketEconomy;
+  DebtManager->StatisticsGen = StatisticsGen;
+  DebtManager->Store = Store;
 
   CustomerAIManager->PlayerCharacter = PlayerCharacter;
   CustomerAIManager->GlobalStaticDataManager = GlobalStaticDataManager;

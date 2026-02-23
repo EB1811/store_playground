@@ -1,5 +1,4 @@
 #include "Market.h"
-#include "Containers/Array.h"
 #include "HAL/Platform.h"
 #include "Logging/LogVerbosity.h"
 #include "Math/UnrealMathUtility.h"

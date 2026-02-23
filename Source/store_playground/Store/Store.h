@@ -54,7 +54,7 @@ struct FStoreBehaviorParams {
   UPROPERTY(EditAnywhere, SaveGame)
   float BuildCostMulti;
   UPROPERTY(EditAnywhere, SaveGame)
-  double DebtLimit;  // * Positive value indicating how much below zero the player can go.
+  double NegativeMoneyLimit;  // * Positive value indicating how much below zero the player can go.
 };
 
 UCLASS(Blueprintable)

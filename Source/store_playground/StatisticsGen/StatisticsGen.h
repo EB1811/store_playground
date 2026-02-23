@@ -102,6 +102,8 @@ public:
   const class AStore* Store;
   UPROPERTY(EditAnywhere)
   const class AMarketEconomy* MarketEconomy;
+  UPROPERTY(EditAnywhere)
+  const class ADebtManager* DebtManager;
 
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;

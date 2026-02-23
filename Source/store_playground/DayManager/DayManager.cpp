@@ -8,6 +8,7 @@
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/NewsGen/NewsGen.h"
 #include "store_playground/Market/MarketDataStructs.h"
+#include "store_playground/DebtManager/DebtManager.h"
 #include "store_playground/AI/CustomerAIManager.h"
 #include "store_playground/Ability/AbilityManager.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
@@ -76,6 +77,15 @@ auto ADayManager::ManageDebt() -> bool {
     NextDebtAmount *= DayManagerParams.DifficultyDebtMultiMap[Difficulty];
 
     return false;
+  }
+
+  if (!DebtManager->TryPayDebt()) {
+    // Game over.
+    UE_LOG(LogTemp, Warning, TEXT("DayManager: Game over. Not enough money to pay debt."));
+    AStorePGGameMode* GameMode = Cast<AStorePGGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+    check(GameMode);
+    GameMode->GameOverReset();
+    return true;
   }
 
   if (Store->GetAvailableMoney() >= NextDebtAmount) {

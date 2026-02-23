@@ -14,6 +14,7 @@ void AStoreExpansionManager::SelectExpansion(FName StoreExpansionLevelID) {
   check(ExpansionData);
   check(Store->GetAvailableMoney() >= ExpansionData->Price && !ExpansionData->bIsLocked);
   check(LevelManager->CurrentLevel == ELevel::Store);
+  check(StorePhaseManager->StorePhaseState != EStorePhaseState::ShopOpen);
 
   Store->MoneySpent(ExpansionData->Price);
   for (auto StockItem : Store->StoreStockItems)

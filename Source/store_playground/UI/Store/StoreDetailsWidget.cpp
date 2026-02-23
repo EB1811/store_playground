@@ -17,6 +17,7 @@
 #include "store_playground/UI/Store/StoreMonetaryDetailCardWidget.h"
 #include "store_playground/UI/Store/StoreStatsGraphsWidget.h"
 #include "store_playground/UI/Graph/StoreStatsGraphWidget.h"
+#include "store_playground/DebtManager/DebtManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 
@@ -36,9 +37,10 @@ void UStoreDetailsWidget::RefreshUI() {
 
   int32 NextPaymentDay = DayManager->NextDayToPayDebt;
   float NextDebtAmount = DayManager->NextDebtAmount;
-  DebtCardWidget->InitUI(FText::FromString("Notices"), FText::GetEmpty(),
-                         FText::FromString(FString::Printf(TEXT("Next Payment: Day: %d"), NextPaymentDay)),
-                         FText::FromString(FString::Printf(TEXT("Amount: %.0f¬"), NextDebtAmount)));
+  DebtCardWidget->InitUI(
+      FText::FromString("Notices"), FText::GetEmpty(),
+      FText::FromString(FString::Printf(TEXT("Next Payment: Day: %d"), NextPaymentDay)),
+      FText::FromString(FString::Printf(TEXT("Amount: %.0f¬"), NextDebtAmount + DebtManager->GetPayableDebt())));
 
   float Profit = StatisticsGen->StoreStatistics.TotalProfitToDate + StatisticsGen->CalcTodaysStoreProfit();
   float Revenue = StatisticsGen->StoreStatistics.TotalRevenueToDate + StatisticsGen->TodaysStoreMoneyActivity.AllIncome;
@@ -59,24 +61,29 @@ void UStoreDetailsWidget::RefreshUI() {
   float Money = Store->Money;
   float TotalItemsValue = 0.0f;
   float OnDisplayValue = 0.0f;
+  float AdditionalDebt = DebtManager->AdditionalDebt;
   for (const auto& Item : PlayerInventoryC->ItemsArray)
     TotalItemsValue += Item->Quantity * MarketEconomy->GetMarketPrice(Item->ItemID);
   for (const auto& StockItem : Store->StoreStockItems)
     OnDisplayValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
-  NetWorthCardWidget->InitUI(
-      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue)),
-      {{
-           FText::FromString("Money:"),
-           Money,
-       },
-       {
-           FText::FromString("Items:"),
-           TotalItemsValue,
-       },
-       {
-           FText::FromString("On Display:"),
-           OnDisplayValue,
-       }});
+  NetWorthCardWidget->InitUI(FText::FromString(FString::Printf(
+                                 TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue - AdditionalDebt)),
+                             {{
+                                  FText::FromString("Money:"),
+                                  Money,
+                              },
+                              {
+                                  FText::FromString("Items:"),
+                                  TotalItemsValue,
+                              },
+                              {
+                                  FText::FromString("On Display:"),
+                                  OnDisplayValue,
+                              },
+                              {
+                                  FText::FromString("Debt:"),
+                                  AdditionalDebt == 0 ? AdditionalDebt : -AdditionalDebt,
+                              }});
 
   int32 UpgradePoints = UpgradeManager->AvailableUpgradePoints;
   int32 AbilitiesAvailable = AbilityManager->GetAvailableEconEventAbilities().Num();
@@ -95,18 +102,20 @@ void UStoreDetailsWidget::InitUI(const class ADayManager* _DayManager,
                                  const class AStorePhaseManager* _StorePhaseManager,
                                  const class AMarketEconomy* _MarketEconomy,
                                  const class AMarket* _Market,
+                                 const class ADebtManager* _DebtManager,
                                  const class AUpgradeManager* _UpgradeManager,
                                  const class AAbilityManager* _AbilityManager,
                                  const class UInventoryComponent* _PlayerInventoryC,
                                  class AStatisticsGen* _StatisticsGen,
                                  class AStore* _Store) {
-  check(_DayManager && _StorePhaseManager && _MarketEconomy && _Market && _StatisticsGen && _UpgradeManager &&
-        _AbilityManager && _PlayerInventoryC && _Store);
+  check(_DayManager && _StorePhaseManager && _MarketEconomy && _Market && _DebtManager && _StatisticsGen &&
+        _UpgradeManager && _AbilityManager && _PlayerInventoryC && _Store);
 
   DayManager = _DayManager;
   StorePhaseManager = _StorePhaseManager;
   MarketEconomy = _MarketEconomy;
   Market = _Market;
+  DebtManager = _DebtManager;
   UpgradeManager = _UpgradeManager;
   AbilityManager = _AbilityManager;
   PlayerInventoryC = _PlayerInventoryC;
@@ -126,24 +135,29 @@ void UStoreDetailsWidget::RefreshTick() {
   float Money = Store->Money;
   float TotalItemsValue = 0.0f;
   float OnDisplayValue = 0.0f;
+  float AdditionalDebt = DebtManager->AdditionalDebt;
   for (const auto& Item : PlayerInventoryC->ItemsArray)
     TotalItemsValue += Item->Quantity * MarketEconomy->GetMarketPrice(Item->ItemID);
   for (const auto& StockItem : Store->StoreStockItems)
     OnDisplayValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
-  NetWorthCardWidget->InitUI(
-      FText::FromString(FString::Printf(TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue)),
-      {{
-           FText::FromString("Money:"),
-           Money,
-       },
-       {
-           FText::FromString("Items:"),
-           TotalItemsValue,
-       },
-       {
-           FText::FromString("On Display:"),
-           OnDisplayValue,
-       }});
+  NetWorthCardWidget->InitUI(FText::FromString(FString::Printf(
+                                 TEXT("Net Worth:  %.0f¬"), Money + TotalItemsValue + OnDisplayValue - AdditionalDebt)),
+                             {{
+                                  FText::FromString("Money:"),
+                                  Money,
+                              },
+                              {
+                                  FText::FromString("Items:"),
+                                  TotalItemsValue,
+                              },
+                              {
+                                  FText::FromString("On Display:"),
+                                  OnDisplayValue,
+                              },
+                              {
+                                  FText::FromString("Debt:"),
+                                  AdditionalDebt == 0 ? AdditionalDebt : -AdditionalDebt,
+                              }});
 
   StatsGraphsWidget->RefreshUI();
 

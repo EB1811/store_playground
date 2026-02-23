@@ -9,6 +9,8 @@
 #include "store_playground/UI/Components/MenuHeaderWidget.h"
 #include "store_playground/UI/Store/StoreDetailsWidget.h"
 #include "store_playground/UI/Store/StoreExpansion/StoreExpansionsListWidget.h"
+#include "store_playground/UI/Debt/DebtWidget.h"
+#include "store_playground/Framework/StorePhaseManager.h"
 #include "store_playground/Level/LevelManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
@@ -29,6 +31,7 @@ void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
     case EStoreViewTab::Details:
       StoreDetailsWidget->SetVisibility(ESlateVisibility::Visible);
       StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Collapsed);
+      DebtWidget->SetVisibility(ESlateVisibility::Collapsed);
       UnlockButton->SetVisibility(ESlateVisibility::Hidden);
       break;
     case EStoreViewTab::Expansion:
@@ -39,7 +42,14 @@ void UStoreViewWidget::SwitchTab(EStoreViewTab Tab) {
 
       StoreDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
       StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Visible);
+      DebtWidget->SetVisibility(ESlateVisibility::Collapsed);
       UnlockButton->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EStoreViewTab::Finance:
+      StoreDetailsWidget->SetVisibility(ESlateVisibility::Collapsed);
+      StoreExpansionsListWidget->SetVisibility(ESlateVisibility::Collapsed);
+      DebtWidget->SetVisibility(ESlateVisibility::Visible);
+      UnlockButton->SetVisibility(ESlateVisibility::Hidden);
       break;
     default: checkNoEntry();
   }
@@ -51,6 +61,7 @@ void UStoreViewWidget::RefreshUI() {
   switch (ActiveTab) {
     case EStoreViewTab::Details: StoreDetailsWidget->RefreshUI(); break;
     case EStoreViewTab::Expansion: StoreExpansionsListWidget->RefreshUI(); break;
+    case EStoreViewTab::Finance: DebtWidget->RefreshUI(); break;
     default: checkNoEntry();
   }
 }
@@ -65,17 +76,21 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
                               const AAbilityManager* AbilityManager,
                               const UInventoryComponent* PlayerInventoryC,
                               AStatisticsGen* StatisticsGen,
+                              ADebtManager* DebtManager,
                               AStore* Store,
                               AStoreExpansionManager* StoreExpansionManager,
                               std::function<void()> _CloseWidgetFunc) {
   check(_LevelManager && DayManager && StorePhaseManager && MarketEconomy && Market && StatisticsGen &&
-        UpgradeManager && AbilityManager && PlayerInventoryC && Store && StoreExpansionManager && _CloseWidgetFunc);
+        UpgradeManager && AbilityManager && PlayerInventoryC && DebtManager && Store && StoreExpansionManager &&
+        _CloseWidgetFunc);
 
   LevelManager = _LevelManager;
 
   TArray<FTopBarTab> TopBarTabs = {};
   for (auto Tab : TEnumRange<EStoreViewTab>()) {
-    if (Tab == EStoreViewTab::Expansion && LevelManager->CurrentLevel != ELevel::Store) continue;
+    if (Tab == EStoreViewTab::Expansion && (LevelManager->CurrentLevel != ELevel::Store ||
+                                            StorePhaseManager->StorePhaseState == EStorePhaseState::ShopOpen))
+      continue;
 
     TopBarTabs.Add(FTopBarTab{GetStoreViewTabText(Tab)});
   }
@@ -93,9 +108,10 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
   MenuHeaderWidget->SetComponentUI(TopBarTabs, TabSelectedFunc);
   SwitchTab(EStoreViewTab::Details);
 
-  StoreDetailsWidget->InitUI(DayManager, StorePhaseManager, MarketEconomy, Market, UpgradeManager, AbilityManager,
-                             PlayerInventoryC, StatisticsGen, Store);
+  StoreDetailsWidget->InitUI(DayManager, StorePhaseManager, MarketEconomy, Market, DebtManager, UpgradeManager,
+                             AbilityManager, PlayerInventoryC, StatisticsGen, Store);
   StoreExpansionsListWidget->InitUI(Store, StoreExpansionManager, [this]() { CloseWidgetFunc(); });
+  DebtWidget->InitUI(InUIInputActions, Store, DebtManager);
 
   UnlockButton->SetVisibility(ESlateVisibility::Hidden);
   UnlockButton->ActionText->SetText(FText::FromString("Unlock (Hold)"));
@@ -107,11 +123,15 @@ void UStoreViewWidget::InitUI(FInUIInputActions InUIInputActions,
 }
 
 void UStoreViewWidget::SetupUIActionable() {
+  UIActionable.AdvanceUI = [this]() {
+    if (ActiveTab == EStoreViewTab::Finance) DebtWidget->IssueDebt();
+  };
   UIActionable.AdvanceUIHold = [this]() {
     if (ActiveTab == EStoreViewTab::Expansion) StoreExpansionsListWidget->UnlockExpansion();
   };
   UIActionable.DirectionalInput = [this](FVector2D Direction) {
     if (ActiveTab == EStoreViewTab::Expansion) StoreExpansionsListWidget->SelectNextExpansion(Direction);
+    else if (ActiveTab == EStoreViewTab::Finance) DebtWidget->ChangeAmount(Direction);
   };
   UIActionable.CycleLeft = [this]() { MenuHeaderWidget->CycleLeft(); };
   UIActionable.CycleRight = [this]() { MenuHeaderWidget->CycleRight(); };

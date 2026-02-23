@@ -169,6 +169,7 @@ enum class EUpgradeEffectSystem : uint8 {
   GlobalData UMETA(DisplayName = "GlobalData"),                // * GlobalData changes.
   Market UMETA(DisplayName = "Market"),                        // * Market / behavior changes.
   MarketEconomy UMETA(DisplayName = "MarketEconomy"),          // * MarketEconomy changes.
+  DebtManager UMETA(DisplayName = "DebtManager"),              // * DebtManager changes.
   MarketLevel UMETA(DisplayName = "MarketLevel"),              // * MarketLevel changes.
   StorePhaseManager UMETA(DisplayName = "StorePhaseManager"),  // * StorePhaseManager changes.
   Store UMETA(DisplayName = "Store"),                          // * Store changes.

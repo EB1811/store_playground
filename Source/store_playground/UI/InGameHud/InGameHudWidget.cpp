@@ -13,6 +13,7 @@
 #include "store_playground/Upgrade/UpgradeManager.h"
 #include "store_playground/DayManager/DayManager.h"
 #include "store_playground/Framework/StorePhaseManager.h"
+#include "store_playground/DebtManager/DebtManager.h"
 #include "store_playground/Level/LevelManager.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
@@ -58,8 +59,8 @@ void UInGameHudWidget::RefreshUI() {
       FText::FromString(FString::Printf(TEXT("%s - Day: %d"), *CurrentPhaseText.ToString(), CurrentDay)));
   DaySlideWidget->RightSlideText->SetText(FText::FromString(DayManager->bIsWeekend ? "Weekend" : "Normal Day"));
 
-  OwnedSlideWidget->SlideText->SetText(
-      FText::FromString(FString::Printf(TEXT("Owed: %.0f¬"), DayManager->NextDebtAmount)));
+  OwnedSlideWidget->SlideText->SetText(FText::FromString(
+      FString::Printf(TEXT("Owed: %.0f¬"), DayManager->NextDebtAmount + DebtManager->GetPayableDebt())));
   OwnedSlideWidget->RightSlideText->SetText(
       FText::FromString(FString::Printf(TEXT("On Day: %d"), DayManager->NextDayToPayDebt)));
 

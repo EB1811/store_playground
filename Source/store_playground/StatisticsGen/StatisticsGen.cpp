@@ -13,6 +13,7 @@
 #include "store_playground/SaveManager/SaveStructs.h"
 #include "store_playground/SaveManager/SaveManager.h"
 #include "store_playground/Steam/SteamManager.h"
+#include "store_playground/DebtManager/DebtManager.h"
 
 void AStatisticsGen::BeginPlay() {
   Super::BeginPlay();
@@ -54,6 +55,7 @@ auto AStatisticsGen::CalcNetWorth() -> float {
     TotalValue += Item->Quantity * MarketEconomy->GetMarketPrice(Item->ItemID);
   for (const FStockItem& StockItem : Store->StoreStockItems)
     TotalValue += MarketEconomy->GetMarketPrice(StockItem.ItemId);
+  TotalValue -= DebtManager->AdditionalDebt;
 
   CachedDetails.PlayerNetWorth = TotalValue;
 

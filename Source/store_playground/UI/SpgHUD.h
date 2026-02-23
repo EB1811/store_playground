@@ -86,6 +86,8 @@ public:
   UPROPERTY(EditAnywhere)
   class ASaveManager* SaveManager;
   UPROPERTY(EditAnywhere)
+  class ADebtManager* DebtManager;
+  UPROPERTY(EditAnywhere)
   class AStatisticsGen* StatisticsGen;
   UPROPERTY(EditAnywhere)
   class AUpgradeManager* UpgradeManager;
