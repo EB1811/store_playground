@@ -15,7 +15,7 @@ struct FDebtManagerParams {
   UPROPERTY(EditAnywhere)
   float BaseDebtInterest;
   UPROPERTY(EditAnywhere)
-  float BaseDebtInterestDayMultiplier;
+  float BaseDebtInterestPerDay;
   UPROPERTY(EditAnywhere)
   float BaseDebtLimit;
 };
@@ -25,6 +25,8 @@ struct FDebtManagerBehaviorParams {
 
   UPROPERTY(EditAnywhere, SaveGame)
   float DebtInterestMulti;
+  UPROPERTY(EditAnywhere)
+  float BaseDebtInterestPerDayMulti;
   UPROPERTY(EditAnywhere, SaveGame)
   float DebtLimitMulti;
   UPROPERTY(EditAnywhere, SaveGame)

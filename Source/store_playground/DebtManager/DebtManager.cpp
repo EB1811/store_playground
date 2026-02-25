@@ -16,7 +16,8 @@ void ADebtManager::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
 
 auto ADebtManager::GetInterestRate() const -> float {
   return DebtManagerParams.BaseDebtInterest * BehaviorParams.DebtInterestMulti +
-         (DayManager->NextDayToPayDebt - DayManager->CurrentDay) * DebtManagerParams.BaseDebtInterestDayMultiplier;
+         (DayManager->NextDayToPayDebt - DayManager->CurrentDay) *
+             (DebtManagerParams.BaseDebtInterestPerDay * BehaviorParams.BaseDebtInterestPerDayMulti);
 }
 auto ADebtManager::GetInterest(float Amount) const -> float { return Amount * GetInterestRate(); }
 auto ADebtManager::GetDebtLimit() const -> float {

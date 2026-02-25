@@ -122,9 +122,20 @@ void UPriceSliderWidget::InitUI(const class UNegotiationSystem* _NegotiationSyst
   }
   PlayerMoney = _PlayerMoney;
 
-  float StepSize = FMath::Max(FMath::RoundToInt(MarketPrice * 0.002f), 1.0f);
-  MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
-  MinValue = MarketPrice / (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+  switch (Type) {
+    case NegotiationType::PlayerBuy:
+      MaxValue =
+          FMath::Min(MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f), MarketPrice * 1.4f);
+      MinValue =
+          FMath::Max(MarketPrice - (MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti)), 10.0f);
+      break;
+    case NegotiationType::PlayerSell:
+      MaxValue = MarketPrice * (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+      MinValue = MarketPrice / (NpcAcceptance * PriceSliderUIParams.AcceptanceBarMulti + 1.0f);
+      break;
+    default: checkNoEntry(); return;
+  }
+  float StepSize = FMath::Max(FMath::RoundToInt(MaxValue - MinValue) * 0.002f, 1.0f);
 
   UE_LOG(LogTemp, Log,
          TEXT("PriceSliderWidget::InitUI: Type: %s, NpcAcceptance: %.2f, MarketPrice: %.2f, "
