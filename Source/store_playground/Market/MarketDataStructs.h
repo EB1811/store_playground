@@ -155,6 +155,8 @@ struct FEconItem {
   EItemEconType ItemEconType;
   UPROPERTY(EditAnywhere)
   EItemWealthType ItemWealthType;
+  UPROPERTY(EditAnywhere)
+  float BasePrice;
 
   UPROPERTY(EditAnywhere, SaveGame)
   float CurrentPrice;  // * Trends towards perfect price.

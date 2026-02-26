@@ -393,6 +393,7 @@ void AMarketEconomy::PerformEconomyTick() {
   for (auto& Item : EconItems) StatisticsGen->ItemPriceChange(Item.ItemID, Item.CurrentPrice);
   for (auto& PopEconData : PopEconDataArray)
     StatisticsGen->PopChange(PopEconData.PopID, PopEconData.Population, PopEconData.GoodsBoughtPerCapita);
+  StatisticsGen->EconomyChange();
   StatisticsGen->CalcNetWorth();
 }
 
@@ -569,6 +570,7 @@ void AMarketEconomy::InitializeEconomyData() {
         Row->ItemType,
         Row->ItemEconType,
         Row->ItemWealthType,
+        Row->BasePrice,
         Row->BasePrice,
         Row->BasePrice,
         0,

@@ -38,4 +38,7 @@ public:
   class UImage* PopulationTrendUpIcon;
   UPROPERTY(meta = (BindWidget))
   class UImage* PopulationTrendDownIcon;
+
+  UPROPERTY(EditAnywhere)
+  FName PopID;
 };

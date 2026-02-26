@@ -21,6 +21,10 @@ struct FStatisticsGenParams {
   int32 ValueHistoryCount;  // * e.g., population, etc.
   UPROPERTY(EditAnywhere)
   int32 NetWorthHistoryCount;
+  UPROPERTY(EditAnywhere)
+  int32 EconomyHistoryCount;
+  UPROPERTY(EditAnywhere)
+  int32 EconomyHistoryInterval;
 };
 
 USTRUCT()
@@ -69,6 +73,20 @@ struct FPopStatistics {
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<float> GoodsBoughtPerCapitaHistory;
 };
+USTRUCT()
+struct FEconomyStatistics {
+  GENERATED_BODY()
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  float IntervalCounter;
+
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<float> TotalWealthHistory;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<float> TotalBoughtHistory;
+  UPROPERTY(EditAnywhere, SaveGame)
+  TArray<float> TotalInflationHistory;
+};
 
 USTRUCT()
 struct FCachedDetails {
@@ -90,6 +108,9 @@ public:
         .DayHistoryCount = 30,
         .ItemPriceHistoryCount = 30,
         .ValueHistoryCount = 60,
+        .NetWorthHistoryCount = 30,
+        .EconomyHistoryCount = 60,
+        .EconomyHistoryInterval = 10,
     };
   }
 
@@ -119,6 +140,8 @@ public:
   TMap<FName, FItemStatistics> ItemStatisticsMap;  // ! Not populated at game start.
   UPROPERTY(EditAnywhere, SaveGame)
   TMap<FName, FPopStatistics> PopStatisticsMap;  // ! Not populated at game start.
+  UPROPERTY(EditAnywhere, SaveGame)
+  FEconomyStatistics EconomyStatistics;
 
   UPROPERTY(EditAnywhere, SaveGame)
   TArray<FItemDeal> TodaysItemDeals;  // * Items sold at negotiation or market.
@@ -137,6 +160,7 @@ public:
 
   void ItemPriceChange(const FName ItemId, const float NewPrice);
   void PopChange(const FName PopId, float NewPopulation, float NewGoodsBoughtPerCapita);
+  void EconomyChange();
 
   void CalcDayStatistics();  // * Call at the end of the day and reset the daily statistics.
 };

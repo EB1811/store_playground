@@ -20,7 +20,10 @@ void AStatisticsGen::BeginPlay() {
 
   StoreStatistics.ProfitHistory.Reserve(StatisticsGenParams.DayHistoryCount);
   StoreStatistics.RevenueHistory.Reserve(StatisticsGenParams.DayHistoryCount);
+  StoreStatistics.ExpensesHistory.Reserve(StatisticsGenParams.DayHistoryCount);
   StoreStatistics.NetWorthHistory.Reserve(StatisticsGenParams.ValueHistoryCount);
+  EconomyStatistics.TotalWealthHistory.Reserve(StatisticsGenParams.EconomyHistoryCount);
+  EconomyStatistics.TotalInflationHistory.Reserve(StatisticsGenParams.EconomyHistoryCount);
 }
 
 void AStatisticsGen::Tick(float DeltaTime) { Super::Tick(DeltaTime); }
@@ -90,6 +93,34 @@ void AStatisticsGen::PopChange(const FName PopId, float NewPopulation, float New
     PopStatisticsMap[PopId].PopulationHistory.RemoveAt(0);
   if (PopStatisticsMap[PopId].GoodsBoughtPerCapitaHistory.Num() > StatisticsGenParams.ValueHistoryCount)
     PopStatisticsMap[PopId].GoodsBoughtPerCapitaHistory.RemoveAt(0);
+}
+
+void AStatisticsGen::EconomyChange() {
+  if (++EconomyStatistics.IntervalCounter < StatisticsGenParams.EconomyHistoryInterval) return;
+  EconomyStatistics.IntervalCounter = 0;
+
+  EconomyStatistics.TotalWealthHistory.Add(MarketEconomy->TotalWealth);
+  if (EconomyStatistics.TotalWealthHistory.Num() > StatisticsGenParams.EconomyHistoryCount)
+    EconomyStatistics.TotalWealthHistory.RemoveAt(0);
+
+  EconomyStatistics.TotalBoughtHistory.Add(MarketEconomy->TotalBought);
+  if (EconomyStatistics.TotalBoughtHistory.Num() > StatisticsGenParams.EconomyHistoryCount)
+    EconomyStatistics.TotalBoughtHistory.RemoveAt(0);
+
+  float TotalInflation = 0.0f;
+  for (const auto& ItemStat : ItemStatisticsMap)
+    TotalInflation +=
+        ItemStat.Value.PriceHistory.Num() > 1 + StatisticsGenParams.EconomyHistoryInterval
+            ? (ItemStat.Value.PriceHistory[ItemStat.Value.PriceHistory.Num() - 1] -
+               ItemStat.Value
+                   .PriceHistory[ItemStat.Value.PriceHistory.Num() - 1 - StatisticsGenParams.EconomyHistoryInterval]) /
+                  ItemStat.Value.PriceHistory[ItemStat.Value.PriceHistory.Num() - 2]
+            : 0.0f;
+  TotalInflation /= ItemStatisticsMap.Num() > 0 ? ItemStatisticsMap.Num() : 1;
+  TotalInflation *= 100.0f;
+  EconomyStatistics.TotalInflationHistory.Add(TotalInflation);
+  if (EconomyStatistics.TotalInflationHistory.Num() > StatisticsGenParams.EconomyHistoryCount)
+    EconomyStatistics.TotalInflationHistory.RemoveAt(0);
 }
 
 void AStatisticsGen::CalcDayStatistics() {

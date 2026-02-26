@@ -348,7 +348,7 @@ void AStorePGGameMode::BeginPlay() {
       PlayerCharacter->SetActorLocation(SpawnPoint->GetActorLocation());
     }
 
-    if (!StorePGGameInstance->bFromSaveGame) MarketEconomy->PerformEconomyTicks(35);
+    if (!StorePGGameInstance->bFromSaveGame) MarketEconomy->PerformEconomyTicks(100);
     MarketEconomy->EconomyParams.bRunSimulation = true;
 
     StorePhaseManager->Start();

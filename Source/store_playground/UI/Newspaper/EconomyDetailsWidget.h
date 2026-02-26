@@ -16,6 +16,18 @@ public:
   virtual void NativeOnInitialized() override;
 
   UPROPERTY(meta = (BindWidget))
+  class UTextBlock* TotalWealthText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* TotalBoughtText;
+  UPROPERTY(meta = (BindWidget))
+  class UTextBlock* TotalInflationText;
+  UPROPERTY(meta = (BindWidget))
+  class UStoreStatsGraphWidget* TotalWealthGraphWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UStoreStatsGraphWidget* TotalBoughtGraphWidget;
+  UPROPERTY(meta = (BindWidget))
+  class UStoreStatsGraphWidget* TotalInflationGraphWidget;
+  UPROPERTY(meta = (BindWidget))
   class UWrapBox* PopDetailsBox;
   UPROPERTY(EditAnywhere)
   TSubclassOf<class UPopDetailsWidget> PopDetailsWidgetClass;
@@ -30,4 +42,8 @@ public:
 
   void RefreshUI();
   void InitUI(const class AMarketEconomy* _MarketEconomy, const class AStatisticsGen* _StatisticsGen);
+
+  UPROPERTY(EditAnywhere)
+  FTimerHandle RefreshTimerHandle;
+  void RefreshTick();
 };

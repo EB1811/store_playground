@@ -2,12 +2,14 @@
 #include "Components/WrapBoxSlot.h"
 #include "HAL/Platform.h"
 #include "Logging/LogVerbosity.h"
+#include "store_playground/Framework/UtilFuncs.h"
 #include "store_playground/Item/ItemBase.h"
 #include "store_playground/Market/MarketEconomy.h"
 #include "store_playground/StatisticsGen/StatisticsGen.h"
 #include "store_playground/UI/Newspaper/PopDetailsWidget.h"
 #include "store_playground/UI/Newspaper/PopTypeWrapBox.h"
 #include "store_playground/Item/ItemDataStructs.h"
+#include "store_playground/UI/Graph/StoreStatsGraphWidget.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/WrapBox.h"
@@ -29,8 +31,8 @@ inline auto GetWealthString(TArray<FPopEconData> PopEconDataArray, const FPopEco
   for (auto& Pop : PopEconDataArray) TotalGoodsBoughtPerCapita += Pop.GoodsBoughtPerCapita;
 
   float GivenPopGoodsBoughtPercentage = GivenPop.GoodsBoughtPerCapita / TotalGoodsBoughtPerCapita * 100.0f;
-  UE_LOG(LogTemp, Log, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
-         GivenPopGoodsBoughtPercentage);
+  // UE_LOG(LogTemp, Log, TEXT("GivenPopGoodsBoughtPercentage for %s: %.2f%%"), *GivenPop.PopID.ToString(),
+  //        GivenPopGoodsBoughtPercentage);
 
   return FString::Printf(GivenPopGoodsBoughtPercentage < 1.0f ? TEXT("Wealth: %.1f") : TEXT("Wealth: %.0f"),
                          GivenPopGoodsBoughtPercentage) +
@@ -54,33 +56,25 @@ inline auto GetItemSpendString(TMap<EItemWealthType, float> ItemSpendPercent) ->
 }
 
 inline auto IsWealthTrendUp(TArray<float> GoodsBoughtPerCapitaHistory) -> bool {
-  int32 ConsideredHistoryCount = 10;
-  if (GoodsBoughtPerCapitaHistory.Num() < ConsideredHistoryCount) return false;
-
+  int32 ConsideredHistoryCount = FMath::Min(10, GoodsBoughtPerCapitaHistory.Num());
   float SignificantChange = 1.0f;
   return GoodsBoughtPerCapitaHistory.Last() >
          GoodsBoughtPerCapitaHistory[GoodsBoughtPerCapitaHistory.Num() - ConsideredHistoryCount] + SignificantChange;
 }
 inline auto IsWealthTrendDown(TArray<float> GoodsBoughtPerCapitaHistory) -> bool {
-  int32 ConsideredHistoryCount = 10;
-  if (GoodsBoughtPerCapitaHistory.Num() < ConsideredHistoryCount) return false;
-
+  int32 ConsideredHistoryCount = FMath::Min(10, GoodsBoughtPerCapitaHistory.Num());
   float SignificantChange = 1.0f;
   return GoodsBoughtPerCapitaHistory.Last() <
          GoodsBoughtPerCapitaHistory[GoodsBoughtPerCapitaHistory.Num() - ConsideredHistoryCount] - SignificantChange;
 }
 inline auto IsPopulationTrendUp(TArray<float> PopulationHistory) -> bool {
-  int32 ConsideredHistoryCount = 5;
-  if (PopulationHistory.Num() < ConsideredHistoryCount) return false;
-
+  int32 ConsideredHistoryCount = FMath::Min(10, PopulationHistory.Num());
   float SignificantChange = 0.9f;
   return PopulationHistory.Last() >
          PopulationHistory[PopulationHistory.Num() - ConsideredHistoryCount] + SignificantChange;
 }
 inline auto IsPopulationTrendDown(TArray<float> PopulationHistory) -> bool {
-  int32 ConsideredHistoryCount = 5;
-  if (PopulationHistory.Num() < ConsideredHistoryCount) return false;
-
+  int32 ConsideredHistoryCount = FMath::Min(10, PopulationHistory.Num());
   float SignificantChange = 0.9f;
   return PopulationHistory.Last() <
          PopulationHistory[PopulationHistory.Num() - ConsideredHistoryCount] - SignificantChange;
@@ -89,6 +83,23 @@ inline auto IsPopulationTrendDown(TArray<float> PopulationHistory) -> bool {
 void UEconomyDetailsWidget::NativeOnInitialized() { Super::NativeOnInitialized(); }
 
 void UEconomyDetailsWidget::RefreshUI() {
+  if (StatisticsGen->EconomyStatistics.TotalWealthHistory.Num() > 0 &&
+      StatisticsGen->EconomyStatistics.TotalInflationHistory.Num() > 0) {
+    float TotalWealth = StatisticsGen->EconomyStatistics.TotalWealthHistory.Last();
+    TotalWealthText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), TotalWealth)));
+    float TotalBought = StatisticsGen->EconomyStatistics.TotalBoughtHistory.Last();
+    TotalBoughtText->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), TotalBought)));
+    float TotalInflation = StatisticsGen->EconomyStatistics.TotalInflationHistory.Last();
+    TotalInflationText->SetText(FText::FromString(FString::Printf(TEXT("%.2f%%"), TotalInflation)));
+
+    TotalWealthGraphWidget->InitUI(StatisticsGen->EconomyStatistics.TotalWealthHistory);
+    TotalWealthGraphWidget->CreateStoreStatsGraph();
+    TotalBoughtGraphWidget->InitUI(StatisticsGen->EconomyStatistics.TotalBoughtHistory);
+    TotalBoughtGraphWidget->CreateStoreStatsGraph();
+    TotalInflationGraphWidget->InitUI(StatisticsGen->EconomyStatistics.TotalInflationHistory);
+    TotalInflationGraphWidget->CreateStoreStatsGraph();
+  }
+
   // * First group pops by type and sort by wealth type.
   TMap<EPopType, TArray<TTuple<FCustomerPop, FPopEconData>>> PopTypeToDataMap;
   for (auto PopType : TEnumRange<EPopType>())
@@ -122,6 +133,8 @@ void UEconomyDetailsWidget::RefreshUI() {
       UPopDetailsWidget* PopDetailsWidget = CreateWidget<UPopDetailsWidget>(this, PopDetailsWidgetClass);
       check(PopDetailsWidget);
 
+      PopDetailsWidget->PopID = Pop.ID;
+
       // ! Workaround for two different asset sizes.
       if (Pop.AssetData.Sprite->GetSlateAtlasData().GetSourceDimensions().Y >= 48) {
         PopDetailsWidget->Page2Icon->SetBrushFromAtlasInterface(Pop.AssetData.Sprite);
@@ -134,10 +147,6 @@ void UEconomyDetailsWidget::RefreshUI() {
       }
 
       PopDetailsWidget->Name->SetText(Pop.PopName);
-      float GenPercent =
-          ((float(PopEconData.MGen) * float(PopEconData.Population) * MarketEconomy->BehaviorParams.MGenMulti) /
-           MarketEconomy->TotalWealth) *
-          100.0f;
       PopDetailsWidget->GensText->SetText(FText::FromString(GetGensString(MarketEconomy, PopEconData)));
       PopDetailsWidget->WealthText->SetText(
           FText::FromString(GetWealthString(MarketEconomy->PopEconDataArray, PopEconData)));
@@ -157,7 +166,7 @@ void UEconomyDetailsWidget::RefreshUI() {
               : "All";
       PopDetailsWidget->ItemEconTypesText->SetText(FText::FromString("Goods Type: " + EconTypesText));
 
-      if (StatisticsGen->PopStatisticsMap.Num() > 0) {
+      if (StatisticsGen->PopStatisticsMap.Num() > 0 && StatisticsGen->PopStatisticsMap.Contains(PopEconData.PopID)) {
         auto GoodsBoughtPerCapitaHistory =
             StatisticsGen->PopStatisticsMap[PopEconData.PopID].GoodsBoughtPerCapitaHistory;
         if (IsWealthTrendUp(GoodsBoughtPerCapitaHistory)) {
@@ -191,6 +200,10 @@ void UEconomyDetailsWidget::RefreshUI() {
     FirstPopDetailsWidget.Key->BgBorder->SetBrushFromMaterial(PopTypeMaterialMap[PopType]);
     FirstPopDetailsWidget.Value->SetNewLine(true);  // Force the first pop details widget to start a new line.
   }
+
+  GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+  GetWorld()->GetTimerManager().SetTimer(RefreshTimerHandle, this, &UEconomyDetailsWidget::RefreshTick, 3.0f, true,
+                                         3.0f);
 }
 
 void UEconomyDetailsWidget::InitUI(const class AMarketEconomy* _MarketEconomy,
@@ -199,4 +212,75 @@ void UEconomyDetailsWidget::InitUI(const class AMarketEconomy* _MarketEconomy,
 
   MarketEconomy = _MarketEconomy;
   StatisticsGen = _StatisticsGen;
+
+  GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+}
+
+void UEconomyDetailsWidget::RefreshTick() {
+  if (!TotalInflationGraphWidget || !TotalWealthGraphWidget || !CheckWidgetIsActive(this)) {
+    GetWorld()->GetTimerManager().ClearTimer(RefreshTimerHandle);
+    return;
+  }
+
+  if (StatisticsGen->EconomyStatistics.TotalWealthHistory.Num() > 0 &&
+      StatisticsGen->EconomyStatistics.TotalBoughtHistory.Num() > 0 &&
+      StatisticsGen->EconomyStatistics.TotalInflationHistory.Num() > 0) {
+    float TotalWealth = StatisticsGen->EconomyStatistics.TotalWealthHistory.Last();
+    TotalWealthText->SetText(FText::FromString(FString::Printf(TEXT("%.0f¬"), TotalWealth)));
+    float TotalBought = StatisticsGen->EconomyStatistics.TotalBoughtHistory.Last();
+    TotalBoughtText->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), TotalBought)));
+    float TotalInflation = StatisticsGen->EconomyStatistics.TotalInflationHistory.Last();
+    TotalInflationText->SetText(FText::FromString(FString::Printf(TEXT("%.2f%%"), TotalInflation)));
+
+    TotalWealthGraphWidget->InitUI(StatisticsGen->EconomyStatistics.TotalWealthHistory);
+    TotalWealthGraphWidget->CreateStoreStatsGraph();
+    TotalBoughtGraphWidget->InitUI(StatisticsGen->EconomyStatistics.TotalBoughtHistory);
+    TotalBoughtGraphWidget->CreateStoreStatsGraph();
+    TotalInflationGraphWidget->InitUI(StatisticsGen->EconomyStatistics.TotalInflationHistory);
+    TotalInflationGraphWidget->CreateStoreStatsGraph();
+  }
+
+  for (auto* Widget : PopDetailsBox->GetAllChildren()) {
+    UPopDetailsWidget* PopDetailsWidget = Cast<UPopDetailsWidget>(Widget);
+    if (!PopDetailsWidget) continue;
+
+    const auto SearchedPopEconData = MarketEconomy->PopEconDataArray.FindByPredicate(
+        [PopDetailsWidget](const auto& PopEconData) { return PopEconData.PopID == PopDetailsWidget->PopID; });
+    if (!SearchedPopEconData) continue;
+    const FPopEconData PopEconData = *SearchedPopEconData;
+
+    PopDetailsWidget->GensText->SetText(FText::FromString(GetGensString(MarketEconomy, PopEconData)));
+    PopDetailsWidget->WealthText->SetText(
+        FText::FromString(GetWealthString(MarketEconomy->PopEconDataArray, PopEconData)));
+    PopDetailsWidget->PopulationText->SetText(
+        FText::FromString(FString::Printf(TEXT("Population: %d"), PopEconData.Population)));
+
+    if (StatisticsGen->PopStatisticsMap.Num() > 0 && StatisticsGen->PopStatisticsMap.Contains(PopEconData.PopID)) {
+      auto GoodsBoughtPerCapitaHistory = StatisticsGen->PopStatisticsMap[PopEconData.PopID].GoodsBoughtPerCapitaHistory;
+      if (IsWealthTrendUp(GoodsBoughtPerCapitaHistory)) {
+        PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Visible);
+        PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+      } else if (IsWealthTrendDown(GoodsBoughtPerCapitaHistory)) {
+        PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+        PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Visible);
+      } else {
+        PopDetailsWidget->WealthTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+        PopDetailsWidget->WealthTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+      }
+      auto PopulationHistory = StatisticsGen->PopStatisticsMap[PopEconData.PopID].PopulationHistory;
+      if (IsPopulationTrendUp(PopulationHistory)) {
+        PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Visible);
+        PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+      } else if (IsPopulationTrendDown(PopulationHistory)) {
+        PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+        PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Visible);
+      } else {
+        PopDetailsWidget->PopulationTrendUpIcon->SetVisibility(ESlateVisibility::Collapsed);
+        PopDetailsWidget->PopulationTrendDownIcon->SetVisibility(ESlateVisibility::Collapsed);
+      }
+    }
+  }
+
+  UE_LOG(LogTemp, Log, TEXT("UEconomyDetailsWidget::RefreshTimer called, visibility: %s"),
+         *UEnum::GetValueAsString(GetParent()->GetVisibility()));
 }
